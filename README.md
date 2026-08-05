@@ -11,7 +11,7 @@ Destiny RTM is a real-time memory (RTM) tool for PS3, used for teleporting, memo
 
 ## Enabling PS3MAPI
 
-1. Install [webMAN MOD](https://github.com/aldostools/webMAN-MOD) on your CFW PS3, if not already installed.
+1. Install [webMAN MOD](https://github.com/aldostools/webMAN-MOD) on your CFW/Hen PS3, if not already installed.
 2. From the XMB, go to webMAN's settings.
 3. Enable **PS3MAPI**.
 4. Note your PS3's IP address — you'll enter this into the app.
