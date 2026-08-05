@@ -50,7 +50,7 @@ Grab the latest build from the [Releases](../../releases) page.
 
 ## Disclaimer
 
-This tool directly reads and writes PS3 process memory. Use at your own risk. It is intended for use with your own console and legally owned games. The developers are not responsible for any damage, bans, or save corruption resulting from its use.
+This tool directly reads and writes PS3 process memory. Use at your own risk. It is intended for use with your own console and legally owned games. The developers are not responsible for any damage, bans, or save corruption resulting from its use. AI Disclaimer: Some AI was used in the creation of this project, mostly formatting.
 
 ## Credits
 
