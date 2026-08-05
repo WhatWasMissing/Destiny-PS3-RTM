@@ -16,7 +16,7 @@ Destiny RTM is a real-time memory (RTM) tool for PS3, used for teleporting, memo
 1. Install [webMAN MOD](https://github.com/aldostools/webMAN-MOD) on your CFW/Hen PS3, if not already installed.
 2. From the XMB, go to webMAN's settings.
 3. Enable **PS3MAPI**.
-4. Note your PS3's IP address — you'll enter this into the app.
+4. Note your PS3's IP address - you'll enter this into the app.
 
 ## Downloads
 
@@ -40,7 +40,7 @@ Grab the latest build from the [Releases](../../releases) page.
 1. Download `DestinyRTM.apk` to your Android device.
 2. If prompted, allow installation from unknown sources (required since this isn't distributed via the Play Store).
 3. Open the app, enter your PS3's IP address, and connect.
-4. Make sure your phone is on the **same Wi-Fi network** as your PS3 — mobile data will not work.
+4. Make sure your phone is on the **same Wi-Fi network** as your PS3 - mobile data will not work.
 
 ## Troubleshooting
 
@@ -56,7 +56,7 @@ This tool directly reads and writes PS3 process memory. Use at your own risk. It
 
 - [webMAN MOD](https://github.com/aldostools/webMAN-MOD) by aldostools
 - PS3MAPI
-- **[KiPOD](https://github.com/kipod8)** — some features used in this mod
+- **[KiPOD](https://github.com/kipod8)** - some features used in this mod
 - **[Soul](https://github.com/PappaSoul)** - some features used
 
 ## Known issues
