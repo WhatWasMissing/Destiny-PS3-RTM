@@ -57,6 +57,7 @@ This tool directly reads and writes PS3 process memory. Use at your own risk. It
 - [webMAN MOD](https://github.com/aldostools/webMAN-MOD) by aldostools
 - PS3MAPI
 - **[KiPOD](https://github.com/kipod8)** — some features used in this mod
+- **[Soul](https://github.com/PappaSoul)** - some features used
 
 ## Known issues
 -Join discord
