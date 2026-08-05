@@ -1,5 +1,7 @@
 # Destiny RTM
 
+https://discord.gg/dHGNkmj39
+
 Destiny RTM is a real-time memory (RTM) tool for PS3, used for teleporting, memory read/write, and other in-game manipulation via [PS3MAPI](https://github.com/aldostools/webMAN-MOD). It's available as a Windows executable and an Android APK, both built from the same core web app.
 
 ## Requirements
@@ -56,3 +58,6 @@ This tool directly reads and writes PS3 process memory. Use at your own risk. It
 - PS3MAPI
 - **[Soul](https://github.com/PappaSoul)** — some features used in this mod, and a big help in learning how to build it
 - **[KiPOD](https://github.com/kipod8)** — some features used in this mod, and a big help in learning how to build it
+
+## Known issues
+-Join discord
