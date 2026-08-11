@@ -16,7 +16,7 @@ The Activity Loader module in **Destiny RTM** allows you to force-load specific 
 4. **Choose Destination:**
    - Use the **Search activity…** field to filter through the destination list.
    - Choose your desired activity from the dropdown menu.
-5. **Execute Load:** Click **▶ Load Activity** to push the changes.
+5. **Execute Load:** Click **Load Activity** to push the changes.
 
 ---
 
@@ -26,5 +26,5 @@ The Activity Loader module in **Destiny RTM** allows you to force-load specific 
 | :--- | :--- |
 | **Search activity…** | Real-time text filter to quickly locate specific activities in the dropdown. |
 | **Activity Dropdown** | Master selection list containing pre-configured activity indices. |
-| **▶ Load Activity** | Writes the target index across 4 memory addresses simultaneously. |
+| **Load Activity** | Writes the target index across 4 memory addresses simultaneously. |
 | **Read Current** | *(Known Issue)* Attempts to read the active activity index. Currently unreliable—select an activity in-game manually instead. |
