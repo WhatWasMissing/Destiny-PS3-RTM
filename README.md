@@ -6,7 +6,7 @@ Destiny RTM is a real-time memory (RTM) tool for PS3, used for teleporting, memo
 
 ## Requirements
 
-- A PS3 running **[webMAN MOD](https://github.com/aldostools/webMAN-MOD)** (CFW required)
+- A PS3 running **[webMAN MOD](https://github.com/aldostools/webMAN-MOD)** (CFW required/Hen)
 - **PS3MAPI** enabled in webMAN MOD's settings
 - Your PS3 and the device running this tool (PC or phone) must be connected to the **same local network**
 - Your PS3's local IP address (found in webMAN MOD or your router's device list)
