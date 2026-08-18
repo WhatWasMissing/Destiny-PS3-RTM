@@ -60,4 +60,4 @@ This tool directly reads and writes PS3 process memory. Use at your own risk. It
 - **[Soul](https://github.com/PappaSoul)** - some features used
 
 ## Known issues
--Join discord
+-Join discord or see known issues page
