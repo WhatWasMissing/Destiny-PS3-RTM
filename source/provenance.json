@@ -1,0 +1,10 @@
+{
+  "executable_sha256": "46ed41416b67b6216ad866b2f31e4c732b19e571d884c5269fb840c894135cb0",
+  "html_sha256": "eb8d2214ffd4ff3f74dc3c2c89e14e2d67a4249bcba4e86cb2af339984a39e47",
+  "bytes": 1565864,
+  "verification": "Recovered file exactly matches the complete embedded Go string, using its pointer and length from the PE executable.",
+  "scope": "Exact embedded frontend only; Go host/build source not recovered.",
+  "source_executable": "DestinyRTM(3).exe",
+  "recovered_file": "source/index.html",
+  "recovered_on": "2026-10-25"
+}

@@ -1,5 +1,14 @@
 # Destiny RTM
 
+## Source backup and license
+
+The verified current desktop frontend is backed up in [source/](source/README.md).
+This is the recovered frontend only; the desktop host/build project is not included.
+
+**Proprietary — all rights reserved. Redistribution, rehosting, and sharing modified
+versions require written permission.** See [LICENSE](LICENSE) for the full terms,
+including GitHub platform rights and third-party exclusions.
+
 https://discord.gg/dHGNkmj39
 
 Destiny RTM is a real-time memory (RTM) tool for PS3, used for teleporting, memory read/write, and other in-game manipulation via [PS3MAPI](https://github.com/aldostools/webMAN-MOD). It's available as a Windows executable and an Android APK, both built from the same core web app.
