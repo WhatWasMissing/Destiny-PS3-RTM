@@ -10,6 +10,7 @@ open the desktop app or automate its UI.
 |---|---|
 | `rtm_status` | Checks webMAN reachability. It does not confirm Destiny is running. |
 | `rtm_read_memory` | Reads 1–65536 bytes from Destiny PID `0x1010200`. |
+| `rtm_read_player_position` | Follows the Overwalls player pointer at `0x0190EBB0` and decodes X/Y/Z as big-endian Float32 values at pointer offsets `+0x140/+0x144/+0x148`. Read-only; live build compatibility and gameplay meaning remain unconfirmed. |
 | `rtm_write_memory` | Writes 1–8 bytes and succeeds only after exact readback. It does not call game functions. |
 | `rtm_set_brightness` | Writes one of the local 1.24 source presets at `0x006101C0` and verifies the bytes. The in-game effect remains unobserved. |
 | `rtm_notify` | Dispatches a webMAN system notification; display is not confirmed. |

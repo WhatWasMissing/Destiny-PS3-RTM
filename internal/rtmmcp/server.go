@@ -24,6 +24,7 @@ const maxMessageBytes = 1 << 20
 type Client interface {
 	Status(context.Context, string) (int, error)
 	ReadMemory(context.Context, string, string, int) ([]byte, error)
+	ReadPlayerPosition(context.Context, string) (rtmclient.PlayerPosition, error)
 	WriteMemory(context.Context, string, string, []byte) error
 	Notify(context.Context, string, string) error
 	LaunchGame(context.Context, string, string) (rtmclient.LaunchResult, error)
@@ -93,6 +94,15 @@ var toolList = []tool{
 		Annotations: map[string]any{"readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true},
 	},
 	{
+		Name:        "rtm_read_player_position",
+		Title:       "Read Destiny player position",
+		Description: "Read the Overwalls source-mapped player pointer at 0x0190EBB0 and decode the three big-endian Float32 coordinates at pointer +0x140. This performs memory reads only; the in-game position and build compatibility are not independently confirmed.",
+		InputSchema: objectSchema(map[string]any{
+			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
+		}, "target_ipv4"),
+		Annotations: map[string]any{"readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true},
+	},
+	{
 		Name:        "rtm_write_memory",
 		Title:       "Write Destiny memory",
 		Description: "Write 1–8 bytes to the Destiny process and report success only after exact fresh readback. The address is hexadecimal; only use known values for the matching game build. This does not call game functions.",
@@ -139,7 +149,7 @@ var toolList = []tool{
 	},
 }
 
-const instructions = "Use only the user's private PS3 IPv4 address. Memory reads and writes target Destiny process 0x1010200 through webMAN MOD on port 80. Reads are capped at 64 KiB; writes are capped at 8 bytes and require exact readback. rtm_status checks webMAN reachability, not whether Destiny is running. Brightness effects are unverified. Notifications report dispatch, not display. Game-launch steps report HTTP acknowledgement and do not confirm that Destiny started. No generic function-call endpoint is exposed."
+const instructions = "Use only the user's private PS3 IPv4 address. Memory reads and writes target Destiny process 0x1010200 through webMAN MOD on port 80. Reads are capped at 64 KiB; writes are capped at 8 bytes and require exact readback. rtm_status checks webMAN reachability, not whether Destiny is running. The player-position tool follows the local Overwalls pointer map using read-only requests; coordinates and build compatibility remain unconfirmed. Brightness effects are unverified. Notifications report dispatch, not display. Game-launch steps report HTTP acknowledgement and do not confirm that Destiny started. No generic function-call endpoint is exposed."
 
 func objectSchema(properties map[string]any, required ...string) map[string]any {
 	return map[string]any{"type": "object", "properties": properties, "required": required, "additionalProperties": false}
@@ -338,6 +348,31 @@ func (s *Server) callTool(ctx context.Context, raw json.RawMessage) map[string]a
 			return errorResult(err)
 		}
 		return successResult(map[string]any{"ok": true, "address": fmt.Sprintf("0x%08X", address), "length": len(data), "hex": strings.ToUpper(hex.EncodeToString(data))})
+	case "rtm_read_player_position":
+		var args targetArgs
+		if err := decodeStrict(call.Arguments, &args); err != nil {
+			return errorResult(err)
+		}
+		if err := validateTarget(args.Target); err != nil {
+			return errorResult(err)
+		}
+		position, err := s.client.ReadPlayerPosition(ctx, args.Target)
+		if err != nil {
+			return errorResult(err)
+		}
+		return successResult(map[string]any{
+			"ok":                        true,
+			"read_only":                 true,
+			"pointer_address":           fmt.Sprintf("0x%08X", rtmclient.PlayerPointerAddress),
+			"player_pointer":            fmt.Sprintf("0x%08X", position.PlayerPointer),
+			"coordinates_address":       fmt.Sprintf("0x%08X", position.CoordinatesAddress),
+			"coordinate_offsets":        []string{"+0x140", "+0x144", "+0x148"},
+			"x":                         position.X,
+			"y":                         position.Y,
+			"z":                         position.Z,
+			"raw_hex":                   position.RawHex,
+			"gameplay_effect_confirmed": false,
+		})
 	case "rtm_write_memory":
 		var args struct {
 			Target  string `json:"target_ipv4"`

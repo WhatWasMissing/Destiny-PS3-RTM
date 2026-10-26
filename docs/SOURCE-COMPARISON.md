@@ -35,13 +35,19 @@ builds use different offsets and were not used as address references.
 - Trophy unlock calls the same unsupported function-call layer and has no
   source-level readback or restoration. It remains unavailable.
 - Deathsinger's Power appears in a recovered mobile RTM, and this source tree
-  contains an old scan/toggle implementation, but it remains hidden. The scan
-  accepts the first exact match of generic PowerPC instructions. In the
-  hash-verified 01.24 EBOOT, the aligned OFF patterns occur at seven sites for
-  `38C6FFFF` and over a thousand sites for `38C0FFFF`; the game binary does not
-  identify which is the encounter's deposit handler. Exposing the first-match
-  writer could patch unrelated code, so this feature needs encounter-specific
-  address evidence before it can be safely ported.
+  contains an old scan/toggle implementation, but it remains hidden. Its
+  intended change is PowerPC `addi r6,r6,-1` (`38C6FFFF`) to `addi r6,r6,4095`
+  (`38C60FFF`), replacing a counter decrement with a large increment. The
+  recovered scan accepts the first exact match of generic instructions. The
+  hash-verified 01.24 EBOOT has seven aligned `38C6FFFF` sites, at
+  `0x009AAB00`, `0x009AC35C`, `0x00A730BC`, `0x00B1B76C`, `0x00D743D8`,
+  `0x010923CC`, and `0x0109248C`; `38C0FFFF` occurs over a thousand times.
+  PPC disassembly identifies those sites as copy loops, array/list bookkeeping,
+  or bit/size calculations. The first match is a byte-copy loop; the closest
+  counter-like match is an array count used to index 32-byte records. None is
+  the encounter deposit handler. The encounter-specific address therefore
+  remains unknown; locating it requires matching encounter runtime evidence or
+  source/disassembly that identifies the function.
 - The local C# client archive collects other players' IP addresses and
   location/provider details. That collection was not ported.
 - The newer local RTM's launch sequence is available for a single ISO in

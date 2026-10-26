@@ -17,19 +17,22 @@ import (
 type fakeClient struct {
 	mu sync.Mutex
 
-	statusCode  int
-	statusErr   error
-	readData    []byte
-	readErr     error
-	writeErr    error
-	notifyErr   error
-	reads       int
-	writes      [][3]string
-	notifies    []string
-	launches    []string
-	launchErr   error
-	blockRead   bool
-	readStarted chan struct{}
+	statusCode    int
+	statusErr     error
+	readData      []byte
+	readErr       error
+	writeErr      error
+	notifyErr     error
+	reads         int
+	writes        [][3]string
+	notifies      []string
+	launches      []string
+	launchErr     error
+	position      rtmclient.PlayerPosition
+	positionErr   error
+	positionReads int
+	blockRead     bool
+	readStarted   chan struct{}
 }
 
 func (f *fakeClient) Status(context.Context, string) (int, error) {
@@ -56,6 +59,13 @@ func (f *fakeClient) ReadMemory(ctx context.Context, _, address string, length i
 		data = make([]byte, length)
 	}
 	return data, nil
+}
+
+func (f *fakeClient) ReadPlayerPosition(context.Context, string) (rtmclient.PlayerPosition, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.positionReads++
+	return f.position, f.positionErr
 }
 
 func (f *fakeClient) WriteMemory(_ context.Context, _, address string, data []byte) error {
@@ -152,8 +162,8 @@ func TestToolsListAdvertisesBoundedRTMTools(t *testing.T) {
 	}
 	list := resultObject(t, responseByID(t, responses, 2))
 	tools, ok := list["tools"].([]any)
-	if !ok || len(tools) != 6 {
-		t.Fatalf("expected six tools, got %#v", list["tools"])
+	if !ok || len(tools) != 7 {
+		t.Fatalf("expected seven tools, got %#v", list["tools"])
 	}
 	for _, item := range tools {
 		descriptor := item.(map[string]any)
@@ -164,12 +174,13 @@ func TestToolsListAdvertisesBoundedRTMTools(t *testing.T) {
 }
 
 func TestReadAndWritesReturnStructuredVerifiedResults(t *testing.T) {
-	client := &fakeClient{statusCode: 200, readData: []byte{0x3f, 0x80, 0, 0}}
+	client := &fakeClient{statusCode: 200, readData: []byte{0x3f, 0x80, 0, 0}, position: rtmclient.PlayerPosition{PlayerPointer: 0x10000000, CoordinatesAddress: 0x10000140, X: 12.5, Y: -3.25, Z: 128, RawHex: "41480000C050000043000000"}}
 	input := toolRequest(1, "rtm_status", `{"target_ipv4":"192.168.0.62"}`) +
 		toolRequest(2, "rtm_read_memory", `{"target_ipv4":"192.168.0.62","address":"006101C0"}`) +
 		toolRequest(3, "rtm_write_memory", `{"target_ipv4":"192.168.0.62","address":"006101C0","hex":"3F800000"}`) +
 		toolRequest(4, "rtm_set_brightness", `{"target_ipv4":"192.168.0.62","preset":"inverted"}`) +
-		toolRequest(5, "rtm_launch_game", `{"target_ipv4":"192.168.0.62"}`)
+		toolRequest(5, "rtm_read_player_position", `{"target_ipv4":"192.168.0.62"}`) +
+		toolRequest(6, "rtm_launch_game", `{"target_ipv4":"192.168.0.62"}`)
 	responses := runServer(t, client, input)
 	if got := structuredObject(t, responseByID(t, responses, 1))["destiny_process_confirmed"]; got != false {
 		t.Fatalf("status incorrectly claims Destiny is confirmed: %v", got)
@@ -184,7 +195,11 @@ func TestReadAndWritesReturnStructuredVerifiedResults(t *testing.T) {
 	if brightness["hex"] != "C1A00000" || brightness["effect_confirmed"] != false {
 		t.Fatalf("unexpected brightness result: %#v", brightness)
 	}
-	launch := structuredObject(t, responseByID(t, responses, 5))
+	position := structuredObject(t, responseByID(t, responses, 5))
+	if position["player_pointer"] != "0x10000000" || position["coordinates_address"] != "0x10000140" || position["x"] != 12.5 || position["y"] != -3.25 || position["z"] != float64(128) || position["read_only"] != true || client.positionReads != 1 {
+		t.Fatalf("unexpected player position result: %#v", position)
+	}
+	launch := structuredObject(t, responseByID(t, responses, 6))
 	if launch["iso_path"] != rtmclient.DefaultDestinyISOPath || launch["game_start_confirmed"] != false || launch["request_dispatched"] != true {
 		t.Fatalf("unexpected launch result: %#v", launch)
 	}
@@ -217,15 +232,16 @@ func TestInvalidTargetArgumentsAndOversizedWritesFailBeforeBackend(t *testing.T)
 			toolRequest(4, "rtm_notify", `{"target_ipv4":"192.168.0.62","message":"hello","extra":true}`)+
 			toolRequest(5, "rtm_read_memory", `{"target_ipv4":"192.168.0.62","address":"FFFFFFFF","length":2}`)+
 			toolRequest(6, "rtm_write_memory", `{"target_ipv4":"192.168.0.62","address":"FFFFFFFF","hex":"0102"}`)+
-			toolRequest(7, "rtm_launch_game", `{"target_ipv4":"192.168.0.62","iso_path":"/dev_hdd0/PS3ISO/../../play.ps3"}`),
+			toolRequest(7, "rtm_launch_game", `{"target_ipv4":"192.168.0.62","iso_path":"/dev_hdd0/PS3ISO/../../play.ps3"}`)+
+			toolRequest(8, "rtm_read_player_position", `{"target_ipv4":"8.8.8.8"}`),
 	)
-	for id := float64(1); id <= 7; id++ {
+	for id := float64(1); id <= 8; id++ {
 		result := resultObject(t, responseByID(t, responses, id))
 		if result["isError"] != true {
 			t.Fatalf("invalid request %v was accepted: %#v", id, result)
 		}
 	}
-	if len(client.writes) != 0 || client.reads != 0 || len(client.notifies) != 0 || len(client.launches) != 0 {
+	if len(client.writes) != 0 || client.reads != 0 || len(client.notifies) != 0 || len(client.launches) != 0 || client.positionReads != 0 {
 		t.Fatalf("invalid inputs reached backend: %#v", client)
 	}
 }

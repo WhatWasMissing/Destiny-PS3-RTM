@@ -2,11 +2,13 @@ package rtmclient
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"html"
 	"io"
+	"math"
 	"net"
 	"net/http"
 	"net/url"
@@ -17,6 +19,18 @@ import (
 )
 
 const DefaultProcessID = "0x1010200"
+
+const PlayerPointerAddress uint32 = 0x0190EBB0
+const PlayerPositionOffset uint32 = 0x140
+
+type PlayerPosition struct {
+	PlayerPointer      uint32
+	CoordinatesAddress uint32
+	X                  float32
+	Y                  float32
+	Z                  float32
+	RawHex             string
+}
 
 const maxResponseBytes = 8 * 1024 * 1024
 
@@ -246,6 +260,52 @@ func (c *Client) ReadMemory(ctx context.Context, ip, address string, length int)
 		return nil, err
 	}
 	return data, nil
+}
+
+// ReadPlayerPosition follows the dynamic player pointer and coordinate offsets
+// recorded in the local Overwalls source. It is read-only and validates the
+// pointer and decoded values before returning them.
+func (c *Client) ReadPlayerPosition(ctx context.Context, ip string) (PlayerPosition, error) {
+	var result PlayerPosition
+	pointerBytes, err := c.ReadMemory(ctx, ip, fmt.Sprintf("%08X", PlayerPointerAddress), 4)
+	if err != nil {
+		return result, fmt.Errorf("read player pointer at 0x%08X: %w", PlayerPointerAddress, err)
+	}
+	if len(pointerBytes) != 4 {
+		return result, errors.New("player pointer read returned an invalid length")
+	}
+	pointer := binary.BigEndian.Uint32(pointerBytes)
+	const lastCoordinateByte = PlayerPositionOffset + 0x0B
+	if pointer < 0x00010000 || pointer&3 != 0 || pointer > 0x7FFFFFFF-lastCoordinateByte {
+		return result, fmt.Errorf("invalid player pointer 0x%08X", pointer)
+	}
+
+	coordinatesAddress := pointer + PlayerPositionOffset
+	coordinateBytes, err := c.ReadMemory(ctx, ip, fmt.Sprintf("%08X", coordinatesAddress), 12)
+	if err != nil {
+		return result, fmt.Errorf("read player coordinates at 0x%08X: %w", coordinatesAddress, err)
+	}
+	if len(coordinateBytes) != 12 {
+		return result, errors.New("player coordinate read returned an invalid length")
+	}
+	values := [3]float32{
+		math.Float32frombits(binary.BigEndian.Uint32(coordinateBytes[0:4])),
+		math.Float32frombits(binary.BigEndian.Uint32(coordinateBytes[4:8])),
+		math.Float32frombits(binary.BigEndian.Uint32(coordinateBytes[8:12])),
+	}
+	for _, value := range values {
+		if math.IsNaN(float64(value)) || math.IsInf(float64(value), 0) {
+			return result, errors.New("player coordinates contain a non-finite Float32 value")
+		}
+	}
+	return PlayerPosition{
+		PlayerPointer:      pointer,
+		CoordinatesAddress: coordinatesAddress,
+		X:                  values[0],
+		Y:                  values[1],
+		Z:                  values[2],
+		RawHex:             strings.ToUpper(hex.EncodeToString(coordinateBytes)),
+	}, nil
 }
 
 func (c *Client) WriteMemory(ctx context.Context, ip, address string, data []byte) error {

@@ -13,7 +13,7 @@ and soulsAPI reflection code are not bundled.
 | Overwalls feature | Destiny RTM port |
 |---|---|
 | Tower, vendor, off-map, Valus, engram and arena destinations | Overwalls tab coordinate shortcuts with source activation modes |
-| Position read, PDR, above-player action, OPK teleport and offset presets | Dedicated controls using big-endian float writes and session checks |
+| Position read, PDR, above-player action, OPK teleport and offset presets | Dedicated controls using big-endian float writes and session checks; the MCP server also exposes a read-only player-position tool following pointer `0x0190EBB0` and offsets `+0x140/+0x144/+0x148` |
 | Named shortcut grid and XML scenarios | Import, edit, delete, export, local persistence and settings backup for `ArrayOfButtonData` |
 | Activity favorites and current index | Source favorites, random Tower index 2–7, index read/write, current four-address loader or source single-address loader |
 | Crucible farm | Four timing profiles, faction destinations, Tower selection, 12/12/11 match pattern, stop control and repeat-until-stopped option |

@@ -47,6 +47,77 @@ func TestReadMemoryScopesProcessAndParsesHexOutput(t *testing.T) {
 	}
 }
 
+func TestReadPlayerPositionFollowsOverwallsPointerAndDecodesBigEndianFloats(t *testing.T) {
+	var addresses []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/getmem.ps3mapi" || r.URL.Query().Get("proc") != DefaultProcessID {
+			t.Fatalf("unexpected request: %s?%s", r.URL.Path, r.URL.RawQuery)
+		}
+		address := r.URL.Query().Get("addr")
+		addresses = append(addresses, address)
+		switch address {
+		case "0190EBB0":
+			if r.URL.Query().Get("len") != "4" {
+				t.Fatalf("pointer read length = %q", r.URL.Query().Get("len"))
+			}
+			fmt.Fprint(w, `<textarea id="output">10000000</textarea>`)
+		case "10000140":
+			if r.URL.Query().Get("len") != "12" {
+				t.Fatalf("coordinate read length = %q", r.URL.Query().Get("len"))
+			}
+			fmt.Fprint(w, `<textarea id="output">41480000C050000043000000</textarea>`)
+		default:
+			t.Fatalf("unexpected address %s", address)
+		}
+	}))
+	defer server.Close()
+
+	position, err := testClient(server).ReadPlayerPosition(context.Background(), "192.168.0.62")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if position.PlayerPointer != 0x10000000 || position.CoordinatesAddress != 0x10000140 {
+		t.Fatalf("unexpected resolved addresses: %#v", position)
+	}
+	if position.X != 12.5 || position.Y != -3.25 || position.Z != 128 || position.RawHex != "41480000C050000043000000" {
+		t.Fatalf("unexpected coordinates: %#v", position)
+	}
+	if strings.Join(addresses, "|") != "0190EBB0|10000140" {
+		t.Fatalf("reads did not follow the source pointer map: %#v", addresses)
+	}
+}
+
+func TestReadPlayerPositionRejectsInvalidPointersAndNonFiniteCoordinates(t *testing.T) {
+	for _, pointer := range []string{"00000000", "00010001", "80000000", "7FFFFEC0"} {
+		t.Run("pointer_"+pointer, func(t *testing.T) {
+			calls := 0
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				calls++
+				fmt.Fprintf(w, `<textarea id="output">%s</textarea>`, pointer)
+			}))
+			defer server.Close()
+			if _, err := testClient(server).ReadPlayerPosition(context.Background(), "192.168.0.62"); err == nil {
+				t.Fatal("invalid player pointer accepted")
+			}
+			if calls != 1 {
+				t.Fatalf("invalid pointer caused %d reads; expected only the pointer read", calls)
+			}
+		})
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("addr") == "0190EBB0" {
+			fmt.Fprint(w, `<textarea id="output">10000000</textarea>`)
+			return
+		}
+		fmt.Fprint(w, `<textarea id="output">7FC000003F8000003F800000</textarea>`)
+	}))
+	defer server.Close()
+	if _, err := testClient(server).ReadPlayerPosition(context.Background(), "192.168.0.62"); err == nil || !strings.Contains(err.Error(), "non-finite") {
+		t.Fatalf("expected non-finite coordinate rejection, got %v", err)
+	}
+}
+
 func TestWriteMemoryRequiresMatchingReadback(t *testing.T) {
 	var value = []byte{0x3F, 0x80, 0x00, 0x00}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
