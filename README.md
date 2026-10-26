@@ -2,8 +2,21 @@
 
 ## Source backup and license
 
-The verified current desktop frontend is backed up in [source/](source/README.md).
-This is the recovered frontend only; the desktop host/build project is not included.
+The recovered frontend is preserved in commit `e36edf7`. The working app is in
+[source/](source/README.md), with a replacement Go desktop host and a repeatable
+[Windows build](docs/DESKTOP-BUILD.md).
+
+The reliability branch adds bounded and verified writes, session-aware reconnect,
+settings backup/restore, improved teleport management and a responsive redesign.
+The Overwalls feature port adds source-specific tower and activity shortcuts,
+scenario XML, routines, inventory tools, and Flyhack support. The local-source
+comparison adds missing 1.24 toggles, an emblem editor, a candidate-based ammo
+editor, framebuffer screenshots, and the scanner/notification controls. See the
+[Overwalls port map](docs/OVERWALLS-PORT.md), [RTM source comparison](docs/SOURCE-COMPARISON.md),
+[initial source review](docs/OVERWALLS-REVIEW.md), and [implementation evidence](docs/IMPLEMENTATION.md).
+Automated checks use an isolated fake console; live game compatibility still
+depends on the console/game build.
+The scriptable client and its command reference are in [docs/RTMCTL.md](docs/RTMCTL.md).
 
 **Proprietary — all rights reserved. Redistribution, rehosting, and sharing modified
 versions require written permission.** See [LICENSE](LICENSE) for the full terms,
@@ -43,6 +56,19 @@ Grab the latest build from the [Releases](../../releases) page.
 1. Download and run `DestinyRTM.exe`.
 2. Enter your PS3's IP address in the field provided.
 3. Connect and use the available tools.
+
+### Command-line tools
+
+The Windows build also produces `dist/rtmctl.exe` for scripted use without
+opening the RTM interface. It supports private-network status checks, bounded
+memory reads, 1–8 byte writes with exact readback verification, and PS3 system
+notifications. It uses Destiny process ID `0x1010200`; it does not expose
+undocumented function-call routes.
+
+```powershell
+.\dist\rtmctl.exe read --ip 192.168.0.62 --address 0030D230 --length 4
+.\dist\rtmctl.exe write --ip 192.168.0.62 --address 0030D230 --hex 3DCCCCCD
+```
 
 ### Android (.apk)
 
