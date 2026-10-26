@@ -14,12 +14,13 @@ missing feature workflows identified in the local Overwalls source.
 | Diagnostics | Tools exports timestamped request outcomes and HTTP statuses. Tests check export redaction of IP addresses and popup text. Browser diagnostics download was exercised. |
 | Code organization | Connection, transport, operations, backups, dialogs, teleport tools, settings, pins/macros, onboarding, notifications and artwork are separate classic-script modules. Stylesheets are separate; script execution order is preserved. Original recovery remains in commit e36edf7. |
 | Overwalls feature port | `source/js/overwalls-tools.js` and the Overwalls tab implement scenario XML, tower/activity shortcuts, source activity mode, farm profiles, stoppable routes, inventory snapshots, character values, individual and grouped cheat controls, plugin checks/loading and saved hook restoration. Coverage and source attribution are in `docs/OVERWALLS-PORT.md`. No live PS3 action was performed. |
+| Local RTM feature comparison | Local 1.24 sources were used to add the missing core toggles, scanner controls, emblem list, candidate-based ammo editor, framebuffer capture, and PS3 notification UI. Pure memory parsers/converters are covered by `tests/memory-features.test.cjs`. Unsupported RPC-only functions and the other-player IP/geolocation archive are documented in `docs/SOURCE-COMPARISON.md`. |
+| Scriptable client | `rtmctl` exposes status, bounded reads, 1–8 byte writes with exact readback, and notifications without a browser window. Go tests use an isolated HTTP fake and reject public IPs, invalid widths, malformed responses and readback mismatches. |
 
 ## Automated checks
 
-The suites below passed before the Overwalls port. This port was not covered by
-those suites; JavaScript syntax, Go compilation and the packaged executable
-build were checked afterward.
+The suites below passed before the Overwalls and local RTM source ports. The
+current run also includes regression tests for the newly added memory helpers.
 
 - `node --test tests/*.test.cjs`: production-function regressions, transport,
   operations, backup schema and rollback tests.
@@ -54,3 +55,8 @@ game behavior beyond memory acknowledgement. The replacement host does not
 implement original CCAPI transport or undocumented RPC parity. Module loading
 uses the fixed webMAN PS3MAPI command path, but actual plugin loading and game
 compatibility still require a live console and matching module build.
+
+The framebuffer offsets, emblem scan location, and ammo signature come from the
+local RTM source. They have not been validated against a live console. A saved
+pause byte is kept locally if screenshot recovery fails so the user can reconnect
+to that console and restore the value.

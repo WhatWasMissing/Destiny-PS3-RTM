@@ -26,9 +26,9 @@ var assets embed.FS
 
 var endpoints = map[string]bool{
 	"/index.ps3": true, "/beep.ps3": true, "/getmem.ps3mapi": true,
-	"/setmem.ps3mapi": true, "/call.ps3mapi": true, "/notify.ps3mapi": true,
-	"/shutdown.ps3mapi": true, "/restart.ps3mapi": true, "/rpc.ps3": true,
-	"/enablerpc.ps3mapi": true, "/getcid.ps3mapi": true, "/setcid.ps3mapi": true,
+	"/setmem.ps3mapi": true, "/notify.ps3mapi": true,
+	"/shutdown.ps3mapi": true, "/restart.ps3mapi": true,
+	"/getcid.ps3mapi": true, "/setcid.ps3mapi": true,
 }
 
 type host struct {

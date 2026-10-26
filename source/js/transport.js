@@ -8,7 +8,7 @@
       const url = new URL(input);
       if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Unsupported console protocol');
       if (url.pathname.endsWith('.ps3mapi') &&
-          /^\/(setmem|getmem|call)\./.test(url.pathname) && !url.searchParams.has('proc')) {
+          /^\/(setmem|getmem)\./.test(url.pathname) && !url.searchParams.has('proc')) {
         url.searchParams.set('proc', options.processId || '0x1010200');
       }
       if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error('Invalid request timeout');

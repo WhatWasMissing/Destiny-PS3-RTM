@@ -51,6 +51,9 @@
       { id: 'tog-ohk',             addr: '43E626',   offVal: '3F80',     label: 'One-Hit Enemies',     size: 2 },
       { id: 'tog-ammo',            addr: '00310F94', offVal: '3F800000', label: 'Unlimited Ammo',    size: 4 },
       { id: 'tog-power',           addr: '02C36FC',  offVal: 'C3C30000', label: 'Infinite Power',  size: 4 },
+      { id: 'tog-no-spread',       addr: '30D230',   offVal: '3F800000', label: 'No Spread',       size: 4 },
+      { id: 'tog-bouncy-items',    addr: 'DB8BE8',   offVal: '2C030000', label: 'Bouncy Items',    size: 4 },
+      { id: 'tog-jump-boost',      addr: 'CCB9E8',   offVal: '3063FFFF', label: '4× Jump Boost',   size: 4 },
       { id: 'tog-bullets',         addr: '51E7E0',   offVal: '3F800000', label: 'Freeze Projectiles',     size: 4 },
       { id: 'tog-instant-respawn', addr: '0071C348', offVal: '93BF0030', label: 'Instant Respawn',  size: 4 },
       { id: 'tog-rapid-fire',      addr: '307590',   offVal: '3F800000', label: 'Faster Fire Rate',       size: 4 },
@@ -71,7 +74,8 @@
       { id: 'tog-unl-abilities', label: 'Unlimited Abilities', pairs: [['2C1DB4','D03B019C'],['CCB9E8','3063FFFF'],['2C36FC','C3C30000']] },
     ];
     const BYTES_DEFS = [
-      { id: 'tog-no-pushbacks', addr: '1389760', offHex: '3F8000003F8000003F800000', label: 'No Knockback' },
+      { id: 'tog-no-pushbacks', addr: '1389760', offHex: '3F8000003F8000003F800000', label: 'No Pushback Barriers' },
+      { id: 'tog-rock-jump', addr: '1389760', offHex: '3F8000003F8000003F800000', label: 'Rock Jump' },
     ];
     const definitions = [
       ...CHEAT_DEFS.map(item => ({...item,pairs:[[item.addr,item.offVal]]})),
@@ -186,61 +190,8 @@
     return ps3fetch(`http://${ip}/beep.ps3?${type}`).catch(() => {});
   }
 
-  // Convert a JS string to big-endian UTF-16 hex — required for WriteUtf16String
-  // PS3 is big-endian so each UTF-16 code unit needs its bytes swapped
-  function toUtf16BEHex(str) {
-    let hex = '';
-    for (let i = 0; i < str.length; i++) {
-      const code = str.charCodeAt(i);
-      const hi = (code >> 8) & 0xFF;
-      const lo = code & 0xFF;
-      hex += hi.toString(16).padStart(2,'0') + lo.toString(16).padStart(2,'0');
-    }
-    // Null terminate and pad to 8-byte boundary for safe 4-byte writes
-    hex += '0000';
-    while (hex.length % 8 !== 0) hex += '00';
-    return hex;
-  }
-
-  // Write a UTF-16 BE string to a PS3 memory address in 4-byte chunks
-  async function writeUtf16(baseAddr, str) {
-    const hex = toUtf16BEHex(str);
-    const base = parseInt(baseAddr,16);
-    return verifiedMemorySequence((hex.match(/.{8}/g)||[]).map((value,index)=>[(base+index*4).toString(16),value]));
-  }
-
-  // Call a PS3 function via PS3MAPI.
-  // addr is a HEX string (e.g. '750540').
-  // args must be DECIMAL uint strings — PS3MAPI call.ps3mapi params are decimal, not hex.
-  // Use hexToDecParam() to convert hex addresses to the required decimal format.
-  function hexToDecParam(hexStr) {
-    return parseInt(hexStr.replace(/^0x/i, ''), 16).toString(10);
-  }
-  function ps3call(addrHex, ...decimalArgs) {
-    // IMPORTANT: webMAN MOD's documented HTTP PS3MAPI command list exposes
-    // MEMORY GET/SET, PS3 NOTIFY, PAGEALLOCATE, THREAD CREATE, etc., but does
-    // not document a generic /call.ps3mapi endpoint. The original soulsAPI
-    // Extension.Call() is therefore not proven to be directly reproducible
-    // from browser HTTP. Keep this isolated as an experimental backend.
-    let url = `http://${ip}/call.ps3mapi?addr=${addrHex}`;
-    decimalArgs.forEach((a, i) => { url += `&p${i+1}=${encodeURIComponent(a)}`; });
-    return ps3fetch(url);
-  }
-
-  // Original Destiny RTM toast sequence recovered from Form1.cs:
-  // EnableRPC(4882496)
-  // Call(7669056, 268632064)
-  // WriteUtf16String(268632576, title)
-  // WriteUtf16String(268633088, body)
-  // Call(7636756, 28508392, 28507992, 268632064, 7, 0)
-  //
-  // This is retained as an EXPERIMENTAL browser backend. The source proves
-  // the soulsAPI sequence, but webMAN's public HTTP documentation does not
-  // prove a generic call.ps3mapi route. We therefore never claim success
-  // merely because a no-cors HTTP request was dispatched.
   // ── Shared PS3MAPI memory-read helpers ──────────────────────────────────
-  // Teleport depends on these helpers to resolve the live player pointer at
-  // 0x0190EBB0. They were unintentionally removed with the Player Size code.
+  // Teleport and character tools use these helpers to resolve live values.
   function extractMemoryHexFromPS3Page(page, addrHex, len = 4) {
     page = String(page || '');
     addrHex = String(addrHex || '').replace(/^0x/i, '').toUpperCase().padStart(8, '0');
@@ -323,9 +274,9 @@
     const hex = await ps3getmem(addr, maxBytes);
     let result = '';
     for (let i = 0; i + 1 < hex.length && result.length < maxBytes; i += 2) {
-      const b = parseInt(hex.slice(i, i + 2), 16);
-      if (!Number.isFinite(b) || b === 0) break;
-      result += String.fromCharCode(b);
+      const byte = parseInt(hex.slice(i, i + 2), 16);
+      if (!Number.isFinite(byte) || byte === 0) break;
+      result += String.fromCharCode(byte);
     }
     return result;
   }
@@ -931,69 +882,244 @@
     }
   }
 
-  async function sendInGameToast() {
-    if (!ip) { toast('Not connected', 'err'); return; }
-    const title = document.getElementById('toast-title').value.trim() || 'Destiny RTM';
-    const body  = document.getElementById('toast-body').value.trim()  || '';
-    try {
-      // Call(7669056 /*0x750540*/, 268632064 /*0x10030000*/) — params are decimal
-      await ps3call('750540', '268632064');
-      await writeUtf16('10030200', title);
-      await writeUtf16('10030400', body);
-      // Call(7636756 /*0x748714*/, 28508392 /*0x1B300E8*/, 28507992 /*0x1B2FF58*/, 268632064 /*0x10030000*/, 7, 0)
-      await ps3call('748714', '28508392', '28507992', '268632064', '7', '0');
-      log(`Original RTM toast sequence dispatched: "${title}"`, 'ok');
-      toast('RTM toast request dispatched', 'ok');
-    } catch(e) {
-      log('Original RTM toast request failed: ' + (e?.message || e), 'err');
-      toast('RTM toast request failed', 'err');
+  const EMBLEM_VALUE_ADDR = 0x600C8C80;
+  const EMBLEM_SCAN_BASE = 0x600E0000;
+  const EMBLEM_SCAN_LENGTH = 0x20000;
+  const EMBLEM_SCAN_CHUNK = 0x4000;
+  const EMBLEM_RESTORE_STORAGE_KEY = 'rtm_emblem_restore_v1';
+  let emblemRestoreStack = [];
+  try {
+    const saved = JSON.parse(localStorage.getItem(EMBLEM_RESTORE_STORAGE_KEY) || '[]');
+    if (Array.isArray(saved)) emblemRestoreStack = saved.filter(item => item &&
+      Number.isInteger(item.address) && /^[0-9A-F]{4}$/.test(item.originalHex) && /^[0-9A-F]{4}$/.test(item.writtenHex) &&
+      typeof item.ip === 'string' && item.ip.length <= 15);
+  } catch (e) {}
+
+  function saveEmblemRestoreStack(nextStack) {
+    if (nextStack.length) {
+      localStorage.setItem(EMBLEM_RESTORE_STORAGE_KEY, JSON.stringify(nextStack));
+      emblemRestoreStack = nextStack;
+    } else {
+      emblemRestoreStack = [];
+      try { localStorage.removeItem(EMBLEM_RESTORE_STORAGE_KEY); } catch (e) {}
     }
   }
 
-  // Documented webMAN/PS3MAPI fallback. This is a system/XMB notification,
-  // not the Destiny-internal toast produced by soulsAPI's Extension.Call().
-  async function sendPS3SystemToastFromRTM() {
-    if (!ip) { toast('Not connected', 'err'); return; }
-    const body = document.getElementById('toast-body')?.value.trim() || 'Hello from Destiny RTM';
-    try {
-      await ps3fetch(`http://${ip}/notify.ps3mapi?msg=${encodeURIComponent(body)}`);
-      log(`PS3 system notification dispatched: "${body}"`, 'ok');
-      toast('PS3 system notification sent ', 'ok');
-    } catch (e) {
-      log('PS3 system notification failed: ' + (e?.message || e), 'err');
-      toast('PS3 notification failed', 'err');
+  function setEmblemStatus(message, failed = false) {
+    const status = document.getElementById('emblem-status');
+    if (!status) return;
+    status.textContent = message;
+    status.style.color = failed ? 'var(--danger)' : 'var(--muted)';
+  }
+
+  function populateEmblemOptions() {
+    const select = document.getElementById('emblem-select');
+    if (!select || !Array.isArray(window.RTM_EMBLEM_OPTIONS)) return;
+    select.replaceChildren();
+    for (const emblem of window.RTM_EMBLEM_OPTIONS) {
+      const option = document.createElement('option');
+      option.value = String(emblem.id);
+      option.textContent = `${emblem.name} · ${emblem.id}`;
+      select.appendChild(option);
     }
   }
+
+  async function locateCharacterEmblem(generation) {
+    const currentHex = (await ps3getmem(EMBLEM_VALUE_ADDR, 2)).toUpperCase();
+    ensureOperationSession(generation);
+    if (!/^[0-9A-F]{4}$/.test(currentHex)) throw new Error('Current emblem value is not a 16-bit value');
+
+    const scanBytes = new Uint8Array(EMBLEM_SCAN_LENGTH);
+    for (let offset = 0; offset < EMBLEM_SCAN_LENGTH; offset += EMBLEM_SCAN_CHUNK) {
+      ensureOperationSession(generation);
+      const length = Math.min(EMBLEM_SCAN_CHUNK, EMBLEM_SCAN_LENGTH - offset);
+      const raw = await ps3getmem(EMBLEM_SCAN_BASE + offset, length);
+      ensureOperationSession(generation);
+      const bytes = RtmMemoryFeatures.bytesFromHex(raw);
+      if (bytes.length !== length) throw new Error(`Emblem scan was short at 0x${(EMBLEM_SCAN_BASE + offset).toString(16).toUpperCase()}`);
+      scanBytes.set(bytes, offset);
+    }
+
+    const emblemId = parseInt(currentHex, 16);
+    const matches = RtmMemoryFeatures.findEmblemMatches(scanBytes, EMBLEM_SCAN_BASE, emblemId);
+    if (matches.length !== 1) throw new Error(matches.length
+      ? `Current emblem matched ${matches.length} locations; refusing an ambiguous write`
+      : 'Could not locate the current emblem in the source address range');
+    return { currentHex, emblemId, address: matches[0] };
+  }
+
+  async function readCharacterEmblem() {
+    if (!ip || !document.getElementById('status-badge')?.classList.contains('connected')) {
+      setEmblemStatus('Connect to the console first.', true);
+      toast('Not connected', 'err');
+      return;
+    }
+    const generation = connectionGeneration;
+    const button = document.getElementById('emblem-read-btn');
+    if (button) button.disabled = true;
+    setEmblemStatus('Reading the current emblem and scanning its source range…');
+    try {
+      const result = await locateCharacterEmblem(generation);
+      ensureOperationSession(generation);
+      const select = document.getElementById('emblem-select');
+      if (select) {
+        if (![...select.options].some(option => Number(option.value) === result.emblemId)) {
+          const option = document.createElement('option');
+          option.value = String(result.emblemId);
+          option.textContent = `Current unlisted emblem · ${result.emblemId}`;
+          select.insertBefore(option, select.firstChild);
+        }
+        select.value = String(result.emblemId);
+      }
+      document.getElementById('emblem-current').value = `${result.emblemId} · 0x${result.currentHex}`;
+      setEmblemStatus(`Located at 0x${result.address.toString(16).toUpperCase().padStart(8, '0')} · unique match`);
+      log(`Character emblem read — ${result.emblemId}, target 0x${result.address.toString(16).toUpperCase()}`, 'ok');
+      toast('Emblem read', 'ok');
+    } catch (error) {
+      setEmblemStatus(error.message || 'Could not read the current emblem.', true);
+      log(`Character emblem read failed: ${error.message}`, 'err');
+      toast('Emblem read failed', 'err');
+    } finally {
+      if (button) button.disabled = false;
+    }
+  }
+
+  async function setCharacterEmblem() {
+    if (!ip || !document.getElementById('status-badge')?.classList.contains('connected')) {
+      setEmblemStatus('Connect to the console first.', true);
+      toast('Not connected', 'err');
+      return;
+    }
+    const id = Number(document.getElementById('emblem-select')?.value);
+    const generation = connectionGeneration;
+    const button = document.getElementById('emblem-set-btn');
+    if (button) button.disabled = true;
+    setEmblemStatus('Rechecking the source location before writing…');
+    try {
+      if (emblemRestoreStack.length >= 32) throw new Error('Restore or review the saved emblem changes before making another edit');
+      if (!Number.isInteger(id) || id < 0 || id > 0xFFFF) throw new Error('Select a valid 16-bit emblem');
+      const target = await locateCharacterEmblem(generation);
+      const selectedHex = [...RtmMemoryFeatures.beU16(id)].map(byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
+      const [targetBefore, currentBefore] = await Promise.all([
+        ps3getmem(target.address, 2),
+        ps3getmem(EMBLEM_VALUE_ADDR, 2)
+      ]);
+      ensureOperationSession(generation);
+      if (targetBefore.toUpperCase() !== target.currentHex || currentBefore.toUpperCase() !== target.currentHex) {
+        throw new Error('Emblem changed during validation; read it again before writing');
+      }
+      const restorePoint = { address: target.address, originalHex: target.currentHex, writtenHex: selectedHex, generation, ip };
+      saveEmblemRestoreStack([...emblemRestoreStack, restorePoint]);
+      document.getElementById('emblem-restore-btn').disabled = false;
+      try {
+        await verifiedMemorySequence([[target.address, selectedHex], [EMBLEM_VALUE_ADDR, selectedHex]]);
+      } catch (writeError) {
+        if (ip !== restorePoint.ip || connectionGeneration !== restorePoint.generation) {
+          throw new Error(`Emblem write was interrupted by a connection change. Reconnect to ${restorePoint.ip} and use Restore to finish recovery.`);
+        }
+        const [targetAfter, currentAfter] = await Promise.all([
+          ps3getmem(target.address, 2).catch(() => ''),
+          ps3getmem(EMBLEM_VALUE_ADDR, 2).catch(() => '')
+        ]);
+        ensureOperationSession(generation);
+        const targetValue = targetAfter.toUpperCase();
+        const currentValue = currentAfter.toUpperCase();
+        if (![target.currentHex, selectedHex].includes(targetValue) || ![target.currentHex, selectedHex].includes(currentValue)) {
+          throw new Error(`Emblem write did not complete cleanly; memory changed unexpectedly and was left untouched: ${writeError.message}`);
+        }
+        const rollback = [];
+        if (targetValue === selectedHex) rollback.push([target.address, target.currentHex]);
+        if (currentValue === selectedHex) rollback.push([EMBLEM_VALUE_ADDR, target.currentHex]);
+        if (rollback.length) {
+          try {
+            await verifiedMemorySequence(rollback);
+          } catch (rollbackError) {
+            throw new Error(`Emblem write failed and rollback could not be verified: ${rollbackError.message}`);
+          }
+        }
+        saveEmblemRestoreStack(emblemRestoreStack.slice(0, -1));
+        throw new Error(`Emblem write failed${rollback.length ? ' and was rolled back' : ''}: ${writeError.message}`);
+      }
+      ensureOperationSession(generation);
+      document.getElementById('emblem-current').value = `${id} · 0x${selectedHex}`;
+      setEmblemStatus(`Set emblem ${id} at both source locations · readback verified`);
+      log(`Character emblem set to ${id}; both 16-bit writes verified`, 'ok');
+      toast('Emblem updated', 'ok');
+    } catch (error) {
+      setEmblemStatus(error.message || 'Emblem update failed.', true);
+      log(`Character emblem update failed: ${error.message}`, 'err');
+      toast('Emblem update not confirmed', 'err');
+    } finally {
+      if (button) button.disabled = false;
+    }
+  }
+
+  async function restoreCharacterEmblem() {
+    const saved = emblemRestoreStack[emblemRestoreStack.length - 1];
+    if (!saved || saved.ip !== ip || !document.getElementById('status-badge')?.classList.contains('connected')) {
+      setEmblemStatus(saved ? `Reconnect to ${saved.ip} before restoring the saved emblem.` : 'Read and set an emblem before restoring.', true);
+      toast(saved ? 'Reconnect to the saved console to restore' : 'No emblem restore point', 'err');
+      return;
+    }
+    const generation = connectionGeneration;
+    const button = document.getElementById('emblem-restore-btn');
+    if (button) button.disabled = true;
+    try {
+      const [targetHex, currentHex] = await Promise.all([ps3getmem(saved.address, 2), ps3getmem(EMBLEM_VALUE_ADDR, 2)]);
+      ensureOperationSession(generation);
+      const targetValue = targetHex.toUpperCase();
+      const currentValue = currentHex.toUpperCase();
+      if (![saved.originalHex, saved.writtenHex].includes(targetValue) || ![saved.originalHex, saved.writtenHex].includes(currentValue)) {
+        throw new Error('Emblem value changed since the write; refusing to overwrite it');
+      }
+      const restorePairs = [];
+      if (targetValue === saved.writtenHex && targetValue !== saved.originalHex) restorePairs.push([saved.address, saved.originalHex]);
+      if (currentValue === saved.writtenHex && currentValue !== saved.originalHex) restorePairs.push([EMBLEM_VALUE_ADDR, saved.originalHex]);
+      if (restorePairs.length) await verifiedMemorySequence(restorePairs);
+      ensureOperationSession(generation);
+      saveEmblemRestoreStack(emblemRestoreStack.slice(0, -1));
+      document.getElementById('emblem-current').value = `${parseInt(saved.originalHex, 16)} · 0x${saved.originalHex}`;
+      document.getElementById('emblem-restore-btn').disabled = emblemRestoreStack.length === 0;
+      setEmblemStatus(`Last emblem change restored · readback verified${emblemRestoreStack.length ? ` · ${emblemRestoreStack.length} earlier change(s) can also be restored` : ''}`);
+      log('Original character emblem restored and verified', 'ok');
+      toast('Original emblem restored', 'ok');
+    } catch (error) {
+      setEmblemStatus(error.message || 'Emblem restore failed.', true);
+      log(`Character emblem restore failed: ${error.message}`, 'err');
+      toast('Emblem restore not confirmed', 'err');
+    } finally {
+      if (button) button.disabled = emblemRestoreStack.length === 0;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    populateEmblemOptions();
+    const restoreButton = document.getElementById('emblem-restore-btn');
+    if (restoreButton) restoreButton.disabled = emblemRestoreStack.length === 0;
+    if (emblemRestoreStack.length) setEmblemStatus(`A saved emblem change can be restored on ${emblemRestoreStack[emblemRestoreStack.length - 1].ip}.`);
+  });
 
   // PS3 system notification — uses PS3MAPI's built-in notify endpoint
   // Shows as an XMB-style popup bubble with the PS3 system icon
-  function sendPS3Notification() {
+  async function sendPS3Notification() {
     if (!ip) { toast('Not connected', 'err'); return; }
     const msg = document.getElementById('notif-msg').value.trim();
     if (!msg) { toast('Enter a message', 'err'); return; }
     const encoded = encodeURIComponent(msg);
-    ps3fetch(`http://${ip}/notify.ps3mapi?msg=${encoded}`)
-      .then(() => { log(`PS3 notification: "${msg}"`, 'ok'); toast('Notification sent ', 'ok'); })
-      .catch(() => { log('Notification failed', 'err'); toast('Notification failed', 'err'); });
+    try {
+      await ps3fetch(`http://${ip}/notify.ps3mapi?msg=${encoded}`);
+      log('PS3 system notification request dispatched; delivery is not confirmed', 'ok');
+      toast('Notification request sent', 'ok');
+    } catch (error) {
+      log(`PS3 notification request failed: ${error.message}`, 'err');
+      toast('Notification request failed', 'err');
+    }
   }
 
   function notifyPS3(msg) {
     if (!ip) return;
     const encoded = encodeURIComponent(msg);
     ps3fetch(`http://${ip}/notify.ps3mapi?msg=${encoded}`).catch(() => {});
-  }
-
-  // Browser-side best-effort RPC initialization corresponding to the source's
-  // EnableRPC(4882496). The exact soulsAPI implementation is inside the DLL;
-  // this HTTP route is therefore treated as experimental rather than proven.
-  async function enableRPC() {
-    if (!ip) return;
-    try {
-      await ps3fetch(`http://${ip}/enablerpc.ps3mapi?addr=4A8040`);
-      log('RPC enable request accepted; function-call capability still requires verification', '');
-    } catch (error) {
-      log(`RPC enable request failed: ${error.message}`, 'err');
-    }
   }
 
   // ── Player hook install / uninstall ───────────────────────────────────────
@@ -1417,6 +1543,10 @@
     { id: 'sec-fov',                 label: 'FOV',             setup: true,  description: 'Field-of-view controls.' },
     { id: 'sec-overwalls',            label: 'Overwalls Tools', setup: true,  description: 'Overwalls scenario, routine, inventory and Flyhack workflows.' },
     { id: 'sec-custom-offset',       label: 'Custom Offset',   setup: true,  description: 'Manual memory address/value tools.', recommended: false },
+    { id: 'sec-ps3-notify',          label: 'PS3 System Notification', setup: true, description: 'Send a documented PS3MAPI system notification.' },
+    { id: 'sec-scanner',             label: 'Memory Scanner',  setup: true,  description: 'Compare bounded memory snapshots and inspect selected values.', recommended: false },
+    { id: 'sec-ammo-editor',         label: 'Ammo Editor',     setup: true,  description: 'Experimental source-build scanner; writes one selected ammo slot.', recommended: false },
+    { id: 'sec-screenshots',         label: 'Screenshots',     setup: true,  description: 'Experimental source-build framebuffer addresses; may pause the game.', recommended: false },
     { id: 'sec-useless',             label: 'Visuals',         setup: true,  description: 'Visual and display-related options.' },    { id: 'activity-loader-panel',   label: 'Activity Loader', setup: true,  description: 'Load missions, strikes, raids and destinations.' }
   ];
 
@@ -1429,6 +1559,19 @@
     if (localStorage.getItem(CHAR_UTILS_VISIBILITY_MIGRATION_KEY) !== '1') {
       localStorage.setItem(SECTION_STORAGE_PREFIX + 'sec-character-utils', '1');
       localStorage.setItem(CHAR_UTILS_VISIBILITY_MIGRATION_KEY, '1');
+    }
+  } catch (e) {}
+
+  const MEMORY_TOOLS_VISIBILITY_MIGRATION_KEY = 'destinyRtmMemoryToolsOptInV1';
+  try {
+    if (localStorage.getItem(MEMORY_TOOLS_VISIBILITY_MIGRATION_KEY) !== '1') {
+      for (const id of ['sec-ammo-editor', 'sec-screenshots']) {
+        const key = SECTION_STORAGE_PREFIX + id;
+        if (localStorage.getItem(key) === null && sessionStorage.getItem('secvis_' + id) === null) {
+          localStorage.setItem(key, '0');
+        }
+      }
+      localStorage.setItem(MEMORY_TOOLS_VISIBILITY_MIGRATION_KEY, '1');
     }
   } catch (e) {}
 
@@ -2034,6 +2177,10 @@
     ],
     tools: [
       'sec-custom-offset',
+      'sec-ps3-notify',
+      'sec-ammo-editor',
+      'sec-screenshots',
+      'sec-scanner',
       'sec-useless'
     ]
   };
@@ -2141,6 +2288,11 @@
       description:'Keeps weapons supplied with ammunition.',
       notes:'Current known issue: this option may not restore correctly when switched off.'
     },
+    'tog-no-spread': {
+      feature:'stable', label:'Stable',
+      description:'Reduces weapon spread while enabled.',
+      notes:'Ported from the local Destiny v1.24 source. The toggle writes the source values and confirms each write by readback.'
+    },
     'tog-power': {
       feature:'experimental', label:'Experimental',
       description:'Alternative unlimited-ability/power behaviour.',
@@ -2171,6 +2323,11 @@
       description:'Keeps abilities available without the normal recharge wait.',
       notes:'This is the preferred unlimited-ability option in the current RTM.'
     },
+    'tog-jump-boost': {
+      feature:'experimental', label:'Experimental',
+      description:'Applies the source RTM’s four-times jump-boost patch.',
+      notes:'Shares 0x00CCB9E8 with Unlimited Abilities. Enabling either option disables the other first.'
+    },
     'tog-rapid-fire': {
       feature:'stable', label:'Stable',
       description:'Makes supported weapons fire much faster.',
@@ -2196,6 +2353,11 @@
       description:'Stops affected characters or actors from moving normally.',
       notes:'Encounter scripting may react unpredictably while actors are frozen.'
     },
+    'tog-bouncy-items': {
+      feature:'experimental', label:'Experimental',
+      description:'Applies the source RTM’s bouncy-item patch.',
+      notes:'The original source provides fixed on/off values but no further usage notes.'
+    },
     'tog-unl-sparrow': {
       feature:'stable', label:'Stable',
       description:'Keeps Sparrow boost available while enabled.',
@@ -2214,7 +2376,12 @@
     'tog-no-pushbacks': {
       feature:'experimental', label:'Experimental',
       description:'Prevents pushback barriers from moving you backwards.',
-      notes:'Also affects some pull/push behaviour and may change encounter movement.'
+      notes:'Also affects some pull/push behaviour and may change encounter movement. Shares a 12-byte patch with Rock Jump; enabling either disables the other.'
+    },
+    'tog-rock-jump': {
+      feature:'experimental', label:'Experimental',
+      description:'Applies the Rock Jump values from the local source RTM.',
+      notes:'Shares a 12-byte patch with No Pushback Barriers; enabling either disables the other.'
     },
     'tog-warpriest': {
       feature:'experimental', label:'Experimental',
@@ -2348,7 +2515,12 @@
 
     // Infinite Power and Unlimited Abilities both patch 0x02C36FC.
     'tog-power': ['tog-unl-abilities'],
-    'tog-unl-abilities': ['tog-power']
+    'tog-unl-abilities': ['tog-power', 'tog-jump-boost'],
+    'tog-jump-boost': ['tog-unl-abilities'],
+
+    // These two source features write different values to the same 12 bytes.
+    'tog-no-pushbacks': ['tog-rock-jump'],
+    'tog-rock-jump': ['tog-no-pushbacks']
   };
 
   function setAllButtonsActive(id, active) {
@@ -2393,6 +2565,39 @@
     return id;
   }
 
+  const PATCH_CONFLICT_OFF = {
+    'tog-no-pushbacks': {
+      label: 'No Pushback Barriers',
+      pairs: [['1389760','3F800000'],['1389764','3F800000'],['1389768','3F800000']]
+    },
+    'tog-rock-jump': {
+      label: 'Rock Jump',
+      pairs: [['1389760','3F800000'],['1389764','3F800000'],['1389768','3F800000']]
+    },
+    'tog-jump-boost': {
+      label: '4× Jump Boost',
+      pairs: [['CCB9E8','3063FFFF']]
+    },
+    'tog-unl-abilities': {
+      label: 'Unlimited Abilities',
+      pairs: [['2C1DB4','D03B019C'],['CCB9E8','3063FFFF'],['2C36FC','C3C30000']]
+    }
+  };
+
+  async function disablePatchConflict(id) {
+    const definition = PATCH_CONFLICT_OFF[id];
+    if (!definition || !cheatState[definition.label]) return null;
+    const generation = connectionGeneration;
+    const result = await patchRunner.apply(definition.pairs);
+    if (generation !== connectionGeneration) throw new Error('Console session changed');
+    if (result.status !== 'verified') throw new Error(`${definition.label} could not be disabled and verified`);
+    cheatState[definition.label] = false;
+    requestedCheatState[definition.label] = false;
+    setAllButtonsActive(id, false);
+    updateCheatStatus(id, 'verified-off');
+    return definition.label;
+  }
+
   function clearDamageConflictUI(exceptId) {
     if (exceptId !== 'tog-ohk') {
       setCheatLabelState('One-Hit Enemies', false);
@@ -2428,8 +2633,15 @@
       disabled.push(await disablePowerConflict('tog-power'));
     }
 
-    if (disabled.length) {
-      const msg = `Conflict detected: disabled ${disabled.join(' + ')}`;
+    for (const conflictId of conflicts) {
+      if (PATCH_CONFLICT_OFF[conflictId] && cheatState[PATCH_CONFLICT_OFF[conflictId].label]) {
+        disabled.push(await disablePatchConflict(conflictId));
+      }
+    }
+
+    const actualDisabled = disabled.filter(Boolean);
+    if (actualDisabled.length) {
+      const msg = `Conflict detected: disabled ${actualDisabled.join(' + ')}`;
       log(msg, 'ok');
       toast(msg, 'ok');
     }
@@ -3182,6 +3394,449 @@
   }
 
 
+
+  // ── 1.24 Ammo Editor and framebuffer capture ───────────────────────────────
+  const AMMO_SCAN_BASE = 0x60300000;
+  const AMMO_SCAN_LENGTH = 0x400000;
+  const AMMO_SCAN_CHUNK = 0x10000;
+  const SCREENSHOT_PAUSE_STORAGE_KEY = 'rtm_framebuffer_pause_restore_v1';
+  let ammoScanState = null;
+  const ammoRestoreStack = [];
+  let ammoScanBusy = false;
+  let screenshotObjectUrl = '';
+  let screenshotPauseRestore = null;
+  try { screenshotPauseRestore = JSON.parse(localStorage.getItem(SCREENSHOT_PAUSE_STORAGE_KEY) || 'null'); } catch (e) { screenshotPauseRestore = null; }
+  window.rtmFramebufferBusy = !!screenshotPauseRestore;
+  window.rtmFramebufferRecoveryIp = screenshotPauseRestore?.ip || '';
+
+  function saveScreenshotPauseRestore(state) {
+    if (state) {
+      try { localStorage.setItem(SCREENSHOT_PAUSE_STORAGE_KEY, JSON.stringify(state)); }
+      catch (error) { throw new Error(`Could not save pause recovery data: ${error.message || error}`); }
+      screenshotPauseRestore = state;
+    } else {
+      screenshotPauseRestore = null;
+      try { localStorage.removeItem(SCREENSHOT_PAUSE_STORAGE_KEY); } catch (e) {}
+    }
+    window.rtmFramebufferRecoveryIp = screenshotPauseRestore?.ip || '';
+  }
+
+  function setAmmoStatus(message, failed = false) {
+    const status = document.getElementById('ammo-scan-status');
+    if (!status) return;
+    status.textContent = message;
+    status.style.color = failed ? 'var(--danger)' : 'var(--muted)';
+  }
+
+  function readAmmoNumber(id) {
+    const input = document.getElementById(id);
+    if (!input || input.value.trim() === '') throw new Error('Enter all four ammo counts first');
+    const value = Number(input.value);
+    if (!Number.isInteger(value) || value < 0 || value > 0x7FFFFFFF) throw new Error('Ammo counts must be whole numbers from 0 to 2147483647');
+    return value;
+  }
+
+  function readAmmoFloat(id) {
+    const input = document.getElementById(id);
+    if (!input || input.value.trim() === '') throw new Error('Enter both special ammo values first');
+    const value = Number(input.value);
+    RtmMemoryFeatures.beFloat32(value);
+    if (value < 0) throw new Error('Special ammo counts must be zero or greater');
+    return value;
+  }
+
+  function updateAmmoFields() {
+    const isSpecial = document.getElementById('ammo-family')?.value === 'Special';
+    const integerFields = document.getElementById('ammo-integer-fields');
+    const floatFields = document.getElementById('ammo-float-fields');
+    if (integerFields) integerFields.style.display = isSpecial ? 'none' : '';
+    if (floatFields) floatFields.style.display = isSpecial ? '' : 'none';
+  }
+
+  function renderAmmoCandidates(addresses) {
+    const list = document.getElementById('ammo-results');
+    const applyButton = document.getElementById('ammo-apply-btn');
+    list.replaceChildren();
+    if (!addresses.length) {
+      list.innerHTML = '<div class="scan-empty">No validated candidates. Check the current counts and try again.</div>';
+      if (applyButton) applyButton.disabled = true;
+      return;
+    }
+    const shown = addresses.slice(0, 100);
+    shown.forEach((address, index) => {
+      const row = document.createElement('label');
+      row.className = 'scan-result-row';
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'ammo-candidate';
+      radio.value = String(index);
+      radio.addEventListener('change', () => { if (applyButton) applyButton.disabled = !radio.checked; });
+      const title = document.createElement('span');
+      title.className = 'scan-result-addr';
+      title.textContent = `${ammoScanState.family} · 0x${address.toString(16).toUpperCase().padStart(8, '0')}`;
+      const detail = document.createElement('span');
+      detail.className = 'scan-result-vals';
+      detail.textContent = ammoScanState.family === 'Special'
+        ? `Current special ammo ${ammoScanState.currentSpecial}`
+        : `Current magazine ${ammoScanState.currentMag} · reserve ${ammoScanState.currentReserve}`;
+      row.append(radio, title, detail);
+      list.appendChild(row);
+    });
+    if (addresses.length > shown.length) {
+      const note = document.createElement('div');
+      note.className = 'scan-empty';
+      note.textContent = `${addresses.length - shown.length} more candidates omitted; use a more distinctive current ammo count.`;
+      list.appendChild(note);
+    }
+    if (applyButton) applyButton.disabled = true;
+  }
+
+  async function scanAmmoCandidates() {
+    if (ammoScanBusy) return;
+    if (!ip || !document.getElementById('status-badge')?.classList.contains('connected')) { toast('Not connected', 'err'); return; }
+    let currentMag, currentReserve, newMag, newReserve, currentSpecial, newSpecial;
+    const family = document.getElementById('ammo-family').value;
+    try {
+      if (family === 'Special') {
+        currentSpecial = readAmmoFloat('ammo-current-special');
+        newSpecial = readAmmoFloat('ammo-new-special');
+      } else {
+        currentMag = readAmmoNumber('ammo-current-mag');
+        currentReserve = readAmmoNumber('ammo-current-reserve');
+        newMag = readAmmoNumber('ammo-new-mag');
+        newReserve = readAmmoNumber('ammo-new-reserve');
+        if (currentMag === 0 && currentReserve === 0) throw new Error('At least one current ammo count must be nonzero');
+      }
+    } catch (error) {
+      setAmmoStatus(error.message, true);
+      toast(error.message, 'err');
+      return;
+    }
+
+    const generation = connectionGeneration;
+    const scanButton = document.getElementById('ammo-scan-btn');
+    const applyButton = document.getElementById('ammo-apply-btn');
+    if (scanButton) scanButton.disabled = true;
+    if (applyButton) applyButton.disabled = true;
+    ammoScanBusy = true;
+    ammoScanState = null;
+    setAmmoStatus('Reading the bounded 4 MiB ammo range…');
+    const progress = document.getElementById('ammo-progress');
+    const progressText = document.getElementById('ammo-progress-text');
+    const progressFill = document.getElementById('ammo-progress-fill');
+    progress.style.display = '';
+
+    try {
+      const snapshot = new Uint8Array(AMMO_SCAN_LENGTH);
+      const chunkCount = Math.ceil(AMMO_SCAN_LENGTH / AMMO_SCAN_CHUNK);
+      for (let offset = 0; offset < AMMO_SCAN_LENGTH; offset += AMMO_SCAN_CHUNK) {
+        ensureOperationSession(generation);
+        const length = Math.min(AMMO_SCAN_CHUNK, AMMO_SCAN_LENGTH - offset);
+        const address = AMMO_SCAN_BASE + offset;
+        progressText.textContent = `Ammo scan ${Math.floor(offset / AMMO_SCAN_CHUNK) + 1}/${chunkCount} · 0x${address.toString(16).toUpperCase()}`;
+        progressFill.style.width = `${Math.round((offset + length) / AMMO_SCAN_LENGTH * 100)}%`;
+        const bytes = RtmMemoryFeatures.bytesFromHex(await ps3getmem(address, length));
+        ensureOperationSession(generation);
+        if (bytes.length !== length) throw new Error(`Short read at 0x${address.toString(16).toUpperCase()}`);
+        snapshot.set(bytes, offset);
+      }
+      const addresses = family === 'Special'
+        ? RtmMemoryFeatures.findSpecialAmmoCandidates(snapshot, AMMO_SCAN_BASE, currentSpecial)
+        : RtmMemoryFeatures.findAmmoCandidates(snapshot, AMMO_SCAN_BASE, currentMag, currentReserve);
+      ensureOperationSession(generation);
+      ammoScanState = { addresses, currentMag, currentReserve, newMag, newReserve, currentSpecial, newSpecial, family, generation, ip };
+      renderAmmoCandidates(addresses);
+      setAmmoStatus(addresses.length
+        ? `${addresses.length} candidate${addresses.length === 1 ? '' : 's'} matched the RTM marker. Select one slot before writing.`
+        : 'No candidates matched the current ammo values and RTM marker.', !addresses.length);
+      log(`Ammo scan complete — ${addresses.length} candidates in 4 MiB`, addresses.length ? 'ok' : 'err');
+    } catch (error) {
+      ammoScanState = null;
+      renderAmmoCandidates([]);
+      setAmmoStatus(`Ammo scan failed: ${error.message}`, true);
+      log(`Ammo scan failed: ${error.message}`, 'err');
+      toast('Ammo scan failed', 'err');
+    } finally {
+      ammoScanBusy = false;
+      progress.style.display = 'none';
+      if (scanButton) scanButton.disabled = false;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('ammo-family')?.addEventListener('change', updateAmmoFields);
+    updateAmmoFields();
+  });
+
+  function selectedAmmoAddress() {
+    if (!ammoScanState) return null;
+    const input = document.querySelector('input[name="ammo-candidate"]:checked');
+    const index = input ? Number(input.value) : -1;
+    return Number.isInteger(index) ? ammoScanState.addresses[index] ?? null : null;
+  }
+
+  async function applyAmmoCandidate() {
+    const state = ammoScanState;
+    const address = selectedAmmoAddress();
+    if (!state || !Number.isInteger(address)) { toast('Select one ammo slot first', 'err'); return; }
+    if (state.ip !== ip || state.generation !== connectionGeneration) { setAmmoStatus('Connection changed; scan again before writing.', true); return; }
+    try {
+      if (ammoRestoreStack.length >= 32) throw new Error('Restore the pending ammo changes before making another edit');
+      if (document.getElementById('ammo-family').value !== state.family) throw new Error('Ammo candidate type changed after the scan; scan again');
+      let originalHex, signatureHex, writtenHex, byteLength, markerOffset;
+      if (state.family === 'Special') {
+        if (readAmmoFloat('ammo-current-special') !== state.currentSpecial || readAmmoFloat('ammo-new-special') !== state.newSpecial) {
+          throw new Error('Special ammo values changed after the scan; scan again');
+        }
+        signatureHex = [...RtmMemoryFeatures.beFloat32(state.currentSpecial), 1, 0, 0, 0]
+          .map(byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
+        const signatureBefore = (await ps3getmem(address, 8)).toUpperCase();
+        ensureOperationSession(state.generation);
+        if (signatureBefore !== signatureHex) throw new Error('Selected slot no longer has the scanned special ammo signature');
+        const marker = RtmMemoryFeatures.bytesFromHex(await ps3getmem(address + 40, 2));
+        ensureOperationSession(state.generation);
+        if (marker.length !== 2 || marker[0] !== 0x80 || marker[1] !== 0x80) throw new Error('Selected special ammo marker changed; scan again');
+        if ((await ps3getmem(address, 8)).toUpperCase() !== signatureBefore) throw new Error('Special ammo values changed during validation; scan again');
+        ensureOperationSession(state.generation);
+        originalHex = signatureBefore.slice(0, 8);
+        writtenHex = RtmMemoryFeatures.beFloat32(state.newSpecial).map(byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
+        byteLength = 4;
+        markerOffset = 40;
+      } else {
+        if (readAmmoNumber('ammo-current-mag') !== state.currentMag || readAmmoNumber('ammo-current-reserve') !== state.currentReserve ||
+            readAmmoNumber('ammo-new-mag') !== state.newMag || readAmmoNumber('ammo-new-reserve') !== state.newReserve) {
+          throw new Error('Ammo values changed after the scan; scan again');
+        }
+        originalHex = (await ps3getmem(address, 8)).toUpperCase();
+        ensureOperationSession(state.generation);
+        const originalBytes = RtmMemoryFeatures.bytesFromHex(originalHex);
+        const expected = [...RtmMemoryFeatures.beU32(state.currentReserve), ...RtmMemoryFeatures.beU32(state.currentMag)];
+        if (originalBytes.length !== 8 || originalBytes.some((byte, index) => byte !== expected[index])) throw new Error('Selected slot no longer has the scanned ammo values');
+        const marker = RtmMemoryFeatures.bytesFromHex(await ps3getmem(address + 28, 2));
+        ensureOperationSession(state.generation);
+        if (marker.length !== 2 || marker[0] !== 0x80 || marker[1] !== 0xA6) throw new Error('Selected slot marker changed; scan again');
+        if ((await ps3getmem(address, 8)).toUpperCase() !== originalHex) throw new Error('Ammo values changed during validation; scan again');
+        ensureOperationSession(state.generation);
+        const reserveHex = RtmMemoryFeatures.beU32(state.newReserve).map(byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
+        const magHex = RtmMemoryFeatures.beU32(state.newMag).map(byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
+        writtenHex = reserveHex + magHex;
+        byteLength = 8;
+        markerOffset = 28;
+      }
+      try {
+        await verifiedMemorySequence([[address, writtenHex]]);
+      } catch (error) {
+        let currentHex = '';
+        try { currentHex = (await ps3getmem(address, byteLength)).toUpperCase(); } catch (_) {}
+        if (currentHex === writtenHex) {
+          try { await verifiedMemorySequence([[address, originalHex]]); }
+          catch (restoreError) { throw new Error(`Ammo write failed and rollback could not be verified: ${restoreError.message}`); }
+          throw new Error(`Ammo write was rolled back: ${error.message}`);
+        }
+        if (currentHex && currentHex !== originalHex) throw new Error(`Ammo slot changed during the write; state is unknown and was not overwritten: ${error.message}`);
+        throw error;
+      }
+      ammoRestoreStack.push({ address, originalHex, writtenHex, byteLength, markerOffset, family: state.family, generation: state.generation, ip: state.ip });
+      document.getElementById('ammo-restore-btn').disabled = false;
+      setAmmoStatus(`Updated ${state.family} at 0x${address.toString(16).toUpperCase()} · readback verified`);
+      log(`Ammo values set at 0x${address.toString(16).toUpperCase()} and verified`, 'ok');
+      toast('Ammo values verified', 'ok');
+    } catch (error) {
+      setAmmoStatus(error.message || 'Ammo write failed.', true);
+      log(`Ammo write failed: ${error.message}`, 'err');
+      toast('Ammo write not confirmed', 'err');
+    }
+  }
+
+  async function restoreAmmoCandidate() {
+    const saved = ammoRestoreStack[ammoRestoreStack.length - 1];
+    if (!saved || saved.ip !== ip || saved.generation !== connectionGeneration) {
+      setAmmoStatus('No ammo restore point for this console session.', true);
+      return;
+    }
+    try {
+      const current = (await ps3getmem(saved.address, saved.byteLength)).toUpperCase();
+      ensureOperationSession(saved.generation);
+      if (current !== saved.writtenHex) throw new Error('Ammo slot changed since the write; refusing to overwrite it');
+      const marker = RtmMemoryFeatures.bytesFromHex(await ps3getmem(saved.address + saved.markerOffset, 2));
+      ensureOperationSession(saved.generation);
+      const expectedMarker = saved.family === 'Special' ? [0x80, 0x80] : [0x80, 0xA6];
+      if (marker.length !== 2 || marker.some((byte, index) => byte !== expectedMarker[index])) {
+        throw new Error('Ammo slot marker changed since the write; refusing to overwrite it');
+      }
+      await verifiedMemorySequence([[saved.address, saved.originalHex]]);
+      ammoRestoreStack.pop();
+      document.getElementById('ammo-restore-btn').disabled = ammoRestoreStack.length === 0;
+      setAmmoStatus(`${saved.family || 'Ammo'} values restored · readback verified${ammoRestoreStack.length ? ` · ${ammoRestoreStack.length} earlier change(s) can also be restored` : ''}`);
+      log('Last ammo change restored and verified', 'ok');
+      toast('Ammo values restored', 'ok');
+    } catch (error) {
+      setAmmoStatus(error.message || 'Ammo restore failed.', true);
+      log(`Ammo restore failed: ${error.message}`, 'err');
+      toast('Ammo restore not confirmed', 'err');
+    }
+  }
+
+  const SCREENSHOT_PROFILES = {
+    sd: { label: '256 × 191 · low resolution', address: 0x34118000, width: 256, height: 191, rowStride: 0xC00, byteLength: 0xBF000 },
+    'hd-a': { label: '1024 × 624 · buffer A', address: 0x341BF000, width: 1024, height: 624 },
+    'hd-b': { label: '1024 × 624 · buffer B', address: 0x3442F000, width: 1024, height: 624 },
+    'hd-1280': { label: '1280 × 720 · high resolution', address: 0xCDE10000, width: 1280, height: 720 },
+    'hd-512': { label: '512 × 312 · compact buffer', address: 0xCF060000, width: 512, height: 312 }
+  };
+  const SCREENSHOT_CHUNK = 0x10000;
+
+  async function restoreScreenshotPause() {
+    const saved = screenshotPauseRestore;
+    const sameSession = saved && saved.ip === ip && saved.generation === connectionGeneration;
+    const recoveredSession = saved && saved.pendingRecovery && saved.ip === ip;
+    if (!saved || (!sameSession && !recoveredSession) || !document.getElementById('status-badge')?.classList.contains('connected')) {
+      setScreenshotStatus('No pause byte can be restored in this console session.', true);
+      return;
+    }
+    try {
+      const currentHex = (await ps3getmem(0x614BFF, 1)).toUpperCase();
+      ensureOperationSession(connectionGeneration);
+      if (!/^[0-9A-F]{2}$/.test(currentHex)) throw new Error('Could not read the current pause byte');
+      if (currentHex !== saved.originalHex && currentHex !== '00') {
+        throw new Error(`Pause byte changed to 0x${currentHex}; refusing to overwrite the new value`);
+      }
+      if (currentHex !== saved.originalHex) await verifiedMemoryValue('614BFF', saved.originalHex);
+      ensureOperationSession(connectionGeneration);
+      saveScreenshotPauseRestore(null);
+      window.rtmFramebufferBusy = false;
+      document.getElementById('screenshot-resume-btn').disabled = true;
+      setScreenshotStatus('Original game pause byte restored and verified.');
+      log('Framebuffer capture pause byte restored and verified', 'ok');
+    } catch (error) {
+      setScreenshotStatus(`Could not restore the original pause byte: ${error.message}`, true);
+      log(`Framebuffer pause recovery failed: ${error.message}`, 'err');
+    }
+  }
+
+  function setScreenshotStatus(message, failed = false) {
+    const status = document.getElementById('screenshot-status');
+    if (!status) return;
+    status.textContent = message;
+    status.style.color = failed ? 'var(--danger)' : 'var(--muted)';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!screenshotPauseRestore) return;
+    const resumeButton = document.getElementById('screenshot-resume-btn');
+    if (resumeButton) resumeButton.disabled = false;
+    setScreenshotStatus(`A previous capture may have left the game paused. Connect to ${screenshotPauseRestore.ip} and restore its saved pause byte.`, true);
+  });
+
+  async function captureDestinyScreenshot() {
+    if (!ip || !document.getElementById('status-badge')?.classList.contains('connected')) { toast('Not connected', 'err'); return; }
+    if (screenshotPauseRestore) { setScreenshotStatus('Restore the saved pause byte before another capture.', true); return; }
+    const profile = SCREENSHOT_PROFILES[document.getElementById('screenshot-profile').value];
+    if (!profile) return;
+    const pauseRequested = document.getElementById('screenshot-pause').checked;
+    if (pauseRequested && !await RtmDialogs.confirm('Pause the game briefly while reading the framebuffer? The original pause byte will be restored after capture.')) return;
+    const generation = connectionGeneration;
+    const targetIp = ip;
+    const button = document.getElementById('screenshot-capture-btn');
+    if (button) button.disabled = true;
+    const progress = document.getElementById('screenshot-progress');
+    const progressText = document.getElementById('screenshot-progress-text');
+    const progressFill = document.getElementById('screenshot-progress-fill');
+    progress.style.display = '';
+    const byteLength = profile.byteLength || profile.width * profile.height * 4;
+    const snapshot = new Uint8Array(byteLength);
+    let originalPauseHex = null;
+    let pauseWriteAttempted = false;
+    let captureError = null;
+    let imageReady = false;
+
+    if (pauseRequested) window.rtmFramebufferBusy = true;
+    try {
+      setScreenshotStatus(`Preparing ${profile.label} capture…`);
+      if (pauseRequested) {
+        originalPauseHex = (await ps3getmem(0x614BFF, 1)).toUpperCase();
+        ensureOperationSession(generation);
+        if (!/^[0-9A-F]{2}$/.test(originalPauseHex)) throw new Error('Could not read the current pause byte');
+        if (originalPauseHex !== '00') {
+          saveScreenshotPauseRestore({ originalHex: originalPauseHex, generation, ip: targetIp, pendingRecovery: true });
+          pauseWriteAttempted = true;
+          await verifiedMemoryValue('614BFF', '00');
+          ensureOperationSession(generation);
+        }
+      }
+
+      const chunks = Math.ceil(byteLength / SCREENSHOT_CHUNK);
+      for (let offset = 0; offset < byteLength; offset += SCREENSHOT_CHUNK) {
+        ensureOperationSession(generation);
+        const length = Math.min(SCREENSHOT_CHUNK, byteLength - offset);
+        const address = profile.address + offset;
+        progressText.textContent = `Framebuffer ${Math.floor(offset / SCREENSHOT_CHUNK) + 1}/${chunks} · 0x${address.toString(16).toUpperCase()}`;
+        progressFill.style.width = `${Math.round((offset + length) / byteLength * 100)}%`;
+        setScreenshotStatus(`Reading ${profile.width} × ${profile.height} · ${Math.round((offset + length) / byteLength * 100)}%`);
+        const bytes = RtmMemoryFeatures.bytesFromHex(await ps3getmem(address, length));
+        ensureOperationSession(generation);
+        if (bytes.length !== length) throw new Error(`Framebuffer read was short at 0x${address.toString(16).toUpperCase()}`);
+        snapshot.set(bytes, offset);
+      }
+
+      const rgba = RtmMemoryFeatures.framebufferToRgba(snapshot, profile.width, profile.height, profile.rowStride || profile.width * 4);
+      const canvas = document.createElement('canvas');
+      canvas.width = profile.width;
+      canvas.height = profile.height;
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('Canvas capture is unavailable in this view');
+      const image = context.createImageData(profile.width, profile.height);
+      image.data.set(rgba);
+      context.putImageData(image, 0, 0);
+      const blob = await new Promise((resolve, reject) => canvas.toBlob(result => result ? resolve(result) : reject(new Error('Could not encode the PNG')), 'image/png'));
+      if (screenshotObjectUrl) URL.revokeObjectURL(screenshotObjectUrl);
+      screenshotObjectUrl = URL.createObjectURL(blob);
+      const preview = document.getElementById('screenshot-preview');
+      preview.src = screenshotObjectUrl;
+      preview.style.display = '';
+      const download = document.getElementById('screenshot-download');
+      download.href = screenshotObjectUrl;
+      download.download = `destiny-${profile.width}x${profile.height}-${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
+      download.textContent = `Download ${profile.width} × ${profile.height} PNG`;
+      download.style.display = 'inline-block';
+      imageReady = true;
+      setScreenshotStatus(`Captured ${profile.width} × ${profile.height} · PNG ready`);
+      log(`Destiny framebuffer captured at ${profile.width} × ${profile.height}`, 'ok');
+      toast('Screenshot captured', 'ok');
+    } catch (error) {
+      captureError = error;
+      setScreenshotStatus(`Capture failed: ${error.message}`, true);
+      log(`Framebuffer capture failed: ${error.message}`, 'err');
+      toast('Screenshot capture failed', 'err');
+    } finally {
+      if (pauseRequested && pauseWriteAttempted && originalPauseHex) {
+        try {
+          const currentHex = (await ps3getmem(0x614BFF, 1)).toUpperCase();
+          ensureOperationSession(generation);
+          if (!/^[0-9A-F]{2}$/.test(currentHex)) throw new Error('Could not read the current pause byte');
+          if (currentHex !== originalPauseHex && currentHex !== '00') {
+            throw new Error(`Pause byte changed to 0x${currentHex}; refusing to overwrite the new value`);
+          }
+          if (currentHex !== originalPauseHex) await verifiedMemoryValue('614BFF', originalPauseHex);
+          ensureOperationSession(generation);
+          saveScreenshotPauseRestore(null);
+          window.rtmFramebufferBusy = false;
+          document.getElementById('screenshot-resume-btn').disabled = true;
+        } catch (error) {
+          saveScreenshotPauseRestore({ originalHex: originalPauseHex, generation, ip: targetIp, pendingRecovery: true });
+          window.rtmFramebufferBusy = true;
+          document.getElementById('screenshot-resume-btn').disabled = false;
+          setScreenshotStatus(`Capture ${imageReady ? 'finished' : 'failed'}, but pause recovery needs attention. Use Restore Pause Byte.`, true);
+          log(`Framebuffer pause recovery needs manual restore: ${error.message}`, 'err');
+        }
+      } else if (pauseRequested) {
+        window.rtmFramebufferBusy = false;
+      }
+      progress.style.display = 'none';
+      if (button) button.disabled = false;
+    }
+    if (captureError && screenshotPauseRestore) toast('Screenshot issue · game pause recovery needs attention', 'err');
+  }
 
   // ── Memory Scanner ────────────────────────────────────────────────────────
   // Snapshot A/B: reads a memory range from PS3 in chunks, stores raw hex.

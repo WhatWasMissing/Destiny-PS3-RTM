@@ -1,4 +1,5 @@
   async function ps3Shutdown() {
+    if (window.rtmFramebufferBusy) { toast('Finish the framebuffer capture or restore the saved pause byte first', 'err'); return; }
     if (!ip) return;
     if (!await RtmDialogs.confirm('Shut down the PS3?')) return;
     const generation = connectionGeneration;
@@ -26,6 +27,7 @@
   }
 
   async function ps3Restart() {
+    if (window.rtmFramebufferBusy) { toast('Finish the framebuffer capture or restore the saved pause byte first', 'err'); return; }
     if (!ip || !await RtmDialogs.confirm('Restart the PS3?')) return;
     const target = ip;
     const generation = ++connectionGeneration;
@@ -73,6 +75,10 @@
     const input = document.getElementById('ip');
     let target = String(ip || input?.value || '').trim();
     if (!target) { try { target = localStorage.getItem(SAVED_IP_KEY) || ''; } catch (_) {} }
+    if (window.rtmFramebufferBusy && String(window.rtmFramebufferRecoveryIp || '') !== target) {
+      toast('Restore the saved pause byte before changing consoles', 'err');
+      return;
+    }
     if (!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(target) || target.split('.').some(part => Number(part)>255)) { toast('Enter a valid PS3 IPv4 address', 'err'); return; }
     const generation = ++connectionGeneration;
     stopAutoReconnect(); stopHealthCheck(); consoleTransport.cancelAll(); resetVerifiedStates();
@@ -98,6 +104,11 @@
 
   let connectionGeneration = 0;
   async function connect() {
+    const recoveryTarget = String(document.getElementById('ip')?.value || '').trim();
+    if (window.rtmFramebufferBusy && String(window.rtmFramebufferRecoveryIp || '') !== recoveryTarget) {
+      toast('Reconnect to the console with the saved pause state first', 'err');
+      return;
+    }
     const generation = ++connectionGeneration;
     consoleTransport.cancelAll();
     resetVerifiedStates();
@@ -123,9 +134,6 @@
       if (generation !== connectionGeneration) return;
       await doubleBeep();
       if (generation !== connectionGeneration) return;
-      // Enable RPC once at connect time via iframe (avoids download popup).
-      // Must be active before any Call() operations.
-      setTimeout(() => { if (generation === connectionGeneration) enableRPC(); }, 500);
       setBadge('connected', 'ONLINE');
       document.getElementById('btn-connect').style.display = 'none';
       document.getElementById('btn-disconnect').style.display = '';
@@ -156,6 +164,7 @@
   }
 
   async function disconnect() {
+    if (window.rtmFramebufferBusy) { toast('Restore the saved pause byte before disconnecting', 'err'); return; }
     const generation = ++connectionGeneration;
     resetVerifiedStates();
     stopAutoReconnect();
@@ -240,7 +249,7 @@
     document.getElementById('btn-shutdown').classList.add('enabled');
     document.getElementById('btn-restart').classList.add('enabled');
 
-    // Deliberately do NOT call enableRPC() or installPlayerHook() here.
+    // Deliberately do NOT reinstall the game hook during a quick reconnect.
     // This reconnect path only restores the RTM's HTTP link.
     log(`Auto reconnect restored → ${targetIp}`, 'ok');
     toast('PS3 connection restored', 'ok');
@@ -248,6 +257,7 @@
   }
 
   function beginSafeAutoReconnect(targetIp = ip) {
+    if (window.rtmFramebufferBusy && String(window.rtmFramebufferRecoveryIp || '') !== String(targetIp || '')) return;
     if (!autoReconnectEnabled || _autoReconnectActive || !targetIp) return;
 
     const generation = ++connectionGeneration;

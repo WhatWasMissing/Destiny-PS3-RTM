@@ -40,9 +40,8 @@ Do not mark the complete objective achieved based on the transport tests alone.
   existing DOMContentLoaded callbacks. Browser confirmed both target sections.
 - Teleport editing/sorting/import/export/duplicate checking/20-step undo added.
   Full browser workflow coverage is still outstanding.
-- Connection generation guards and disconnect cleanup added; race integration
-  tests are still required. The original reconnect and direct read paths still
-  need consolidated handling.
+- Connection generation guards and disconnect cleanup added; later production
+  function tests cover reconnect and disconnect races.
 - Go 1.27.1 is available in the local pokemon-sots toolchain. Desktop host
   implementation/build remains outstanding.
 - No live PS3 requests were made for these checks.
@@ -103,8 +102,8 @@ Do not mark the complete objective achieved based on the transport tests alone.
   states position-write acknowledgement rather than proven in-game movement.
 - Phone dark/light views inspected at 390px (375px content area); no document
   horizontal overflow. All five navigation tabs now fit without a hidden tab.
-- Desktop rebuild passed Go and JavaScript tests. Broader console operation
-  verification, native-window check and final scope audit remain outstanding.
+- Desktop rebuild passed Go and JavaScript tests. Verification against a live
+  PS3 remains outstanding; no console was used.
 
 ## Legacy operations and session audit
 
@@ -142,11 +141,11 @@ Do not mark the complete objective achieved based on the transport tests alone.
   rejection, with automatic cleanup. No PS3 requests are sent by the smoke check.
 - Added guards for late disconnect cleanup and health probes at the same IP;
   production-function tests cover both. Diagnostics redact popup path text and
-  retain HTTP status codes. Thirty Node tests currently pass.
+  retain HTTP status codes. Thirty-six Node tests currently pass.
 - Backup/restore now preserves first-run setup and visibility migration flags.
   Documentation now describes the replacement desktop project consistently.
 - Stable string/speed/scanner writes also use verified memory operations.
-  Final rebuild after these latest edits and final scope audit are still required.
+  The current source comparison, 36-test run, and packaged rebuild passed.
 
 ## Final scope audit
 
@@ -156,7 +155,7 @@ setmem calls through verified writes; the internal runner uses direct bounded
 transport to avoid recursion. Integration checks cover destination/process
 rejection and exact unaligned UInt16 writes preserving neighboring bytes.
 Player hook installation checks supported instructions before any mutation;
-cleanup is restricted to hooks owned by this app. Thirty-one Node tests pass,
+cleanup is restricted to hooks owned by this app. Thirty-six Node tests pass,
 plus Go host and production-frontend fake-console integration tests.
 
 Stylesheets are now separated into base.css and design.css. A final browser
@@ -165,4 +164,27 @@ Build tooling syntax-checks all JavaScript, runs the suites, builds the executab
 smoke-tests that executable, and records executable/source hashes in
  dist/build-manifest.json. No live PS3 or in-game compatibility claim is made.
 The original recovery and proprietary license remain preserved. The changes are
-reviewable in PR #8; it remains a draft for live-console review before release.
+reviewable in PR #8; it remains a draft pending live-console compatibility review.
+
+## Local RTM source comparison
+
+- Compared the newer local 1.24 web and C# builds. Added No Spread, Bouncy
+  Items, 4× Jump Boost and Rock Jump with conflict handling for overlapping
+  patches.
+- Restored the scanner controls and added a 103-entry emblem selector.
+  Emblem and ammo writes require fresh validation and readback, with saved
+  guarded recovery. Ammo edits support the special-ammo float signature and a
+  session undo stack.
+- Added chunked framebuffer captures with optional pause restoration and a
+  persisted manual recovery path. The tool fails closed if it cannot save
+  recovery data before pausing. These addresses remain unverified against a
+  live game build.
+- Replaced the nonfunctional RPC notification variant with the documented PS3
+  system notification flow. Removed experimental Player Size and connection
+  RPC calls; documented Player Size, trophy unlock, and Destiny-internal toast
+  as unsupported by stock webMAN's HTTP PS3MAPI endpoint set.
+- The client archive/geolocation feature was excluded because it collects
+  other players' IP and location/provider data. Older 1.08/phone offsets were
+  excluded because they conflict with the local 1.24 source.
+- Source locations, online references, and remaining compatibility limits are
+  recorded in `SOURCE-COMPARISON.md`.

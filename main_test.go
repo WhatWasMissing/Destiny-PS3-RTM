@@ -64,3 +64,16 @@ func TestHostProxy(t *testing.T) {
 		t.Fatal("host validation missing")
 	}
 }
+
+func TestHostRejectsUndocumentedFunctionCallRoutes(t *testing.T) {
+	h := &host{token: "test-token", origin: "http://127.0.0.1:8767", client: http.DefaultClient, validTarget: consoleTarget}
+	for _, path := range []string{"/call.ps3mapi", "/rpc.ps3", "/enablerpc.ps3mapi"} {
+		r := httptest.NewRequest("GET", h.origin+"/console?url="+url.QueryEscape("http://192.168.1.62"+path), nil)
+		r.Header.Set("X-RTM-Token", h.token)
+		w := httptest.NewRecorder()
+		h.handler().ServeHTTP(w, r)
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("route %s returned %d", path, w.Code)
+		}
+	}
+}

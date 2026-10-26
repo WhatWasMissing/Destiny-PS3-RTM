@@ -5,9 +5,11 @@ and Microsoft Edge (or a default browser). No external Go dependencies are used.
 
 Run `./build.ps1` from PowerShell. If Go is not on PATH, pass `-Go` with the
 absolute path to `go.exe`. The script runs Go and JavaScript tests and writes
-`dist/DestinyRTM.exe`, embedding the complete `source/` directory.
-The build also writes `dist/build-manifest.json` with executable and embedded
-source hashes, and syntax-checks every JavaScript module before packaging.
+`dist/DestinyRTM.exe`, embedding the complete `source/` directory, and
+`dist/rtmctl.exe`, a standalone command-line client for webMAN PS3MAPI.
+The build also writes `dist/build-manifest.json` with both executable hashes
+and embedded source hashes, and syntax-checks every JavaScript module before
+packaging.
 
 Run the executable to open an Edge app window. If Edge cannot be located, the
 default browser opens instead. The host runs until its console is closed.
@@ -23,6 +25,11 @@ port 80. It does not implement CCAPI or add undocumented RPC capabilities.
 It uses request authentication, validates Host/Origin, disallows redirects,
 caps response size, bypasses system HTTP proxies and bounds upstream timeouts.
 No console data or requests are sent to an external service.
+
+`rtmctl` talks directly to a private IPv4 target on port 80. It provides
+readback-verified memory writes and system notifications without opening the
+desktop UI. Its target, process and write-size checks match the RTM's intended
+Destiny process scope. Run `dist/rtmctl.exe help` for commands.
 
 The frontend detects this host through `/host-config`. Ordinary static hosting
 continues to use direct console HTTP, subject to browser cross-origin rules.

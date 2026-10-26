@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { createTransport } = require('../source/js/transport.js');
 
-test('process scope applies only to memory and call endpoints', async () => {
+test('process scope applies only to memory endpoints', async () => {
   const urls = [];
   const transport = createTransport({ fetch: async url => { urls.push(new URL(url)); return new Response('ok'); } });
   await transport.request('http://console/setmem.ps3mapi?addr=1234&val=00');

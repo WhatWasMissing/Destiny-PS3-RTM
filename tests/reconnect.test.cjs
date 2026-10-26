@@ -10,6 +10,7 @@ function harness() {
   let resolveProbe, finishCount = 0, interval;
   const nodes = new Proxy({}, { get: (target,key) => target[key] ||= { style: {}, classList: { remove() {} } } });
   const context = vm.createContext({
+    window: { rtmFramebufferBusy: false },
     ip: '192.168.0.62', connectionGeneration: 1, autoReconnectEnabled: true,
     _autoReconnectActive: false, _autoReconnectAttempts: 0, _autoReconnectTimer: null,
     AUTO_RECONNECT_MAX_ATTEMPTS: 3, AUTO_RECONNECT_INTERVAL: 100,
@@ -37,7 +38,7 @@ test('interval does not overlap a pending probe and current session can reconnec
 test('quick relink cannot reconnect after the session is replaced',async()=>{
   let resolveProbe,finished=0;
   const nodes=new Proxy({}, {get:(target,key)=>target[key]||={value:'192.168.0.62',style:{},classList:{remove(){}}}});
-  const context=vm.createContext({ip:'192.168.0.62',connectionGeneration:1,document:{getElementById:id=>nodes[id]},
+  const context=vm.createContext({window:{rtmFramebufferBusy:false},ip:'192.168.0.62',connectionGeneration:1,document:{getElementById:id=>nodes[id]},
     stopAutoReconnect(){},stopHealthCheck(){},consoleTransport:{cancelAll(){}},resetVerifiedStates(){},
     setBadge(){},toast(){},log(){},probePS3Reachable:()=>new Promise(resolve=>{resolveProbe=resolve;}),
     finishSafeAutoReconnect:async()=>{finished++;}});
@@ -49,7 +50,7 @@ test('quick relink cannot reconnect after the session is replaced',async()=>{
 test('restart wait does not start a reconnect loop after disconnect',async()=>{
   let finishWait,reconnects=0;
   const nodes=new Proxy({}, {get:(target,key)=>target[key]||={style:{},classList:{remove(){}}}});
-  const context=vm.createContext({ip:'192.168.0.62',connectionGeneration:1,document:{getElementById:id=>nodes[id]},
+  const context=vm.createContext({window:{rtmFramebufferBusy:false},ip:'192.168.0.62',connectionGeneration:1,document:{getElementById:id=>nodes[id]},
     RtmDialogs:{confirm:async()=>true},stopAutoReconnect(){},stopHealthCheck(){},consoleTransport:{cancelAll(){},request:async()=>{}},
     resetVerifiedStates(){},setBadge(){},log(){},sleep:()=>new Promise(resolve=>{finishWait=resolve;}),beginSafeAutoReconnect:()=>reconnects++});
   const start=source.indexOf('  async function ps3Restart(');
@@ -59,7 +60,7 @@ test('restart wait does not start a reconnect loop after disconnect',async()=>{
 });
 test('late disconnect cleanup cannot clear a newer connection',async()=>{
   let finishCleanup,cancellations=0;
-  const context=vm.createContext({ip:'old',connectionGeneration:1,resetVerifiedStates(){},stopAutoReconnect(){},stopHealthCheck(){},
+  const context=vm.createContext({window:{rtmFramebufferBusy:false},ip:'old',connectionGeneration:1,resetVerifiedStates(){},stopAutoReconnect(){},stopHealthCheck(){},
     consoleTransport:{cancelAll(){cancellations++;}},uninstallPlayerHook:()=>new Promise(resolve=>{finishCleanup=resolve;}),log(){},toast(){}});
   const start=source.indexOf('  async function disconnect(');
   vm.runInContext(source.slice(start,source.indexOf('\n  }',start)+4),context);

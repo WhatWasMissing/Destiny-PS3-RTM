@@ -296,9 +296,10 @@
 </div>
 <div id="toast"></div>
 <script src="js/connection.js"></script>
+<script src="js/memory-features.js"></script>
+<script src="js/emblem-options.js"></script>
 <script src="js/app-core.js"></script>
 <script src="js/accent-settings.js"></script>
-<script src="js/notification-console.js"></script>
 <div class="rtm-tabs-wrap">
   <div class="rtm-tabs" role="tablist" aria-label="RTM categories">
     <button class="rtm-tab active" id="rtm-tab-home" type="button" onclick="setRTMTab('home')">Home</button>
@@ -394,7 +395,7 @@
   </div>
 </details>
 <div class="main-conflict-note" style="margin:0.55rem 1rem 0;padding:0.55rem 0.7rem;border:1px solid rgba(201,168,76,0.28);border-radius:8px;background:rgba(201,168,76,0.05);color:var(--muted);font-family:var(--mono);font-size:0.57rem;line-height:1.45;">
-  <strong style="color:var(--gold);">Conflict Detection:</strong> Infinite Power and Unlimited Abilities share part of the same patch. Enabling either one automatically disables the other first.
+  <strong style="color:var(--gold);">Conflict Detection:</strong> Infinite Power and Unlimited Abilities share a patch; 4× Jump Boost shares a patch address with Unlimited Abilities; Rock Jump and No Pushback Barriers share the same 12 bytes. Enabling a conflicting option disables the active one first.
 </div>
 <div class="cheat-status-legend">
   <b>Status:</b> Off = default/inactive · Applying = change in progress · On = last successful enable · Failed = last action failed.
@@ -414,6 +415,11 @@
 <button class="cheat-btn gold" id="tog-ammo" onclick="togFire('00310F94','60000000','3F800000','Unlimited Ammo',this)">
   <span class="cheat-name">Unlimited Ammo</span>
   <span class="cheat-desc">Keeps your weapons supplied with ammo while enabled (Currently never turns off).</span>
+  <span class="addr"></span>
+</button>
+<button class="cheat-btn blue" id="tog-no-spread" onclick="togFire('30D230','3DCCCCCD','3F800000','No Spread',this)">
+  <span class="cheat-name">No Spread</span>
+  <span class="cheat-desc">Reduces weapon spread while enabled.</span>
   <span class="addr"></span>
 </button>
 <button class="cheat-btn green" id="tog-power" onclick="togFire('02C36FC','C3C30004','C3C30000','Infinite Power',this)">
@@ -446,6 +452,11 @@
   <span class="cheat-desc">Keeps abilities available without the normal recharge wait.</span>
   <span class="addr"></span>
 </button>
+<button class="cheat-btn gold" id="tog-jump-boost" onclick="togFire('CCB9E8','30630001','3063FFFF','4× Jump Boost',this)">
+  <span class="cheat-name">4× Jump Boost</span>
+  <span class="cheat-desc">Applies the source RTM's jump-boost patch. Shares one patch address with Unlimited Abilities.</span>
+  <span class="addr"></span>
+</button>
 <button class="cheat-btn red" id="tog-rapid-fire" onclick="togFire('307590','49F42400','3F800000','Faster Fire Rate',this)">
   <span class="cheat-name">Faster Fire Rate</span>
   <span class="cheat-desc">Makes supported weapons fire much faster.</span>
@@ -471,6 +482,11 @@
   <span class="cheat-desc">Stops affected characters from moving normally.</span>
   <span class="addr"></span>
 </button>
+<button class="cheat-btn blue" id="tog-bouncy-items" onclick="togFire('DB8BE8','2C030001','2C030000','Bouncy Items',this)">
+  <span class="cheat-name">Bouncy Items</span>
+  <span class="cheat-desc">Enables the source RTM's bouncy-item patch.</span>
+  <span class="addr"></span>
+</button>
 <button class="cheat-btn gold" id="tog-unl-sparrow" onclick="togFire('50A700','60000000','D023002C','Unlimited Sparrow Boost',this)">
   <span class="cheat-name">Unlimited Sparrow Boost</span>
   <span class="cheat-desc">Keeps your Sparrow boost available while enabled.</span>
@@ -489,6 +505,11 @@
 <button class="cheat-btn red" id="tog-no-pushbacks" onclick="togFireBytes('1389760','C0A000000000000000000000','3F8000003F8000003F800000','No Pushback Barriers',this)">
   <span class="cheat-name">No Pushback Barriers</span>
   <span class="cheat-desc">Prevents pushback barriers from pushing you backwards. Also removes the box pull</span>
+  <span class="addr"></span>
+</button>
+<button class="cheat-btn red" id="tog-rock-jump" onclick="togFireBytes('1389760','BF2147AE3F63D70A3F3851EC','3F8000003F8000003F800000','Rock Jump',this)">
+  <span class="cheat-name">Rock Jump</span>
+  <span class="cheat-desc">Applies the source RTM's Rock Jump values. Shares its 12-byte patch with No Pushback Barriers.</span>
   <span class="addr"></span>
 </button>
 <button class="cheat-btn gold" id="tog-warpriest" onclick="togFireMulti([['444CA4','C0434F80'],['1897420','3F800000']],[['444CA4','C0434DB0'],['1897420','3F800000']],'Warpriest Immunity',this)">
@@ -628,8 +649,25 @@
   </div>
 </div>
 
-
-
+<div class="panel">
+  <div class="panel-header">Character Emblem</div>
+  <div class="panel-muted-note" style="margin:0.75rem 1rem 0;">Select an emblem from the local 1.24 RTM list. Before writing, the tool scans the source address range and requires one matching live entry.</div>
+  <div class="custom-body">
+    <div class="field-wrap">
+      <span class="field-label">Current Emblem</span>
+      <input class="hex-input" id="emblem-current" type="text" readonly placeholder="Read to detect the current emblem">
+    </div>
+    <div class="field-wrap">
+      <span class="field-label">New Emblem</span>
+      <select class="hex-input" id="emblem-select" style="text-transform:none;"></select>
+    </div>
+    <div class="tuner-actions">
+      <button class="btn-apply" id="emblem-read-btn" type="button" onclick="readCharacterEmblem()" style="flex:1;margin-top:0;">Read Emblem</button>
+      <button class="btn-apply" id="emblem-set-btn" type="button" onclick="setCharacterEmblem()" style="flex:1;margin-top:0;">Set Emblem</button>
+      <button class="btn-apply danger" id="emblem-restore-btn" type="button" onclick="restoreCharacterEmblem()" style="flex:1;margin-top:0;" disabled>Restore</button>
+    </div>
+    <div class="ow-job-status" id="emblem-status" role="status" aria-live="polite">Read the connected Guardian's current emblem first.</div>
+  </div>
 </div></div>
 </div><div class="section" id="sec-gamespeed" style="padding-top:0">
 <p class="category-label" onclick="toggleSection('sec-gamespeed')">Gamespeed<svg class="collapse-chevron" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg></p>
@@ -969,7 +1007,150 @@
 <button class="btn-send" onclick="sendCustom()">▶ Send Offset</button>
 </div>
 </div></div><!-- /.section-body /.panel -->
-</div><div class="section" id="sec-useless" style="padding-top:0">
+</div>
+
+<div class="section" id="sec-ps3-notify" style="padding-top:0">
+<p class="category-label" onclick="toggleSection('sec-ps3-notify')">PS3 System Notification<svg class="collapse-chevron" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg></p>
+<div class="section-body"><div class="panel">
+  <div class="panel-header">XMB System Popup</div>
+  <div class="custom-body">
+    <div class="field-wrap">
+      <span class="field-label">Message</span>
+      <input class="hex-input" type="text" id="notif-msg" placeholder="Hello from RTM" maxlength="128" style="font-family:var(--sans);text-transform:none;">
+    </div>
+    <button class="btn-send" type="button" onclick="sendPS3Notification()">▶ Send Notification</button>
+  </div>
+</div></div>
+</div>
+
+<div class="section" id="sec-ammo-editor" style="padding-top:0">
+<p class="category-label" onclick="toggleSection('sec-ammo-editor')">Ammo Editor<svg class="collapse-chevron" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 21"></polyline></svg></p>
+<div class="section-body"><div class="panel">
+  <div class="panel-header">Ammo Editor</div>
+  <div class="panel-muted-note" style="margin:0.75rem 1rem 0;">Read-only scan of the local 1.24 RTM's 4 MiB search range. It lists matching candidates first; only the single address you choose is written, and the previous values can be restored for this session. The weapon label is for your reference; the scan does not identify weapon type.</div>
+  <div class="custom-body">
+    <div class="field-wrap">
+      <span class="field-label">Candidate label (manual)</span>
+      <select class="hex-input" id="ammo-family" style="text-transform:none;">
+        <option value="Primary">Primary</option>
+        <option value="Secondary">Secondary</option>
+        <option value="Heavy">Heavy</option>
+        <option value="Special">Special (float)</option>
+      </select>
+    </div>
+    <div class="scan-row" id="ammo-integer-fields">
+      <div class="scan-field"><label for="ammo-current-mag">Current magazine</label><input class="scan-input" id="ammo-current-mag" type="number" min="0" max="2147483647" step="1" value=""></div>
+      <div class="scan-field"><label for="ammo-current-reserve">Current reserve</label><input class="scan-input" id="ammo-current-reserve" type="number" min="0" max="2147483647" step="1" value=""></div>
+      <div class="scan-field"><label for="ammo-new-mag">New magazine</label><input class="scan-input" id="ammo-new-mag" type="number" min="0" max="2147483647" step="1" value=""></div>
+      <div class="scan-field"><label for="ammo-new-reserve">New reserve</label><input class="scan-input" id="ammo-new-reserve" type="number" min="0" max="2147483647" step="1" value=""></div>
+    </div>
+    <div class="scan-row" id="ammo-float-fields" style="display:none;">
+      <div class="scan-field"><label for="ammo-current-special">Current special ammo</label><input class="scan-input" id="ammo-current-special" type="number" step="any" value=""></div>
+      <div class="scan-field"><label for="ammo-new-special">New special ammo</label><input class="scan-input" id="ammo-new-special" type="number" step="any" value=""></div>
+    </div>
+    <div class="scan-btn-row">
+      <button class="btn-snap btn-snap-a" id="ammo-scan-btn" type="button" onclick="scanAmmoCandidates()">Scan Ammo Memory</button>
+      <button class="btn-snap btn-snap-b" id="ammo-apply-btn" type="button" onclick="applyAmmoCandidate()" disabled>Write Selected Slot</button>
+      <button class="btn-snap btn-snap-reset" id="ammo-restore-btn" type="button" onclick="restoreAmmoCandidate()" disabled>Restore Last Values</button>
+    </div>
+    <div class="scan-progress" id="ammo-progress"><span id="ammo-progress-text">Reading memory…</span><div class="scan-progress-bar"><div class="scan-progress-fill" id="ammo-progress-fill"></div></div></div>
+    <div class="scan-status"><div class="scan-stat" id="ammo-scan-status">Enter the current counts and scan to list candidates.</div></div>
+    <div class="scan-results" id="ammo-results"><div class="scan-empty">No ammo candidates scanned.</div></div>
+  </div>
+</div></div>
+</div>
+
+<div class="section" id="sec-screenshots" style="padding-top:0">
+<p class="category-label" onclick="toggleSection('sec-screenshots')">Screenshots<svg class="collapse-chevron" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 21"></polyline></svg></p>
+<div class="section-body"><div class="panel">
+  <div class="panel-header">Destiny Framebuffer Capture</div>
+  <div class="panel-muted-note" style="margin:0.75rem 1rem 0;">Captures a GPU-memory buffer defined by the local 1.24 RTM source. Buffer addresses are build-specific and have not been verified against a live console.</div>
+  <div class="custom-body">
+    <div class="field-wrap">
+      <span class="field-label">Capture size</span>
+      <select class="hex-input" id="screenshot-profile" style="text-transform:none;">
+        <option value="sd">256 × 191 · low resolution</option>
+        <option value="hd-a">1024 × 624 · buffer A</option>
+        <option value="hd-b">1024 × 624 · buffer B</option>
+        <option value="hd-1280">1280 × 720 · high resolution</option>
+        <option value="hd-512">512 × 312 · compact buffer</option>
+      </select>
+    </div>
+    <label class="field-wrap" style="display:flex;align-items:center;gap:10px;">
+      <input id="screenshot-pause" type="checkbox" style="width:auto;">
+      <span class="field-label" style="margin:0;">Pause capture and restore the current pause byte</span>
+    </label>
+    <button class="btn-send" id="screenshot-capture-btn" type="button" onclick="captureDestinyScreenshot()">Capture Framebuffer</button>
+    <div class="scan-progress" id="screenshot-progress"><span id="screenshot-progress-text">Reading framebuffer…</span><div class="scan-progress-bar"><div class="scan-progress-fill" id="screenshot-progress-fill"></div></div></div>
+    <button class="btn-apply danger" id="screenshot-resume-btn" type="button" onclick="restoreScreenshotPause()" disabled>Restore Pause Byte</button>
+    <div class="scan-status"><div class="scan-stat" id="screenshot-status">Ready</div></div>
+    <img id="screenshot-preview" alt="Captured Destiny framebuffer" style="display:none;max-width:100%;max-height:420px;object-fit:contain;border:1px solid var(--border);border-radius:8px;background:#080a0f;">
+    <a id="screenshot-download" style="display:none;margin-top:8px;" download="destiny-framebuffer.png">Download PNG</a>
+  </div>
+</div></div>
+</div>
+
+<div class="section" id="sec-scanner" style="padding-top:0">
+<p class="category-label" onclick="toggleSection('sec-scanner')">Memory Scanner<svg class="collapse-chevron" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg></p>
+<div class="section-body"><div class="panel">
+  <div class="panel-header">Snapshot Diff Scanner</div>
+  <div class="panel-muted-note" style="margin:0.75rem 1rem 0;">Read a bounded range from the Destiny process, compare two snapshots, then inspect or write back selected values.</div>
+
+  <div class="scan-row">
+    <div class="scan-field">
+      <label for="scan-base">Base Address</label>
+      <input class="scan-input" id="scan-base" value="00300000" maxlength="8" placeholder="00300000">
+    </div>
+    <div class="scan-field">
+      <label for="scan-len">Length (bytes)</label>
+      <input class="scan-input" id="scan-len" value="65536" placeholder="65536" type="number" min="256" max="524288" step="256">
+    </div>
+    <div class="scan-field">
+      <label for="scan-type">Value Type</label>
+      <select class="scan-input" id="scan-type">
+        <option value="u32">4-byte · UInt32</option>
+        <option value="u16">2-byte · UInt16</option>
+        <option value="u8">1-byte · Byte</option>
+        <option value="float">Float · 32-bit</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="scan-btn-row">
+    <button class="btn-snap btn-snap-a" id="btn-snap-a" type="button" onclick="scanSnapshot('A')">Snapshot A</button>
+    <button class="btn-snap btn-snap-b" id="btn-snap-b" type="button" onclick="scanSnapshot('B')">Snapshot B</button>
+    <button class="btn-snap btn-snap-diff" type="button" onclick="scanDiff()">Diff A→B</button>
+    <button class="btn-snap btn-snap-reset" type="button" onclick="scanReset()">Reset</button>
+  </div>
+
+  <div class="scan-progress" id="scan-progress">
+    <span id="scan-progress-text">Reading memory…</span>
+    <div class="scan-progress-bar"><div class="scan-progress-fill" id="scan-progress-fill"></div></div>
+  </div>
+
+  <div class="scan-status">
+    <div class="scan-stat" id="stat-a">Snapshot A: <span>—</span></div>
+    <div class="scan-stat" id="stat-b">Snapshot B: <span>—</span></div>
+    <div class="scan-stat hi" id="stat-diff">Diffs: <span>—</span></div>
+  </div>
+
+  <div class="scan-results-header">
+    <span class="scan-results-label">Results</span>
+    <input class="scan-filter" id="scan-filter" placeholder="filter addr…" oninput="scanFilterResults()">
+  </div>
+
+  <div class="scan-results" id="scan-results">
+    <div class="scan-empty">Take Snapshot A, change one in-game value, then take Snapshot B and compare.</div>
+  </div>
+
+  <div class="panel-header" style="margin-top:2px">Pinned Candidates</div>
+  <div class="scan-results" id="scan-pinned" style="max-height:160px">
+    <div class="scan-empty" id="scan-pinned-empty">No pinned addresses yet.</div>
+  </div>
+</div></div>
+</div>
+
+<div class="section" id="sec-useless" style="padding-top:0">
 <p class="category-label" onclick="toggleSection('sec-useless')">Visuals<svg class="collapse-chevron" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg></p>
 <div class="section-body">
 <!-- Screen FX -->
