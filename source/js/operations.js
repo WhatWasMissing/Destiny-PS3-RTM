@@ -1,6 +1,6 @@
 (function (root) {
   'use strict';
-  function createRunner({ session, write, read }) {
+  function createRunner({ session, write, read, beforeApply }) {
     let tail = Promise.resolve();
     function apply(pairs, options = {}) {
       const owner = session();
@@ -15,6 +15,9 @@
       const run = async () => {
         let completed = 0;
         try {
+          check();
+          if (typeof beforeApply === 'function') await beforeApply(owner, normalized);
+          check();
           for (const [address, value] of normalized) {
             check(); await write(address, value, options); check(); completed++;
           }

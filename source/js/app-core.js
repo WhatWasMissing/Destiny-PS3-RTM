@@ -2663,8 +2663,17 @@
     return disabled;
   }
 
+  const buildCompatibilityGuard = RtmBuildCompatibility.create({
+    session: () => ip && document.getElementById('status-badge').classList.contains('connected') ? `${connectionGeneration}:${ip}` : '',
+    read: (address, length) => ps3getmem(parseInt(address, 16), length)
+  });
+  function ensureDestinyWriteProfile() {
+    return buildCompatibilityGuard.ensure();
+  }
+  window.ensureDestinyWriteProfile = ensureDestinyWriteProfile;
   const patchRunner = RtmOperations.createRunner({
     session: () => ip && document.getElementById('status-badge').classList.contains('connected') ? `${connectionGeneration}:${ip}` : '',
+    beforeApply: (owner, pairs) => buildCompatibilityGuard.ensure(pairs),
     write: async (address, value, options) => {
       const target = ip;
       await consoleTransport.request(`http://${target}/setmem.ps3mapi?addr=${address.toString(16)}&val=${value}`,options.timeoutMs || 8000);
@@ -3255,6 +3264,105 @@
   window.setDamageMultiplierPreset = setDamageMultiplierPreset;
   window.applyCustomDamageMultiplier = applyCustomDamageMultiplier;
   window.resetCustomDamageMultiplier = resetCustomDamageMultiplier;
+
+  // The recovered RTM labels these Float32 presets as damage modes. Static
+  // PPC tracing only identifies a conditional ratio fallback, so preserve the
+  // source labels and make their unconfirmed gameplay meaning explicit.
+  const LEGACY_SCALAR_ADDR = 0x004449EC;
+  const LEGACY_SCALAR_CODE_ADDR = 0x00444B64;
+  const LEGACY_SCALAR_CODE_HEX = '3C600044C03601283CC03F803B4349EC3061034462C4000063850000C05A0000';
+  const LEGACY_SCALAR_PRESETS = Object.freeze({
+    normal: { hex: '3F800000', label: 'Normal · 1×' },
+    max_damage: { hex: '3FFFFFFF', label: 'Source label: Max Damage · ~2×' },
+    one_hit_kill_2: { hex: '42C80000', label: 'Source label: 1 Hit Kill 2 · 100×' },
+  });
+  let legacyScalarBusy = false;
+
+  function setLegacyScalarStatus(message, isError = false) {
+    const status = document.getElementById('legacy-scalar-status');
+    if (!status) return;
+    status.textContent = message;
+    status.style.color = isError ? 'var(--danger)' : 'var(--muted)';
+  }
+
+  async function hasLegacyScalarBuildSignature() {
+    const raw = await ps3getmem(LEGACY_SCALAR_CODE_ADDR, 32);
+    const actual = String(raw || '').replace(/[^0-9a-f]/gi, '').toUpperCase();
+    return actual === LEGACY_SCALAR_CODE_HEX;
+  }
+
+  async function readLegacyScalarPreset() {
+    if (!ip) {
+      setLegacyScalarStatus('Not connected · 004449EC', true);
+      return false;
+    }
+    try {
+      const supportedBuild = await hasLegacyScalarBuildSignature();
+      const raw = await ps3getmem(LEGACY_SCALAR_ADDR, 4);
+      const hex = String(raw || '').replace(/[^0-9a-f]/gi, '').toUpperCase();
+      if (!/^[0-9A-F]{8}$/.test(hex)) throw new Error('Read returned an invalid 4-byte value');
+      if (!supportedBuild) {
+        setLegacyScalarStatus(`Build signature mismatch · raw 004449EC=${hex}`, true);
+        return false;
+      }
+      const entry = Object.values(LEGACY_SCALAR_PRESETS).find((preset) => preset.hex === hex);
+      setLegacyScalarStatus(`${entry ? entry.label : 'Unknown value'} · 004449EC=${hex}`, !entry);
+      return Boolean(entry);
+    } catch (error) {
+      setLegacyScalarStatus(`Read failed · ${error.message}`, true);
+      return false;
+    }
+  }
+
+  async function applyLegacyScalarPreset() {
+    if (typeof hasReadServerSafetyGuide === 'function' && !hasReadServerSafetyGuide()) {
+      serverSafetyRequired = true;
+      setServerCheatsLocked(true);
+      openServerSafetyGuide();
+      toast('Read the Server Cheats safety guide first', 'err');
+      return false;
+    }
+    if (!ip) {
+      setLegacyScalarStatus('Not connected · 004449EC', true);
+      toast('Not connected', 'err');
+      return false;
+    }
+    if (legacyScalarBusy) return false;
+
+    const select = document.getElementById('legacy-scalar-preset');
+    const preset = LEGACY_SCALAR_PRESETS[select?.value];
+    if (!preset) return false;
+    const target = ip;
+    const generation = connectionGeneration;
+    legacyScalarBusy = true;
+    try {
+      if (!await hasLegacyScalarBuildSignature()) throw new Error('01.24 scalar-consumer signature mismatch; write refused');
+      if (generation !== connectionGeneration || target !== ip) throw new Error('Connection changed; retry the operation');
+      const before = String(await ps3getmem(LEGACY_SCALAR_ADDR, 4) || '').replace(/[^0-9a-f]/gi, '').toUpperCase();
+      if (generation !== connectionGeneration || target !== ip) throw new Error('Connection changed; retry the operation');
+      if (!/^[0-9A-F]{8}$/.test(before) || !Object.values(LEGACY_SCALAR_PRESETS).some((candidate) => candidate.hex === before)) {
+        throw new Error(`Unknown current value ${before || '(unreadable)'}; write refused`);
+      }
+      await verifiedMemoryValue('004449EC', preset.hex);
+      if (generation !== connectionGeneration || target !== ip) throw new Error('Connection changed during write');
+      const readback = String(await ps3getmem(LEGACY_SCALAR_ADDR, 4) || '').replace(/[^0-9a-f]/gi, '').toUpperCase();
+      if (readback !== preset.hex) throw new Error(`Readback mismatch: ${readback || '(unreadable)'}`);
+      setLegacyScalarStatus(`Applied ${preset.label} · 004449EC=${readback}`);
+      log(`Recovered scalar preset → 004449EC=${readback} (${preset.label}; gameplay effect unknown)`, 'ok');
+      toast(`${preset.label} bytes verified`, 'ok');
+      return true;
+    } catch (error) {
+      setLegacyScalarStatus(`Not applied · ${error.message}`, true);
+      log(`Recovered scalar preset refused/failed: ${error.message}`, 'err');
+      toast('Scalar preset was not applied', 'err');
+      return false;
+    } finally {
+      legacyScalarBusy = false;
+    }
+  }
+
+  window.readLegacyScalarPreset = readLegacyScalarPreset;
+  window.applyLegacyScalarPreset = applyLegacyScalarPreset;
 
   let server4xDamageState = false;
   let server4xDamageBusy = false;

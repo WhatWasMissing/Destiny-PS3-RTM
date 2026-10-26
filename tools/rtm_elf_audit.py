@@ -30,11 +30,14 @@ KNOWN_SITES = (
     ("Flip View - OFF", 0x00614C40, "3F000000"),
     ("Power Boost - OFF", 0x0005E614, "3F800000"),
     ("One-Hit - OFF halfword", 0x0043E626, "3F80"),
+    ("Ultimate RTM - source-labeled scalar preset default", 0x004449EC, "3F800000"),
+    ("Ultimate RTM - 01.24 damage scalar consumer signature", 0x00444B64, "3C600044C03601283CC03F803B4349EC3061034462C4000063850000C05A0000"),
     ("Warpriest HTML - source OFF instruction", 0x00444CA4, "C0434DB0"),
     ("Warpriest HTML - source OFF data", 0x01897420, "3F800000"),
     ("Warpriest Overwalls CSharp - source OFF instruction", 0x00444CA4, "C04100F0"),
     ("Warpriest Overwalls CSharp - secondary BSS initial value", 0x01891AE0, "00000000"),
     ("Deathsinger - reset fallback signature", 0x001C7B58, "38C6FFFF"),
+    ("Deathsinger - uncontextualized alternate ON word", 0x006AEFEC, "38C00FFF"),
     ("Overwalls plate hook - source branch-site pair", 0x00A015AC, "3063FFF44BFFFB15"),
     ("Overwalls plate hook - code-cave initial word", 0x010FB514, "00000000"),
     ("Overwalls plate hook - state-flag initial BSS", 0x0190EC98, "00000000"),
@@ -204,8 +207,17 @@ def main(argv: list[str] | None = None) -> int:
         metavar="HEX",
         help="find aligned occurrences in executable PT_LOAD segments (repeatable)",
     )
+    parser.add_argument(
+        "--max-signature-hits",
+        type=int,
+        default=32,
+        metavar="N",
+        help="maximum addresses printed per signature (0 prints all; default: 32)",
+    )
     parser.add_argument("--json", action="store_true", help="write machine-readable JSON")
     args = parser.parse_args(argv)
+    if args.max_signature_hits < 0:
+        parser.error("--max-signature-hits must be 0 or greater")
     try:
         signatures = [parse_hex(value) for value in args.search_signature]
         result = audit(args.elf, signatures)
@@ -227,8 +239,13 @@ def main(argv: list[str] | None = None) -> int:
         observed = site["observed"] or f"unmapped: {site['mapping_error']}"
         print(f"  {site['address']} {site['name']}: expected {site['expected']}, observed {observed}, match={site['matches']}")
     for signature in result["signatures"]:
-        addresses = ", ".join(signature["aligned_executable_addresses"]) or "none"
-        print(f"Signature {signature['hex']}: {addresses}")
+        hits = signature["aligned_executable_addresses"]
+        limit = args.max_signature_hits
+        shown = hits if limit == 0 else hits[:limit]
+        addresses = ", ".join(shown) or "none"
+        omitted = len(hits) - len(shown)
+        suffix = f" (+{omitted} omitted; use --max-signature-hits 0 to list all)" if omitted else ""
+        print(f"Signature {signature['hex']}: {len(hits)} aligned matches: {addresses}{suffix}")
     if not result["is_expected_bles01857_0124"]:
         print("Address results are only comparisons; they are not compatibility evidence for this unidentified build.")
     return 0

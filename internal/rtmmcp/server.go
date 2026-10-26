@@ -86,6 +86,15 @@ var toolList = []tool{
 		Annotations: map[string]any{"readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true},
 	},
 	{
+		Name:        "rtm_verify_build",
+		Title:       "Check Destiny build profile",
+		Description: "Read three code signatures and compare them with the audited BLES01857 01.24 profile. This is a read-only compatibility check, not a full EBOOT hash or region identification; a mismatch blocks memory writes but does not block reads.",
+		InputSchema: objectSchema(map[string]any{
+			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
+		}, "target_ipv4"),
+		Annotations: map[string]any{"readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true},
+	},
+	{
 		Name:        "rtm_read_memory",
 		Title:       "Read Destiny memory",
 		Description: "Read 1–65536 bytes from the Destiny process (PID 0x1010200) on a private IPv4 PS3. Address is hexadecimal.",
@@ -126,7 +135,7 @@ var toolList = []tool{
 	{
 		Name:        "rtm_set_player_scale",
 		Title:       "Set Destiny player scale",
-		Description: "Set the current local player scale to a finite source-range multiplier from 0.3 through 20 (the source UI offers 0.3, 1, 2 and 20; use 1 to reset). Requires matching 1.24 PPC code signatures and a stable player-name/object-handle chain. The tool rechecks the destination before a verified four-byte Float32 write; it emulates the source resolver rather than executing a game function. Game visual effect and server persistence are not confirmed.",
+		Description: "Set the current local player scale to a finite source-range multiplier from 0.3 through 20 (the source UI offers 0.3, 1, 2 and 20; use 1 to reset). Requires the three-site BLES01857 01.24 runtime signature profile plus a stable player-name/object-handle chain. The tool rechecks the destination before a verified four-byte Float32 write; it emulates the source resolver rather than executing a game function. Game visual effect and server persistence are not confirmed.",
 		InputSchema: objectSchema(map[string]any{
 			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
 			"scale":       map[string]any{"type": "number", "minimum": 0.3, "maximum": 20, "description": "Float32 player scale multiplier; source buttons include 0.3, 1, 2 and 20; 1 resets the source value."},
@@ -136,7 +145,7 @@ var toolList = []tool{
 	{
 		Name:        "rtm_write_memory",
 		Title:       "Write Destiny memory",
-		Description: "Write 1–8 bytes to the Destiny process and report success only after exact fresh readback. The address is hexadecimal; only use known values for the matching game build. This does not call game functions.",
+		Description: "Require the three-site BLES01857 01.24 runtime signature profile, then write 1–8 bytes to the Destiny process and report success only after exact fresh readback. The address is hexadecimal; this does not call game functions.",
 		InputSchema: objectSchema(map[string]any{
 			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
 			"address":     map[string]any{"type": "string", "description": "32-bit hexadecimal memory address, optionally prefixed with 0x."},
@@ -147,11 +156,21 @@ var toolList = []tool{
 	{
 		Name:        "rtm_set_brightness",
 		Title:       "Set a source-backed brightness preset",
-		Description: "Write Bright (50), Normal (1), or Inverted (-20) from the local 1.24 C# source to 0x006101C0 and verify the bytes. Readback confirms bytes only; the in-game visual effect has not been observed.",
+		Description: "Require the three-site BLES01857 01.24 runtime signature profile, then write Bright (50), Normal (1), or Inverted (-20) from the local 1.24 C# source to 0x006101C0 and verify the bytes. Readback confirms bytes only; the in-game visual effect has not been observed.",
 		InputSchema: objectSchema(map[string]any{
 			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
 			"preset":      map[string]any{"type": "string", "enum": []string{"bright", "normal", "inverted"}},
 		}, "target_ipv4", "preset"),
+		Annotations: map[string]any{"readOnlyHint": false, "destructiveHint": true, "idempotentHint": true, "openWorldHint": true},
+	},
+	{
+		Name:        "rtm_set_legacy_scalar_preset",
+		Title:       "Set an experimental RTM scalar preset",
+		Description: "Select Normal (Float32 1), or a recovered RTM-labeled Max Damage (0x3FFFFFFF, about 2) / 1 Hit Kill 2 (Float32 100) preset at 0x004449EC. These gameplay labels are unverified: 01.24 code uses the word as a fallback coefficient in an unidentified ratio calculation. Requires the three-site 01.24 signature profile, the exact consumer-code signature at 0x00444B64, and a known current preset before writing; verifies exact readback.",
+		InputSchema: objectSchema(map[string]any{
+			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
+			"mode":        map[string]any{"type": "string", "enum": []string{"normal", "max_damage", "one_hit_kill_2"}},
+		}, "target_ipv4", "mode"),
 		Annotations: map[string]any{"readOnlyHint": false, "destructiveHint": true, "idempotentHint": true, "openWorldHint": true},
 	},
 	{
@@ -180,7 +199,7 @@ var toolList = []tool{
 	},
 }
 
-const instructions = "Use only the user's private PS3 IPv4 address. Memory reads and writes target Destiny process 0x1010200 through webMAN MOD on port 80. Reads are capped at 64 KiB; writes are capped at 8 bytes and require exact readback. rtm_status checks webMAN reachability, not whether Destiny is running. Player-position and entity-pointer tools follow the local Overwalls pointer map using read-only requests; coordinates, pointer semantics, and build compatibility remain unconfirmed. Player-scale tools require the verified 1.24 resolver/helper byte signatures and emulate the source lookup without calling game functions; writes recheck the pointer chain and verify the Float32 bytes, but visual effect and server persistence remain unconfirmed. Brightness effects are unverified. Notifications report dispatch, not display. Game-launch steps report HTTP acknowledgement and do not confirm that Destiny started. No generic function-call endpoint is exposed."
+const instructions = "Use only the user's private PS3 IPv4 address. Memory reads and writes target Destiny process 0x1010200 through webMAN MOD on port 80. Reads are capped at 64 KiB; writes are capped at 8 bytes and require exact readback. rtm_status checks webMAN reachability, not whether Destiny is running. Player-position and entity-pointer tools follow the local Overwalls pointer map using read-only requests; coordinates, pointer semantics, and build compatibility remain unconfirmed. Player-scale tools require the verified 1.24 resolver/helper byte signatures and emulate the source lookup without calling game functions; writes recheck the pointer chain and verify the Float32 bytes, but visual effect and server persistence remain unconfirmed. Brightness and experimental scalar-preset effects are unverified. The scalar setter requires the exact 01.24 consumer signature at 0x00444B64 and transitions only between the three known values at 0x004449EC. Notifications report dispatch, not display. Game-launch steps report HTTP acknowledgement and do not confirm that Destiny started. No generic function-call endpoint is exposed."
 
 func objectSchema(properties map[string]any, required ...string) map[string]any {
 	return map[string]any{"type": "object", "properties": properties, "required": required, "additionalProperties": false}
@@ -349,6 +368,25 @@ func (s *Server) callTool(ctx context.Context, raw json.RawMessage) map[string]a
 			return errorResult(err)
 		}
 		return successResult(map[string]any{"ok": true, "target_ipv4": args.Target, "webman_reachable": true, "http_status": status, "destiny_process_confirmed": false})
+	case "rtm_verify_build":
+		var args targetArgs
+		if err := decodeStrict(call.Arguments, &args); err != nil {
+			return errorResult(err)
+		}
+		if err := validateTarget(args.Target); err != nil {
+			return errorResult(err)
+		}
+		profile := rtmclient.InspectDestiny0124SignatureProfile(ctx, args.Target, s.client.ReadMemory)
+		return successResult(map[string]any{
+			"ok":                        true,
+			"read_only":                 true,
+			"target_ipv4":               args.Target,
+			"profile":                   profile.Profile,
+			"profile_match":             profile.Matches,
+			"full_eboot_hash_confirmed": false,
+			"title_region_confirmed":    false,
+			"signatures":                profile.Signatures,
+		})
 	case "rtm_read_memory":
 		var args struct {
 			Target  string `json:"target_ipv4"`
@@ -467,6 +505,9 @@ func (s *Server) callTool(ctx context.Context, raw json.RawMessage) map[string]a
 		}
 		s.memoryWriteMu.Lock()
 		defer s.memoryWriteMu.Unlock()
+		if err := s.verifyBuildCompatibility(ctx, args.Target); err != nil {
+			return errorResult(err)
+		}
 		result, err := s.client.SetPlayerScale(ctx, args.Target, args.Scale)
 		if err != nil {
 			return errorResult(err)
@@ -536,6 +577,68 @@ func (s *Server) callTool(ctx context.Context, raw json.RawMessage) map[string]a
 			return errorResult(err)
 		}
 		return successResult(map[string]any{"ok": true, "verified": true, "address": "0x006101C0", "preset": args.Preset, "hex": hexValue, "effect_confirmed": false})
+	case "rtm_set_legacy_scalar_preset":
+		var args struct {
+			Target string `json:"target_ipv4"`
+			Mode   string `json:"mode"`
+		}
+		if err := decodeStrict(call.Arguments, &args); err != nil {
+			return errorResult(err)
+		}
+		if err := validateTarget(args.Target); err != nil {
+			return errorResult(err)
+		}
+		presets := map[string]string{
+			"normal":         "3F800000",
+			"max_damage":     "3FFFFFFF",
+			"one_hit_kill_2": "42C80000",
+		}
+		hexValue, ok := presets[args.Mode]
+		if !ok {
+			return errorResult(errors.New("mode must be normal, max_damage, or one_hit_kill_2"))
+		}
+		s.memoryWriteMu.Lock()
+		defer s.memoryWriteMu.Unlock()
+		if err := s.verifyBuildCompatibility(ctx, args.Target); err != nil {
+			return errorResult(err)
+		}
+		code, err := s.client.ReadMemory(ctx, args.Target, "00444B64", 32)
+		if err != nil {
+			return errorResult(fmt.Errorf("read 01.24 damage-code signature: %w", err))
+		}
+		const expectedCode = "3C600044C03601283CC03F803B4349EC3061034462C4000063850000C05A0000"
+		if strings.ToUpper(hex.EncodeToString(code)) != expectedCode {
+			return errorResult(errors.New("01.24 damage-code signature mismatch at 0x00444B64; write refused"))
+		}
+		before, err := s.client.ReadMemory(ctx, args.Target, "004449EC", 4)
+		if err != nil {
+			return errorResult(fmt.Errorf("read current damage mode: %w", err))
+		}
+		beforeHex := strings.ToUpper(hex.EncodeToString(before))
+		known := map[string]bool{"3F800000": true, "3FFFFFFF": true, "42C80000": true}
+		if !known[beforeHex] {
+			return errorResult(fmt.Errorf("current value %q at 0x004449EC is not a known source preset; write refused", beforeHex))
+		}
+		data, _ := hex.DecodeString(hexValue)
+		if err := ctx.Err(); err != nil {
+			return errorResult(err)
+		}
+		if err := s.client.WriteMemory(ctx, args.Target, "004449EC", data); err != nil {
+			return errorResult(err)
+		}
+		readback, err := s.client.ReadMemory(ctx, args.Target, "004449EC", 4)
+		if err != nil {
+			return errorResult(fmt.Errorf("write was sent but final readback failed: %w", err))
+		}
+		readbackHex := strings.ToUpper(hex.EncodeToString(readback))
+		if readbackHex != hexValue {
+			return errorResult(fmt.Errorf("write was not verified: sent %s, read back %s", hexValue, readbackHex))
+		}
+		return successResult(map[string]any{
+			"ok": true, "verified": true, "address": "0x004449EC", "mode": args.Mode,
+			"previous_hex": beforeHex, "hex": hexValue, "build_signature_verified": true,
+			"gameplay_effect_confirmed": false,
+		})
 	case "rtm_notify":
 		var args struct {
 			Target  string `json:"target_ipv4"`
@@ -622,7 +725,26 @@ func (s *Server) writeMemory(ctx context.Context, target, address string, data [
 	if err := ctx.Err(); err != nil {
 		return err
 	}
+	parsedAddress, err := parseAddress(address)
+	if err != nil {
+		return err
+	}
+	if err := rtmclient.ValidateDestinyWriteRange(parsedAddress, len(data)); err != nil {
+		return err
+	}
+	if err := s.verifyBuildCompatibility(ctx, target); err != nil {
+		return err
+	}
 	return s.client.WriteMemory(ctx, target, address, data)
+}
+
+func (s *Server) verifyBuildCompatibility(ctx context.Context, target string) error {
+	if verifier, ok := s.client.(interface {
+		VerifyDestiny0124Profile(context.Context, string) error
+	}); ok {
+		return verifier.VerifyDestiny0124Profile(ctx, target)
+	}
+	return rtmclient.VerifyDestiny0124SignatureProfile(ctx, target, s.client.ReadMemory)
 }
 
 type targetArgs struct {

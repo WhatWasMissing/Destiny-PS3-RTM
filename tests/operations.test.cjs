@@ -18,6 +18,13 @@ test('unreadable response is explicitly unverified', async () => {
   const runner = createRunner({ session: () => 'console1', write: async () => {}, read: async () => { throw new Error('not readable'); } });
   assert.equal((await runner.apply([['1234','AA']])).status, 'unverified');
 });
+test('preflight runs before the first write and blocks an incompatible build', async () => {
+  let writes = 0, checks = 0;
+  const runner = createRunner({session:()=> 'console1',beforeApply:async()=>{checks++;throw new Error('unsupported Destiny build');},write:async()=>writes++,read:async()=>''});
+  await assert.rejects(runner.apply([['1234','AABB']]),/unsupported Destiny build/);
+  assert.equal(checks,1);
+  assert.equal(writes,0);
+});
 test('session change prevents remaining writes and queued actions', async () => {
   let owner = 'console1', writes = 0;
   const runner = createRunner({ session: () => owner, write: async () => { writes++; owner = 'console2'; }, read: async () => 'AA' });

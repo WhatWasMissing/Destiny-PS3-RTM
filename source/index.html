@@ -298,6 +298,7 @@
 <script src="js/connection.js"></script>
 <script src="js/memory-features.js"></script>
 <script src="js/emblem-options.js"></script>
+<script src="js/build-compatibility.js"></script>
 <script src="js/app-core.js"></script>
 <script src="js/player-scale-tools.js"></script>
 <script src="js/launch-tools.js"></script>
@@ -800,6 +801,23 @@
 
   <div id="damage-current-status" style="margin-top:0.7rem;text-align:center;font-family:var(--mono);font-size:0.62rem;color:var(--muted);">
     Current selection: 1× (3F80)
+  </div>
+
+  <div style="margin-top:0.9rem;padding:0.8rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;">
+    <div class="field-label" style="margin-bottom:0.5rem;">Experimental Scalar Preset · 01.24</div>
+    <div class="tidy-technical" style="margin:0 0 0.65rem;color:var(--muted);font-family:var(--mono);font-size:0.59rem;line-height:1.5;">
+      The recovered Ultimate RTM labels these values <strong style="color:var(--text);">Max Damage</strong> (~2×) and <strong style="color:var(--text);">1 Hit Kill 2</strong> (100×), but 01.24 only confirms a fallback coefficient in an unidentified calculation. No damage or kill effect is verified. Applying a preset writes one Float32 after matching-build and current-value checks.
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <select id="legacy-scalar-preset" style="flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px;border-radius:6px;">
+        <option value="normal">Normal · 1×</option>
+        <option value="max_damage">Source label: Max Damage · ~2×</option>
+        <option value="one_hit_kill_2">Source label: 1 Hit Kill 2 · 100×</option>
+      </select>
+      <button class="btn-apply" type="button" onclick="applyLegacyScalarPreset()" style="margin:0;">Apply</button>
+      <button class="btn-apply" type="button" onclick="readLegacyScalarPreset()" style="margin:0;">Read</button>
+    </div>
+    <div id="legacy-scalar-status" role="status" style="margin-top:0.6rem;text-align:center;font-family:var(--mono);font-size:0.59rem;color:var(--muted);">Not read · 004449EC</div>
   </div>
 </div>
 </div></div>

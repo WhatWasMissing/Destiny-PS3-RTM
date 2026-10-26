@@ -809,6 +809,8 @@
       requireConnected();
       if ((await flyhackReady(context)).ready) { flyStatus('SPRX is already loaded and verified', 'ok'); return; }
       if (!root.RtmHost || typeof root.RtmHost.loadModule !== 'function') throw new Error('Module loading is unavailable in this hosting environment');
+      if (typeof root.ensureDestinyWriteProfile !== 'function') throw new Error('Destiny build verification is unavailable; module load refused');
+      await root.ensureDestinyWriteProfile();
       const pid = parseInt(String(GAME_PID).replace(/^0x/i, ''), 16);
       checkContext(context);
       const response = await root.RtmHost.loadModule(ip, String(pid), SPRX_PATH);

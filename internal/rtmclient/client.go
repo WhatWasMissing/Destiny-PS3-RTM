@@ -15,6 +15,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -75,6 +76,9 @@ type Client struct {
 	HTTP      *http.Client
 	ProcessID string
 	sleep     func(context.Context, time.Duration) error
+
+	buildProfileMu    sync.Mutex
+	buildProfileCache map[string]time.Time
 
 	// endpointOverride is only set by package tests so they can use loopback servers.
 	endpointOverride string
@@ -295,6 +299,45 @@ func (c *Client) ReadMemory(ctx context.Context, ip, address string, length int)
 	return data, nil
 }
 
+// VerifyDestiny0124Profile checks the fixed-address code fingerprint for the
+// 01.24 update before a write. A successful check is cached briefly per console
+// so multi-write RTM actions do not repeat the same three reads for each byte.
+func (c *Client) VerifyDestiny0124Profile(ctx context.Context, ip string) error {
+	if c == nil {
+		return errors.New("console client is unavailable; write refused")
+	}
+	process := c.ProcessID
+	if process == "" {
+		process = DefaultProcessID
+	}
+	if !strings.EqualFold(process, DefaultProcessID) {
+		return errors.New("build verification and memory writes must target the Destiny process")
+	}
+	cacheKey := ip + "|" + process
+	c.buildProfileMu.Lock()
+	defer c.buildProfileMu.Unlock()
+	if until := c.buildProfileCache[cacheKey]; time.Now().Before(until) {
+		return nil
+	}
+	if err := VerifyDestiny0124SignatureProfile(ctx, ip, c.ReadMemory); err != nil {
+		return err
+	}
+	if c.buildProfileCache == nil {
+		c.buildProfileCache = make(map[string]time.Time)
+	}
+	c.buildProfileCache[cacheKey] = time.Now().Add(destiny0124ProfileCacheTTL)
+	return nil
+}
+
+// InspectDestiny0124Profile returns fresh per-signature reads without applying
+// the write gate or caching the result.
+func (c *Client) InspectDestiny0124Profile(ctx context.Context, ip string) BuildProfileStatus {
+	if c == nil {
+		return InspectDestiny0124SignatureProfile(ctx, ip, nil)
+	}
+	return InspectDestiny0124SignatureProfile(ctx, ip, c.ReadMemory)
+}
+
 // ReadPlayerPosition follows the dynamic player pointer and coordinate offsets
 // recorded in the local Overwalls source. It is read-only and validates the
 // pointer and decoded values before returning them.
@@ -489,6 +532,12 @@ func (c *Client) WriteMemory(ctx context.Context, ip, address string, data []byt
 	}
 	if uint64(addr)+uint64(len(data))-1 > 0xFFFFFFFF {
 		return errors.New("address range exceeds 32-bit memory")
+	}
+	if err := ValidateDestinyWriteRange(addr, len(data)); err != nil {
+		return err
+	}
+	if err := c.VerifyDestiny0124Profile(ctx, ip); err != nil {
+		return err
 	}
 	process := c.ProcessID
 	if process == "" {

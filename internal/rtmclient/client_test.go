@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -259,7 +260,16 @@ func TestWriteMemoryRequiresMatchingReadback(t *testing.T) {
 			}
 			fmt.Fprint(w, "OK")
 		case "/getmem.ps3mapi":
-			fmt.Fprintf(w, `<textarea id="output">%s</textarea>`, strings.ToUpper(hex.EncodeToString(value)))
+			reads := map[string]string{
+				"00444B64": "3C600044C03601283CC03F803B4349EC3061034462C4000063850000C05A0000",
+				"001FB3C8": "8084001C908300004E800020",
+				"002FF2D0": "7C0802A648A99751F821FF81F8010090",
+			}
+			result, ok := reads[r.URL.Query().Get("addr")]
+			if !ok {
+				result = strings.ToUpper(hex.EncodeToString(value))
+			}
+			fmt.Fprintf(w, `<textarea id="output">%s</textarea>`, result)
 		default:
 			t.Fatalf("unexpected path %s", r.URL.Path)
 		}
@@ -273,6 +283,35 @@ func TestWriteMemoryRequiresMatchingReadback(t *testing.T) {
 	value[3] = 0x01
 	if err := client.WriteMemory(context.Background(), "192.168.0.62", "0030D230", []byte{0x3F, 0x80, 0, 0}); err == nil || !strings.Contains(err.Error(), "not verified") {
 		t.Fatalf("expected a readback mismatch, got %v", err)
+	}
+}
+
+func TestWriteMemoryRefusesUnknownBuildBeforeSendingWrite(t *testing.T) {
+	writes := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/setmem.ps3mapi" {
+			writes++
+			return
+		}
+		length, _ := strconv.Atoi(r.URL.Query().Get("len"))
+		fmt.Fprintf(w, `<textarea id="output">%s</textarea>`, strings.Repeat("00", length))
+	}))
+	defer server.Close()
+	client := testClient(server)
+	err := client.WriteMemory(context.Background(), "192.168.0.62", "0030D230", []byte{0x3F, 0x80, 0, 0})
+	if err == nil || !strings.Contains(err.Error(), "signature mismatch") {
+		t.Fatalf("expected build mismatch, got %v", err)
+	}
+	if writes != 0 {
+		t.Fatalf("unsupported build received %d writes", writes)
+	}
+}
+
+func TestWriteMemoryCannotOverwriteBuildSignatures(t *testing.T) {
+	client := New()
+	err := client.WriteMemory(context.Background(), "192.168.0.62", "002FF2CF", []byte{0, 0, 0})
+	if err == nil || !strings.Contains(err.Error(), "overlaps protected 01.24 code signature") {
+		t.Fatalf("expected protected signature range refusal, got %v", err)
 	}
 }
 

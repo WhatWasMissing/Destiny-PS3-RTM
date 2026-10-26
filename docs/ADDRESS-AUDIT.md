@@ -20,6 +20,18 @@ Its hash and size match the published decrypted BLES01857 **01.24** EBOOT.
 The paired SELF is under `ebootbinelfBAK\EBOOT.BIN`; the decrypted ELF hash
 is the identity used for the comparisons below.
 
+The same 01.24 hash was also found at `C:\Users\novel\Downloads\EBOOT.ELF`
+and in three E: backups. No confirmed BLUS31181 01.24 ELF was located; the
+available BLUS update packages found locally stop at 01.23.
+
+The other decrypted copy at `D:\Soul rtm\EBOOT.ELF` has SHA-256
+`e14e1cedaf85a10ef08a3d4b86d86ff942f222cd27fde9a68d612947169846c6`, which
+identifies it as BLES01857 **01.00**, not 01.24. Its adjacent game metadata is
+also version 01.00. The installed US BLUS31181 and European BLES01857 game
+folders inspected on this PC likewise report 01.00. The verified 01.24 ELF
+exists separately in the RTM research backups; the folder evidence does not
+establish which version is currently running on a console.
+
 This ELF has no static or dynamic symbol-table sections, and its section-name
 table is zero-filled. A decompiler can still lift PowerPC instructions into
 approximate pseudocode, but function names and boundaries must be reconstructed
@@ -52,10 +64,11 @@ write causes the named in-game effect.
 | Flip View | 1.24 C# and web RTM sources use ON `40A0A000`, OFF `3F000000` at `0x00614C40` | `0x00614C40`: `3F000000` | Confirms the shared source address and OFF value in the update ELF. A live effect check is still separate. |
 | Power Boost / Variable Buff | C# uses `0x0005E614`, ON `403F0000`, OFF `3F800000`; Overwalls and the app use ON `403F0004` at that address | `0x0005E614`: `3F800000` (Float32 `1.0`) | Supports the shared candidate address and OFF/default value. The two ON values differ slightly and the ELF default does not resolve which source value or gameplay label is intended. |
 | One-Hit Enemies | Main RTM and 1.24 C# use ON halfword `447A`; Overwalls uses `547A`, both at `0x0043E626`; both use OFF `3F80` | `0x0043E626`: `3F80` (low halfword of `3C603F80` at `0x0043E624`) | Confirms the source patch site and OFF value in 01.24. The competing ON variants are both source-derived; the pristine ELF cannot determine which variant has the intended gameplay effect. |
+| Ultimate RTM source-labeled scalar presets | Recovered handlers write `3FFFFFFF` (“Max Damage”) or `42C80000` (“1 Hit Kill 2”) to `0x004449EC`; both restore `3F800000` | `0x004449EC`: `3F800000`; exact consumer signature at `0x00444B64` | The word is part of a literal pool in the executable segment. A branch at `0x004449E8` jumps over the pool; `0x00444B80` reads the first word as Float32. The consumer uses it as a coefficient only when a ratio denominator is below about `0.0001`, then multiplies output-buffer `+0x11C`. The output structure and gameplay meaning are unidentified, so the source labels do not prove a damage effect. Writes remain source-labeled and require the exact signature, a known current value, and readback. |
 | Unlimited Ammo | 1.24 C# writes ON bytes `3880270F`, `38A0270F`, and `60000000FC1EF8003FC0461C63DE3C0093DF0110` at `0x003108EC`, `0x00310554`, and `0x00CF95AC` | OFF bytes in 01.24 ELF are `63C40000`, `63C50000`, and `63DD0000408200083BA00001807F001CD3DF0110`, matching the C# source. The former app address `0x00310F94` contains `7C9E20107C8407B44BFFF7C92C030000…`, not the declared OFF value `3F800000`. | Supports the C# three-site OFF mapping. The incorrect single-site app target was replaced; exact readback is required for all three sites on enable and reset. This does not prove the gameplay effect. |
 | Warpriest Immunity - web RTM variant | Local web RTM writes ON `C0434F80` and OFF `C0434DB0` at `0x00444CA4`, plus `3F800000` at `0x01897420` | 01.24 ELF contains `C04100F0` at `0x00444CA4` and `37343036` at `0x01897420` | Both claimed OFF values mismatch the verified executable. The main web RTM control and reset entry are blocked for this build; no replacement values are inferred. |
 | Warpriest Immunity - Overwalls C# variant | C# writes ON `C0420348` and OFF `C04100F0` at `0x00444CA4`, and writes `3F800000` to `0x01891AE0` only when enabled | 01.24 ELF contains the claimed OFF instruction `C04100F0`; `0x01891AE0` lies in zero-filled BSS | The primary OFF instruction matches the executable. The source leaves the secondary BSS word set after disabling; its purpose and runtime effect are unconfirmed. This distinct Overwalls variant remains available in the Overwalls tab. |
-| Deathsinger reset fallback | Recovered mobile RTM scans for generic `38C6FFFF`/`38C0FFFF`; its reset fallback is `0x001C7B58` | ELF has `30C100907C440C0ED0410070308100A0` at the fallback. The scanner's first hit is `38C0FFFF` at `0x00011670`. | First hit is an initialization sentinel, not the encounter counter. The fallback does not contain either accepted instruction; Deathsinger remains hidden. |
+| Deathsinger candidate scan | `D:\VIRUS\1111111111111PhoneRTMtest\DestinyMobileBETA_2.html` claims `38C6FFFF` → `38C60FFF` and scans broad memory for generic `addi` encodings | No aligned `38C60FFF` in 01.24; seven aligned `38C6FFFF` words are unrelated routines. One `38C00FFF` occurs at `0x006AEFEC`, but its role is unidentified. Fallback `0x001C7B58` contains `30C100907C440C0ED0410070308100A0`. | The signed immediate explains the arithmetic (`FFFF` = −1; `0FFF` = +4095), not the encounter site. The scan accepts generic matches without checking executable alignment or handler context; its first hit `0x00011670` is an initialization sentinel. No Deathsinger patch location is established, so the control remains hidden. |
 | Overwalls plate hook | Overwalls replaces the two-instruction site at `0x00A015AC` with a branch to its 104-byte body at `0x010FB514`; its state flag is `0x0190EC98` | 01.24 starts with `3063FFF44BFFFB15`; the code-cave first word and BSS flag are zero | Supports the source layout in the pristine ELF. Before writing, the app now requires the exact two-instruction sequence, the complete 104-byte cave to read as zero, and the flag to be zero. This is a build-layout check; it does not verify the hook's in-game effect. |
 | Overwalls physics hook | Source branch site `0x001C4110`; code cave `0x010D8EC0` | 01.24 has original instruction `30640140`; code-cave first word is zero | Confirms the source's initial branch and cave prefix in 01.24; runtime behavior remains unobserved. |
 | Player Size | Local C# identifies a player by name in 24 records, gets its handle at record `+1604`, resolves the object index through `0x002FF2D0`, then writes Float32 scale at `0x01A1D9E8 + ((index & 0x1FFF) * 0xC0) + 0x9C`. | `0x002FF2D0`: resolver signature matches; `0x001FB3C8`: leaf getter `8084001C908300004E800020`. Runtime lookup table `0x01A21CB0` and scale-object base `0x01A1D9E8` are zero-filled BSS in the file. | Confirms resolver/helper code and source arithmetic, but not runtime table contents or visual effect. The app and MCP tool emulate the resolver with reads and do not use the C# RPC stub/scratch area. |
@@ -75,6 +88,35 @@ several update-build values. At `0x006101C0` it contains `62A30000`; at
 `addic r3,r3,-0x1378`. These observations apply only to base 01.00 and are not
 evidence about update 01.24.
 
+## Runtime write compatibility gate
+
+The app, local desktop proxy, MCP server, and Go memory client now refuse
+memory writes unless three live code reads match the audited 01.24 signature
+profile:
+
+| Address | Expected bytes | Role in the source audit |
+|---|---|---|
+| `0x00444B64` | `3C600044C03601283CC03F803B4349EC3061034462C4000063850000C05A0000` | Scalar consumer code |
+| `0x001FB3C8` | `8084001C908300004E800020` | Player-scale lookup helper |
+| `0x002FF2D0` | `7C0802A648A99751F821FF81F8010090` | Player object-handle resolver prologue |
+
+The app checks before each serialized patch operation; desktop and Go clients
+cache a successful result for up to five seconds per console. Failed or
+unreadable checks are not cached. Read-only operations do not require the
+profile. This is a runtime **signature profile**, not a full EBOOT hash or a
+region check; current evidence proves it matches BLES01857 01.24 and rejects
+the local BLES01857 01.00 image at these same addresses. There is no confirmed
+BLUS31181 01.24 ELF in the local inventory, so a successful profile must not
+be described as proof of the BLUS region or whole-image identity.
+
+The three signature byte ranges are protected from the app's generic write
+tools, so a mistaken raw write cannot erase the evidence needed for later
+checks. The Overwalls plate hook uses a different code site and does not
+overlap this fingerprint.
+
+No live-console writes were performed while adding this gate. See
+`docs/RTM-MCP.md` for the tools covered and the read-only behavior.
+
 ## Brightness read and preset controls
 
 The panel reads exactly four bytes at `0x006101C0` and displays the raw word and
@@ -83,6 +125,39 @@ its big-endian Float32 interpretation. It also exposes the local C# presets
 memory path, and displays success only after exact readback. The 01.24 ELF stores
 the source's Normal value (`3F800000`, `1.0`) at this address. A successful
 readback confirms bytes, not the in-game brightness effect.
+
+## Ultimate RTM scalar trace
+
+The recovered Ultimate RTM has two handlers for `0x004449EC`: one labeled “1
+Hit Kill 2” writes `100.0` (`42C80000`) or restores `1.0`; the other labeled
+“Max Damage” writes `3FFFFFFF` (about `2.0`) or restores `1.0`. The presets
+target the same word, so the app presents them as one selector.
+
+That word is in an executable load segment, but static control flow identifies
+it as literal-pool data: the unconditional branch at `0x004449E8` jumps to
+`0x00D98BAC`, around the pool, and no direct branch targets the pool words.
+Linear decoding interprets `3F800000` as `lis r28,0`; it is not reached as an
+instruction on the traced path. The words at `0x004449EC`, `+4`, `+8`, and
+`+0xC` are `3F800000` (1.0), `38D1B717` (about 0.0001), `00000000`, and
+`3C23D70A` (about 0.01); `0x004449FC` is an alignment NOP. The function begins
+at `0x00444A00`.
+
+At `0x00444B70`, code forms `r26 = 0x004449EC`; `lfs f2,0(r26)` at
+`0x00444B80` loads the first pool word. Later code calls `0x00439568` twice,
+forms a ratio, and compares the absolute denominator against the pool's
+approximately `0.0001` threshold. When the denominator is too small, it selects
+the `0x004449EC` coefficient; otherwise it selects the ratio. The selected
+value multiplies the previous Float32 at caller-owned output-buffer offset
+`+0x11C`, then stores the result back. A later condition can apply another
+multiplier from `[r1+0x4DC]`. Initializer `0x0044CAB0` clears a 0x140-byte
+record, copies source fields, and sets `+0x118` to `-1` and `+0x11C` to `1.0`.
+Its four direct callers are `0x00436570`, `0x004367CC`, `0x00436EC0`, and
+`0x00436FD8`; three use a stack buffer at `r1+0x140`, and one uses `r1+0x100`.
+After the calculation, caller `0x004367CC` directly reads `+0x118` and passes
+that value through `*r30`. The callers do not directly read `+0x11C`; they pass
+the record through helpers which may inspect it indirectly. The record layout
+and gameplay meaning of `+0x11C` remain unidentified, so the source labels do
+not establish a damage effect.
 
 ## Runtime-only addresses
 
@@ -97,6 +172,26 @@ Matching static code/data bytes do not prove server persistence. Controlled
 observation in the matching 01.24 runtime is needed to confirm dynamic mappings
 and in-game effects.
 
+## Reading the memory map
+
+The tools send addresses to the Destiny process (`0x1010200`) through PS3MAPI;
+four-byte values are decoded as big-endian PPC data. For the executable segment,
+virtual address `A` maps to ELF file offset `A - 0x00010000`; for example,
+`0x004449EC` is file offset `0x004349EC`. Its default bytes and the nearby code
+signature can therefore be checked in the exact EBOOT, and disassembly can show
+which code reads it. This verifies a candidate against the build, not the named
+gameplay effect.
+
+The writable segment's file-backed data ends at `0x019013A4`; the rest of that
+segment is BSS, zero-filled in the ELF. Roots such as `0x0190EBB0` are expected
+to be empty in the file and initialized at runtime, so their live pointer value
+must be read before following the chain. Addresses used by local RTMs in
+`0x600...` are outside the EBOOT load segments; the ELF gives no allocation or
+contents for them. Those require fresh live reads while the matching game is
+running. A pointer read and its target fields are not one atomic snapshot, so
+write tools should revalidate identity and mapping immediately before a write,
+then verify the exact bytes afterward.
+
 ## Repeatable local audit
 
 The read-only helper at `tools/rtm_elf_audit.py` hashes an ELF, parses its
@@ -105,12 +200,17 @@ executable segments for aligned byte signatures. For the recovered game copy,
 run:
 
 ```powershell
-python tools/rtm_elf_audit.py 'E:\Destiny PS3 RTMs\fly hack\gpttest\ebbotelfBAK\EBOOT.ELF' --search-signature 38C6FFFF
+python tools/rtm_elf_audit.py 'E:\Destiny PS3 RTMs\fly hack\gpttest\ebbotelfBAK\EBOOT.ELF' `
+  --search-signature 38C6FFFF `
+  --search-signature 38C0FFFF `
+  --search-signature 38C60FFF `
+  --search-signature 38C00FFF
 ```
 
 It reports whether the input hash is the verified 01.24 build, the bytes at
-known source sites, and all aligned matches for a supplied signature. It does
-not decrypt SELF files, disassemble instructions, or inspect a running game;
-the signature search returns candidates that still need disassembly and runtime
-evidence. Run its synthetic parser checks with
+known source sites, and the count plus first 32 aligned matches for each
+signature. Pass `--max-signature-hits 0` to print every match; JSON output
+always contains every match. The helper does not decrypt SELF files, disassemble
+instructions, or inspect a running game; signature hits still need context
+before they can identify a feature. Run its synthetic parser checks with
 `python -m unittest discover -s tests -p test_elfaudit.py -v`.

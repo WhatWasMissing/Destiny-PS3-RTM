@@ -3,6 +3,7 @@ package rtmmcp
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"io"
@@ -20,6 +21,7 @@ type fakeClient struct {
 	statusCode          int
 	statusErr           error
 	readData            []byte
+	readDataByAddress   map[string][]byte
 	readErr             error
 	writeErr            error
 	notifyErr           error
@@ -53,7 +55,13 @@ func (f *fakeClient) ReadMemory(ctx context.Context, _, address string, length i
 	f.reads++
 	block := f.blockRead
 	started := f.readStarted
-	data := append([]byte(nil), f.readData...)
+	data := append([]byte(nil), f.readDataByAddress[strings.ToUpper(strings.TrimPrefix(strings.TrimPrefix(address, "0x"), "0X"))]...)
+	if len(data) == 0 {
+		data = fake0124Signature(address, length)
+	}
+	if len(data) == 0 {
+		data = append([]byte(nil), f.readData...)
+	}
 	err := f.readErr
 	f.mu.Unlock()
 	if block {
@@ -68,6 +76,23 @@ func (f *fakeClient) ReadMemory(ctx context.Context, _, address string, length i
 		data = make([]byte, length)
 	}
 	return data, nil
+}
+
+func fake0124Signature(address string, length int) []byte {
+	var signature string
+	switch strings.ToUpper(strings.TrimPrefix(strings.TrimPrefix(address, "0x"), "0X")) {
+	case "00444B64":
+		signature = "3C600044C03601283CC03F803B4349EC3061034462C4000063850000C05A0000"
+	case "001FB3C8":
+		signature = "8084001C908300004E800020"
+	case "002FF2D0":
+		signature = "7C0802A648A99751F821FF81F8010090"
+	}
+	data, err := hex.DecodeString(signature)
+	if err != nil || len(data) != length {
+		return nil
+	}
+	return data
 }
 
 func (f *fakeClient) ReadPlayerPosition(context.Context, string) (rtmclient.PlayerPosition, error) {
@@ -192,11 +217,12 @@ func TestToolsListAdvertisesBoundedRTMTools(t *testing.T) {
 	}
 	list := resultObject(t, responseByID(t, responses, 2))
 	tools, ok := list["tools"].([]any)
-	if !ok || len(tools) != 10 {
-		t.Fatalf("expected ten tools, got %#v", list["tools"])
+	if !ok || len(tools) != 12 {
+		t.Fatalf("expected twelve tools, got %#v", list["tools"])
 	}
 	var sawEntityInspector bool
 	var sawScaleInspector, sawScaleSetter bool
+	var sawBuildVerifier bool
 	var sawSourceScaleRange bool
 	for _, item := range tools {
 		descriptor := item.(map[string]any)
@@ -209,6 +235,9 @@ func TestToolsListAdvertisesBoundedRTMTools(t *testing.T) {
 		if descriptor["name"] == "rtm_inspect_player_scale" {
 			sawScaleInspector = descriptor["annotations"].(map[string]any)["readOnlyHint"] == true
 		}
+		if descriptor["name"] == "rtm_verify_build" {
+			sawBuildVerifier = descriptor["annotations"].(map[string]any)["readOnlyHint"] == true
+		}
 		if descriptor["name"] == "rtm_set_player_scale" {
 			sawScaleSetter = descriptor["annotations"].(map[string]any)["destructiveHint"] == true
 			properties := descriptor["inputSchema"].(map[string]any)["properties"].(map[string]any)
@@ -219,8 +248,24 @@ func TestToolsListAdvertisesBoundedRTMTools(t *testing.T) {
 	if !sawEntityInspector {
 		t.Fatal("entity pointer inspector is missing or is not marked read-only")
 	}
-	if !sawScaleInspector || !sawScaleSetter || !sawSourceScaleRange {
+	if !sawScaleInspector || !sawScaleSetter || !sawSourceScaleRange || !sawBuildVerifier {
 		t.Fatal("player-scale inspect/set tools are missing or their annotations are wrong")
+	}
+}
+
+func TestBuildVerifierIsReadOnlyAndReportsPerSignatureMismatch(t *testing.T) {
+	client := &fakeClient{readDataByAddress: map[string][]byte{"002FF2D0": make([]byte, 16)}}
+	responses := runServer(t, client, toolRequest(1, "rtm_verify_build", `{"target_ipv4":"192.168.0.62"}`))
+	result := structuredObject(t, responseByID(t, responses, 1))
+	if result["read_only"] != true || result["profile_match"] != false || result["full_eboot_hash_confirmed"] != false || result["title_region_confirmed"] != false {
+		t.Fatalf("build check overstated its result: %#v", result)
+	}
+	signatures, ok := result["signatures"].([]any)
+	if !ok || len(signatures) != 3 || client.reads != 3 || len(client.writes) != 0 {
+		t.Fatalf("build check did not return three read-only signature results: %#v reads=%d writes=%#v", result, client.reads, client.writes)
+	}
+	if signatures[2].(map[string]any)["matches"] != false {
+		t.Fatalf("mismatched signature was reported as matching: %#v", signatures[2])
 	}
 }
 
@@ -271,6 +316,18 @@ func TestReadAndWritesReturnStructuredVerifiedResults(t *testing.T) {
 	}
 	if !sawGeneric || !sawBrightness {
 		t.Fatalf("expected both verified values, got %#v", client.writes)
+	}
+}
+
+func TestGenericWriteRefusesToOverwriteBuildFingerprint(t *testing.T) {
+	client := &fakeClient{}
+	responses := runServer(t, client, toolRequest(1, "rtm_write_memory", `{"target_ipv4":"192.168.0.62","address":"002FF2D0","hex":"00000000"}`))
+	response := responseByID(t, responses, 1)
+	result := resultObject(t, response)
+	structured, _ := result["structuredContent"].(map[string]any)
+	message, _ := structured["error"].(string)
+	if result["isError"] != true || !strings.Contains(message, "protected 01.24 code signature") || len(client.writes) != 0 || client.reads != 0 {
+		t.Fatalf("protected fingerprint write was not refused before reads/writes: response=%#v reads=%d writes=%#v", response, client.reads, client.writes)
 	}
 }
 

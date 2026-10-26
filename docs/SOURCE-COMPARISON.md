@@ -19,6 +19,13 @@ builds use different offsets and were not used as address references.
 | Screenshots | Added the five framebuffer profiles and PNG download. Reads are chunked. Optional pause capture requires persisting the original pause byte before writing and restores it in `finally`; if that fails, the app retains a manual recovery action and blocks other connection changes until recovery. |
 | ISO game launch | Added the source sequence from the newer local RTM: mount `/dev_hdd0/PS3ISO/<file>.iso` with `mode=silent`, wait 3 seconds, return to `/wmnav.ps3/game`, wait 1 second, then request `/play.ps3`. The ISO path is restricted to a filename directly inside `PS3ISO`. Each HTTP response is reported by stage; it does not confirm Destiny started. The desktop MCP tool uses the same sequence. |
 | Player Size | Ported the local C# name-to-object lookup and Float32 scale formula for the `0.3`, `1`, `2`, and `20` source values. The app and MCP tool check the 01.24 resolver/helper signatures, emulate the lookup with reads instead of calling the game function, recheck identity and pointer mapping before writes, and require exact scale readback. In-game effect and persistence remain unconfirmed. |
+| Experimental Scalar Preset | The recovered RTM's two source labels target the same literal-pool Float32 at `0x004449EC`: Normal `3F800000`, “Max Damage” `3FFFFFFF` (~2), and “1 Hit Kill 2” `42C80000` (100). In 01.24, four callers initialize a 0x140-byte record through `0x0044CAB0`, which sets `+0x11C` to 1.0, then call the consumer at `0x00444A00`. It multiplies `+0x11C` by a ratio, or by the literal-pool scalar when the denominator is below ~0.0001. No direct caller read establishes what `+0x11C` represents, so the source gameplay labels remain unverified. The experimental app/MCP write requires the exact `0x00444B64` code signature, known current values, and readback. |
+
+All app memory patches, the desktop `/console` write route, MCP write tools,
+and the Go memory client now require the 01.24 runtime signature profile before
+the first write in an operation. This profile detects the known local 01.00
+build mismatch but does not establish full executable hash or title-region
+identity. Read-only memory tools remain usable on other builds.
 
 ## Not exposed as working controls
 
@@ -35,8 +42,9 @@ builds use different offsets and were not used as address references.
   `/enablerpc.ps3mapi` routes.
 - Trophy unlock calls the same unsupported function-call layer and has no
   source-level readback or restoration. It remains unavailable.
-- Deathsinger's Power appears in a recovered mobile RTM, and this source tree
-  contains an old scan/toggle implementation, but it remains hidden. Its
+- Deathsinger's Power appears in
+  `D:\VIRUS\1111111111111PhoneRTMtest\DestinyMobileBETA_2.html`, and this source
+  tree contains an old scan/toggle implementation, but it remains hidden. Its
   intended change is PowerPC `addi r6,r6,-1` (`38C6FFFF`) to `addi r6,r6,4095`
   (`38C60FFF`), replacing a counter decrement with a large increment. In the
   instruction encoding, the low 16 bits are a signed immediate: `FFFF` means
@@ -48,11 +56,18 @@ builds use different offsets and were not used as address references.
   PPC context identifies it as an initialization sentinel set to `-1`, not an
   encounter counter. The EBOOT has seven aligned `38C6FFFF` sites, at
   `0x009AAB00`, `0x009AC35C`, `0x00A730BC`, `0x00B1B76C`, `0x00D743D8`,
-  and 1,112 raw `38C0FFFF` occurrences (1,111 four-byte-aligned). The seven
-  `38C6FFFF` sites disassemble as copy loops, array/list bookkeeping, or
-  bit/size calculations. None is the encounter deposit handler. The reset
-  fallback at `0x001C7B58` also points at unrelated 01.24 code bytes. The
-  encounter-specific address therefore remains unknown; locating it requires
+  `0x010923CC`, and `0x0109248C`; the earlier list omitted the last two. The
+  first two occur in divide/remainder indexing loops; `0x00A730BC` is in an
+  array-copy routine; `0x00B1B76C` decrements a list count before indexing its
+  records; `0x00D743D8` feeds the value to a bit shift; and the two `0x0109*`
+  sites are in size/alignment arithmetic. None is identified as the encounter
+  deposit handler. The `38C0FFFF` alternative has 1,112 raw file occurrences
+  (1,111 four-byte-aligned); the first, at `0x00011670`, is the initialization
+  sentinel above. The reset fallback at `0x001C7B58` also points at unrelated
+  01.24 code bytes. A separate `38C00FFF` word exists at `0x006AEFEC`, but no
+  caller or encounter context ties it to this patch. The scan searches OFF
+  words only, so it cannot rediscover an already patched word. The
+  encounter-specific address therefore remains unknown. Locating it requires
   encounter-specific runtime evidence or source/disassembly that identifies
   the function.
 - The main web-RTM Warpriest Immunity variant is present in local HTML, but
