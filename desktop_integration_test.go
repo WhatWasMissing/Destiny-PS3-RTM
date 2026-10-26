@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -21,10 +22,16 @@ func (fn roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { ret
 func TestDesktopFrontendAgainstFakeConsole(t *testing.T) {
 	var lock sync.Mutex
 	memory := map[uint64]byte{}
+	var launchRoutes []string
 	console := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		lock.Lock()
 		defer lock.Unlock()
 		q := r.URL.Query()
+		if strings.HasPrefix(r.URL.Path, "/mount.ps3/") || r.URL.Path == "/wmnav.ps3/game" || r.URL.Path == "/play.ps3" {
+			launchRoutes = append(launchRoutes, r.URL.EscapedPath())
+			fmt.Fprint(w, "accepted")
+			return
+		}
 		switch r.URL.Path {
 		case "/index.ps3":
 			fmt.Fprint(w, "fake console ready")
@@ -84,6 +91,10 @@ func TestDesktopFrontendAgainstFakeConsole(t *testing.T) {
 	output, err := command.CombinedOutput()
 	if err != nil {
 		t.Fatalf("frontend integration failed: %v\n%s", err, output)
+	}
+	wantRoutes := []string{"/mount.ps3/dev_hdd0/PS3ISO/Destiny.iso&mode=silent", "/wmnav.ps3/game", "/play.ps3"}
+	if strings.Join(launchRoutes, "|") != strings.Join(wantRoutes, "|") {
+		t.Fatalf("frontend launch sequence = %#v", launchRoutes)
 	}
 	t.Log(string(output))
 }

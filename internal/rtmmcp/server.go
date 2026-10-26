@@ -14,6 +14,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"destiny-rtm/internal/rtmclient"
 )
 
 const protocolVersion = "2025-11-25"
@@ -24,6 +26,7 @@ type Client interface {
 	ReadMemory(context.Context, string, string, int) ([]byte, error)
 	WriteMemory(context.Context, string, string, []byte) error
 	Notify(context.Context, string, string) error
+	LaunchGame(context.Context, string, string) (rtmclient.LaunchResult, error)
 }
 
 type Server struct {
@@ -120,9 +123,23 @@ var toolList = []tool{
 		}, "target_ipv4", "message"),
 		Annotations: map[string]any{"readOnlyHint": false, "destructiveHint": false, "idempotentHint": false, "openWorldHint": true},
 	},
+	{
+		Name:        "rtm_launch_game",
+		Title:       "Launch Destiny from ISO",
+		Description: "Run the recovered Destiny RTM launch sequence: mount one ISO from /dev_hdd0/PS3ISO/, return to the game list, and start the mounted game. Each HTTP step must be acknowledged; Destiny boot cannot be confirmed.",
+		InputSchema: objectSchema(map[string]any{
+			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
+			"iso_path": map[string]any{
+				"type": "string", "description": "One .iso filename directly under /dev_hdd0/PS3ISO/.",
+				"default": rtmclient.DefaultDestinyISOPath, "minLength": 22, "maxLength": 160,
+				"pattern": `^/dev_hdd0/PS3ISO/[A-Za-z0-9][A-Za-z0-9 _().-]{0,124}\.iso$`,
+			},
+		}, "target_ipv4"),
+		Annotations: map[string]any{"readOnlyHint": false, "destructiveHint": true, "idempotentHint": false, "openWorldHint": true},
+	},
 }
 
-const instructions = "Use only the user's private PS3 IPv4 address. Requests target Destiny process 0x1010200 over webMAN MOD on port 80. Memory reads are capped at 64 KiB; writes are capped at 8 bytes and require exact readback. rtm_status checks webMAN reachability, not whether Destiny is running. Brightness effects are unverified. Notifications report dispatch, not display. No generic function-call endpoint is exposed."
+const instructions = "Use only the user's private PS3 IPv4 address. Memory reads and writes target Destiny process 0x1010200 through webMAN MOD on port 80. Reads are capped at 64 KiB; writes are capped at 8 bytes and require exact readback. rtm_status checks webMAN reachability, not whether Destiny is running. Brightness effects are unverified. Notifications report dispatch, not display. Game-launch steps report HTTP acknowledgement and do not confirm that Destiny started. No generic function-call endpoint is exposed."
 
 func objectSchema(properties map[string]any, required ...string) map[string]any {
 	return map[string]any{"type": "object", "properties": properties, "required": required, "additionalProperties": false}
@@ -384,6 +401,37 @@ func (s *Server) callTool(ctx context.Context, raw json.RawMessage) map[string]a
 			return errorResult(err)
 		}
 		return successResult(map[string]any{"ok": true, "request_dispatched": true, "delivery_confirmed": false})
+	case "rtm_launch_game":
+		var args struct {
+			Target  string `json:"target_ipv4"`
+			ISOPath string `json:"iso_path"`
+		}
+		if err := decodeStrict(call.Arguments, &args); err != nil {
+			return errorResult(err)
+		}
+		if err := validateTarget(args.Target); err != nil {
+			return errorResult(err)
+		}
+		if args.ISOPath == "" {
+			args.ISOPath = rtmclient.DefaultDestinyISOPath
+		}
+		if _, err := rtmclient.ValidateDestinyISOPath(args.ISOPath); err != nil {
+			return errorResult(err)
+		}
+		launch, err := s.client.LaunchGame(ctx, args.Target, args.ISOPath)
+		data := map[string]any{
+			"ok":                   err == nil,
+			"target_ipv4":          args.Target,
+			"iso_path":             launch.ISOPath,
+			"stages":               launch.Stages,
+			"game_start_confirmed": launch.GameStartConfirmed,
+		}
+		if err != nil {
+			data["error"] = err.Error()
+			return structuredErrorResult(data)
+		}
+		data["request_dispatched"] = true
+		return successResult(data)
 	default:
 		return errorResult(fmt.Errorf("unknown RTM tool %q", call.Name))
 	}
@@ -466,6 +514,10 @@ func successResult(data map[string]any) map[string]any {
 
 func errorResult(err error) map[string]any {
 	data := map[string]any{"ok": false, "error": err.Error()}
+	return structuredErrorResult(data)
+}
+
+func structuredErrorResult(data map[string]any) map[string]any {
 	encoded, _ := json.Marshal(data)
 	return map[string]any{"content": []any{map[string]any{"type": "text", "text": string(encoded)}}, "structuredContent": data, "isError": true}
 }

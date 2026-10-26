@@ -2,10 +2,11 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const nativeSetTimeout = setTimeout;
 const origin = process.env.RTM_TEST_ORIGIN;
 if (!origin) throw new Error('Run this script through go test');
 function element(id = '') {
-  const node = {id,value:'',className:'',style:{setProperty(){}},children:[],textContent:'',innerHTML:'',
+  const node = {id,value:'',className:'',style:{setProperty(){}},dataset:{},children:[],textContent:'',innerHTML:'',
     appendChild(child){this.children.push(child);},append(...children){this.children.push(...children);},
     addEventListener(){},setAttribute(){},querySelector(){return null;},remove(){},focus(){}};
   node.classList = {
@@ -21,7 +22,7 @@ const get=id=>{if(!nodes.has(id))nodes.set(id,element(id));return nodes.get(id);
 const storage=new Map();
 const context=vm.createContext({
   URL,Response,AbortController,AbortSignal,DOMException,TextEncoder,TextDecoder,
-  setTimeout,clearTimeout,setInterval:()=>1,clearInterval(){},console,
+  setTimeout:(callback,ms,...args)=>nativeSetTimeout(callback,[3000,1000].includes(ms)?1:ms,...args),clearTimeout,setInterval:()=>1,clearInterval(){},console,
   location:{hostname:'127.0.0.1'},CSS:{escape:value=>value},
   localStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value),removeItem:key=>storage.delete(key)},
   sessionStorage:{getItem:()=>null,setItem(){}},
@@ -35,7 +36,7 @@ const context=vm.createContext({
   }
 });
 context.window=context;
-for(const file of ['desktop-host','transport','operations','backups','connection','app-core']) {
+for(const file of ['desktop-host','transport','operations','backups','connection','app-core','launch-tools']) {
   vm.runInContext(fs.readFileSync(`source/js/${file}.js`,'utf8'),context,{filename:file+'.js'});
 }
 (async()=>{
@@ -45,6 +46,9 @@ for(const file of ['desktop-host','transport','operations','backups','connection
   await context.ps3fetch('http://192.168.0.62/setmem.ps3mapi?addr=1254&val=AABBCCDD');
   await context.ps3writeU16(0x1256,0x1122);
   assert.equal(await context.ps3getmem(0x1254,4),'AABB1122','unaligned UInt16 write changed neighboring bytes');
+  get('rtm-launch-iso-path').value='/dev_hdd0/PS3ISO/Destiny.iso';
+  await context.launchDestiny();
+  assert.match(get('rtm-launch-status').textContent,/Destiny start is not confirmed/);
   await assert.rejects(context.ps3fetch('http://192.168.0.63/setmem.ps3mapi?addr=1254&val=00000000'),/active game session/);
   await assert.rejects(context.ps3fetch('http://192.168.0.62/setmem.ps3mapi?addr=1254&val=00000000&proc=77'),/active game session/);
   const button=get('integration-toggle');
@@ -63,5 +67,5 @@ for(const file of ['desktop-host','transport','operations','backups','connection
   assert.equal(get('integration-toggle').classList.contains('active-cheat'),false);
   const diagnostics=vm.runInContext('consoleTransport.diagnostics()',context);
   assert.ok(diagnostics.some(entry=>entry.operation==='/setmem.ps3mapi'&&entry.outcome==='failed'));
-  console.log('Desktop integration passed: host detection/auth, read-only relink, write/readback, mismatch, partial failure, disconnect, diagnostics.');
+  console.log('Desktop integration passed: host detection/auth, RTM launch stages, write/readback, mismatch, partial failure, disconnect, diagnostics.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

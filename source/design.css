@@ -45,6 +45,14 @@ body.compact-ui .cheat-feature-label, body.compact-ui .cheat-status-label,
 .slider-preset, .cheat-btn, .rtm-tab-btn { border-radius: 3px; letter-spacing: .01em; text-transform: none; }
 .btn-connect, .btn-apply, .btn-power, .btn-send, .tp-btn { font-family: var(--sans); font-size: 13px; }
 .btn-apply.danger { background: var(--surface); color: var(--danger); border: 1px solid var(--border); }
+.rtm-launch { padding: 0 1rem 1rem; }
+.rtm-launch label { display:block; margin:0 0 6px; color:var(--muted); font:600 0.65rem var(--mono); letter-spacing:.08em; text-transform:uppercase; }
+.rtm-launch-controls { display:flex; gap:8px; }
+.rtm-launch-controls .ip-input { min-width:0; flex:1; }
+.rtm-launch-controls .btn-connect { flex-shrink:0; }
+.rtm-launch-status { margin:6px 0 0; color:var(--muted); font:0.68rem/1.45 var(--mono); }
+.rtm-launch-status[data-state="error"] { color:var(--danger); }
+.rtm-launch-status[data-state="ok"] { color:var(--accent); }
 .ip-input, .hex-input, .scan-input, #cheat-search, #act-search, #act-select { border-radius: 3px !important; font-size: 14px !important; }
 .field-label, .slider-label, .scan-field label { font: 12px var(--sans); letter-spacing: .03em; }
 .tp-slot-name { font: 14px var(--sans); }
@@ -99,6 +107,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, [onclick]:focus
   .section { padding-inline: 12px; }
   .connect-row, .tp-btn-row, .scan-btn-row, .custom-row { flex-wrap: wrap; }
   .ip-input { flex-basis: 100%; }
+  .rtm-launch-controls { flex-direction:column; }
   #sec-maintenance button { flex: 1 1 140px; }
   .ow-inline-controls, .ow-farm-form { align-items: stretch; }
   .ow-inline-controls label, .ow-farm-form label { flex-basis: 100%; }

@@ -27,6 +27,7 @@ var nonHex = regexp.MustCompile(`[^0-9A-Fa-f]`)
 type Client struct {
 	HTTP      *http.Client
 	ProcessID string
+	sleep     func(context.Context, time.Duration) error
 
 	// endpointOverride is only set by package tests so they can use loopback servers.
 	endpointOverride string
@@ -40,7 +41,100 @@ func New() *Client {
 			CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
 		},
 		ProcessID: DefaultProcessID,
+		sleep:     sleepContext,
 	}
+}
+
+const DefaultDestinyISOPath = "/dev_hdd0/PS3ISO/Destiny.iso"
+
+type LaunchStage struct {
+	Name         string `json:"name"`
+	Acknowledged bool   `json:"acknowledged"`
+	HTTPStatus   int    `json:"http_status,omitempty"`
+	Error        string `json:"error,omitempty"`
+}
+
+type LaunchResult struct {
+	TargetIPv4         string        `json:"target_ipv4"`
+	ISOPath            string        `json:"iso_path"`
+	Stages             []LaunchStage `json:"stages"`
+	GameStartConfirmed bool          `json:"game_start_confirmed"`
+}
+
+var destinyISOName = regexp.MustCompile(`(?i)^[a-z0-9][a-z0-9 _().-]{0,124}\.iso$`)
+
+// ValidateDestinyISOPath allows one ISO file in webMAN's standard PS3ISO folder.
+// The local RTM source uses this mount location; arbitrary webMAN paths are not exposed.
+func ValidateDestinyISOPath(path string) (string, error) {
+	const prefix = "/dev_hdd0/PS3ISO/"
+	if !strings.HasPrefix(path, prefix) || len(path) > 160 {
+		return "", errors.New("ISO path must be one file under /dev_hdd0/PS3ISO/")
+	}
+	name := strings.TrimPrefix(path, prefix)
+	if strings.Contains(name, "..") || !destinyISOName.MatchString(name) {
+		return "", errors.New("ISO filename must be a simple .iso filename without URL or path characters")
+	}
+	return path, nil
+}
+
+func sleepContext(ctx context.Context, delay time.Duration) error {
+	timer := time.NewTimer(delay)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
+	}
+}
+
+// LaunchGame follows the recovered RTM's webMAN launch sequence. HTTP success
+// acknowledges individual requests; it cannot confirm that Destiny booted.
+func (c *Client) LaunchGame(ctx context.Context, ip, isoPath string) (LaunchResult, error) {
+	result := LaunchResult{TargetIPv4: ip, GameStartConfirmed: false}
+	validatedPath, err := ValidateDestinyISOPath(isoPath)
+	if err != nil {
+		return result, err
+	}
+	result.ISOPath = validatedPath
+	if c == nil {
+		return result, errors.New("client is nil")
+	}
+
+	steps := []struct {
+		name  string
+		path  string
+		pause time.Duration
+	}{
+		{name: "mount_iso", path: "/mount.ps3" + validatedPath + "&mode=silent", pause: 3 * time.Second},
+		{name: "return_to_xmb", path: "/wmnav.ps3/game", pause: time.Second},
+		{name: "start_mounted_game", path: "/play.ps3"},
+	}
+
+	for index, step := range steps {
+		result.Stages = append(result.Stages, LaunchStage{Name: step.name})
+		stage := &result.Stages[len(result.Stages)-1]
+		response, requestErr := c.request(ctx, ip, step.path, nil)
+		if requestErr != nil {
+			stage.Error = requestErr.Error()
+			return result, fmt.Errorf("%s stage failed: %w", step.name, requestErr)
+		}
+		stage.Acknowledged = true
+		stage.HTTPStatus = response.StatusCode
+		response.Body.Close()
+
+		if step.pause > 0 {
+			nextStage := steps[index+1].name
+			wait := c.sleep
+			if wait == nil {
+				wait = sleepContext
+			}
+			if waitErr := wait(ctx, step.pause); waitErr != nil {
+				return result, fmt.Errorf("waiting before %s stage failed after %s was acknowledged: %w", nextStage, step.name, waitErr)
+			}
+		}
+	}
+	return result, nil
 }
 
 func validateIPv4(ipText string) (net.IP, error) {

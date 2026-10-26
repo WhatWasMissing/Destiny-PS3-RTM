@@ -299,6 +299,7 @@
 <script src="js/memory-features.js"></script>
 <script src="js/emblem-options.js"></script>
 <script src="js/app-core.js"></script>
+<script src="js/launch-tools.js"></script>
 <script src="js/brightness-tools.js"></script>
 <script src="js/accent-settings.js"></script>
 <div class="rtm-tabs-wrap">
@@ -342,6 +343,14 @@
 <svg fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" x2="12" y1="2" y2="12"></line></svg> Shutdown </button>
 <button class="btn-power btn-restart" id="btn-restart" onclick="ps3Restart()" title="Restart PS3">
 <svg fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 .49-3.27"></path></svg> Restart </button>
+</div>
+<div class="rtm-launch" id="rtm-launch">
+  <label for="rtm-launch-iso-path">Destiny ISO path</label>
+  <div class="rtm-launch-controls">
+    <input class="ip-input" id="rtm-launch-iso-path" type="text" value="/dev_hdd0/PS3ISO/Destiny.iso" autocomplete="off" spellcheck="false" aria-describedby="rtm-launch-status"/>
+    <button class="btn-connect" id="btn-launch-destiny" type="button" onclick="launchDestiny()">Launch Destiny</button>
+  </div>
+  <p id="rtm-launch-status" class="rtm-launch-status" aria-live="polite">Mounts the ISO, returns to the game list, then sends the start request. Game start cannot be confirmed.</p>
 </div>
 <div style="padding: 0 1rem 1rem;">
 <button class="cheat-btn" id="tog-anti-mm" onclick="togAntiMatchmaking(this)" style="width:100%;flex-direction:row;justify-content:space-between;padding:12px 14px;border-color:rgba(224,92,79,0.3);">

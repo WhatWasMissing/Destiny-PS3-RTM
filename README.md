@@ -18,7 +18,8 @@ Automated checks use an isolated fake console; live game compatibility still
 depends on the console/game build.
 The scriptable client and its command reference are in [docs/RTMCTL.md](docs/RTMCTL.md).
 The direct agent-tool server and Codex setup instructions are in
-[docs/RTM-MCP.md](docs/RTM-MCP.md).
+[docs/RTM-MCP.md](docs/RTM-MCP.md). Its named tools include the source-backed,
+staged ISO launch workflow; HTTP acknowledgement does not confirm Destiny booted.
 
 **Proprietary — all rights reserved. Redistribution, rehosting, and sharing modified
 versions require written permission.** See [LICENSE](LICENSE) for the full terms,

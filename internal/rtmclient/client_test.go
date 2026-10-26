@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 )
 
 func testClient(server *httptest.Server) *Client {
@@ -106,6 +107,69 @@ func TestNotifyEncodesMessageAndRejectsOverlongInput(t *testing.T) {
 	}
 	if err := client.Notify(context.Background(), "192.168.0.62", strings.Repeat("x", 129)); err == nil {
 		t.Fatal("overlong notification accepted")
+	}
+}
+
+func TestLaunchGameUsesRecoveredStageOrderAndReportsOnlyHTTPAcknowledgement(t *testing.T) {
+	var paths []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		paths = append(paths, r.URL.EscapedPath())
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+	client := testClient(server)
+	var pauses []time.Duration
+	client.sleep = func(_ context.Context, delay time.Duration) error {
+		pauses = append(pauses, delay)
+		return nil
+	}
+
+	result, err := client.LaunchGame(context.Background(), "192.168.0.62", DefaultDestinyISOPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantPaths := []string{
+		"/mount.ps3/dev_hdd0/PS3ISO/Destiny.iso&mode=silent",
+		"/wmnav.ps3/game",
+		"/play.ps3",
+	}
+	if strings.Join(paths, "|") != strings.Join(wantPaths, "|") {
+		t.Fatalf("launch path order = %#v", paths)
+	}
+	if len(result.Stages) != 3 || !result.Stages[0].Acknowledged || !result.Stages[1].Acknowledged || !result.Stages[2].Acknowledged || result.GameStartConfirmed {
+		t.Fatalf("unexpected launch result: %#v", result)
+	}
+	if len(pauses) != 2 || pauses[0] != 3*time.Second || pauses[1] != time.Second {
+		t.Fatalf("launch delays = %#v", pauses)
+	}
+}
+
+func TestLaunchGameValidatesPathAndPreservesPartialProgressOnCancellation(t *testing.T) {
+	for _, path := range []string{
+		"/dev_hdd0/PS3ISO/subfolder/Destiny.iso",
+		"/dev_hdd0/PS3ISO/../Destiny.iso",
+		"/dev_hdd0/PS3ISO/Destiny.iso?x=/play.ps3",
+		"/dev_hdd0/PS3ISO/Destiny.iso#fragment",
+		"/dev_hdd0/GAMES/Destiny.iso",
+	} {
+		if _, err := ValidateDestinyISOPath(path); err == nil {
+			t.Errorf("unsafe ISO path accepted: %q", path)
+		}
+	}
+
+	calls := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		calls++
+	}))
+	defer server.Close()
+	client := testClient(server)
+	client.sleep = func(context.Context, time.Duration) error { return context.Canceled }
+	result, err := client.LaunchGame(context.Background(), "192.168.0.62", DefaultDestinyISOPath)
+	if err == nil || !strings.Contains(err.Error(), "waiting before return_to_xmb") {
+		t.Fatalf("expected cancellation after mount, got %v", err)
+	}
+	if calls != 1 || len(result.Stages) != 1 || !result.Stages[0].Acknowledged || result.GameStartConfirmed {
+		t.Fatalf("partial launch progress lost: calls=%d result=%#v", calls, result)
 	}
 }
 

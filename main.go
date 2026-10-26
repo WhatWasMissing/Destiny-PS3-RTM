@@ -19,6 +19,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"destiny-rtm/internal/rtmclient"
 )
 
 //go:embed source
@@ -29,6 +31,7 @@ var endpoints = map[string]bool{
 	"/setmem.ps3mapi": true, "/notify.ps3mapi": true,
 	"/shutdown.ps3mapi": true, "/restart.ps3mapi": true,
 	"/getcid.ps3mapi": true, "/setcid.ps3mapi": true,
+	"/wmnav.ps3/game": true, "/play.ps3": true,
 }
 
 type host struct {
@@ -42,6 +45,33 @@ func consoleTarget(target *url.URL) bool {
 	ip := net.ParseIP(target.Hostname())
 	return target.Scheme == "http" && target.User == nil && ip != nil && ip.To4() != nil &&
 		ip.IsPrivate() && (target.Port() == "" || target.Port() == "80") && target.Fragment == ""
+}
+
+func supportedConsoleEndpoint(target *url.URL) bool {
+	if target.Path == "/wmnav.ps3/game" || target.Path == "/play.ps3" {
+		return target.RawQuery == "" && !target.ForceQuery
+	}
+	if endpoints[target.Path] {
+		return true
+	}
+	if strings.HasPrefix(target.Path, "/popup.ps3/") {
+		return true
+	}
+	if !strings.HasPrefix(target.Path, "/mount.ps3/") || target.RawQuery != "" || target.ForceQuery {
+		return false
+	}
+	const prefix = "/mount.ps3"
+	const suffix = "&mode=silent"
+	if !strings.HasSuffix(target.Path, suffix) {
+		return false
+	}
+	isoPath := strings.TrimSuffix(strings.TrimPrefix(target.Path, prefix), suffix)
+	validatedPath, err := rtmclient.ValidateDestinyISOPath(isoPath)
+	if err != nil {
+		return false
+	}
+	canonical := prefix + validatedPath + suffix
+	return target.Path == canonical && target.EscapedPath() == (&url.URL{Path: canonical}).EscapedPath()
 }
 
 func (h *host) handler() http.Handler {
@@ -62,7 +92,7 @@ func (h *host) handler() http.Handler {
 			return
 		}
 		target, err := url.Parse(r.URL.Query().Get("url"))
-		if err != nil || !h.validTarget(target) || (!endpoints[target.Path] && !strings.HasPrefix(target.Path, "/popup.ps3/")) {
+		if err != nil || !h.validTarget(target) || !supportedConsoleEndpoint(target) {
 			http.Error(w, "Unsupported console target or endpoint", http.StatusBadRequest)
 			return
 		}

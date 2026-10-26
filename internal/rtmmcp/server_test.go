@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 	"testing"
+
+	"destiny-rtm/internal/rtmclient"
 )
 
 type fakeClient struct {
@@ -24,6 +26,8 @@ type fakeClient struct {
 	reads       int
 	writes      [][3]string
 	notifies    []string
+	launches    []string
+	launchErr   error
 	blockRead   bool
 	readStarted chan struct{}
 }
@@ -66,6 +70,16 @@ func (f *fakeClient) Notify(_ context.Context, _, message string) error {
 	defer f.mu.Unlock()
 	f.notifies = append(f.notifies, message)
 	return f.notifyErr
+}
+
+func (f *fakeClient) LaunchGame(_ context.Context, target, isoPath string) (rtmclient.LaunchResult, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.launches = append(f.launches, target+" "+isoPath)
+	return rtmclient.LaunchResult{
+		TargetIPv4: target, ISOPath: isoPath, GameStartConfirmed: false,
+		Stages: []rtmclient.LaunchStage{{Name: "mount_iso", Acknowledged: true, HTTPStatus: 200}},
+	}, f.launchErr
 }
 
 func hexString(data []byte) string {
@@ -138,8 +152,8 @@ func TestToolsListAdvertisesBoundedRTMTools(t *testing.T) {
 	}
 	list := resultObject(t, responseByID(t, responses, 2))
 	tools, ok := list["tools"].([]any)
-	if !ok || len(tools) != 5 {
-		t.Fatalf("expected five tools, got %#v", list["tools"])
+	if !ok || len(tools) != 6 {
+		t.Fatalf("expected six tools, got %#v", list["tools"])
 	}
 	for _, item := range tools {
 		descriptor := item.(map[string]any)
@@ -154,7 +168,8 @@ func TestReadAndWritesReturnStructuredVerifiedResults(t *testing.T) {
 	input := toolRequest(1, "rtm_status", `{"target_ipv4":"192.168.0.62"}`) +
 		toolRequest(2, "rtm_read_memory", `{"target_ipv4":"192.168.0.62","address":"006101C0"}`) +
 		toolRequest(3, "rtm_write_memory", `{"target_ipv4":"192.168.0.62","address":"006101C0","hex":"3F800000"}`) +
-		toolRequest(4, "rtm_set_brightness", `{"target_ipv4":"192.168.0.62","preset":"inverted"}`)
+		toolRequest(4, "rtm_set_brightness", `{"target_ipv4":"192.168.0.62","preset":"inverted"}`) +
+		toolRequest(5, "rtm_launch_game", `{"target_ipv4":"192.168.0.62"}`)
 	responses := runServer(t, client, input)
 	if got := structuredObject(t, responseByID(t, responses, 1))["destiny_process_confirmed"]; got != false {
 		t.Fatalf("status incorrectly claims Destiny is confirmed: %v", got)
@@ -168,6 +183,13 @@ func TestReadAndWritesReturnStructuredVerifiedResults(t *testing.T) {
 	brightness := structuredObject(t, responseByID(t, responses, 4))
 	if brightness["hex"] != "C1A00000" || brightness["effect_confirmed"] != false {
 		t.Fatalf("unexpected brightness result: %#v", brightness)
+	}
+	launch := structuredObject(t, responseByID(t, responses, 5))
+	if launch["iso_path"] != rtmclient.DefaultDestinyISOPath || launch["game_start_confirmed"] != false || launch["request_dispatched"] != true {
+		t.Fatalf("unexpected launch result: %#v", launch)
+	}
+	if len(client.launches) != 1 || client.launches[0] != "192.168.0.62 "+rtmclient.DefaultDestinyISOPath {
+		t.Fatalf("unexpected launch call: %#v", client.launches)
 	}
 	if len(client.writes) != 2 {
 		t.Fatalf("unexpected writes: %#v", client.writes)
@@ -194,15 +216,16 @@ func TestInvalidTargetArgumentsAndOversizedWritesFailBeforeBackend(t *testing.T)
 			toolRequest(3, "rtm_read_memory", `{"target_ipv4":"192.168.0.62","address":"1000","length":65537}`)+
 			toolRequest(4, "rtm_notify", `{"target_ipv4":"192.168.0.62","message":"hello","extra":true}`)+
 			toolRequest(5, "rtm_read_memory", `{"target_ipv4":"192.168.0.62","address":"FFFFFFFF","length":2}`)+
-			toolRequest(6, "rtm_write_memory", `{"target_ipv4":"192.168.0.62","address":"FFFFFFFF","hex":"0102"}`),
+			toolRequest(6, "rtm_write_memory", `{"target_ipv4":"192.168.0.62","address":"FFFFFFFF","hex":"0102"}`)+
+			toolRequest(7, "rtm_launch_game", `{"target_ipv4":"192.168.0.62","iso_path":"/dev_hdd0/PS3ISO/../../play.ps3"}`),
 	)
-	for id := float64(1); id <= 6; id++ {
+	for id := float64(1); id <= 7; id++ {
 		result := resultObject(t, responseByID(t, responses, id))
 		if result["isError"] != true {
 			t.Fatalf("invalid request %v was accepted: %#v", id, result)
 		}
 	}
-	if len(client.writes) != 0 || client.reads != 0 || len(client.notifies) != 0 {
+	if len(client.writes) != 0 || client.reads != 0 || len(client.notifies) != 0 || len(client.launches) != 0 {
 		t.Fatalf("invalid inputs reached backend: %#v", client)
 	}
 }

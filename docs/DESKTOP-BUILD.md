@@ -21,7 +21,8 @@ origin; export settings before moving between origins.
 
 This is a replacement host, not recovered original Go code. It serves local
 assets and proxies supported webMAN endpoints to private IPv4 addresses on
-port 80. It does not implement CCAPI or add undocumented RPC capabilities.
+port 80, including the constrained ISO launch sequence. It does not implement
+CCAPI or add undocumented RPC capabilities.
 It uses request authentication, validates Host/Origin, disallows redirects,
 caps response size, bypasses system HTTP proxies and bounds upstream timeouts.
 No console data or requests are sent to an external service.
@@ -32,9 +33,9 @@ desktop UI. Its target, process and write-size checks match the RTM's intended
 Destiny process scope. Run `dist/rtmctl.exe help` for commands.
 
 `rtm-mcp` exposes status, bounded reads, verified writes, the source-backed
-brightness presets and system notifications over MCP stdio. Register it with
-Codex using the steps in [RTM-MCP.md](RTM-MCP.md). Build/protocol smoke checks
-use no live console connection.
+brightness presets, system notifications and the staged ISO launch workflow
+over MCP stdio. Register it with Codex using the steps in [RTM-MCP.md](RTM-MCP.md).
+Build/protocol smoke checks use no live console connection.
 
 The frontend detects this host through `/host-config`. Ordinary static hosting
 continues to use direct console HTTP, subject to browser cross-origin rules.

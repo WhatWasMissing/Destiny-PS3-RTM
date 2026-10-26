@@ -13,12 +13,19 @@ open the desktop app or automate its UI.
 | `rtm_write_memory` | Writes 1–8 bytes and succeeds only after exact readback. It does not call game functions. |
 | `rtm_set_brightness` | Writes one of the local 1.24 source presets at `0x006101C0` and verifies the bytes. The in-game effect remains unobserved. |
 | `rtm_notify` | Dispatches a webMAN system notification; display is not confirmed. |
+| `rtm_launch_game` | Mounts one ISO from `/dev_hdd0/PS3ISO/`, waits for webMAN, returns to the game list, and starts the mounted game. HTTP acknowledgement is reported per stage; game start is not confirmed. |
 
 Every tool requires the PS3's private IPv4 address. The server fixes webMAN to
 port 80 and Destiny to PID `0x1010200`, disables redirects and proxy use, and
 does not expose function-call, client-list, IP-collection, or geolocation
 operations. Read/write limits and target validation are enforced by the shared
 client as well as the MCP tool layer.
+
+`rtm_launch_game` defaults to `/dev_hdd0/PS3ISO/Destiny.iso`. Its optional
+`iso_path` must be a simple `.iso` filename directly inside `/dev_hdd0/PS3ISO/`;
+no other webMAN mount paths are accepted. It follows the recovered source's
+3-second mount delay and 1-second game-list delay. An acknowledged `/play.ps3`
+response does not prove that Destiny finished starting.
 
 ## Build and register with Codex
 
