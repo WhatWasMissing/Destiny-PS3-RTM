@@ -4,9 +4,11 @@
 25 October 2026. It includes the Home / Mods / Player / Tools / All tabs,
 character banner, Quick Access, Character Utilities, and saved teleport fixes.
 
-The original bytes are preserved, including embedded assets and scripts.
-The file's SHA-256 is recorded in `provenance.json`. No visual redesign has
-been applied to this backup. The previously edited Android source was an older
+The original recovery is preserved in Git commit
+`e36edf76a50e30824eb972de2c03c5f9a0f34613`. Its SHA-256 is recorded in
+`provenance.json`; that record describes the original recovery, not subsequent
+edits on development branches. The working frontend now loads transport code
+from `js/transport.js`. Serve the whole `source/` directory when previewing. The previously edited Android source was an older
 version and is not included here.
 
 This is a frontend backup, not a complete buildable desktop project. The Go

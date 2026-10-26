@@ -2470,6 +2470,7 @@
 </style>
 </head>
 <body>
+<script src="js/transport.js"></script>
 <script>
   try {
     if ((localStorage.getItem('rtm_appearance') || 'dark') === 'light') {
@@ -2939,14 +2940,9 @@
   }
 
   // NOTE: For READ ops (getmem), use ps3fetchRead() which throws on empty body.
-  async function ps3fetch(url) {
-    // If the URL doesn't already have proc, add it.
-    // This ensures writes also hit the Game memory, not the WebMAN memory.
-    const proc = "0x1010200";
-    if (!url.includes("proc=")) {
-      url = url.replace("?", `?proc=${proc}&`);
-    }
-    return await fetch(url);
+  const consoleTransport = RtmTransport.createTransport({ processId: GAME_PID });
+  async function ps3fetch(url, timeoutMs = 8000) {
+    return consoleTransport.request(url, timeoutMs);
   }
 
   // For getmem — must be able to READ the response. Rejects if body is empty
