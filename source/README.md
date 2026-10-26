@@ -17,3 +17,8 @@ require the original desktop integration and a compatible PS3 connection.
 
 The repository's proprietary no-redistribution LICENSE applies to material
 owned by WhatWasMissing. Third-party rights remain with their owners.
+
+
+Desktop builds are now available through the replacement Go host. See
+[desktop build instructions](../docs/DESKTOP-BUILD.md). Original host source
+remains unrecovered; the replacement does not imply native API parity.

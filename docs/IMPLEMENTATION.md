@@ -46,3 +46,22 @@ Do not mark the complete objective achieved based on the transport tests alone.
 - Go 1.27.1 is available in the local pokemon-sots toolchain. Desktop host
   implementation/build remains outstanding.
 - No live PS3 requests were made for these checks.
+
+## Desktop and modular frontend pass
+
+- Replacement dependency-free Go host and build.ps1 added. Go tests cover local
+  fake-console proxying, endpoint/target restrictions, authentication and embedded
+  frontend. The first packaged executable passed host smoke checks.
+- Browser reads and health probes now use the bounded transport; host detection
+  routes console traffic through the local proxy. Full race tests remain pending.
+- Inline JavaScript extracted into named files in original execution order.
+- External design.css applies readable system typography, graphite surfaces,
+  muted gold actions, keyboard focus and responsive control sizing. Desktop Tools
+  screen inspected after extraction. Mobile/light-mode checks remain pending.
+- Status badges now distinguish UNKNOWN from requested ON/OFF; actual write
+  readback and multi-step operation verification still need implementation.
+- Overwalls assessment now includes main and Retrofit projects, scenario schema,
+  hook/plugin dependencies, AFK timing and concrete port recommendations.
+- Remaining key work: live-console limits, truthful verified states, queue/session
+  integration tests, full backup/teleport browser workflows, responsive QA and
+  final packaged application checks. Goal is not complete.

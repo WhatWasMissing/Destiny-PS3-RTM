@@ -1,0 +1,80 @@
+/* Destiny RTM: equipment-panel typography, quiet surfaces, deliberate actions. */
+:root {
+  --bg: #141719; --surface: #1a1e21; --card: #202529; --border: #394146;
+  --accent: #c4b784; --gold: #c4b784; --text: #e5e7e4; --muted: #a1acb1;
+  --success: #97c1a6; --danger: #df9a91; --accent2: #df9a91;
+  --sans: 'Segoe UI', system-ui, sans-serif;
+  --mono: 'Cascadia Code', Consolas, monospace;
+  color-scheme: dark;
+}
+body { line-height: 1.5; }
+header { padding: 20px max(20px, calc((100vw - 1240px) / 2)); gap: 14px; }
+header h1 { font-weight: 500; letter-spacing: .16em; }
+header h1 span { font: 10px var(--sans); letter-spacing: .14em; margin-top: 5px; color: var(--muted); }
+.section, .search-container, .rtm-tabs { max-width: 1280px; margin-inline: auto; }
+.section { padding-inline: 20px; padding-bottom: 22px; }
+.panel { border-radius: 4px; }
+.panel-header, .category-label {
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
+  letter-spacing: .08em; color: var(--text); line-height: 1.5;
+}
+.panel-header { padding: 12px 16px; background: transparent; overflow-wrap: anywhere; }
+.panel-header::before { display: none; }
+.category-label { padding: 12px 0; }
+.cheat-btn { border-radius: 3px; text-align: left; font-size: 14px; font-weight: 500; letter-spacing: 0; }
+.cheat-btn.blue, .cheat-btn.red, .cheat-btn.green, .cheat-btn.gold { border-color: var(--border); }
+.cheat-btn .addr { font-size: 11px; color: var(--muted); }
+.cheat-btn .cheat-desc { font: 12px/1.5 var(--sans); color: var(--muted); }
+body.compact-ui .cheat-feature-label, body.compact-ui .cheat-status-label,
+.cheat-feature-label, .cheat-status-label { font: 11px/1.4 var(--sans); letter-spacing: .01em; }
+.cheat-btn.active-cheat, .btn-apply.active-cheat {
+  box-shadow: inset 3px 0 var(--success); border-color: var(--success) !important;
+  background: #263a30 !important; color: var(--text) !important;
+}
+.btn-connect, .btn-apply { background: var(--accent); color: #15191a; font-weight: 600; }
+.btn-connect, .btn-apply, .btn-power, .btn-disconnect, .btn-send, .btn-snap, .tp-btn,
+.slider-preset, .cheat-btn, .rtm-tab-btn { border-radius: 3px; letter-spacing: .01em; text-transform: none; }
+.btn-connect, .btn-apply, .btn-power, .btn-send, .tp-btn { font-family: var(--sans); font-size: 13px; }
+.btn-apply.danger { background: var(--surface); color: var(--danger); border: 1px solid var(--border); }
+.ip-input, .hex-input, .scan-input, #cheat-search, #act-search, #act-select { border-radius: 3px !important; font-size: 14px !important; }
+.field-label, .slider-label, .scan-field label { font: 12px var(--sans); letter-spacing: .03em; }
+.tp-slot-name { font: 14px var(--sans); }
+.tp-slot-coords { font-size: 11px; }
+.tp-folder { border-radius: 3px; }
+.tp-folder-header { padding: 10px; }
+.tp-folder-name { font: 13px var(--sans); }
+.tp-slot-actions button { min-height: 32px; font: 12px var(--sans); }
+.tp-new-folder-btn { font: 13px var(--sans); }
+.status-badge { border-radius: 3px; font-size: 11px; }
+[id^="rtm-tab-"] { font: 13px var(--sans); padding: 9px 18px; letter-spacing: .02em; }
+.log-entry { font-size: 12px; line-height: 1.7; }
+.log-entry .ts { color: var(--muted); }
+#sec-maintenance .connect-row { gap: 10px; }
+#sec-maintenance button { min-height: 42px; }
+button:focus-visible, input:focus-visible, select:focus-visible, [onclick]:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 3px;
+}
+@media (hover: hover) {
+  .cheat-btn:hover, .slider-preset:hover { border-color: var(--muted); background: #2a3237; }
+}
+@media (min-width: 1000px) { .cheat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+  header { padding: 14px 12px; flex-wrap: wrap; gap: 10px; }
+  .section { padding-inline: 12px; }
+  .connect-row, .tp-btn-row, .scan-btn-row, .custom-row { flex-wrap: wrap; }
+  .ip-input { flex-basis: 100%; }
+  #sec-maintenance button { flex: 1 1 140px; }
+  .cheat-grid { gap: 8px; padding: 12px; }
+  .cheat-btn { font-size: 13px; min-width: 0; overflow-wrap: anywhere; }
+  .tp-coord-grid { min-width: 0; }
+  .hex-input { min-width: 0; width: 100%; }
+}
+body.light-mode {
+  --bg: #edeeea; --surface: #f8f8f4; --card: #fff; --border: #c5cccb;
+  --text: #232d32; --muted: #59666c; --accent: #80703b; --success: #316344;
+  color-scheme: light;
+}
+body.light-mode .btn-connect, body.light-mode .btn-apply { color: #fff; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
