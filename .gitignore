@@ -4,3 +4,5 @@
 /recovered-current/
 /source-content-matches.txt
 /source-search-paths.txt
+__pycache__/
+*.py[cod]

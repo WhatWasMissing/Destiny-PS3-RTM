@@ -75,3 +75,21 @@ readback confirms bytes, not the in-game brightness effect.
 Matching static code/data bytes do not prove server persistence. Controlled
 observation in the matching 01.24 runtime is needed to confirm dynamic mappings
 and in-game effects.
+
+## Repeatable local audit
+
+The read-only helper at `tools/rtm_elf_audit.py` hashes an ELF, parses its
+big-endian load segments, reads candidate virtual addresses, and searches
+executable segments for aligned byte signatures. For the recovered game copy,
+run:
+
+```powershell
+python tools/rtm_elf_audit.py 'E:\Destiny PS3 RTMs\fly hack\gpttest\ebbotelfBAK\EBOOT.ELF' --search-signature 38C6FFFF
+```
+
+It reports whether the input hash is the verified 01.24 build, the bytes at
+known source sites, and all aligned matches for a supplied signature. It does
+not decrypt SELF files, disassemble instructions, or inspect a running game;
+the signature search returns candidates that still need disassembly and runtime
+evidence. Run its synthetic parser checks with
+`python -m unittest discover -s tests -p test_elfaudit.py -v`.
