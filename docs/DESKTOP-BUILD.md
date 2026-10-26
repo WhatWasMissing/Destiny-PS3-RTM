@@ -6,10 +6,10 @@ and Microsoft Edge (or a default browser). No external Go dependencies are used.
 Run `./build.ps1` from PowerShell. If Go is not on PATH, pass `-Go` with the
 absolute path to `go.exe`. The script runs Go and JavaScript tests and writes
 `dist/DestinyRTM.exe`, embedding the complete `source/` directory, and
-`dist/rtmctl.exe`, a standalone command-line client for webMAN PS3MAPI.
-The build also writes `dist/build-manifest.json` with both executable hashes
-and embedded source hashes, and syntax-checks every JavaScript module before
-packaging.
+`dist/rtmctl.exe`, a standalone command-line client for webMAN PS3MAPI, and
+`dist/rtm-mcp.exe`, a local MCP server for direct agent-tool access. The build
+also writes `dist/build-manifest.json` with all executable hashes and embedded
+source hashes, and syntax-checks every JavaScript module before packaging.
 
 Run the executable to open an Edge app window. If Edge cannot be located, the
 default browser opens instead. The host runs until its console is closed.
@@ -30,6 +30,11 @@ No console data or requests are sent to an external service.
 readback-verified memory writes and system notifications without opening the
 desktop UI. Its target, process and write-size checks match the RTM's intended
 Destiny process scope. Run `dist/rtmctl.exe help` for commands.
+
+`rtm-mcp` exposes status, bounded reads, verified writes, the source-backed
+brightness presets and system notifications over MCP stdio. Register it with
+Codex using the steps in [RTM-MCP.md](RTM-MCP.md). Build/protocol smoke checks
+use no live console connection.
 
 The frontend detects this host through `/host-config`. Ordinary static hosting
 continues to use direct console HTTP, subject to browser cross-origin rules.
