@@ -377,6 +377,7 @@
   async function connect() {
     const generation = ++connectionGeneration;
     consoleTransport.cancelAll();
+    resetVerifiedStates();
     stopHealthCheck();
     stopAutoReconnect();
     const val = document.getElementById('ip').value.trim();
@@ -431,6 +432,7 @@
 
   async function disconnect() {
     ++connectionGeneration;
+    resetVerifiedStates();
     stopAutoReconnect();
     stopHealthCheck();
     consoleTransport.cancelAll();
@@ -522,6 +524,10 @@
   function beginSafeAutoReconnect(targetIp = ip) {
     if (!autoReconnectEnabled || _autoReconnectActive || !targetIp) return;
 
+    const generation = ++connectionGeneration;
+    consoleTransport.cancelAll();
+    resetVerifiedStates();
+    let busy = false;
     _autoReconnectActive = true;
     _autoReconnectAttempts = 0;
     stopHealthCheck();
@@ -530,15 +536,18 @@
     log(`Connection lost — auto reconnect started → ${targetIp}`, 'err');
 
     const attempt = async () => {
-      if (!autoReconnectEnabled || !_autoReconnectActive) return;
+      if (!autoReconnectEnabled || !_autoReconnectActive || busy || generation !== connectionGeneration) return;
+      busy = true;
 
       _autoReconnectAttempts++;
       setBadge('connecting', `RECONNECT ${_autoReconnectAttempts}/${AUTO_RECONNECT_MAX_ATTEMPTS}`);
 
       try {
         await probePS3Reachable(targetIp, 4000);
+        if (!_autoReconnectActive || generation !== connectionGeneration) return;
         await finishSafeAutoReconnect(targetIp);
       } catch (e) {
+        if (!_autoReconnectActive || generation !== connectionGeneration) return;
         if (_autoReconnectAttempts >= AUTO_RECONNECT_MAX_ATTEMPTS) {
           stopAutoReconnect(false);
           setBadge('failed', 'RECONNECT FAILED');
@@ -550,7 +559,7 @@
           log('Auto reconnect timed out after 3 minutes', 'err');
           toast('Auto reconnect timed out', 'err');
         }
-      }
+      } finally { busy = false; }
     };
 
     attempt();
@@ -2459,24 +2468,12 @@
   }
 
   function restoreActiveCheatUI() {
-    const saved = loadActiveCheatIds();
-    Object.keys(saved).forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.classList.add('active-cheat');
+    // Browser storage records prior UI intent, never current console memory.
+    // A new page/session starts unknown until a write and readback succeed.
+    document.querySelectorAll('[id^="tog-"], [id^="srv-"]').forEach(element => {
+      element.classList.remove('active-cheat');
+      element.dataset.consoleState = 'unknown';
     });
-
-    // Rebuild each toggle's internal tracker from the restored UI state.
-    document.querySelectorAll('[id^="tog-"]').forEach(el => {
-      if (el.classList.contains('active-cheat') && typeof getCheatLabel === 'function') {
-        cheatState[getCheatLabel(el)] = true;
-      }
-    });
-    if (saved['tog-anti-mm']) antiMMState = true;
-
-    const ropkEl = document.getElementById('ropk-controls');
-    if (saved['srv-void'])      srvMode = 'void';
-    else if (saved['srv-ropk']) { srvMode = 'ropk'; if (ropkEl) ropkEl.style.display = ''; }
-    else if (saved['srv-off'])  srvMode = 'off';
   }
 
   function setupCheatPersistenceObserver() {
@@ -2792,12 +2789,14 @@
   const cheatRuntimeStatus = Object.create(null);
 
   function normalizeCheatStatus(state) {
-    return ['unknown','on','off','applying','failed'].includes(state) ? state : 'off';
+    return ['unknown','on','off','verified-on','verified-off','applying','failed'].includes(state) ? state : 'off';
   }
 
   function cheatStatusText(state) {
     return ({
       unknown:'UNKNOWN',
+      'verified-on':'ON VERIFIED',
+      'verified-off':'OFF VERIFIED',
       on:'ON REQUESTED',
       off:'OFF REQUESTED',
       applying:'APPLYING…',
@@ -2968,108 +2967,72 @@
     return disabled;
   }
 
+  const patchRunner = RtmOperations.createRunner({
+    session: () => ip && document.getElementById('status-badge').classList.contains('connected') ? `${connectionGeneration}:${ip}` : '',
+    write: async (address, value) => {
+      const target = ip;
+      await ps3fetch(`http://${target}/setmem.ps3mapi?addr=${address.toString(16)}&val=${value}`);
+      await henDelay();
+    },
+    read: (address, length) => ps3getmem(address, length)
+  });
+  const requestedCheatState = Object.create(null);
+  function resetVerifiedStates() {
+    for (const label of Object.keys(cheatState)) delete cheatState[label];
+    for (const label of Object.keys(requestedCheatState)) delete requestedCheatState[label];
+    document.querySelectorAll('[id^="tog-"], [id^="srv-"]').forEach(element => {
+      element.classList.remove('active-cheat');
+      updateCheatStatus(element, 'unknown');
+    });
+  }
+
+  async function applyToggle(label, btn, pairsForState) {
+    if (!ip || !document.getElementById('status-badge').classList.contains('connected')) { setCheatStatusFromButton(btn, 'unknown'); toast('Not connected', 'err'); return; }
+    if (btn?.disabled) return;
+    const generation = connectionGeneration;
+    const isOn = !(requestedCheatState[label] ?? cheatState[label]);
+    if (btn) btn.disabled = true;
+    setCheatStatusFromButton(btn, 'applying');
+    try {
+      if (isOn && btn?.id) await resolveCheatConflicts(btn.id);
+      if (generation !== connectionGeneration) return;
+      requestedCheatState[label] = isOn;
+      const result = await patchRunner.apply(pairsForState(isOn));
+      if (generation !== connectionGeneration) return;
+      requestedCheatState[label] = isOn;
+      if (result.status === 'verified') {
+        cheatState[label] = isOn;
+        btn?.classList.toggle('active-cheat', isOn);
+        setCheatStatusFromButton(btn, isOn ? 'verified-on' : 'verified-off');
+        log(`${label}: ${isOn ? 'ON' : 'OFF'} verified by memory readback`, 'ok');
+        toast(`${label}: ${isOn ? 'ON' : 'OFF'} verified`, 'ok');
+      } else {
+        btn?.classList.remove('active-cheat');
+        setCheatStatusFromButton(btn, 'unknown');
+        log(`${label}: write acknowledged, readback unavailable; state unknown`, 'err');
+        toast(`${label}: sent, not verified`, '');
+      }
+    } catch (error) {
+      if (generation !== connectionGeneration) return;
+      btn?.classList.remove('active-cheat');
+      setCheatStatusFromButton(btn, 'unknown');
+      log(`${label}: ${error.message}`, 'err'); toast(`${label}: state unknown`, 'err');
+    } finally { if (btn) btn.disabled = false; }
+  }
   async function togFire(addr, onVal, offVal, label, btn, size = 4) {
-    if (!ip) { setCheatStatusFromButton(btn, 'failed'); toast('Not connected', 'err'); return; }
-    const isOn = !cheatState[label];
-    if (isOn && btn?.id) await resolveCheatConflicts(btn.id);
-    const writeVal = isOn ? onVal : offVal;
-    const sizeParam = size !== 4 ? `&size=${size}` : '';
-    setCheatStatusFromButton(btn, 'applying');
-    try {
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${addr}&val=${writeVal}${sizeParam}`);
-      await henDelay();
-      cheatState[label] = isOn;
-      btn.classList.toggle('active-cheat', isOn);
-      setCheatStatusFromButton(btn, isOn ? 'on' : 'off');
-      const stateWord = isOn ? 'ON' : 'OFF';
-      log(`${label} ${stateWord} → addr:${addr} val:${writeVal}`, 'ok');
-      toast(`${label} ${stateWord}`, 'ok');
-      notifyPS3(`${label}: ${stateWord}`);
-    } catch(e) {
-      setCheatStatusFromButton(btn, 'failed');
-      log(`${label} failed: ${e.message}`, 'err');
-      toast(`${label} failed`, 'err');
-    }
+    return applyToggle(label, btn, isOn => [[addr, isOn ? onVal : offVal]]);
   }
-
   async function togFireMulti(onPairs, offPairs, label, btn) {
-    if (!ip) { setCheatStatusFromButton(btn, 'failed'); toast('Not connected', 'err'); return; }
-    const isOn = !cheatState[label];
-    if (isOn && btn?.id) await resolveCheatConflicts(btn.id);
-    const pairs = isOn ? onPairs : offPairs;
-    setCheatStatusFromButton(btn, 'applying');
-    try {
-      for (const [addr, val] of pairs) {
-        await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${addr}&val=${val}`);
-        await henDelay();
-      }
-      cheatState[label] = isOn;
-      btn.classList.toggle('active-cheat', isOn);
-      setCheatStatusFromButton(btn, isOn ? 'on' : 'off');
-      const stateWord = isOn ? 'ON' : 'OFF';
-      log(`${label} ${stateWord} → ${pairs.length} writes`, 'ok');
-      toast(`${label} ${stateWord}`, 'ok');
-      notifyPS3(`${label}: ${stateWord}`);
-    } catch(e) {
-      setCheatStatusFromButton(btn, 'failed');
-      log(`${label} failed: ${e.message}`, 'err');
-      toast(`${label} failed`, 'err');
-    }
+    return applyToggle(label, btn, isOn => isOn ? onPairs : offPairs);
   }
-
-  // togFireFloat: toggle a single float address ON/OFF
-  // onFloat/offFloat are JS number strings e.g. '0', '-1', '1'
   async function togFireFloat(addr, onFloat, offFloat, label, btn) {
-    if (!ip) { setCheatStatusFromButton(btn, 'failed'); toast('Not connected', 'err'); return; }
-    const isOn = !cheatState[label];
-    const fVal = isOn ? parseFloat(onFloat) : parseFloat(offFloat);
-    const valHex = floatToBEHex(fVal);
-    setCheatStatusFromButton(btn, 'applying');
-    try {
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${addr}&val=${valHex}`);
-      await henDelay();
-      cheatState[label] = isOn;
-      btn.classList.toggle('active-cheat', isOn);
-      setCheatStatusFromButton(btn, isOn ? 'on' : 'off');
-      const stateWord = isOn ? 'ON' : 'OFF';
-      log(`${label} ${stateWord} → addr:${addr} val:${valHex}`, 'ok');
-      toast(`${label} ${stateWord}`, 'ok');
-      notifyPS3(`${label}: ${stateWord}`);
-    } catch(e) {
-      setCheatStatusFromButton(btn, 'failed');
-      log(`${label} failed: ${e.message}`, 'err');
-      toast(`${label} failed`, 'err');
-    }
+    return applyToggle(label, btn, isOn => [[addr, floatToBEHex(parseFloat(isOn ? onFloat : offFloat))]]);
   }
-
-  // togFireBytes: toggle a setMemory-style multi-byte write
-  // onHex/offHex are full hex strings (e.g. 'C0A000000000000000000000')
-  // Written in 4-byte chunks sequentially
   async function togFireBytes(baseAddr, onHex, offHex, label, btn) {
-    if (!ip) { setCheatStatusFromButton(btn, 'failed'); toast('Not connected', 'err'); return; }
-    const isOn = !cheatState[label];
-    const hex = isOn ? onHex : offHex;
-    const chunks = hex.match(/.{8}/g) || [];
-    setCheatStatusFromButton(btn, 'applying');
-    try {
-      const base = parseInt(baseAddr, 16);
-      for (let i = 0; i < chunks.length; i++) {
-        const addr = (base + i * 4).toString(16).toUpperCase();
-        await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${addr}&val=${chunks[i]}`);
-        await henDelay();
-      }
-      cheatState[label] = isOn;
-      btn.classList.toggle('active-cheat', isOn);
-      setCheatStatusFromButton(btn, isOn ? 'on' : 'off');
-      const stateWord = isOn ? 'ON' : 'OFF';
-      log(`${label} ${stateWord} → ${chunks.length} writes from ${baseAddr}`, 'ok');
-      toast(`${label} ${stateWord}`, 'ok');
-      notifyPS3(`${label}: ${stateWord}`);
-    } catch(e) {
-      setCheatStatusFromButton(btn, 'failed');
-      log(`${label} failed: ${e.message}`, 'err');
-      toast(`${label} failed`, 'err');
-    }
+    return applyToggle(label, btn, isOn => {
+      const hex = isOn ? onHex : offHex;
+      return (hex.match(/.{1,8}/g) || []).map((chunk, i) => [(parseInt(baseAddr,16) + i*4).toString(16), chunk]);
+    });
   }
 
 
@@ -3973,7 +3936,7 @@
   async function fetchConsoleID() {
     if (!ip) { toast('Not connected', 'err'); return; }
     try {
-      const response = await fetch(`http://${ip}/getcid.ps3mapi`);
+      const response = await consoleTransport.request(`http://${ip}/getcid.ps3mapi`);
       const htmlText = await response.text();
 
       // Parse the HTML response and extract the CID from the <h2> tag.

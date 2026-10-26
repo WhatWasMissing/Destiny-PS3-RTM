@@ -65,3 +65,21 @@ Do not mark the complete objective achieved based on the transport tests alone.
 - Remaining key work: live-console limits, truthful verified states, queue/session
   integration tests, full backup/teleport browser workflows, responsive QA and
   final packaged application checks. Goal is not complete.
+
+## Write verification pass
+
+- Main togFire/Multi/Float/Bytes controls now serialize patch operations and
+  verify the resulting memory bytes. HTTP acceptance without readable memory
+  leaves status UNKNOWN; mismatches and partial writes are reported explicitly.
+- Stored active-cheat highlights no longer restore as live console state.
+  Explicit connect/disconnect and automatic reconnect invalidate prior verified
+  states. Reconnecting blocks patch-runner operations.
+- Late automatic reconnect results cannot overwrite a newer session or a
+  disconnect; pending probes do not overlap interval ticks.
+- Thirteen Node tests pass, including serialized operation session changes,
+  readback mismatch/unavailability, partial failures, and tests executing the
+  production reconnect function with a fake console probe.
+- Remaining: extend verification beyond the main generic toggles (custom
+  writes, sliders, server modes, teleport and hook operations); lifecycle
+  integration beyond automatic reconnect; full UI workflows and responsive QA.
+  No live-console verification has been performed.
