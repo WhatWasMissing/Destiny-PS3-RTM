@@ -30,13 +30,13 @@ builds use different offsets and were not used as address references.
   from local source; they have not been checked against a live console build.
   No live console testing was performed.
 
-Several additional local source candidates conflict with the checked BLES01857
-ELF: Brightness, FOV, Flip View, Power Boost and One-Hit Enemies. Their source
-values either point into executable instructions or disagree across RTMs. The
-Brightness control is a read-only address probe; the other conflicts remain
-unchanged until runtime evidence identifies the correct build and memory
-semantics. See [ADDRESS-AUDIT.md](ADDRESS-AUDIT.md) for the ELF identity,
-instruction bytes and limits of that comparison.
+Several local source candidates conflict: Brightness, FOV, Flip View, Power
+Boost and One-Hit Enemies. A local ELF previously labelled `PATCH0024` has a
+hash matching Destiny 01.00, not 01.24, so its disassembly cannot validate or
+reject these 01.24 source claims. Brightness remains a read-only probe; the
+other conflicts remain unresolved pending a correctly identified 01.24 ELF and
+runtime evidence. See [ADDRESS-AUDIT.md](ADDRESS-AUDIT.md) for the corrected
+build identity and next verification step.
 
 The local source establishes provenance, not build compatibility. Public
 webMAN documentation supports memory reads/writes and the PS3 notification

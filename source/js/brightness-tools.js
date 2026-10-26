@@ -40,9 +40,9 @@
       const preset = memory.brightnessPresetForHex(raw);
       current.textContent = `Current word: ${raw} · Float32 ${formatted}`;
       if (preset) {
-        setStatus(`Matches the source “${preset.label}” value (${preset.value}), but this address is executable code in the checked ELF. Probe only; runtime behavior and a writable data address remain unconfirmed.`, 'warning');
+        setStatus(`Matches the source “${preset.label}” value (${preset.value}), but this does not prove the address is a brightness field or the correct build. Probe only; 01.24 semantics remain unconfirmed.`, 'warning');
       } else {
-        setStatus('Does not match any listed source preset. The address is a code location in the checked ELF; no write was attempted.', 'warning');
+        setStatus('Does not match any listed source preset. The address semantics are unknown for this build; no write was attempted.', 'warning');
       }
     } catch (error) {
       if (generation !== connectionGeneration || targetIp !== ip) {
