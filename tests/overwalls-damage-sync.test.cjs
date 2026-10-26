@@ -72,3 +72,17 @@ test('failed Overwalls readback does not replace the displayed damage state', as
   assert.deepEqual(synced, []);
   assert.match(status.textContent, /not confirmed/);
 });
+
+test('Overwalls Warpriest variant restores its source-matched primary instruction', async () => {
+  const writes = [];
+  loadOverwallsTools({
+    writeSequence: async pairs => { writes.push(pairs); },
+    syncDamage: () => {}
+  });
+
+  await global.owApplyCheatToggle(4, true);
+  assert.deepEqual(writes[0], [['00444CA4', 'C0420348'], ['01891AE0', '3F800000']]);
+
+  await global.owApplyCheatToggle(4, false);
+  assert.deepEqual(writes[1], [['00444CA4', 'C04100F0']]);
+});

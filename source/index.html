@@ -522,9 +522,9 @@
   <span class="cheat-desc">Applies the source RTM's Rock Jump values. Shares its 12-byte patch with No Pushback Barriers.</span>
   <span class="addr"></span>
 </button>
-<button class="cheat-btn gold" id="tog-warpriest" onclick="togFireMulti([['444CA4','C0434F80'],['1897420','3F800000']],[['444CA4','C0434DB0'],['1897420','3F800000']],'Warpriest Immunity',this)">
-  <span class="cheat-name">Warpriest Immunity</span>
-  <span class="cheat-desc">Removes warpriest immunity while enabled. (Must be instance leader)</span>
+<button class="cheat-btn gold" id="tog-warpriest" disabled title="Blocked: the source patch's OFF bytes do not match the verified BLES01857 01.24 EBOOT">
+  <span class="cheat-name">Warpriest Immunity · source mismatch</span>
+  <span class="cheat-desc">Unavailable for the verified 01.24 build. The source OFF values differ from the executable at both patch sites.</span>
   <span class="addr"></span>
 </button>
 <button class="cheat-btn gold" id="tog-sword-energy" onclick="triggerDynamicCheat('tog-sword-energy')">

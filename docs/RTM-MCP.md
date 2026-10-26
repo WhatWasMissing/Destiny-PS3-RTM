@@ -11,6 +11,7 @@ open the desktop app or automate its UI.
 | `rtm_status` | Checks webMAN reachability. It does not confirm Destiny is running. |
 | `rtm_read_memory` | Reads 1–65536 bytes from Destiny PID `0x1010200`. |
 | `rtm_read_player_position` | Follows the Overwalls player pointer at `0x0190EBB0` and decodes X/Y/Z as big-endian Float32 values at pointer offsets `+0x140/+0x144/+0x148`. Read-only; live build compatibility and gameplay meaning remain unconfirmed. |
+| `rtm_inspect_entity_pointers` | Reads Overwalls player and OPK-target roots at `0x0190EBB0` and `0x0190EBB4`. For valid pointers it returns raw bytes and decoded big-endian Float32 X/Y/Z at `+0x140/+0x144/+0x148`, plus the target activation field at `+0x1B8`. Null and invalid pointers are reported without dereferencing; a self-target is marked. The several reads form a non-atomic snapshot. Live pointer semantics and build compatibility remain unconfirmed. |
 | `rtm_write_memory` | Writes 1–8 bytes and succeeds only after exact readback. It does not call game functions. |
 | `rtm_set_brightness` | Writes one of the local 1.24 source presets at `0x006101C0` and verifies the bytes. The in-game effect remains unobserved. |
 | `rtm_notify` | Dispatches a webMAN system notification; display is not confirmed. |
@@ -20,7 +21,9 @@ Every tool requires the PS3's private IPv4 address. The server fixes webMAN to
 port 80 and Destiny to PID `0x1010200`, disables redirects and proxy use, and
 does not expose function-call, client-list, IP-collection, or geolocation
 operations. Read/write limits and target validation are enforced by the shared
-client as well as the MCP tool layer.
+client as well as the MCP tool layer. The entity pointer inspector performs
+memory reads only and includes raw hex for each pointer and decoded field;
+non-finite Float32 values are returned as null while their raw bytes are kept.
 
 `rtm_launch_game` defaults to `/dev_hdd0/PS3ISO/Destiny.iso`. Its optional
 `iso_path` must be a simple `.iso` filename directly inside `/dev_hdd0/PS3ISO/`;

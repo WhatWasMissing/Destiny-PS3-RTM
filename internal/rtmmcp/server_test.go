@@ -17,22 +17,25 @@ import (
 type fakeClient struct {
 	mu sync.Mutex
 
-	statusCode    int
-	statusErr     error
-	readData      []byte
-	readErr       error
-	writeErr      error
-	notifyErr     error
-	reads         int
-	writes        [][3]string
-	notifies      []string
-	launches      []string
-	launchErr     error
-	position      rtmclient.PlayerPosition
-	positionErr   error
-	positionReads int
-	blockRead     bool
-	readStarted   chan struct{}
+	statusCode         int
+	statusErr          error
+	readData           []byte
+	readErr            error
+	writeErr           error
+	notifyErr          error
+	reads              int
+	writes             [][3]string
+	notifies           []string
+	launches           []string
+	launchErr          error
+	position           rtmclient.PlayerPosition
+	positionErr        error
+	positionReads      int
+	entityPointers     rtmclient.EntityPointerInspection
+	entityPointerErr   error
+	entityPointerReads int
+	blockRead          bool
+	readStarted        chan struct{}
 }
 
 func (f *fakeClient) Status(context.Context, string) (int, error) {
@@ -66,6 +69,13 @@ func (f *fakeClient) ReadPlayerPosition(context.Context, string) (rtmclient.Play
 	defer f.mu.Unlock()
 	f.positionReads++
 	return f.position, f.positionErr
+}
+
+func (f *fakeClient) InspectEntityPointers(context.Context, string) (rtmclient.EntityPointerInspection, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.entityPointerReads++
+	return f.entityPointers, f.entityPointerErr
 }
 
 func (f *fakeClient) WriteMemory(_ context.Context, _, address string, data []byte) error {
@@ -162,14 +172,21 @@ func TestToolsListAdvertisesBoundedRTMTools(t *testing.T) {
 	}
 	list := resultObject(t, responseByID(t, responses, 2))
 	tools, ok := list["tools"].([]any)
-	if !ok || len(tools) != 7 {
-		t.Fatalf("expected seven tools, got %#v", list["tools"])
+	if !ok || len(tools) != 8 {
+		t.Fatalf("expected eight tools, got %#v", list["tools"])
 	}
+	var sawEntityInspector bool
 	for _, item := range tools {
 		descriptor := item.(map[string]any)
 		if descriptor["inputSchema"].(map[string]any)["additionalProperties"] != false {
 			t.Fatalf("tool schema accepts unknown arguments: %#v", descriptor)
 		}
+		if descriptor["name"] == "rtm_inspect_entity_pointers" {
+			sawEntityInspector = descriptor["annotations"].(map[string]any)["readOnlyHint"] == true
+		}
+	}
+	if !sawEntityInspector {
+		t.Fatal("entity pointer inspector is missing or is not marked read-only")
 	}
 }
 
@@ -223,6 +240,60 @@ func TestReadAndWritesReturnStructuredVerifiedResults(t *testing.T) {
 	}
 }
 
+func TestEntityPointerInspectorReturnsStructuredReadOnlySnapshot(t *testing.T) {
+	client := &fakeClient{entityPointers: rtmclient.EntityPointerInspection{
+		Player: rtmclient.EntityPointerSnapshot{
+			RootAddress: rtmclient.PlayerPointerAddress, Pointer: 0x10000000, PointerRawHex: "10000000", PointerState: rtmclient.PointerStateValid,
+			CoordinatesAddress: 0x10000140, CoordinatesRawHex: "41480000C050000043000000", CoordinatesState: "valid",
+			X: float32Value(12.5), Y: float32Value(-3.25), Z: float32Value(128), ActivationState: "not_applicable",
+		},
+		Target: rtmclient.EntityPointerSnapshot{
+			RootAddress: rtmclient.TargetPointerAddress, Pointer: 0x10001000, PointerRawHex: "10001000", PointerState: rtmclient.PointerStateValid,
+			CoordinatesAddress: 0x10001140, CoordinatesRawHex: "3F8000004000000040400000", CoordinatesState: "valid",
+			X: float32Value(1), Y: float32Value(2), Z: float32Value(3),
+			ActivationAddress: 0x100011B8, ActivationRawHex: "3F800000", ActivationState: "valid", ActivationValue: float32Value(1),
+		},
+	}}
+	responses := runServer(t, client, toolRequest(1, "rtm_inspect_entity_pointers", `{"target_ipv4":"192.168.0.62"}`))
+	result := structuredObject(t, responseByID(t, responses, 1))
+	if result["ok"] != true || result["read_only"] != true || result["snapshot_atomic"] != false || result["build_compatibility_confirmed"] != false || client.entityPointerReads != 1 || len(client.writes) != 0 {
+		t.Fatalf("unexpected entity inspection envelope or side effect: %#v", result)
+	}
+	player, ok := result["player"].(map[string]any)
+	if !ok || player["root_address"] != "0x0190EBB0" || player["pointer"] != "0x10000000" || player["pointer_raw_hex"] != "10000000" || player["coordinates_address"] != "0x10000140" || player["coordinates_raw_hex"] != "41480000C050000043000000" || player["x"] != 12.5 || player["y"] != -3.25 || player["z"] != float64(128) {
+		t.Fatalf("unexpected player pointer result: %#v", result["player"])
+	}
+	target, ok := result["target"].(map[string]any)
+	if !ok || target["root_address"] != "0x0190EBB4" || target["pointer"] != "0x10001000" || target["coordinates_address"] != "0x10001140" || target["x"] != float64(1) || target["y"] != float64(2) || target["z"] != float64(3) || target["activation_address"] != "0x100011B8" || target["activation_raw_hex"] != "3F800000" || target["activation_value"] != float64(1) {
+		t.Fatalf("unexpected target pointer result: %#v", result["target"])
+	}
+}
+
+func TestEntityPointerInspectorPreservesNullAndInvalidPointerStates(t *testing.T) {
+	client := &fakeClient{entityPointers: rtmclient.EntityPointerInspection{
+		Player: rtmclient.EntityPointerSnapshot{
+			RootAddress: rtmclient.PlayerPointerAddress, PointerRawHex: "00000000", PointerState: rtmclient.PointerStateNull,
+			CoordinatesState: "not_read", X: nil, Y: nil, Z: nil, ActivationState: "not_applicable",
+		},
+		Target: rtmclient.EntityPointerSnapshot{
+			RootAddress: rtmclient.TargetPointerAddress, Pointer: 0x10000001, PointerRawHex: "10000001", PointerState: rtmclient.PointerStateInvalid,
+			PointerError: "pointer is not four-byte aligned", CoordinatesState: "not_read", ActivationState: "not_read",
+		},
+	}}
+	responses := runServer(t, client, toolRequest(1, "rtm_inspect_entity_pointers", `{"target_ipv4":"192.168.0.62"}`))
+	result := structuredObject(t, responseByID(t, responses, 1))
+	player := result["player"].(map[string]any)
+	if player["pointer"] != "0x00000000" || player["pointer_raw_hex"] != "00000000" || player["pointer_state"] != rtmclient.PointerStateNull || player["coordinates_address"] != nil || player["x"] != nil {
+		t.Fatalf("null pointer was not preserved safely: %#v", player)
+	}
+	target := result["target"].(map[string]any)
+	if target["pointer"] != "0x10000001" || target["pointer_raw_hex"] != "10000001" || target["pointer_state"] != rtmclient.PointerStateInvalid || target["pointer_error"] == "" || target["coordinates_address"] != nil || target["activation_address"] != nil {
+		t.Fatalf("invalid pointer was not preserved safely: %#v", target)
+	}
+}
+
+func float32Value(value float32) *float32 { return &value }
+
 func TestInvalidTargetArgumentsAndOversizedWritesFailBeforeBackend(t *testing.T) {
 	client := &fakeClient{}
 	responses := runServer(t, client,
@@ -233,15 +304,16 @@ func TestInvalidTargetArgumentsAndOversizedWritesFailBeforeBackend(t *testing.T)
 			toolRequest(5, "rtm_read_memory", `{"target_ipv4":"192.168.0.62","address":"FFFFFFFF","length":2}`)+
 			toolRequest(6, "rtm_write_memory", `{"target_ipv4":"192.168.0.62","address":"FFFFFFFF","hex":"0102"}`)+
 			toolRequest(7, "rtm_launch_game", `{"target_ipv4":"192.168.0.62","iso_path":"/dev_hdd0/PS3ISO/../../play.ps3"}`)+
-			toolRequest(8, "rtm_read_player_position", `{"target_ipv4":"8.8.8.8"}`),
+			toolRequest(8, "rtm_read_player_position", `{"target_ipv4":"8.8.8.8"}`)+
+			toolRequest(9, "rtm_inspect_entity_pointers", `{"target_ipv4":"8.8.8.8"}`),
 	)
-	for id := float64(1); id <= 8; id++ {
+	for id := float64(1); id <= 9; id++ {
 		result := resultObject(t, responseByID(t, responses, id))
 		if result["isError"] != true {
 			t.Fatalf("invalid request %v was accepted: %#v", id, result)
 		}
 	}
-	if len(client.writes) != 0 || client.reads != 0 || len(client.notifies) != 0 || len(client.launches) != 0 || client.positionReads != 0 {
+	if len(client.writes) != 0 || client.reads != 0 || len(client.notifies) != 0 || len(client.launches) != 0 || client.positionReads != 0 || client.entityPointerReads != 0 {
 		t.Fatalf("invalid inputs reached backend: %#v", client)
 	}
 }

@@ -3,6 +3,7 @@ package rtmclient
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -116,6 +117,133 @@ func TestReadPlayerPositionRejectsInvalidPointersAndNonFiniteCoordinates(t *test
 	if _, err := testClient(server).ReadPlayerPosition(context.Background(), "192.168.0.62"); err == nil || !strings.Contains(err.Error(), "non-finite") {
 		t.Fatalf("expected non-finite coordinate rejection, got %v", err)
 	}
+}
+
+func TestInspectEntityPointersReadsPlayerTargetCoordinatesAndActivation(t *testing.T) {
+	var reads []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/getmem.ps3mapi" || r.URL.Query().Get("proc") != DefaultProcessID {
+			t.Fatalf("unexpected request: %s?%s", r.URL.Path, r.URL.RawQuery)
+		}
+		address := r.URL.Query().Get("addr")
+		length := r.URL.Query().Get("len")
+		reads = append(reads, address+":"+length)
+		values := map[string]string{
+			"0190EBB0": "10000000",
+			"0190EBB4": "10001000",
+			"10000140": "41480000C050000043000000",
+			"10001140": "3F8000004000000040400000",
+			"100011B8": "3F800000",
+		}
+		if value, ok := values[address]; ok {
+			fmt.Fprintf(w, `<textarea id="output">%s</textarea>`, value)
+			return
+		}
+		t.Fatalf("unexpected address %s", address)
+	}))
+	defer server.Close()
+
+	inspection, err := testClient(server).InspectEntityPointers(context.Background(), "192.168.0.62")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if inspection.Player.RootAddress != PlayerPointerAddress || inspection.Player.Pointer != 0x10000000 || inspection.Player.PointerRawHex != "10000000" || inspection.Player.PointerState != PointerStateValid {
+		t.Fatalf("unexpected player pointer: %#v", inspection.Player)
+	}
+	if inspection.Player.CoordinatesAddress != 0x10000140 || inspection.Player.CoordinatesRawHex != "41480000C050000043000000" || inspection.Player.CoordinatesState != "valid" {
+		t.Fatalf("unexpected player coordinates: %#v", inspection.Player)
+	}
+	if inspection.Player.X == nil || *inspection.Player.X != 12.5 || inspection.Player.Y == nil || *inspection.Player.Y != -3.25 || inspection.Player.Z == nil || *inspection.Player.Z != 128 {
+		t.Fatalf("unexpected decoded player coordinates: %#v", inspection.Player)
+	}
+	if inspection.Target.RootAddress != TargetPointerAddress || inspection.Target.Pointer != 0x10001000 || inspection.Target.PointerRawHex != "10001000" || inspection.Target.PointerState != PointerStateValid {
+		t.Fatalf("unexpected target pointer: %#v", inspection.Target)
+	}
+	if inspection.Target.CoordinatesAddress != 0x10001140 || inspection.Target.CoordinatesRawHex != "3F8000004000000040400000" || inspection.Target.CoordinatesState != "valid" {
+		t.Fatalf("unexpected target coordinates: %#v", inspection.Target)
+	}
+	if inspection.Target.X == nil || *inspection.Target.X != 1 || inspection.Target.Y == nil || *inspection.Target.Y != 2 || inspection.Target.Z == nil || *inspection.Target.Z != 3 {
+		t.Fatalf("unexpected decoded target coordinates: %#v", inspection.Target)
+	}
+	if inspection.Target.ActivationAddress != 0x100011B8 || inspection.Target.ActivationRawHex != "3F800000" || inspection.Target.ActivationState != "valid" || inspection.Target.ActivationValue == nil || *inspection.Target.ActivationValue != 1 {
+		t.Fatalf("unexpected target activation field: %#v", inspection.Target)
+	}
+	wantReads := "0190EBB0:4|0190EBB4:4|10000140:12|10001140:12|100011B8:4"
+	if strings.Join(reads, "|") != wantReads {
+		t.Fatalf("memory reads = %#v, want %s", reads, wantReads)
+	}
+}
+
+func TestInspectEntityPointersRepresentsNullInvalidSelfAndNonFiniteFields(t *testing.T) {
+	t.Run("null and invalid roots are not dereferenced", func(t *testing.T) {
+		calls := 0
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			calls++
+			value := map[string]string{"0190EBB0": "00000000", "0190EBB4": "10000001"}[r.URL.Query().Get("addr")]
+			fmt.Fprintf(w, `<textarea id="output">%s</textarea>`, value)
+		}))
+		defer server.Close()
+		inspection, err := testClient(server).InspectEntityPointers(context.Background(), "192.168.0.62")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if calls != 2 || inspection.Player.PointerState != PointerStateNull || inspection.Player.PointerRawHex != "00000000" || inspection.Player.CoordinatesAddress != 0 {
+			t.Fatalf("unexpected null pointer result/calls: %#v, %d", inspection.Player, calls)
+		}
+		if calls != 2 || inspection.Target.PointerState != PointerStateInvalid || inspection.Target.PointerRawHex != "10000001" || inspection.Target.PointerError == "" || inspection.Target.ActivationAddress != 0 {
+			t.Fatalf("unexpected invalid pointer result/calls: %#v, %d", inspection.Target, calls)
+		}
+	})
+
+	t.Run("self target is marked and remains read-only", func(t *testing.T) {
+		var reads []string
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			address := r.URL.Query().Get("addr")
+			reads = append(reads, address)
+			value := map[string]string{
+				"0190EBB0": "10000000", "0190EBB4": "10000000",
+				"10000140": "3F8000004000000040400000", "100001B8": "3F800000",
+			}[address]
+			fmt.Fprintf(w, `<textarea id="output">%s</textarea>`, value)
+		}))
+		defer server.Close()
+		inspection, err := testClient(server).InspectEntityPointers(context.Background(), "192.168.0.62")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if inspection.Target.PointerState != PointerStateSameAsPlayer || inspection.Target.PointerNote == "" || inspection.Target.CoordinatesAddress != 0x10000140 || inspection.Target.ActivationAddress != 0x100001B8 {
+			t.Fatalf("self target was not identified/read-only inspected: %#v", inspection.Target)
+		}
+		if strings.Join(reads, "|") != "0190EBB0|0190EBB4|10000140|10000140|100001B8" {
+			t.Fatalf("unexpected self-target reads: %#v", reads)
+		}
+	})
+
+	t.Run("non-finite values retain raw bytes and are JSON-safe", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			value := map[string]string{
+				"0190EBB0": "10000000", "0190EBB4": "10001000",
+				"10000140": "7FC000003F80000040000000",
+				"10001140": "3F8000004000000040400000",
+				"100011B8": "7F800000",
+			}[r.URL.Query().Get("addr")]
+			fmt.Fprintf(w, `<textarea id="output">%s</textarea>`, value)
+		}))
+		defer server.Close()
+		inspection, err := testClient(server).InspectEntityPointers(context.Background(), "192.168.0.62")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if inspection.Player.CoordinatesState != "non_finite" || inspection.Player.X != nil || inspection.Player.Y == nil || *inspection.Player.Y != 1 || inspection.Player.CoordinatesRawHex != "7FC000003F80000040000000" {
+			t.Fatalf("unexpected non-finite coordinate result: %#v", inspection.Player)
+		}
+		if inspection.Target.ActivationState != "non_finite" || inspection.Target.ActivationValue != nil || inspection.Target.ActivationRawHex != "7F800000" {
+			t.Fatalf("unexpected non-finite activation result: %#v", inspection.Target)
+		}
+		if _, err := json.Marshal(inspection); err != nil {
+			t.Fatalf("non-finite inspection cannot be JSON encoded: %v", err)
+		}
+	})
 }
 
 func TestWriteMemoryRequiresMatchingReadback(t *testing.T) {

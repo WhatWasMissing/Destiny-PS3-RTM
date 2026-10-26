@@ -38,16 +38,26 @@ builds use different offsets and were not used as address references.
   contains an old scan/toggle implementation, but it remains hidden. Its
   intended change is PowerPC `addi r6,r6,-1` (`38C6FFFF`) to `addi r6,r6,4095`
   (`38C60FFF`), replacing a counter decrement with a large increment. The
-  recovered scan accepts the first exact match of generic instructions. The
-  hash-verified 01.24 EBOOT has seven aligned `38C6FFFF` sites, at
+  recovered scan accepts the first match of generic instructions without
+  requiring instruction alignment. In the hash-verified 01.24 EBOOT the first
+  scan hit is `38C0FFFF` at `0x00011670`, in the first `0x10000–0x14000` chunk;
+  PPC context identifies it as an initialization sentinel set to `-1`, not an
+  encounter counter. The EBOOT has seven aligned `38C6FFFF` sites, at
   `0x009AAB00`, `0x009AC35C`, `0x00A730BC`, `0x00B1B76C`, `0x00D743D8`,
-  `0x010923CC`, and `0x0109248C`; `38C0FFFF` occurs over a thousand times.
-  PPC disassembly identifies those sites as copy loops, array/list bookkeeping,
-  or bit/size calculations. The first match is a byte-copy loop; the closest
-  counter-like match is an array count used to index 32-byte records. None is
-  the encounter deposit handler. The encounter-specific address therefore
-  remains unknown; locating it requires matching encounter runtime evidence or
-  source/disassembly that identifies the function.
+  and 1,112 raw `38C0FFFF` occurrences (1,111 four-byte-aligned). The seven
+  `38C6FFFF` sites disassemble as copy loops, array/list bookkeeping, or
+  bit/size calculations. None is the encounter deposit handler. The reset
+  fallback at `0x001C7B58` also points at unrelated 01.24 code bytes. The
+  encounter-specific address therefore remains unknown; locating it requires
+  encounter-specific runtime evidence or source/disassembly that identifies
+  the function.
+- The main web-RTM Warpriest Immunity variant is present in local HTML, but
+  its source OFF values (`C0434DB0` at `0x00444CA4` and `3F800000` at
+  `0x01897420`) do not match BLES01857 01.24 (`C04100F0` and `37343036`). The
+  main control and reset entry are blocked for this build. A separate Overwalls
+  C# variant uses the matching `C04100F0` primary OFF instruction, but sets
+  `0x01891AE0` to `3F800000` only on enable. The C# source does not restore that
+  BSS word on disable, so its purpose and runtime behavior remain unconfirmed.
 - The local C# client archive collects other players' IP addresses and
   location/provider details. That collection was not ported.
 - The newer local RTM's launch sequence is available for a single ISO in

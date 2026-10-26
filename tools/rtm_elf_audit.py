@@ -30,6 +30,11 @@ KNOWN_SITES = (
     ("Flip View - OFF", 0x00614C40, "3F000000"),
     ("Power Boost - OFF", 0x0005E614, "3F800000"),
     ("One-Hit - OFF halfword", 0x0043E626, "3F80"),
+    ("Warpriest HTML - source OFF instruction", 0x00444CA4, "C0434DB0"),
+    ("Warpriest HTML - source OFF data", 0x01897420, "3F800000"),
+    ("Warpriest Overwalls CSharp - source OFF instruction", 0x00444CA4, "C04100F0"),
+    ("Warpriest Overwalls CSharp - secondary BSS initial value", 0x01891AE0, "00000000"),
+    ("Deathsinger - reset fallback signature", 0x001C7B58, "38C6FFFF"),
 )
 
 

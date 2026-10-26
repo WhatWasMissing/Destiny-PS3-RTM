@@ -25,6 +25,7 @@ type Client interface {
 	Status(context.Context, string) (int, error)
 	ReadMemory(context.Context, string, string, int) ([]byte, error)
 	ReadPlayerPosition(context.Context, string) (rtmclient.PlayerPosition, error)
+	InspectEntityPointers(context.Context, string) (rtmclient.EntityPointerInspection, error)
 	WriteMemory(context.Context, string, string, []byte) error
 	Notify(context.Context, string, string) error
 	LaunchGame(context.Context, string, string) (rtmclient.LaunchResult, error)
@@ -103,6 +104,15 @@ var toolList = []tool{
 		Annotations: map[string]any{"readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true},
 	},
 	{
+		Name:        "rtm_inspect_entity_pointers",
+		Title:       "Inspect Destiny entity pointers",
+		Description: "Read the Overwalls player and OPK-target roots at 0x0190EBB0 and 0x0190EBB4. For valid pointers, decode XYZ Float32 values at +0x140/+0x144/+0x148 and the target activation Float32 at +0x1B8. Null or invalid pointers are reported without dereferencing them; self-targets are marked. This is read-only; live semantics and build compatibility remain unconfirmed.",
+		InputSchema: objectSchema(map[string]any{
+			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
+		}, "target_ipv4"),
+		Annotations: map[string]any{"readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true},
+	},
+	{
 		Name:        "rtm_write_memory",
 		Title:       "Write Destiny memory",
 		Description: "Write 1–8 bytes to the Destiny process and report success only after exact fresh readback. The address is hexadecimal; only use known values for the matching game build. This does not call game functions.",
@@ -149,7 +159,7 @@ var toolList = []tool{
 	},
 }
 
-const instructions = "Use only the user's private PS3 IPv4 address. Memory reads and writes target Destiny process 0x1010200 through webMAN MOD on port 80. Reads are capped at 64 KiB; writes are capped at 8 bytes and require exact readback. rtm_status checks webMAN reachability, not whether Destiny is running. The player-position tool follows the local Overwalls pointer map using read-only requests; coordinates and build compatibility remain unconfirmed. Brightness effects are unverified. Notifications report dispatch, not display. Game-launch steps report HTTP acknowledgement and do not confirm that Destiny started. No generic function-call endpoint is exposed."
+const instructions = "Use only the user's private PS3 IPv4 address. Memory reads and writes target Destiny process 0x1010200 through webMAN MOD on port 80. Reads are capped at 64 KiB; writes are capped at 8 bytes and require exact readback. rtm_status checks webMAN reachability, not whether Destiny is running. Player-position and entity-pointer tools follow the local Overwalls pointer map using read-only requests; coordinates, pointer semantics, and build compatibility remain unconfirmed. Brightness effects are unverified. Notifications report dispatch, not display. Game-launch steps report HTTP acknowledgement and do not confirm that Destiny started. No generic function-call endpoint is exposed."
 
 func objectSchema(properties map[string]any, required ...string) map[string]any {
 	return map[string]any{"type": "object", "properties": properties, "required": required, "additionalProperties": false}
@@ -373,6 +383,28 @@ func (s *Server) callTool(ctx context.Context, raw json.RawMessage) map[string]a
 			"raw_hex":                   position.RawHex,
 			"gameplay_effect_confirmed": false,
 		})
+	case "rtm_inspect_entity_pointers":
+		var args targetArgs
+		if err := decodeStrict(call.Arguments, &args); err != nil {
+			return errorResult(err)
+		}
+		if err := validateTarget(args.Target); err != nil {
+			return errorResult(err)
+		}
+		inspection, err := s.client.InspectEntityPointers(ctx, args.Target)
+		if err != nil {
+			return errorResult(err)
+		}
+		return successResult(map[string]any{
+			"ok":                            true,
+			"read_only":                     true,
+			"snapshot_atomic":               false,
+			"player_root_address":           fmt.Sprintf("0x%08X", inspection.Player.RootAddress),
+			"target_root_address":           fmt.Sprintf("0x%08X", inspection.Target.RootAddress),
+			"player":                        entityPointerResult(inspection.Player),
+			"target":                        entityPointerResult(inspection.Target),
+			"build_compatibility_confirmed": false,
+		})
 	case "rtm_write_memory":
 		var args struct {
 			Target  string `json:"target_ipv4"`
@@ -469,6 +501,35 @@ func (s *Server) callTool(ctx context.Context, raw json.RawMessage) map[string]a
 		return successResult(data)
 	default:
 		return errorResult(fmt.Errorf("unknown RTM tool %q", call.Name))
+	}
+}
+
+func entityPointerResult(snapshot rtmclient.EntityPointerSnapshot) map[string]any {
+	var coordinatesAddress any
+	if snapshot.CoordinatesAddress != 0 {
+		coordinatesAddress = fmt.Sprintf("0x%08X", snapshot.CoordinatesAddress)
+	}
+	var activationAddress any
+	if snapshot.ActivationAddress != 0 {
+		activationAddress = fmt.Sprintf("0x%08X", snapshot.ActivationAddress)
+	}
+	return map[string]any{
+		"root_address":        fmt.Sprintf("0x%08X", snapshot.RootAddress),
+		"pointer":             fmt.Sprintf("0x%08X", snapshot.Pointer),
+		"pointer_raw_hex":     snapshot.PointerRawHex,
+		"pointer_state":       snapshot.PointerState,
+		"pointer_error":       snapshot.PointerError,
+		"pointer_note":        snapshot.PointerNote,
+		"coordinates_address": coordinatesAddress,
+		"coordinates_raw_hex": snapshot.CoordinatesRawHex,
+		"coordinates_state":   snapshot.CoordinatesState,
+		"x":                   snapshot.X,
+		"y":                   snapshot.Y,
+		"z":                   snapshot.Z,
+		"activation_address":  activationAddress,
+		"activation_raw_hex":  snapshot.ActivationRawHex,
+		"activation_state":    snapshot.ActivationState,
+		"activation_value":    snapshot.ActivationValue,
 	}
 }
 

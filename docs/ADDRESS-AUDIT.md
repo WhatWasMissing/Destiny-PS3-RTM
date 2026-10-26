@@ -48,6 +48,18 @@ write causes the named in-game effect.
 | Power Boost / Variable Buff | C# uses `0x0005E614`, ON `403F0000`, OFF `3F800000`; Overwalls and the app use ON `403F0004` at that address | `0x0005E614`: `3F800000` (Float32 `1.0`) | Supports the shared candidate address and OFF/default value. The two ON values differ slightly and the ELF default does not resolve which source value or gameplay label is intended. |
 | One-Hit Enemies | Main RTM and 1.24 C# use ON halfword `447A`; Overwalls uses `547A`, both at `0x0043E626`; both use OFF `3F80` | `0x0043E626`: `3F80` (low halfword of `3C603F80` at `0x0043E624`) | Confirms the source patch site and OFF value in 01.24. The competing ON variants are both source-derived; the pristine ELF cannot determine which variant has the intended gameplay effect. |
 | Unlimited Ammo | 1.24 C# writes ON bytes `3880270F`, `38A0270F`, and `60000000FC1EF8003FC0461C63DE3C0093DF0110` at `0x003108EC`, `0x00310554`, and `0x00CF95AC` | OFF bytes in 01.24 ELF are `63C40000`, `63C50000`, and `63DD0000408200083BA00001807F001CD3DF0110`, matching the C# source. The former app address `0x00310F94` contains `7C9E20107C8407B44BFFF7C92C030000…`, not the declared OFF value `3F800000`. | Supports the C# three-site OFF mapping. The incorrect single-site app target was replaced; exact readback is required for all three sites on enable and reset. This does not prove the gameplay effect. |
+| Warpriest Immunity - web RTM variant | Local web RTM writes ON `C0434F80` and OFF `C0434DB0` at `0x00444CA4`, plus `3F800000` at `0x01897420` | 01.24 ELF contains `C04100F0` at `0x00444CA4` and `37343036` at `0x01897420` | Both claimed OFF values mismatch the verified executable. The main web RTM control and reset entry are blocked for this build; no replacement values are inferred. |
+| Warpriest Immunity - Overwalls C# variant | C# writes ON `C0420348` and OFF `C04100F0` at `0x00444CA4`, and writes `3F800000` to `0x01891AE0` only when enabled | 01.24 ELF contains the claimed OFF instruction `C04100F0`; `0x01891AE0` lies in zero-filled BSS | The primary OFF instruction matches the executable. The source leaves the secondary BSS word set after disabling; its purpose and runtime effect are unconfirmed. This distinct Overwalls variant remains available in the Overwalls tab. |
+| Deathsinger reset fallback | Recovered mobile RTM scans for generic `38C6FFFF`/`38C0FFFF`; its reset fallback is `0x001C7B58` | ELF has `30C100907C440C0ED0410070308100A0` at the fallback. The scanner's first hit is `38C0FFFF` at `0x00011670`. | First hit is an initialization sentinel, not the encounter counter. The fallback does not contain either accepted instruction; Deathsinger remains hidden. |
+
+A broader comparison of current fixed-site toggle OFF values against the same
+01.24 ELF also matched Invincibility, No Spread, Infinite Power, Freeze
+Projectiles, Enemy Ignore, Instant Respawn, Steady Aim, Unlimited Abilities,
+Rapid Fire, Walk Through Objects, Zero Gravity, Fall Through Floors, Freeze
+Characters, Bouncy Items, Sparrow Boost, Super Speed, and the shared Rock
+Jump/No Pushback baseline. The audit helper includes the mismatched web-RTM
+Warpriest values, the Overwalls C# primary OFF instruction and zero-initialized
+BSS word, and the Deathsinger source fallback.
 
 For comparison, the same candidate sites in the **01.00** ELF do not match
 several update-build values. At `0x006101C0` it contains `62A30000`; at

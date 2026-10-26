@@ -21,7 +21,40 @@ import (
 const DefaultProcessID = "0x1010200"
 
 const PlayerPointerAddress uint32 = 0x0190EBB0
+const TargetPointerAddress uint32 = 0x0190EBB4
 const PlayerPositionOffset uint32 = 0x140
+const EntityActivationOffset uint32 = 0x1B8
+
+const (
+	PointerStateValid        = "valid"
+	PointerStateNull         = "null"
+	PointerStateInvalid      = "invalid"
+	PointerStateSameAsPlayer = "same_as_player"
+)
+
+type EntityPointerSnapshot struct {
+	RootAddress        uint32   `json:"root_address"`
+	Pointer            uint32   `json:"pointer"`
+	PointerRawHex      string   `json:"pointer_raw_hex"`
+	PointerState       string   `json:"pointer_state"`
+	PointerError       string   `json:"pointer_error,omitempty"`
+	PointerNote        string   `json:"pointer_note,omitempty"`
+	CoordinatesAddress uint32   `json:"coordinates_address,omitempty"`
+	CoordinatesRawHex  string   `json:"coordinates_raw_hex,omitempty"`
+	CoordinatesState   string   `json:"coordinates_state"`
+	X                  *float32 `json:"x"`
+	Y                  *float32 `json:"y"`
+	Z                  *float32 `json:"z"`
+	ActivationAddress  uint32   `json:"activation_address,omitempty"`
+	ActivationRawHex   string   `json:"activation_raw_hex,omitempty"`
+	ActivationState    string   `json:"activation_state,omitempty"`
+	ActivationValue    *float32 `json:"activation_value,omitempty"`
+}
+
+type EntityPointerInspection struct {
+	Player EntityPointerSnapshot `json:"player"`
+	Target EntityPointerSnapshot `json:"target"`
+}
 
 type PlayerPosition struct {
 	PlayerPointer      uint32
@@ -306,6 +339,144 @@ func (c *Client) ReadPlayerPosition(ctx context.Context, ip string) (PlayerPosit
 		Z:                  values[2],
 		RawHex:             strings.ToUpper(hex.EncodeToString(coordinateBytes)),
 	}, nil
+}
+
+// InspectEntityPointers reads the Overwalls player and OPK-target pointer roots,
+// then decodes source-mapped fields for structurally valid pointers. Null and
+// invalid pointers are represented without dereferencing them; self-targets
+// are marked in the result. This method performs memory reads only.
+func (c *Client) InspectEntityPointers(ctx context.Context, ip string) (EntityPointerInspection, error) {
+	var result EntityPointerInspection
+	playerRoot, err := c.ReadMemory(ctx, ip, fmt.Sprintf("%08X", PlayerPointerAddress), 4)
+	if err != nil {
+		return result, fmt.Errorf("read player pointer at 0x%08X: %w", PlayerPointerAddress, err)
+	}
+	targetRoot, err := c.ReadMemory(ctx, ip, fmt.Sprintf("%08X", TargetPointerAddress), 4)
+	if err != nil {
+		return result, fmt.Errorf("read target pointer at 0x%08X: %w", TargetPointerAddress, err)
+	}
+	if len(playerRoot) != 4 || len(targetRoot) != 4 {
+		return result, errors.New("entity pointer read returned an invalid length")
+	}
+
+	playerPointer := binary.BigEndian.Uint32(playerRoot)
+	targetPointer := binary.BigEndian.Uint32(targetRoot)
+	result.Player = EntityPointerSnapshot{
+		RootAddress:      PlayerPointerAddress,
+		Pointer:          playerPointer,
+		PointerRawHex:    strings.ToUpper(hex.EncodeToString(playerRoot)),
+		CoordinatesState: "not_read",
+		ActivationState:  "not_applicable",
+	}
+	result.Target = EntityPointerSnapshot{
+		RootAddress:      TargetPointerAddress,
+		Pointer:          targetPointer,
+		PointerRawHex:    strings.ToUpper(hex.EncodeToString(targetRoot)),
+		CoordinatesState: "not_read",
+		ActivationState:  "not_read",
+	}
+
+	classifyEntityPointer(&result.Player)
+	classifyEntityPointer(&result.Target)
+	if result.Player.PointerState == PointerStateValid {
+		if err := c.readEntityCoordinates(ctx, ip, &result.Player); err != nil {
+			return result, fmt.Errorf("read player entity: %w", err)
+		}
+	}
+	if result.Target.PointerState == PointerStateValid {
+		if result.Player.PointerState == PointerStateValid && targetPointer == playerPointer {
+			result.Target.PointerState = PointerStateSameAsPlayer
+			result.Target.PointerNote = "target pointer equals the player pointer; source OPK logic skips self-targets"
+		}
+		if err := c.readEntityCoordinates(ctx, ip, &result.Target); err != nil {
+			return result, fmt.Errorf("read target entity: %w", err)
+		}
+		activationAddress := targetPointer + EntityActivationOffset
+		result.Target.ActivationAddress = activationAddress
+		activationBytes, err := c.ReadMemory(ctx, ip, fmt.Sprintf("%08X", activationAddress), 4)
+		if err != nil {
+			return result, fmt.Errorf("read target activation field at 0x%08X: %w", activationAddress, err)
+		}
+		if len(activationBytes) != 4 {
+			return result, errors.New("target activation read returned an invalid length")
+		}
+		activation := math.Float32frombits(binary.BigEndian.Uint32(activationBytes))
+		result.Target.ActivationRawHex = strings.ToUpper(hex.EncodeToString(activationBytes))
+		if finiteFloat32(activation) {
+			result.Target.ActivationValue = float32Pointer(activation)
+			result.Target.ActivationState = "valid"
+		} else {
+			result.Target.ActivationState = "non_finite"
+		}
+	}
+	return result, nil
+}
+
+const entityPointerMaxOffset uint32 = EntityActivationOffset + 3
+
+func classifyEntityPointer(snapshot *EntityPointerSnapshot) {
+	if snapshot.Pointer == 0 {
+		snapshot.PointerState = PointerStateNull
+		return
+	}
+	if snapshot.Pointer < 0x00010000 {
+		snapshot.PointerState = PointerStateInvalid
+		snapshot.PointerError = "pointer is below the user-memory range"
+		return
+	}
+	if snapshot.Pointer&3 != 0 {
+		snapshot.PointerState = PointerStateInvalid
+		snapshot.PointerError = "pointer is not four-byte aligned"
+		return
+	}
+	if snapshot.Pointer > 0x7FFFFFFF-entityPointerMaxOffset {
+		snapshot.PointerState = PointerStateInvalid
+		snapshot.PointerError = "pointer plus source fields exceeds the supported 32-bit user-memory range"
+		return
+	}
+	snapshot.PointerState = PointerStateValid
+}
+
+func (c *Client) readEntityCoordinates(ctx context.Context, ip string, snapshot *EntityPointerSnapshot) error {
+	address := snapshot.Pointer + PlayerPositionOffset
+	snapshot.CoordinatesAddress = address
+	data, err := c.ReadMemory(ctx, ip, fmt.Sprintf("%08X", address), 12)
+	if err != nil {
+		return fmt.Errorf("read coordinates at 0x%08X: %w", address, err)
+	}
+	if len(data) != 12 {
+		return errors.New("coordinate read returned an invalid length")
+	}
+	snapshot.CoordinatesRawHex = strings.ToUpper(hex.EncodeToString(data))
+	values := [3]float32{
+		math.Float32frombits(binary.BigEndian.Uint32(data[0:4])),
+		math.Float32frombits(binary.BigEndian.Uint32(data[4:8])),
+		math.Float32frombits(binary.BigEndian.Uint32(data[8:12])),
+	}
+	snapshot.X = finiteFloat32Pointer(values[0])
+	snapshot.Y = finiteFloat32Pointer(values[1])
+	snapshot.Z = finiteFloat32Pointer(values[2])
+	if snapshot.X == nil || snapshot.Y == nil || snapshot.Z == nil {
+		snapshot.CoordinatesState = "non_finite"
+	} else {
+		snapshot.CoordinatesState = "valid"
+	}
+	return nil
+}
+
+func finiteFloat32(value float32) bool {
+	return !math.IsNaN(float64(value)) && !math.IsInf(float64(value), 0)
+}
+
+func float32Pointer(value float32) *float32 {
+	return &value
+}
+
+func finiteFloat32Pointer(value float32) *float32 {
+	if !finiteFloat32(value) {
+		return nil
+	}
+	return float32Pointer(value)
 }
 
 func (c *Client) WriteMemory(ctx context.Context, ip, address string, data []byte) error {

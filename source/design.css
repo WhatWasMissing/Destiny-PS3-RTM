@@ -31,6 +31,7 @@ header h1 span { font: 10px var(--sans); letter-spacing: .14em; margin-top: 5px;
 .panel-header::before { display: none; }
 .category-label { padding: 12px 0; }
 .cheat-btn { border-radius: 3px; text-align: left; font-size: 14px; font-weight: 500; letter-spacing: 0; }
+.cheat-btn:disabled { cursor: not-allowed; opacity: .56; filter: saturate(.55); }
 .cheat-btn.blue, .cheat-btn.red, .cheat-btn.green, .cheat-btn.gold { border-color: var(--border); }
 .cheat-btn .addr { font-size: 11px; color: var(--muted); }
 .cheat-btn .cheat-desc { font: 12px/1.5 var(--sans); color: var(--muted); }

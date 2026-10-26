@@ -84,7 +84,6 @@
     const MULTI_DEFS = [
       { id: 'tog-notarget',      label: 'Enemy Ignore',           pairs: [['18681C','3F800000'],['1891E4','3F800000']] },
       { id: 'tog-no-recoil',     label: 'Steady Aim',           pairs: [['5056DC','3F800000'],['505D24','3F800000'],['30DC44','3F800000']] },
-      { id: 'tog-warpriest',     label: 'Warpriest Immunity',    pairs: [['444CA4','C0434DB0'],['1897420','3F800000']] },
       { id: 'tog-unl-abilities', label: 'Unlimited Abilities', pairs: [['2C1DB4','D03B019C'],['CCB9E8','3063FFFF'],['2C36FC','C3C30000']] },
       { id: 'tog-ammo', label: 'Unlimited Ammo', pairs: UNLIMITED_AMMO_PATCH.off },
     ];
