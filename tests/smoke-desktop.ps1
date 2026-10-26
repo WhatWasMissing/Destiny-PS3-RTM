@@ -16,7 +16,7 @@ try {
     if (!$origin) { throw 'Desktop host did not start within 10 seconds' }
     $configuration = Invoke-RestMethod -Uri ($origin + '/host-config') -TimeoutSec 5
     if ($configuration.host -ne 'destiny-rtm' -or !$configuration.token) { throw 'Invalid desktop configuration response' }
-    foreach ($asset in @('index.html','js/transport.js','js/operations.js','js/connection.js','design.css')) {
+    foreach ($asset in @('index.html','js/transport.js','js/operations.js','js/connection.js','base.css','design.css')) {
         $response = Invoke-WebRequest -Uri ($origin + '/' + $asset) -TimeoutSec 5 -UseBasicParsing
         if ($response.StatusCode -ne 200 -or !$response.Content) { throw "Missing embedded asset: $asset" }
     }

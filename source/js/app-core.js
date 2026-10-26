@@ -44,6 +44,7 @@
 
   // ── Reset all active cheats ───────────────────────────────────────────────
   async function resetAllCheats() {
+    const operationGeneration = connectionGeneration;
     log('Resetting all active cheats…', '');
     const CHEAT_DEFS = [
       { id: 'tog-god-mode',        addr: '00444CA0', offVal: 'C0210358', label: 'Invincibility',         size: 4 },
@@ -81,6 +82,7 @@
     ];
     let verified = 0, failed = 0;
     for (const definition of definitions) {
+      if (operationGeneration !== connectionGeneration) return {verified,failed:failed+1};
       const element = document.getElementById(definition.id);
       if (!element || (!element.classList.contains('active-cheat') && !requestedCheatState[definition.label])) continue;
       try {
@@ -93,7 +95,7 @@
         log(`${definition.label} reset not confirmed: ${error.message}`,'err');
       }
     }
-    if (srvMode !== 'off') {
+    if (operationGeneration === connectionGeneration && srvMode !== 'off') {
       if (await srvSetMode('off',document.getElementById('srv-off'))) verified++; else failed++;
     }
     log(`Reset result: ${verified} verified off; ${failed} unconfirmed`, failed ? 'err' : 'ok');
@@ -154,6 +156,19 @@
   // NOTE: For READ ops (getmem), use ps3fetchRead() which throws on empty body.
   const consoleTransport = RtmTransport.createTransport({ processId: GAME_PID, fetch: RtmHost.fetch });
   async function ps3fetch(url, timeoutMs = 8000) {
+    const target = new URL(url);
+    if (target.pathname === '/setmem.ps3mapi') {
+      if (target.hostname !== ip || (target.searchParams.has('proc') && target.searchParams.get('proc').toLowerCase() !== GAME_PID.toLowerCase())) throw new Error('Memory write target does not match active game session');
+      let value = target.searchParams.get('val') || '';
+      if (!value) throw new Error('Memory write value is required');
+      if (target.searchParams.has('size')) {
+        const bytes = Number(target.searchParams.get('size'));
+        if (![1,2,4].includes(bytes) || value.length > bytes*2) throw new Error('Memory value exceeds selected width');
+        value = value.padStart(bytes*2,'0');
+      }
+      await verifiedMemoryValue(target.searchParams.get('addr') || '',value,timeoutMs);
+      return new Response('Memory write verified', {status:200});
+    }
     return consoleTransport.request(url, timeoutMs);
   }
 
@@ -256,7 +271,7 @@
     return null;
   }
 
-  async function ps3getmem(addr, len = 4) {
+  async function ps3getmem(addr, len = 4, timeoutMs = 8000) {
     if (!ip) throw new Error('Not connected');
 
     const numericAddr = Number(addr) >>> 0;
@@ -274,7 +289,7 @@
     // Older working Teleport builds used fetch(), so keep that as the primary
     // transport. If it fails, try the RTM's readable-XHR path as a fallback.
     try {
-      const response = await consoleTransport.request(url, 8000);
+      const response = await consoleTransport.request(url, timeoutMs);
       page = await response.text();
     } catch (e) {
       firstError = e;
@@ -282,7 +297,7 @@
 
     if (!page) {
       try {
-        const xhr = await ps3fetchRead(url, 8000);
+        const xhr = await ps3fetchRead(url, timeoutMs);
         page = xhr.responseText || '';
       } catch (e) {
         const msg = e?.message || firstError?.message || String(e);
@@ -518,6 +533,7 @@
   }
 
   async function executeTeleport() {
+    const operationGeneration = connectionGeneration;
     if (!ip) {
       toast("Not connected", "err");
       return;
@@ -558,11 +574,12 @@
         floatToBEHex(z);
 
       // X, Y and Z are contiguous 4-byte floats. Write all 12 bytes at X.
+      ensureOperationSession(operationGeneration);
       await ps3fetch(
         `http://${ip}/setmem.ps3mapi?addr=${xAddr.toString(16).padStart(8, '0').toUpperCase()}&val=${combinedHex}`
       );
 
-      toast("Direct teleport successful!", "ok");
+      toast("Position bytes verified; movement not observed", "");
       log(
         `Direct teleport → X:0x${xAddr.toString(16).toUpperCase()} ` +
         `Y:0x${yAddr.toString(16).toUpperCase()} ` +
@@ -577,6 +594,7 @@
   }
 
   async function tpGo() {
+    const operationGeneration = connectionGeneration;
     if (!ip) { toast("Not connected", "err"); return; }
     const x = parseFloat(document.getElementById('tp-x').value);
     const y = parseFloat(document.getElementById('tp-y').value);
@@ -626,6 +644,7 @@
       // Teleport again.
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
+          ensureOperationSession(operationGeneration);
           await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${xAddr}&val=${combinedHex}`);
           writeSucceeded = true;
           break;
@@ -993,10 +1012,12 @@
   // Lock flag: true while installPlayerHook is in progress.
   // Prevents srvSetMode from touching 0x10D8EC0 mid-write.
   let hookInstalling = false;
+  let playerHookTarget = null;
 
   async function installPlayerHook() {
     if (!ip) return;
     const generation = connectionGeneration;
+    const target = ip;
     hookInstalling = true;
     const write = async (address,value) => {
       if (generation !== connectionGeneration) throw new Error('Hook session changed');
@@ -1004,6 +1025,10 @@
       if (generation !== connectionGeneration) throw new Error('Hook session changed');
     };
     try {
+      const current = await ps3getmem(0x1C4110,4);
+      if (generation !== connectionGeneration) throw new Error('Hook session changed');
+      if (!['30640140','48F14DB0'].includes(current)) throw new Error('Hook site does not match the supported game build');
+      if (current === '48F14DB0') await write('1C4110','30640140');
       // Step 1: write the 116-byte PPC stub to 0x10D8EC0.
       // Branch is NOT yet active, so no need to deactivate first.
       // henDelay() guards against HEN's slower write handler being overwhelmed.
@@ -1040,6 +1065,7 @@
       // Stub is fully written before this, so the CPU will never hit a partial stub.
       await write(`1C4110`,`48F14DB0`);
 
+      playerHookTarget = target;
       log('Player hook bytes and activation branch verified by readback', 'ok');
     } catch(e) {
       log(`Player hook not confirmed: ${e.message}`, 'err');
@@ -1050,8 +1076,13 @@
   }
 
   async function uninstallPlayerHook() {
-    if (!ip) return;
-    await verifiedMemoryValue('1C4110','30640140');
+    if (!ip || playerHookTarget !== ip) return;
+    const target = ip, generation = connectionGeneration;
+    const current = await ps3getmem(0x1C4110,4);
+    ensureOperationSession(generation);
+    if (!['30640140','48F14DB0'].includes(current)) throw new Error('Hook site changed; restoration was not attempted');
+    if (current !== '30640140') await verifiedMemoryValue('1C4110','30640140');
+    if (playerHookTarget === target) playerHookTarget = null;
     log('Player hook branch restoration verified', 'ok');
   }
 
@@ -1241,13 +1272,13 @@
     if (custom && document.activeElement !== custom) custom.value = String(value);
   }
   function fovDisplay(value) { return Number(value).toFixed(2); }
-  async function verifiedMemorySequence(pairs) {
-    const result = await patchRunner.apply(pairs);
+  async function verifiedMemorySequence(pairs, timeoutMs = 8000) {
+    const result = await patchRunner.apply(pairs,{timeoutMs});
     if (result.status !== 'verified') throw new Error('Write acknowledged but readback unavailable; value not confirmed');
     return result;
   }
-  async function verifiedMemoryValue(address, hex) {
-    const result = await verifiedMemorySequence([[address,hex]]);
+  async function verifiedMemoryValue(address, hex, timeoutMs = 8000) {
+    const result = await verifiedMemorySequence([[address,hex]],timeoutMs);
     if (result.status !== 'verified') throw new Error('Write acknowledged but readback unavailable; value not confirmed');
     return hex;
   }
@@ -1346,6 +1377,7 @@
   let antiMMState = false;
   let antiMMBusy  = false;
   async function togAntiMatchmaking(btn) {
+    const operationGeneration = connectionGeneration;
     if (!ip)        { updateCheatStatus('tog-anti-mm', 'failed'); toast('Not connected', 'err'); return; }
     if (antiMMBusy) { toast('Please wait…', 'err'); return; }
 
@@ -1356,6 +1388,7 @@
     updateCheatStatus('tog-anti-mm', 'applying');
     const val = willEnable ? '3BA0005E' : 'A3BF00DA';
     try {
+      ensureOperationSession(operationGeneration);
       await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=00913338&val=${val}`);
       antiMMState = willEnable;
       btn.classList.toggle('active-cheat', antiMMState);
@@ -1811,29 +1844,20 @@
   // This matches what the C# SoulsAPI WriteUInt16 effectively does on a
   // fresh load where the surrounding bytes are already zeroed.
   async function ps3writeU16(addr, value) {
-    const alignedAddr  = addr & ~3;
-    const byteOffset   = addr - alignedAddr; // 0 or 2
-    const hi = (value >> 8) & 0xFF;
-    const lo =  value       & 0xFF;
-
-    // Build the 4-byte word: zero-fill the non-owned half
-    let bytes = [0, 0, 0, 0];
-    bytes[byteOffset]     = hi;
-    bytes[byteOffset + 1] = lo;
-
-    const newHex      = bytes.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join('');
-    const alignedHex  = alignedAddr.toString(16).toUpperCase().padStart(8, '0');
-    await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${alignedHex}&val=${newHex}`);
+    if (!Number.isInteger(value) || value < 0 || value > 65535) throw new Error('Invalid activity index');
+    await verifiedMemoryValue(addr.toString(16),value.toString(16).padStart(4,'0'));
   }
 
   async function loadActivity(index) {
+    const operationGeneration = connectionGeneration;
     if (!ip) { toast('Not connected', 'err'); return; }
     try {
       for (const addr of ACT_ADDRS) {
+        ensureOperationSession(operationGeneration);
         await ps3writeU16(addr, index);
       }
       const name = ALL_ACTIVITIES[index - 1] || `Activity ${index}`;
-      log(`Activity loaded: ${name}`, 'ok');
+      log(`Activity index writes verified: ${name}; load completion not observed`, 'ok');
       toast(name.length > 30 ? name.slice(0,30)+'…' : name, 'ok');
     } catch(e) {
       log(`LoadActivity failed: ${e.message}`, 'err');
@@ -2334,7 +2358,9 @@
   }
 
   async function disablePowerConflict(id) {
+    const operationGeneration = connectionGeneration;
     if (id === 'tog-power') {
+      ensureOperationSession(operationGeneration);
       await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=02C36FC&val=C3C30000`);
       await henDelay();
       setCheatLabelState('Infinite Power', false);
@@ -2350,6 +2376,7 @@
         ['2C36FC','C3C30000']
       ];
       for (const [addr, val] of offPairs) {
+        ensureOperationSession(operationGeneration);
         await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${addr}&val=${val}`);
         await henDelay();
       }
@@ -2408,15 +2435,21 @@
 
   const patchRunner = RtmOperations.createRunner({
     session: () => ip && document.getElementById('status-badge').classList.contains('connected') ? `${connectionGeneration}:${ip}` : '',
-    write: async (address, value) => {
+    write: async (address, value, options) => {
       const target = ip;
-      await ps3fetch(`http://${target}/setmem.ps3mapi?addr=${address.toString(16)}&val=${value}`);
+      await consoleTransport.request(`http://${target}/setmem.ps3mapi?addr=${address.toString(16)}&val=${value}`,options.timeoutMs || 8000);
       await henDelay();
     },
-    read: (address, length) => ps3getmem(address, length)
+    read: (address, length, options) => ps3getmem(address, length, options.timeoutMs || 8000)
   });
   const requestedCheatState = Object.create(null);
+  function ensureOperationSession(generation) {
+    if (generation !== connectionGeneration) throw new Error('Console session changed; operation cancelled');
+  }
   function resetVerifiedStates() {
+    antiMMState = false; server4xDamageState = false; srvMode = 'unknown';
+    for (const key of Object.keys(toggleState)) delete toggleState[key];
+    const controls = document.getElementById('ropk-controls'); if (controls) controls.style.display = 'none';
     for (const label of Object.keys(cheatState)) delete cheatState[label];
     for (const label of Object.keys(requestedCheatState)) delete requestedCheatState[label];
     document.querySelectorAll('[id^="tog-"], [id^="srv-"]').forEach(element => {
@@ -2528,6 +2561,7 @@
   }
 
   async function togDeathsinger(btn) {
+    const operationGeneration = connectionGeneration;
     if (!ip) { toast('Not connected', 'err'); return; }
     const addr = document.getElementById('ds-addr').value.trim().replace(/^0x/i, '');
     if (!addr) { toast('Enter the instruction address first', 'err'); return; }
@@ -2538,6 +2572,7 @@
     const writeVal = isOn ? onVal : offVal;
 
     try {
+      ensureOperationSession(operationGeneration);
       await ps3fetch('http://' + ip + '/setmem.ps3mapi?addr=' + addr + '&val=' + writeVal);
       cheatState["Deathsinger's Power"] = isOn;
       btn.classList.toggle('active-cheat', isOn);
@@ -3095,6 +3130,7 @@
 
   // Write the current ROPK X/Y/Z slider values as floats to the offset addresses
   async function ropkWrite() {
+    const operationGeneration = connectionGeneration;
     if (typeof hasReadServerSafetyGuide === 'function' && !hasReadServerSafetyGuide()) {
       serverSafetyRequired = true;
       setServerCheatsLocked(true);
@@ -3104,8 +3140,11 @@
     const x = parseFloat(document.getElementById('ropk-x').value) || 0;
     const y = parseFloat(document.getElementById('ropk-y').value) || 0;
     const z = parseFloat(document.getElementById('ropk-z').value) || 0;
+    ensureOperationSession(operationGeneration);
     await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${ROPK_X_ADDR.toString(16).toUpperCase()}&val=${floatToBEHex(x)}`);
+    ensureOperationSession(operationGeneration);
     await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${ROPK_Y_ADDR.toString(16).toUpperCase()}&val=${floatToBEHex(y)}`);
+    ensureOperationSession(operationGeneration);
     await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${ROPK_Z_ADDR.toString(16).toUpperCase()}&val=${floatToBEHex(z)}`);
   }
 

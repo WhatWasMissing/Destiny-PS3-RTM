@@ -6,6 +6,8 @@ and Microsoft Edge (or a default browser). No external Go dependencies are used.
 Run `./build.ps1` from PowerShell. If Go is not on PATH, pass `-Go` with the
 absolute path to `go.exe`. The script runs Go and JavaScript tests and writes
 `dist/DestinyRTM.exe`, embedding the complete `source/` directory.
+The build also writes `dist/build-manifest.json` with executable and embedded
+source hashes, and syntax-checks every JavaScript module before packaging.
 
 Run the executable to open an Edge app window. If Edge cannot be located, the
 default browser opens instead. The host runs until its console is closed.

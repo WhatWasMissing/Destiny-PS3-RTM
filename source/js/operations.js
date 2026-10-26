@@ -2,7 +2,7 @@
   'use strict';
   function createRunner({ session, write, read }) {
     let tail = Promise.resolve();
-    function apply(pairs) {
+    function apply(pairs, options = {}) {
       const owner = session();
       const normalized = pairs.map(([address, value]) => {
         const addr = String(address).replace(/^0x/i, '');
@@ -16,7 +16,7 @@
         let completed = 0;
         try {
           for (const [address, value] of normalized) {
-            check(); await write(address, value); check(); completed++;
+            check(); await write(address, value, options); check(); completed++;
           }
         } catch (cause) {
           throw new Error(`Patch incomplete (${completed}/${normalized.length} writes acknowledged): ${cause.message}`, { cause });
@@ -24,7 +24,7 @@
         for (const [address, expected] of normalized) {
           check();
           let actual;
-          try { actual = await read(address, expected.length / 2); }
+          try { actual = await read(address, expected.length / 2, options); }
           catch (error) { check(); return { status: 'unverified', writes: completed, reason: error.message }; }
           check();
           if (String(actual).replace(/\s/g, '').toUpperCase() !== expected) {

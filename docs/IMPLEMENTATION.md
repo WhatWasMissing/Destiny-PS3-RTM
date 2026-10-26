@@ -147,3 +147,22 @@ Do not mark the complete objective achieved based on the transport tests alone.
   Documentation now describes the replacement desktop project consistently.
 - Stable string/speed/scanner writes also use verified memory operations.
   Final rebuild after these latest edits and final scope audit are still required.
+
+## Final scope audit
+
+The final requirement matrix and validation limits are recorded in
+VERIFICATION.md. The shared ps3fetch memory adapter now routes remaining raw
+setmem calls through verified writes; the internal runner uses direct bounded
+transport to avoid recursion. Integration checks cover destination/process
+rejection and exact unaligned UInt16 writes preserving neighboring bytes.
+Player hook installation checks supported instructions before any mutation;
+cleanup is restricted to hooks owned by this app. Thirty-one Node tests pass,
+plus Go host and production-frontend fake-console integration tests.
+
+Stylesheets are now separated into base.css and design.css. A final browser
+reload verified the Tools screen with no console errors after that separation.
+Build tooling syntax-checks all JavaScript, runs the suites, builds the executable,
+smoke-tests that executable, and records executable/source hashes in
+ dist/build-manifest.json. No live PS3 or in-game compatibility claim is made.
+The original recovery and proprietary license remain preserved. The changes are
+reviewable in PR #8; it remains a draft for live-console review before release.

@@ -1,4 +1,4 @@
-# Overwalls review — initial findings
+# Overwalls architecture and port assessment
 
 Inspected local project:
 E:/Destiny PS3 RTMs/fly hack/OverwallsTool - Hybrid/
@@ -6,9 +6,10 @@ E:/Destiny PS3 RTMs/fly hack/OverwallsTool - Hybrid/
 This is a decompiled .NET Framework 4.7.2 Windows Forms application. The main
 implementation is AFKCrucible/Form1.cs. OverwallsTool/Form1.cs is generated
 resource access code, not the main application. soulsAPI is referenced and
-bundled through Costura; its transport and call behavior require further review.
+bundled through Costura. This review covers its usage from the decompiled
+application and Retrofit, not proof of every bundled native transport behavior.
 
-## Evidence so far
+## Inspected behavior
 
 - Connect handler, lines 306–311: opens soulsAPI connection UI, then installs
   physics and plate hooks. Hook installation is coupled to connecting.
@@ -18,12 +19,12 @@ bundled through Costura; its transport and call behavior require further review.
 - LoadActivity, lines 1025–1028: writes activity index to a fixed address.
 - GridButton_Click, lines 1298–1316: named coordinate shortcuts; blank entries
   open a coordinate editor. Right-click deletion uses a confirmation dialog.
-- Scenario loader begins at line 1332: XML scenario import. Review schema and
-  validation before recommending compatibility support.
+- Scenario loader begins at line 1332: XML scenario import. The accompanying
+  VoG.xml sample confirms ArrayOfButtonData entries with Name/Text/X/Y/Z fields.
 - UI includes AFK farming, activity loader, teleports, adjustable delays and
   CCAPI-specific functionality. These are not proof of browser compatibility.
 
-## Candidate recommendations to validate
+## Port boundaries
 
 - Scenario XML import/export and named teleport shortcut editing are promising
   data/UI ports. Existing RTM folders should be preserved rather than replaced.

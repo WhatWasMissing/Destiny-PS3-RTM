@@ -103,9 +103,11 @@
     resetVerifiedStates();
     stopHealthCheck();
     stopAutoReconnect();
-    const val = document.getElementById('ip').value.trim();
+    let val = document.getElementById('ip').value.trim();
     if (!val) { toast('Enter a PS3 IP address', 'err'); return; }
     if (!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(val) || val.split('.').some(part => Number(part) > 255)) { toast('Enter a valid IPv4 address', 'err'); return; }
+    val = val.split('.').map(Number).join('.');
+    document.getElementById('ip').value = val;
     ip = val;
     saveIp(val);
 

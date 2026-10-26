@@ -42,6 +42,11 @@ for(const file of ['desktop-host','transport','operations','backups','connection
   get('ip').value='192.168.0.62';
   await context.quickReconnectFromBadge();
   assert.equal(get('status-badge').classList.contains('connected'),true);
+  await context.ps3fetch('http://192.168.0.62/setmem.ps3mapi?addr=1254&val=AABBCCDD');
+  await context.ps3writeU16(0x1256,0x1122);
+  assert.equal(await context.ps3getmem(0x1254,4),'AABB1122','unaligned UInt16 write changed neighboring bytes');
+  await assert.rejects(context.ps3fetch('http://192.168.0.63/setmem.ps3mapi?addr=1254&val=00000000'),/active game session/);
+  await assert.rejects(context.ps3fetch('http://192.168.0.62/setmem.ps3mapi?addr=1254&val=00000000&proc=77'),/active game session/);
   const button=get('integration-toggle');
   await context.togFire('1234','AABBCCDD','00000000','Integration toggle',button);
   assert.equal(vm.runInContext("cheatRuntimeStatus['integration-toggle']",context),'verified-on');
