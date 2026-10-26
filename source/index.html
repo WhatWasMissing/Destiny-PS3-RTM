@@ -1184,12 +1184,15 @@
 </div>
 <div class="panel" style="margin:0 1rem 0.75rem">
 <div class="panel-header">Brightness · address probe</div>
-<div class="compact-help-note">The matching 01.24 ELF stores the source's Normal value (Float32 1.0) at 0x006101C0. This probe reads the live word only; the ELF value does not by itself prove the runtime field's meaning or in-game effect.</div>
+<div class="compact-help-note">The 1.24 C# source defines Bright 50, Normal 1 and Inverted -20 at 0x006101C0. The matching ELF stores Normal (Float32 1.0) there. Preset writes require exact readback; the in-game effect has not been observed.</div>
 <div class="scan-status"><div class="scan-stat" id="brightness-current">Current word: not read</div></div>
 <div class="cheat-grid">
 <button class="cheat-btn" id="brightness-read-btn" type="button" onclick="readBrightnessCandidate()">Read 0x006101C0</button>
+<button class="cheat-btn" id="brightness-preset-bright" type="button" onclick="applyBrightnessPreset('bright')">Bright · 50</button>
+<button class="cheat-btn" id="brightness-preset-normal" type="button" onclick="applyBrightnessPreset('normal')">Normal · 1</button>
+<button class="cheat-btn" id="brightness-preset-inverted" type="button" onclick="applyBrightnessPreset('inverted')">Inverted · −20</button>
 </div>
-<div class="ow-job-status" id="brightness-status" role="status" aria-live="polite">Probe only · 01.24 address semantics are not confirmed.</div>
+<div class="ow-job-status" id="brightness-status" role="status" aria-live="polite">Preset writes use 0x006101C0 with readback verification; the effect is untested.</div>
 </div>
 <!-- Camera / World -->
 <div class="panel" style="margin:0 1rem 0.75rem">

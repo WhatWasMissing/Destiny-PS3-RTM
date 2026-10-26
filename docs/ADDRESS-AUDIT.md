@@ -27,16 +27,22 @@ Primary build references:
 
 ## Candidate patch-site comparison
 
-The 01.24 file is ELF64, big-endian PowerPC64. Its first executable load segment
-maps virtual addresses starting at `0x00010000` to file offsets starting at
-`0x00000000`. The table records bytes in the **01.24 ELF** at each candidate
-address, alongside the source claim. These bytes can support or reject a static
-patch location; they do not prove the live process has the same mapping or that
-a write causes the named in-game effect.
+The 01.24 file is ELF64, big-endian PowerPC64. Its load segments map the game
+image as follows:
+
+| Segment | Virtual range | File backing |
+|---|---|---|
+| Executable/read-only | `0x00010000–0x0183D178` | Offset `0`, size `0x182D178` |
+| Writable data + BSS | `0x01840000–0x01C72948` | Offset `0x01830000`, initialized size `0xC13A4`; remaining `0x3715A4` bytes are zero-filled BSS |
+
+The table records bytes in the **01.24 ELF** at each candidate address,
+alongside the source claim. These bytes can support or reject a static patch
+location; they do not prove the live process has the same mapping or that a
+write causes the named in-game effect.
 
 | Feature | Local source claims | Bytes in 01.24 ELF | Static assessment |
 |---|---|---|---|
-| Brightness | C# writes Float32 `50`, `1`, and `-20` at `0x006101C0` (`42480000`, `3F800000`, `C1A00000`) | `0x006101C0`: `3F800000` (Float32 `1.0`) | Supports the address and the Normal preset as the 01.24 default. The runtime probe remains read-only; live brightness behavior is not established by ELF bytes alone. |
+| Brightness | C# writes Float32 `50`, `1`, and `-20` at `0x006101C0` (`42480000`, `3F800000`, `C1A00000`) | `0x006101C0`: `3F800000` (Float32 `1.0`) | Supports the address and the Normal preset as the 01.24 default. The app offers source presets with exact write readback; the in-game brightness effect is not established by ELF bytes alone. |
 | FOV | 1.24 C# and web RTM sources write the Float32 field at `0x0070906C` | `0x0070906C`: `40000000` (Float32 `2.0`), followed by `40490E38` | Confirms the shared source address and its default value in the update ELF. A live effect check is still separate. |
 | Flip View | 1.24 C# and web RTM sources use ON `40A0A000`, OFF `3F000000` at `0x00614C40` | `0x00614C40`: `3F000000` | Confirms the shared source address and OFF value in the update ELF. A live effect check is still separate. |
 | Power Boost / Variable Buff | C# uses `0x0005E614`, ON `403F0000`, OFF `3F800000`; Overwalls and the app use ON `403F0004` at that address | `0x0005E614`: `3F800000` (Float32 `1.0`) | Supports the shared candidate address and OFF/default value. The two ON values differ slightly and the ELF default does not resolve which source value or gameplay label is intended. |
@@ -48,20 +54,23 @@ several update-build values. At `0x006101C0` it contains `62A30000`; at
 `addic r3,r3,-0x1378`. These observations apply only to base 01.00 and are not
 evidence about update 01.24.
 
-## Brightness probe
+## Brightness read and preset controls
 
 The panel reads exactly four bytes at `0x006101C0` and displays the raw word and
-its big-endian Float32 interpretation. It reports whether the value matches one
-of the local C# presets, but never writes or offers a restore action. The
-01.24 ELF stores the source's Normal value (`3F800000`, `1.0`) at this address.
-A live read or preset match still does not prove the runtime field's meaning or
-the in-game effect.
+its big-endian Float32 interpretation. It also exposes the local C# presets
+(Bright `50`, Normal `1`, Inverted `-20`), writes them through the verified
+memory path, and displays success only after exact readback. The 01.24 ELF stores
+the source's Normal value (`3F800000`, `1.0`) at this address. A successful
+readback confirms bytes, not the in-game brightness effect.
 
 ## Runtime-only addresses
 
-The RTM's `0x600...` character, wallet, emblem, and ammo addresses fall outside
-the mapped ELF load segments. Local source files use them as absolute runtime
-addresses, but the executable alone cannot establish their allocation or
-contents. Likewise, matching static code/data bytes do not prove server
-persistence. Controlled read-only observation in the matching 01.24 runtime is
-needed to confirm runtime mappings and effects.
+| Address | Relation to the 01.24 ELF | Local source use |
+|---|---|---|
+| `0x0190EBB0` | In the zero-filled BSS of the writable segment | Overwalls reads a runtime pointer here; its coordinate fields are at pointer `+0x140`, `+0x144`, and `+0x148`, with activation data at `+0x1B8`. The pointer value itself must be read at runtime. |
+| `0x600...` regions, including `0x600E66B0` and `0x60300000` | Outside every EBOOT load segment | Local RTMs use these as wallet, emblem, ammo, and other player-memory ranges. The ELF alone cannot establish their allocation or contents. |
+| `0x10030000` | Outside every EBOOT load segment | Local Player Size source uses it as scratch data around a function call. The tool's ordinary memory read/write endpoint does not perform that call. |
+
+Matching static code/data bytes do not prove server persistence. Controlled
+observation in the matching 01.24 runtime is needed to confirm dynamic mappings
+and in-game effects.

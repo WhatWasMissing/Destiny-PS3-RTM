@@ -9,6 +9,7 @@ builds use different offsets and were not used as address references.
 
 | Feature | Result |
 |---|---|
+| Brightness presets | Added the local 1.24 C# Bright `50`, Normal `1`, and Inverted `-20` values at `0x006101C0`. Writes require exact readback; the matched ELF default is `1.0`, but the in-game effect remains unobserved. |
 | No Spread, Bouncy Items, 4× Jump Boost, Rock Jump | Added from the local 1.24 C# source. Overlapping patches disable the other active option before a write. |
 | Memory Scanner | The scan/diff code already existed; its missing controls are now available in Tools. Reads remain bounded and writes require readback. |
 | PS3 notification | Available as a PS3 system notification through webMAN MOD's documented notification route. It is separate from the old Destiny-internal toast. |
@@ -36,7 +37,8 @@ and One-Hit OFF halfword at their candidate sites. The local 1.24 C# and web RTM
 sources agree on FOV and Flip View addresses. Power Boost ON values still differ
 slightly between source variants, and One-Hit retains two competing ON values
 (`447A` and `547A`). Static bytes establish build compatibility at these sites,
-not live runtime effects. Brightness remains read-only. See
+not live runtime effects. Brightness now exposes the source presets through
+readback-verified writes; its in-game effect remains unobserved. See
 [ADDRESS-AUDIT.md](ADDRESS-AUDIT.md) for hashes, bytes, and runtime limitations.
 
 The local source establishes provenance, not build compatibility. Public
