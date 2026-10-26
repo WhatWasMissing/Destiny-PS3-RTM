@@ -324,6 +324,7 @@
 
   function saveAddress(cheatId, newAddr) {
     const addr = newAddr.trim().toUpperCase();
+    if (!/^(?:0X)?[0-9A-F]{1,8}$/.test(addr)) { toast('Enter a valid hexadecimal memory address', 'err'); return; }
     let savedAddrs = {};
     try {
       savedAddrs = JSON.parse(localStorage.getItem('cheatAddresses') || '{}');
@@ -333,7 +334,7 @@
     savedAddrs[cheatId] = addr;
     try {
       localStorage.setItem('cheatAddresses', JSON.stringify(savedAddrs));
-    } catch (e) {}
+    } catch (e) { toast('Address could not be saved', 'err'); return; }
 
     const el = document.getElementById(`addr-${cheatId}`);
     if (el) el.innerText = addr;
@@ -347,7 +348,7 @@
   function triggerDynamicCheat(cheatId) {
     const addr = document.getElementById(`addr-${cheatId}`).innerText.trim();
     const btn = document.getElementById(cheatId);
-    togFireFloat(addr, '3F800000', '00000000', 'Unlimited Sword Energy', btn);
+    togFire(addr, '3F800000', '00000000', 'Unlimited Sword Energy', btn);
   }
 
   document.addEventListener('DOMContentLoaded', loadSavedAddresses);

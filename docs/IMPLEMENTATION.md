@@ -83,3 +83,25 @@ Do not mark the complete objective achieved based on the transport tests alone.
   writes, sliders, server modes, teleport and hook operations); lifecycle
   integration beyond automatic reconnect; full UI workflows and responsive QA.
   No live-console verification has been performed.
+
+## Workflow and FOV pass
+
+- Saved-position browser workflow exercised while disconnected: create, edit
+  coordinates/name, delete, undo, export, import with duplicate skipping, complete
+  settings export and restore/reload. The test position remained intact.
+- Replaced saved-position and folder native prompts with labelled in-app dialog
+  forms. Initial testing exposed unsupported prompt() and an unset default
+  folder option; both are fixed. Settings/position import confirmations now use
+  the same in-app dialog system.
+- Backup validation rejects coercible invalid coordinates, float32 overflow,
+  invalid enums/IPs/address mappings and duplicate folder IDs. Teleport storage
+  failures report an error and restore the last persisted in-memory snapshot.
+- Duplicate FOV handlers were removed. The obsolete later definition mapped a
+  direct slider value through a 0–10 offset formula. Production-handler tests
+  now verify 2.5 writes 2.5 and reset writes/displays 2.0.
+- FOV/game-speed writes use readback verification. Teleport messaging explicitly
+  states position-write acknowledgement rather than proven in-game movement.
+- Phone dark/light views inspected at 390px (375px content area); no document
+  horizontal overflow. All five navigation tabs now fit without a hidden tab.
+- Desktop rebuild passed Go and JavaScript tests. Broader console operation
+  verification, native-window check and final scope audit remain outstanding.

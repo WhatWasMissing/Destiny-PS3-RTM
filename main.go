@@ -80,6 +80,7 @@ func (h *host) handler() http.Handler {
 		if "http://"+r.Host != h.origin { http.Error(w, "Invalid host", http.StatusForbidden); return }
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("Cache-Control", "no-store")
 		mux.ServeHTTP(w, r)
 	})
 }

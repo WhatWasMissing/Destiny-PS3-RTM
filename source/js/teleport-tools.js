@@ -5,18 +5,16 @@
     undo.push(JSON.stringify({ savedTeleports, teleportFolders }));
     if (undo.length > 20) undo.shift();
   };
-  window.tpEditSlot = function (index) {
+  window.tpEditSlot = async function (index) {
     const position = savedTeleports[index]; if (!position) return;
-    const name = prompt('Location name:', position.name); if (name === null) return;
-    if (!name.trim() || name.length > 200) { toast('Enter a name of 1â€“200 characters', 'err'); return; }
-    const next = { ...position, name: name.trim() };
-    for (const axis of ['x','y','z']) {
-      const value = prompt(axis.toUpperCase() + ' coordinate:', position[axis]);
-      if (value === null) return;
-      if (!value.trim() || !Number.isFinite(Number(value))) { toast('Coordinates must be finite numbers', 'err'); return; }
-      next[axis] = Number(value);
-    }
-    tpRemember(); savedTeleports[index] = next; saveTeleportsToStorage(); tpRenderSlots();
+    const result = await RtmDialogs.fields({ title: 'Edit position', fields: [
+      { name:'name', label:'Location name', value:position.name },
+      ...['x','y','z'].map(axis => ({name:axis,label:axis.toUpperCase()+' coordinate',type:'number',value:position[axis]}))
+    ] });
+    if (!result) return;
+    if (!['x','y','z'].every(axis => RtmBackups.coordinate(result[axis]))) { toast('Coordinates must be finite float values', 'err'); return; }
+    tpRemember(); savedTeleports[index] = { ...position, ...result };
+    if (!saveTeleportsToStorage()) { tpRenderSlots(); return; } tpRenderSlots();
   };
   window.tpIsDuplicate = function (position) {
     return savedTeleports.some(existing => ['x','y','z'].every(axis => Number(existing[axis]) === Number(position[axis])));
@@ -34,13 +32,13 @@
     const toolbar = document.createElement('div'); toolbar.className = 'connect-row'; toolbar.style.flexWrap = 'wrap';
     function button(label, handler) {
       const element = document.createElement('button'); element.className = 'slider-preset'; element.textContent = label;
-      element.onclick = () => { try { handler(); } catch (error) { toast(error.message, 'err'); } }; toolbar.append(element);
+      element.onclick = async () => { try { await handler(); } catch (error) { toast(error.message, 'err'); } }; toolbar.append(element);
     }
-    button('Sort by name', () => { tpRemember(); savedTeleports.sort((a,b) => a.name.localeCompare(b.name)); saveTeleportsToStorage(); tpRenderSlots(); });
+    button('Sort by name', () => { tpRemember(); savedTeleports.sort((a,b) => a.name.localeCompare(b.name)); if (!saveTeleportsToStorage()) { tpRenderSlots(); return; } tpRenderSlots(); });
     button('Undo last change', () => {
       if (!undo.length) { toast('No teleport changes to undo', ''); return; }
       const previous = JSON.parse(undo.pop()); savedTeleports = previous.savedTeleports; teleportFolders = previous.teleportFolders;
-      saveTeleportsToStorage(); tpRenderSlots();
+      if (!saveTeleportsToStorage()) { tpRenderSlots(); return; } tpRenderSlots();
     });
     button('Export positions', exportPositions);
     const fileInput = document.createElement('input'); fileInput.type = 'file'; fileInput.accept = '.json'; fileInput.hidden = true;
@@ -55,7 +53,7 @@
         if (!data.settings.rtm_saved_teleports) throw new Error('No positions found in this backup');
         const positions = JSON.parse(data.settings.rtm_saved_teleports);
         const folders = JSON.parse(data.settings.rtm_teleport_folders || '[]');
-        if (!confirm(`Merge ${positions.length} positions? Duplicate coordinates will be skipped.`)) return;
+        if (!await RtmDialogs.confirm(`Merge ${positions.length} positions? Duplicate coordinates will be skipped.`)) return;
         tpRemember();
         for (const folder of folders) if (!teleportFolders.some(existing => existing.id === folder.id)) teleportFolders.push(folder);
         let added = 0;
@@ -63,7 +61,7 @@
           if (tpIsDuplicate(position)) continue;
           savedTeleports.push({ ...position, folderId: teleportFolders.some(folder => folder.id === position.folderId) ? position.folderId : 'unsorted' }); added++;
         }
-        saveTeleportsToStorage(); tpRenderSlots(); toast(`Imported ${added} positions`, 'ok');
+        if (!saveTeleportsToStorage()) { tpRenderSlots(); return; } tpRenderSlots(); toast(`Imported ${added} positions`, 'ok');
       } catch (error) { toast(error.message, 'err'); }
       finally { fileInput.value = ''; }
     };

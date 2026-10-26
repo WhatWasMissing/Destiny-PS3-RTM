@@ -25,7 +25,7 @@
         const file = input.files[0]; if (!file) return;
         if (file.size > 5000000) throw new Error('Backup exceeds the 5 MB limit');
         const bundle = RtmBackups.validate(JSON.parse(await file.text()));
-        if (!confirm('Replace the settings included in this backup? The page will reload. Console actions will not run.')) return;
+        if (!await RtmDialogs.confirm('Replace the settings included in this backup? The page will reload. Console actions will not run.')) return;
         download('destiny-rtm-before-restore.json', RtmBackups.capture(localStorage));
         RtmBackups.restore(localStorage, bundle);
         location.reload();

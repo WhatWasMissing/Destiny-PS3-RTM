@@ -7,7 +7,7 @@
       const normalized = pairs.map(([address, value]) => {
         const addr = String(address).replace(/^0x/i, '');
         const hex = String(value).replace(/\s/g, '').toUpperCase();
-        if (!/^[0-9a-f]{1,8}$/i.test(addr) || !/^(?:[0-9A-F]{2})+$/.test(hex)) throw new Error('Invalid memory patch');
+        if (!/^[0-9a-f]{1,8}$/i.test(addr) || parseInt(addr,16) === 0 || !/^(?:[0-9A-F]{2})+$/.test(hex)) throw new Error('Invalid memory patch');
         return [parseInt(addr, 16), hex];
       });
       if (!normalized.length) return Promise.reject(new Error('Empty memory patch'));

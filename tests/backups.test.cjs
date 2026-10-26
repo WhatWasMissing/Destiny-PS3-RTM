@@ -26,3 +26,17 @@ test('restore rolls back earlier changes when storage fails', () => {
   assert.throws(() => restore(storage, { format: 'destiny-rtm-settings', version: 1, settings: { rtm_saved_ip: 'new', henMode: '1' } }));
   assert.equal(storage.getItem('rtm_saved_ip'), 'old');
 });
+test('reject coordinates coerced from null, booleans, arrays and float32 overflow', () => {
+  for (const x of [null, true, [], {}, '', ' ', '1e100']) {
+    assert.throws(() => validate({ format: 'destiny-rtm-settings', version: 1, settings: {
+      rtm_saved_teleports: JSON.stringify([{name:'bad',x,y:0,z:0}])
+    } }));
+  }
+});
+test('reject malformed addresses, settings enums and duplicate folder IDs', () => {
+  for (const settings of [ {cheatAddresses:'{"tog-god":"1234&val=BAD"}'}, {rtm_active_tab:'unknown'},
+    {rtm_appearance:'other'}, {henMode:'yes'}, {rtm_saved_ip:'999.0.0.1'},
+    {rtm_teleport_folders:'[{"id":"a","name":"One"},{"id":"a","name":"Two"}]'} ]) {
+    assert.throws(() => validate({format:'destiny-rtm-settings',version:1,settings}));
+  }
+});

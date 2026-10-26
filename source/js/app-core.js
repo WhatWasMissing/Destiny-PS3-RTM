@@ -864,47 +864,58 @@
   if (!teleportFolders.some(f => f.id === 'unsorted')) teleportFolders.unshift({ id:'unsorted', name:'Unsorted', system:true, open:true });
   savedTeleports = Array.isArray(savedTeleports) ? savedTeleports.map(p => ({...p, folderId:p.folderId || 'unsorted'})) : [];
 
+  let lastSavedTeleportSnapshot = JSON.stringify({ savedTeleports, teleportFolders });
   function saveTeleportsToStorage() {
-    try { localStorage.setItem(TELEPORTS_KEY, JSON.stringify(savedTeleports)); } catch (e) {}
-    try { localStorage.setItem(TELEPORT_FOLDERS_KEY, JSON.stringify(teleportFolders)); } catch (e) {}
+    try {
+      RtmBackups.restore(localStorage, { format: 'destiny-rtm-settings', version: 1, settings: {
+        [TELEPORTS_KEY]: JSON.stringify(savedTeleports),
+        [TELEPORT_FOLDERS_KEY]: JSON.stringify(teleportFolders)
+      } });
+      lastSavedTeleportSnapshot = JSON.stringify({ savedTeleports, teleportFolders });
+      return true;
+    } catch (error) {
+      const previous = JSON.parse(lastSavedTeleportSnapshot);
+      savedTeleports = previous.savedTeleports; teleportFolders = previous.teleportFolders;
+      toast(`Positions were not saved: ${error.message}`, 'err');
+      return false;
+    }
   }
 
   function tpEscape(v) {
     return String(v ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
   }
-  function tpNewFolder() {
-    const name = prompt('Folder name:');
-    if (!name || !name.trim()) return;
-    teleportFolders.push({ id:'folder_' + Date.now().toString(36), name:name.trim(), open:true });
-    saveTeleportsToStorage(); tpRenderSlots();
+  async function tpNewFolder() {
+    const result = await RtmDialogs.fields({ title:'New folder', fields:[{name:'name',label:'Folder name'}] });
+    if (!result) return;
+    tpRemember(); teleportFolders.push({ id:'folder_'+crypto.randomUUID().replaceAll('-',''), name:result.name, open:true });
+    if (!saveTeleportsToStorage()) { tpRenderSlots(); return; } tpRenderSlots();
   }
-  function tpRenameFolder(id) {
-    const folder = teleportFolders.find(f => f.id === id);
-    if (!folder || folder.system) return;
-    const name = prompt('Rename folder:', folder.name);
-    if (!name || !name.trim()) return;
-    folder.name = name.trim(); saveTeleportsToStorage(); tpRenderSlots();
+  async function tpRenameFolder(id) {
+    const folder = teleportFolders.find(folder => folder.id === id); if (!folder || folder.system) return;
+    const result = await RtmDialogs.fields({ title:'Rename folder', fields:[{name:'name',label:'Folder name',value:folder.name}] });
+    if (!result) return;
+    tpRemember(); folder.name = result.name;
+    if (!saveTeleportsToStorage()) { tpRenderSlots(); return; } tpRenderSlots();
   }
-  function tpDeleteFolder(id) {
-    const folder = teleportFolders.find(f => f.id === id);
-    if (!folder || folder.system) return;
-    if (!confirm(`Delete folder \"${folder.name}\"? Locations will be moved to Unsorted.`)) return;
-    tpRemember();
-    savedTeleports.forEach(p => { if (p.folderId === id) p.folderId = 'unsorted'; });
-    teleportFolders = teleportFolders.filter(f => f.id !== id);
-    saveTeleportsToStorage(); tpRenderSlots();
+  async function tpDeleteFolder(id) {
+    const folder = teleportFolders.find(folder => folder.id === id); if (!folder || folder.system) return;
+    if (!await RtmDialogs.confirm(`Delete folder "${folder.name}"? Positions will move to Unsorted.`)) return;
+    tpRemember(); savedTeleports.forEach(position => { if (position.folderId === id) position.folderId = 'unsorted'; });
+    teleportFolders = teleportFolders.filter(folder => folder.id !== id);
+    if (!saveTeleportsToStorage()) { tpRenderSlots(); return; } tpRenderSlots();
   }
+
   function tpToggleFolder(id) {
     const folder = teleportFolders.find(f => f.id === id); if (!folder) return;
-    folder.open = !folder.open; saveTeleportsToStorage(); tpRenderSlots();
+    folder.open = !folder.open; if (!saveTeleportsToStorage()) { tpRenderSlots(); return; } tpRenderSlots();
   }
-  function tpMoveSlot(idx) {
-    const pos = savedTeleports[idx]; if (!pos) return;
-    const options = teleportFolders.map((f,i) => `${i+1}. ${f.name}`).join('\n');
-    const answer = prompt(`Move \"${pos.name}\" to folder:\n${options}\n\nEnter folder number:`);
-    const n = Number(answer);
-    if (!Number.isInteger(n) || n < 1 || n > teleportFolders.length) return;
-    pos.folderId = teleportFolders[n-1].id; saveTeleportsToStorage(); tpRenderSlots();
+  async function tpMoveSlot(idx) {
+    const position = savedTeleports[idx]; if (!position) return;
+    const result = await RtmDialogs.fields({ title:'Move position', fields:[{ name:'folder', label:'Destination folder', value:position.folderId,
+      options:teleportFolders.map(folder => ({value:folder.id,label:folder.name})) }] });
+    if (!result) return;
+    tpRemember(); position.folderId = result.folder;
+    if (!saveTeleportsToStorage()) { tpRenderSlots(); return; } tpRenderSlots();
   }
 
   // Note: this file already has a separate readPlayerPos() (used by the
@@ -1083,37 +1094,25 @@
         throw lastWriteError || new Error("Teleport memory write failed");
       }
 
-      toast("Teleported successfully!", "ok");
-      log(`Teleported to X:${x} Y:${y} Z:${z}`, "ok");
+      toast("Position write acknowledged; movement not verified", "");
+      log(`Position write acknowledged: X:${x} Y:${y} Z:${z}; movement not verified`, "");
     } catch (e) {
       toast("Teleport failed", "err");
       log("Teleport error: " + e.message, "err");
     }
   }
 
-  function tpSaveCurrent() {
-    const x = document.getElementById('tp-x').value;
-    const y = document.getElementById('tp-y').value;
-    const z = document.getElementById('tp-z').value;
-
-    if (![x,y,z].every(value => value.trim() !== '' && Number.isFinite(Number(value)))) {
-      toast("Read coordinates first", "err");
-      return;
-    }
-
-    const slotName = prompt("Enter a name for this saved location:", `Position ${savedTeleports.length + 1}`);
-    if (!slotName) return;
-    const folderOptions = teleportFolders.map((f,i) => `${i+1}. ${f.name}`).join('\n');
-    const folderAnswer = prompt(`Save \"${slotName}\" in folder:\n${folderOptions}\n\nEnter folder number (default 1):`, '1');
-    const folderNumber = Number(folderAnswer || 1);
-    const folder = Number.isInteger(folderNumber) && folderNumber >= 1 && folderNumber <= teleportFolders.length ? teleportFolders[folderNumber - 1] : teleportFolders[0];
-
-    if (tpIsDuplicate({x,y,z}) && !confirm('These coordinates are already saved. Save another copy?')) return;
-    tpRemember();
-    savedTeleports.push({ name: slotName.trim().slice(0,200), x, y, z, folderId: folder.id });
-    saveTeleportsToStorage();
-    tpRenderSlots();
-    toast("Position saved!", "ok");
+  async function tpSaveCurrent() {
+    const position = Object.fromEntries(['x','y','z'].map(axis => [axis,document.getElementById('tp-'+axis).value]));
+    if (!['x','y','z'].every(axis => RtmBackups.coordinate(position[axis]))) { toast('Enter finite coordinates first', 'err'); return; }
+    const result = await RtmDialogs.fields({ title:'Save position', fields:[
+      {name:'name',label:'Location name',value:`Position ${savedTeleports.length+1}`},
+      {name:'folder',label:'Folder',options:teleportFolders.map(folder => ({value:folder.id,label:folder.name}))}
+    ] });
+    if (!result) return;
+    if (tpIsDuplicate(position) && !await RtmDialogs.confirm('These coordinates are already saved. Save another copy?')) return;
+    tpRemember(); savedTeleports.push({...position,name:result.name,folderId:result.folder});
+    if (!saveTeleportsToStorage()) { tpRenderSlots(); return; } tpRenderSlots(); toast('Position saved', 'ok');
   }
 
   async function tpAboveYou() {
@@ -1153,7 +1152,7 @@
   function tpDeleteSlot(idx) {
     tpRemember();
     savedTeleports.splice(idx, 1);
-    saveTeleportsToStorage();
+    if (!saveTeleportsToStorage()) { tpRenderSlots(); return; }
     tpRenderSlots();
     toast("Position removed", "ok");
   }
@@ -1653,7 +1652,7 @@
     if (isNaN(speed) || speed <= 0) { toast('Enter a valid speed', 'err'); return; }
     const hex = floatToHex(speed);
     try {
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=30586864&val=${hex}`);
+      await verifiedMemoryValue('30586864',hex);
       log(`Gamespeed → x${speed} (${hex})`, 'ok');
       toast(`Gamespeed x${speed} `, 'ok');
     } catch(e) { log('Gamespeed write failed', 'err'); toast('Gamespeed failed', 'err'); }
@@ -1663,176 +1662,56 @@
     if (!ip) { toast('Not connected', 'err'); return; }
     document.getElementById('gs-input').value = '1';
     try {
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=30586864&val=3F800000`);
+      await verifiedMemoryValue('30586864','3F800000');
       log('Gamespeed reset → x1', 'ok');
       toast('Gamespeed reset ', 'ok');
     } catch(e) { log('Gamespeed reset failed', 'err'); toast('Gamespeed reset failed', 'err'); }
   }
 
-  // ── FOV helpers ───────────────────────────────────────────────────────
+  // FOV is represented directly (2.0–3.0 on the slider), not as a 0–10 offset.
   const FOV_ADDR = 0x0070906C;
-
-  function updateFOV(value) {
-    const n = Number(value);
-    if (!Number.isFinite(n)) return;
-
-    const val = document.getElementById('fov-val');
-    if (val) val.textContent = n.toFixed(2);
-
-    const custom = document.getElementById('fov-custom');
-    if (custom && document.activeElement !== custom) custom.value = String(n);
+  function floatToHex(value) {
+    if (!RtmBackups.coordinate(value)) throw new Error('Value cannot be represented as a finite float');
+    const bytes = new Uint8Array(4); new DataView(bytes.buffer).setFloat32(0, Number(value), false);
+    return Array.from(bytes, byte => byte.toString(16).padStart(2,'0')).join('').toUpperCase();
   }
-
-  async function writeFOVValue(fov) {
-    if (!ip) throw new Error('Not connected');
-
-    const n = Number(fov);
-    if (!Number.isFinite(n)) throw new Error('Invalid FOV value');
-
-    const hex = floatToHex(n);
-    await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${FOV_ADDR.toString(16).toUpperCase()}&val=${hex}`);
+  function updateFOV(value) {
+    if (!Number.isFinite(Number(value))) return;
+    document.getElementById('fov-val').textContent = Number(value).toFixed(2);
+    const custom = document.getElementById('fov-custom');
+    if (custom && document.activeElement !== custom) custom.value = String(value);
+  }
+  function fovDisplay(value) { return Number(value).toFixed(2); }
+  async function verifiedMemoryValue(address, hex) {
+    const result = await patchRunner.apply([[address,hex]]);
+    if (result.status !== 'verified') throw new Error('Write acknowledged but readback unavailable; value not confirmed');
     return hex;
   }
-
+  async function writeFOVValue(value) {
+    const number = Number(value);
+    if (!RtmBackups.coordinate(value) || number <= 0) throw new Error('Enter a positive finite FOV value');
+    return verifiedMemoryValue('70906C', floatToHex(number));
+  }
   async function applyFOV() {
-    if (!ip) { toast('Not connected', 'err'); return; }
-
-    const slider = document.getElementById('fov-slider');
-    const custom = document.getElementById('fov-custom');
-
-    let value = Number(slider?.value ?? 2);
-    if (custom && String(custom.value).trim() !== '') {
-      const customValue = Number(custom.value);
-      if (Number.isFinite(customValue)) value = customValue;
-    }
-
-    const btn = document.getElementById('fov-apply-btn');
-    if (btn) btn.disabled = true;
-
-    try {
-      const hex = await writeFOVValue(value);
-      const val = document.getElementById('fov-val');
-      if (val) val.textContent = value.toFixed(2);
-      log(`FOV ${value} → 0070906C = ${hex}`, 'ok');
-      toast(`FOV applied: ${value}`, 'ok');
-    } catch (e) {
-      log(`FOV failed: ${e.message || e}`, 'err');
-      toast('FOV write failed', 'err');
-    } finally {
-      if (btn) btn.disabled = false;
-    }
+    const value = Number(document.getElementById('fov-slider').value);
+    try { await writeFOVValue(value); updateFOV(value); toast(`FOV ${value} verified`, 'ok'); }
+    catch (error) { log(`FOV not confirmed: ${error.message}`, 'err'); toast('FOV not confirmed', 'err'); }
   }
-
-  async function resetFOV() {
-    const slider = document.getElementById('fov-slider');
-    const custom = document.getElementById('fov-custom');
-    if (slider) slider.value = '2';
-    if (custom) custom.value = '2';
-    updateFOV(2);
-
-    if (!ip) { toast('Not connected', 'err'); return; }
-
-    try {
-      const hex = await writeFOVValue(2.0);
-      log(`FOV reset → 0070906C = ${hex}`, 'ok');
-      toast('FOV reset to 2.00', 'ok');
-    } catch (e) {
-      log(`FOV reset failed: ${e.message || e}`, 'err');
-      toast('FOV reset failed', 'err');
-    }
-  }
-
-  // ── FOV helpers ───────────────────────────────────────────────────────────
-  // Formula from C#: fov = 2.0 + trackBar1.Value / 10.0  (trackBar range 0–10)
-  // Addr: 0x70906C  — WriteFloat
-  function fovDisplay(val) {
-    return (2.0 + parseFloat(val) / 10.0).toFixed(1);
-  }
-
-  function floatToHex(f) {
-    const buf = new ArrayBuffer(4);
-    new DataView(buf).setFloat32(0, f, false); // big-endian
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('').toUpperCase();
-  }
-
-  async function writeFOVValue(fov) {
-    if (!ip) { toast('Not connected', 'err'); return false; }
-    if (!Number.isFinite(fov)) {
-      toast('Enter a valid FOV number', 'err');
-      return false;
-    }
-
-    const hex = floatToHex(fov);
-    try {
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=70906C&val=${hex}`);
-      log(`FOV set → ${fov} (${hex})`, 'ok');
-      toast(`FOV ${fov} `, 'ok');
-      return true;
-    } catch(e) {
-      log('FOV write failed', 'err');
-      toast('FOV failed', 'err');
-      return false;
-    }
-  }
-
-  async function applyFOV() {
-    const raw = parseFloat(document.getElementById('fov-slider').value);
-    const fov = 2.0 + raw / 10.0;
-    const ok = await writeFOVValue(fov);
-    if (ok) {
-      const custom = document.getElementById('fov-custom');
-      if (custom) custom.value = String(fov);
-    }
-  }
-
   async function applyCustomFOV() {
-    const input = document.getElementById('fov-custom');
-    if (!input) return;
-
-    const text = input.value.trim();
-    if (!text) {
-      toast('Enter an FOV number', 'err');
-      input.focus();
-      return;
-    }
-
-    const fov = Number(text);
-    if (!Number.isFinite(fov)) {
-      toast('Enter a valid FOV number', 'err');
-      input.focus();
-      return;
-    }
-
-    const ok = await writeFOVValue(fov);
-    if (!ok) return;
-
-    // Keep the normal slider in sync when the custom value is inside its 2.0–3.0 range.
-    if (fov >= 2.0 && fov <= 3.0) {
-      const slider = document.getElementById('fov-slider');
-      const display = document.getElementById('fov-val');
-      const raw = Math.round((fov - 2.0) * 10);
-      if (slider) slider.value = String(raw);
-      if (display) display.textContent = fov.toFixed(1);
-    } else {
-      const display = document.getElementById('fov-val');
-      if (display) display.textContent = 'Custom';
-    }
-  }
-
-  async function resetFOV() {
-    if (!ip) { toast('Not connected', 'err'); return; }
-    document.getElementById('fov-slider').value = 0;
-    document.getElementById('fov-val').textContent = '2.0';
-    const custom = document.getElementById('fov-custom');
-    if (custom) custom.value = '2.0';
+    const input = document.getElementById('fov-custom'); if (!input) return;
+    const value = Number(input.value);
     try {
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=70906C&val=40000000`);
-      log('FOV reset → 2.0 (40000000)', 'ok');
-      toast('FOV reset ', 'ok');
-    } catch(e) {
-      log('FOV reset failed', 'err');
-      toast('FOV reset failed', 'err');
-    }
+      await writeFOVValue(input.value);
+      if (value >= 2 && value <= 3) document.getElementById('fov-slider').value = String(value);
+      updateFOV(value); toast(`FOV ${value} verified`, 'ok');
+    } catch (error) { log(`FOV not confirmed: ${error.message}`, 'err'); toast('FOV not confirmed', 'err'); }
+  }
+  async function resetFOV() {
+    try {
+      await writeFOVValue(2);
+      document.getElementById('fov-slider').value = '2'; updateFOV(2);
+      toast('FOV 2.00 verified', 'ok');
+    } catch (error) { log(`FOV reset not confirmed: ${error.message}`, 'err'); toast('FOV reset not confirmed', 'err'); }
   }
 
   // ── Player Name ───────────────────────────────────────────────────────────

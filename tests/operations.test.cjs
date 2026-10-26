@@ -1,6 +1,12 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { createRunner } = require('../source/js/operations.js');
+test('reject null addresses and malformed patches before sending a request', () => {
+  let writes = 0;
+  const runner = createRunner({session:()=> 'console1',write:async()=>writes++,read:async()=>''});
+  for (const pairs of [[['0','AA']],[['1234','ZZ']],[['100000000','AA']]]) assert.throws(()=>runner.apply(pairs),/Invalid memory patch/);
+  assert.equal(writes,0);
+});
 test('verified requires matching readback, not only an acknowledged write', async () => {
   const memory = new Map();
   const runner = createRunner({ session: () => 'console1', write: async (a,v) => memory.set(a,v), read: async a => memory.get(a) });
