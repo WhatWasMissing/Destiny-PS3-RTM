@@ -20,10 +20,17 @@ builds use different offsets and were not used as address references.
 
 ## Not exposed as working controls
 
-- Player Size and the Destiny-internal toast depend on `soulsAPI.Extension.Call`.
-  Stock webMAN MOD's HTTP PS3MAPI router does not include the generic
-  `/call.ps3mapi` route. The previous experimental Player Size UI and
-  connection-time RPC request have been removed.
+- Player Size and the Destiny-internal toast depend on
+  `soulsAPI.Extension.Call`. The local `soulsAPI.dll` implements this on top of
+  memory reads/writes by installing a 136-byte PowerPC stub at `0x004A8040`,
+  clearing a shared 10,324-byte mailbox, and invoking calls through staged
+  memory. Its `Call` implementation uses a shared mailbox, sleeps a fixed 20 ms,
+  and has no completion polling or title/version checks. The DLL has no
+  accompanying license in the recovered project. The DLL and extracted machine
+  code are not included in this repository; the previous experimental Player
+  Size UI and connection-time RPC request remain removed. Stock webMAN also
+  does not implement the HTML copy's `/call.ps3mapi` and
+  `/enablerpc.ps3mapi` routes.
 - Trophy unlock calls the same unsupported function-call layer and has no
   source-level readback or restoration. It remains unavailable.
 - The local C# client archive collects other players' IP addresses and
