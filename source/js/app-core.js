@@ -72,63 +72,33 @@
     const BYTES_DEFS = [
       { id: 'tog-no-pushbacks', addr: '1389760', offHex: '3F8000003F8000003F800000', label: 'No Knockback' },
     ];
-    for (const d of CHEAT_DEFS) {
-      const el = document.getElementById(d.id);
-      if (!el || !el.classList.contains('active-cheat')) continue;
-      const sizeParam = d.size !== 4 ? `&size=${d.size}` : '';
-      try { await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${d.addr}&val=${d.offVal}${sizeParam}`); } catch(e) {}
-      await henDelay();
-      cheatState[d.label] = false;
-      el.classList.remove('active-cheat');
-    }
-    for (const d of FLOAT_DEFS) {
-      const el = document.getElementById(d.id);
-      if (!el || !el.classList.contains('active-cheat')) continue;
-      try { await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${d.addr}&val=${floatToBEHex(d.offFloat)}`); } catch(e) {}
-      await henDelay();
-      cheatState[d.label] = false;
-      el.classList.remove('active-cheat');
-    }
-    for (const d of MULTI_DEFS) {
-      const el = document.getElementById(d.id);
-      if (!el || !el.classList.contains('active-cheat')) continue;
-      for (const [addr, val] of d.pairs) {
-        try { await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${addr}&val=${val}`); } catch(e) {}
-        await henDelay();
+    const definitions = [
+      ...CHEAT_DEFS.map(item => ({...item,pairs:[[item.addr,item.offVal]]})),
+      ...FLOAT_DEFS.map(item => ({...item,pairs:[[item.addr,floatToBEHex(item.offFloat)]]})),
+      ...MULTI_DEFS,
+      { id:'tog-deathsinger', label:"Deathsinger's Power", pairs:[[document.getElementById('ds-addr')?.value.trim().replace(/^0x/i,'') || '1C7B58',dsDetectedOff || '38C60001']] },
+      ...BYTES_DEFS.map(item => ({...item,pairs:(item.offHex.match(/.{8}/g)||[]).map((value,index)=>[(parseInt(item.addr,16)+index*4).toString(16),value])}))
+    ];
+    let verified = 0, failed = 0;
+    for (const definition of definitions) {
+      const element = document.getElementById(definition.id);
+      if (!element || (!element.classList.contains('active-cheat') && !requestedCheatState[definition.label])) continue;
+      try {
+        const result = await patchRunner.apply(definition.pairs);
+        if (result.status !== 'verified') throw new Error('readback unavailable');
+        cheatState[definition.label] = false; requestedCheatState[definition.label] = false;
+        element.classList.remove('active-cheat'); updateCheatStatus(element,'verified-off'); verified++;
+      } catch (error) {
+        element.classList.remove('active-cheat'); updateCheatStatus(element,'unknown'); failed++;
+        log(`${definition.label} reset not confirmed: ${error.message}`,'err');
       }
-      cheatState[d.label] = false;
-      el.classList.remove('active-cheat');
     }
-    for (const d of BYTES_DEFS) {
-      const el = document.getElementById(d.id);
-      if (!el || !el.classList.contains('active-cheat')) continue;
-      const chunks = d.offHex.match(/.{8}/g) || [];
-      const base = parseInt(d.addr, 16);
-      for (let i = 0; i < chunks.length; i++) {
-        const addr = (base + i * 4).toString(16).toUpperCase();
-        try { await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${addr}&val=${chunks[i]}`); } catch(e) {}
-        await henDelay();
-      }
-      cheatState[d.label] = false;
-      el.classList.remove('active-cheat');
+    if (srvMode !== 'off') {
+      if (await srvSetMode('off',document.getElementById('srv-off'))) verified++; else failed++;
     }
-    // Reset Deathsinger's Power if active
-    if (cheatState["Deathsinger's Power"]) {
-      try { await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=1C7B58&val=${dsDetectedOff || '38C60001'}`); } catch(e) {}
-      await henDelay();
-      cheatState["Deathsinger's Power"] = false;
-      const dsEl = document.getElementById('tog-deathsinger');
-      if (dsEl) dsEl.classList.remove('active-cheat');
-    }
-    // Clear server cheats visual state (PS3 memory will be reset by reboot anyway)
-    ['srv-void','srv-ropk','srv-off'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.classList.remove('active-cheat');
-    });
-    srvMode = 'off';
-    const ropkCtrl = document.getElementById('ropk-controls');
-    if (ropkCtrl) ropkCtrl.style.display = 'none';
-    log('All cheats reset ', 'ok');
+    log(`Reset result: ${verified} verified off; ${failed} unconfirmed`, failed ? 'err' : 'ok');
+    toast(`${verified} reset verified; ${failed} unconfirmed`, failed ? 'err' : 'ok');
+    return {verified,failed};
   }
 
   function ts() {
@@ -203,11 +173,14 @@
 
   async function ps3Shutdown() {
     if (!ip) return;
-    if (!confirm('Shut down the PS3?')) return;
+    if (!await RtmDialogs.confirm('Shut down the PS3?')) return;
+    const generation = connectionGeneration;
     log('Sending shutdown command…', '');
     try {
       await ps3fetch(`http://${ip}/shutdown.ps3mapi`);
-      log('Shutdown command sent', 'ok');
+      if (generation !== connectionGeneration) return;
+      ++connectionGeneration; consoleTransport.cancelAll(); resetVerifiedStates();
+      log('Shutdown request acknowledged', '');
       toast('PS3 shutting down…', 'ok');
       // Connection will drop — clean up the UI
       stopHealthCheck();
@@ -226,74 +199,27 @@
   }
 
   async function ps3Restart() {
-    if (!ip) return;
-    if (!confirm('Restart the PS3?')) return;
-    const targetIp = ip;
-    log('Sending restart command…', '');
+    if (!ip || !await RtmDialogs.confirm('Restart the PS3?')) return;
+    const target = ip;
+    const generation = ++connectionGeneration;
+    stopAutoReconnect(); stopHealthCheck(); consoleTransport.cancelAll(); resetVerifiedStates();
+    setBadge('connecting','RESTART REQUEST');
     try {
-      await resetAllCheats();
-    } catch(e) {}
-    try {
-      await ps3fetch(`http://${targetIp}/restart.ps3mapi`);
-    } catch(e) {
-      // The PS3 cuts the connection as it restarts — a network error here is
-      // expected and not a failure. Only bail if ip was never set.
+      await consoleTransport.request(`http://${target}/restart.ps3mapi`,5000);
+      log('Restart request acknowledged; waiting for console availability','');
+    } catch (error) {
+      log(`Restart response unavailable; restart is not confirmed: ${error.message}`,'err');
     }
-    log('Restart command sent — waiting for PS3 to come back…', 'ok');
-    toast('Restarting… will reconnect automatically', 'ok');
-
-    // Clear connection state while the PS3 is down
-    stopHealthCheck();
+    if (generation !== connectionGeneration) return;
     ip = '';
-    setBadge('connecting', 'REBOOTING…');
-    document.getElementById('btn-connect').style.display = 'none';
+    document.getElementById('btn-connect').style.display = '';
+    document.getElementById('btn-connect').disabled = false;
     document.getElementById('btn-disconnect').style.display = 'none';
     document.getElementById('btn-shutdown').classList.remove('enabled');
     document.getElementById('btn-restart').classList.remove('enabled');
-
-    // Poll every 5 s for up to 3 minutes. The PS3 typically takes 40-80 s
-    // to fully boot and have PS3MAPI listening again.
-    const POLL_INTERVAL = 5000;
-    const MAX_ATTEMPTS  = 36; // 3 min
-    let attempts = 0;
-
-    // Give the PS3 a head-start before we start pinging so we don't
-    // immediately get a stale success from the dying connection.
-    await new Promise(r => setTimeout(r, 15000));
-
-    const poll = setInterval(async () => {
-      attempts++;
-      log(`Reconnect attempt ${attempts}/${MAX_ATTEMPTS} → ${targetIp}`, '');
-      setBadge('connecting', `REBOOTING… ${attempts}`);
-      try {
-        await ps3fetch(`http://${targetIp}/beep.ps3?1`, 4000);
-        // PS3 responded — reconnect
-        clearInterval(poll);
-        ip = targetIp;
-        await new Promise(r => setTimeout(r, 400));
-        await doubleBeep();
-        setTimeout(() => enableRPC(), 500);
-        setBadge('connected', 'ONLINE');
-        document.getElementById('btn-connect').style.display = 'none';
-        document.getElementById('btn-disconnect').style.display = '';
-        document.getElementById('btn-shutdown').classList.add('enabled');
-        document.getElementById('btn-restart').classList.add('enabled');
-        log(`Reconnected → ${targetIp}`, 'ok');
-        toast('Reconnected after restart', 'ok');
-        startHealthCheck();
-
-      } catch(e) {
-        if (attempts >= MAX_ATTEMPTS) {
-          clearInterval(poll);
-          setBadge('failed', 'FAILED');
-          document.getElementById('btn-connect').style.display = '';
-          document.getElementById('btn-connect').disabled = false;
-          log('Auto-reconnect timed out — reconnect manually', 'err');
-          toast('Reconnect timed out', 'err');
-        }
-        // else: still booting, keep polling
-      }
-    }, POLL_INTERVAL);
+    await sleep(15000);
+    if (generation !== connectionGeneration) return;
+    beginSafeAutoReconnect(target);
   }
 
   async function doubleBeep() {
@@ -317,57 +243,27 @@
   }
 
   async function quickReconnectFromBadge() {
-    stopAutoReconnect(false);
-    const badge = document.getElementById('status-badge');
-    if (badge?.classList.contains('connecting')) return;
-
     const input = document.getElementById('ip');
     let target = String(ip || input?.value || '').trim();
-
-    if (!target) {
-      try { target = String(localStorage.getItem(SAVED_IP_KEY) || '').trim(); } catch (e) {}
-    }
-
-    if (!target) {
-      toast('No saved PS3 IP — enter one in Connection first', 'err');
-      document.getElementById('ip')?.focus();
-      return;
-    }
-
-    // Manual quick relink only. This does not reinstall RPC/player hooks
-    // and does not perform any memory writes.
-    stopHealthCheck();
-    ip = target;
-    if (input) input.value = target;
-    saveIp(target);
-
-    setBadge('connecting', 'RELINKING...');
-    log(`Quick reconnect → ${target}`, '');
-
+    if (!target) { try { target = localStorage.getItem(SAVED_IP_KEY) || ''; } catch (_) {} }
+    if (!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(target) || target.split('.').some(part => Number(part)>255)) { toast('Enter a valid PS3 IPv4 address', 'err'); return; }
+    const generation = ++connectionGeneration;
+    stopAutoReconnect(); stopHealthCheck(); consoleTransport.cancelAll(); resetVerifiedStates();
+    ip = target; if (input) input.value = target;
+    setBadge('connecting','RELINKING...');
     try {
-      await ps3fetch(`http://${target}/beep.ps3?1`);
-
-      setBadge('connected', 'ONLINE');
-      document.getElementById('btn-connect').style.display = 'none';
-      document.getElementById('btn-connect').disabled = false;
-      document.getElementById('btn-disconnect').style.display = '';
-      document.getElementById('btn-shutdown').classList.add('enabled');
-      document.getElementById('btn-restart').classList.add('enabled');
-
-      startHealthCheck();
-      log(`Quick reconnect successful → ${target}`, 'ok');
-      toast('Connection refreshed', 'ok');
-    } catch (e) {
-      setBadge('failed', 'FAILED');
+      await probePS3Reachable(target,5000);
+      if (generation !== connectionGeneration) return;
+      await finishSafeAutoReconnect(target);
+    } catch (error) {
+      if (generation !== connectionGeneration) return;
+      ip = ''; setBadge('failed','FAILED');
       document.getElementById('btn-connect').style.display = '';
       document.getElementById('btn-connect').disabled = false;
       document.getElementById('btn-disconnect').style.display = 'none';
       document.getElementById('btn-shutdown').classList.remove('enabled');
       document.getElementById('btn-restart').classList.remove('enabled');
-
-      log(`Quick reconnect failed → ${target}`, 'err');
-      toast(e?.name === 'AbortError' ? 'PS3 not responding' : 'Could not refresh connection', 'err');
-      ip = '';
+      log(`Relink failed: ${error.message}`,'err'); toast('Could not refresh connection','err');
     }
   }
 
@@ -1275,8 +1171,7 @@
 
   async function writeHexAt(addr, hex) {
     const addrHex = Number(addr).toString(16).padStart(8, '0').toUpperCase();
-    await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${addrHex}&val=${hex}`);
-    await henDelay();
+    await verifiedMemoryValue(addrHex,hex);
   }
 
   async function writeInt32At(addr, value) {
@@ -1451,7 +1346,13 @@
 
   async function installPlayerHook() {
     if (!ip) return;
+    const generation = connectionGeneration;
     hookInstalling = true;
+    const write = async (address,value) => {
+      if (generation !== connectionGeneration) throw new Error('Hook session changed');
+      await verifiedMemoryValue(address,value);
+      if (generation !== connectionGeneration) throw new Error('Hook session changed');
+    };
     try {
       // Step 1: write the 116-byte PPC stub to 0x10D8EC0.
       // Branch is NOT yet active, so no need to deactivate first.
@@ -1460,38 +1361,39 @@
       const stubChunks = stubHex.match(/.{8}/g);
       for (let i = 0; i < stubChunks.length; i++) {
         const addr = (0x10D8EC0 + i * 4).toString(16).toUpperCase();
-        await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${addr}&val=${stubChunks[i]}`);
-        await henDelay();
+        await write(`${addr}`,`${stubChunks[i]}`);
+        
       }
       // Zero the 152-byte tail region at 0x10D8F34
       for (let i = 0; i < 38; i++) {
         const addr = (0x10D8F34 + i * 4).toString(16).toUpperCase();
-        await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${addr}&val=00000000`);
-        await henDelay();
+        await write(`${addr}`,`00000000`);
+        
       }
 
       // Step 2: write hook data values
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=190EBC4&val=306E8D58`); await henDelay();
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=190EBAC&val=3F99999A`); await henDelay(); // 1.2f
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=190EBD0&val=C499DA3F`); await henDelay();
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=190EBD4&val=C41B299C`); await henDelay();
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=190EBD8&val=4230BCFE`); await henDelay();
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=190EBE0&val=C49979E6`); await henDelay();
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=190EBE4&val=C42005F0`); await henDelay();
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=190EBE8&val=41F563DA`); await henDelay();
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=190EBF0&val=C499A918`); await henDelay();
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=190EBF4&val=C425A282`); await henDelay();
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=190EBF8&val=420AF6F6`); await henDelay();
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=190EBFC&val=00000001`); await henDelay();
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=190EC00&val=00000002`); await henDelay();
+      await write(`190EBC4`,`306E8D58`); 
+      await write(`190EBAC`,`3F99999A`);  // 1.2f
+      await write(`190EBD0`,`C499DA3F`); 
+      await write(`190EBD4`,`C41B299C`); 
+      await write(`190EBD8`,`4230BCFE`); 
+      await write(`190EBE0`,`C49979E6`); 
+      await write(`190EBE4`,`C42005F0`); 
+      await write(`190EBE8`,`41F563DA`); 
+      await write(`190EBF0`,`C499A918`); 
+      await write(`190EBF4`,`C425A282`); 
+      await write(`190EBF8`,`420AF6F6`); 
+      await write(`190EBFC`,`00000001`); 
+      await write(`190EC00`,`00000002`); 
 
       // Step 3: activate — branch patch at 0x1C4110 → jumps to stub.
       // Stub is fully written before this, so the CPU will never hit a partial stub.
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=1C4110&val=48F14DB0`);
+      await write(`1C4110`,`48F14DB0`);
 
-      log('Player hook installed — gamespeed active', 'ok');
+      log('Player hook bytes and activation branch verified by readback', 'ok');
     } catch(e) {
-      log('Player hook install failed', 'err');
+      log(`Player hook not confirmed: ${e.message}`, 'err');
+      throw e;
     } finally {
       hookInstalling = false;
     }
@@ -1499,11 +1401,8 @@
 
   async function uninstallPlayerHook() {
     if (!ip) return;
-    try {
-      // Restore original instruction at the branch patch site
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=1C4110&val=30640140`);
-      log('Player hook removed', 'ok');
-    } catch(e) {}
+    await verifiedMemoryValue('1C4110','30640140');
+    log('Player hook branch restoration verified', 'ok');
   }
 
   const toggleState = {};
@@ -1511,6 +1410,12 @@
   // size: 4 (default, UInt32), 2 (UInt16), or 1 (byte) — must match what the
   // solution uses or adjacent memory gets corrupted (e.g. immunity bug)
   async function fire(addr, val, label, restoreVal, size = 4) {
+    const generation = connectionGeneration;
+    const verifiedWrite = async (address,value) => {
+      if (generation !== connectionGeneration) throw new Error('Console session changed');
+      await verifiedMemoryValue(address,value);
+      if (generation !== connectionGeneration) throw new Error('Console session changed');
+    };
     if (!ip) { toast('Not connected', 'err'); return; }
     const key = addr + '_' + label;
     const isToggle = restoreVal !== undefined;
@@ -1520,7 +1425,7 @@
     const sizeParam = size !== 4 ? `&size=${size}` : '';
 
     try {
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${addr}&val=${writeVal}${sizeParam}`);
+      await verifiedWrite(`${addr}`,`${writeVal}`);
       if (isToggle) toggleState[key] = isOn;
       log(`${label}${stateLabel} → addr:${addr} val:${writeVal} [${size}b]`, 'ok');
       toast(label + stateLabel + ' ', 'ok');
@@ -1534,6 +1439,12 @@
   // EnableRPC is called first to stabilise PS3MAPI before the write sequence
   // fireMulti: onPairs = [[addr,val],...], offPairs = [[addr,val],...] OR legacy restoreVal string
   async function fireMulti(onPairs, offPairsOrRestore, label, size = 4) {
+    const generation = connectionGeneration;
+    const verifiedWrite = async (address,value) => {
+      if (generation !== connectionGeneration) throw new Error('Console session changed');
+      await verifiedMemoryValue(address,value);
+      if (generation !== connectionGeneration) throw new Error('Console session changed');
+    };
     if (!ip) { toast('Not connected', 'err'); return; }
     // Legacy call: fireMulti(pairs, label, restoreVal) — single restore value applied to all
     if (typeof offPairsOrRestore === 'string' || offPairsOrRestore === undefined) {
@@ -1549,7 +1460,7 @@
         for (const [addr, val] of pairs) {
           const v = writeVal !== null ? writeVal : val;
           const sizeParam = size !== 4 ? `&size=${size}` : '';
-          await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${addr}&val=${v}${sizeParam}`);
+          await verifiedWrite(`${addr}`,`${v}`);
         }
         if (isToggle) toggleState[key] = isOn;
         log(`${lbl}${stateLabel} → ${pairs.length} writes sent`, 'ok');
@@ -1570,7 +1481,7 @@
     try {
       for (const [addr, val] of activePairs) {
         const sizeParam = size !== 4 ? `&size=${size}` : '';
-        await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${addr}&val=${val}${sizeParam}`);
+        await verifiedWrite(`${addr}`,`${val}`);
       }
       toggleState[key] = isOn;
       log(`${lbl}${stateLabel} → ${activePairs.length} writes sent`, 'ok');
@@ -1613,19 +1524,17 @@
     writeSize = sz;
   }
 
-  function sendCustom() {
-    if (!ip) { toast('Not connected', 'err'); return; }
+  async function sendCustom() {
     const addr = document.getElementById('c-addr').value.trim().replace(/^0x/i,'');
-    const val  = document.getElementById('c-val').value.trim().replace(/^0x/i,'');
-    if (!addr || !val) { toast('Enter address & value', 'err'); return; }
-    const paddedVal = advancedMode ? val : val.padStart(8,'0');
-    const url = (advancedMode && writeSize !== 4)
-      ? `http://${ip}/setmem.ps3mapi?addr=${addr}&val=${paddedVal}&size=${writeSize}`
-      : `http://${ip}/setmem.ps3mapi?addr=${addr}&val=${paddedVal}`;
-    ps3fetch(url)
-      .then(() => { log(`Custom → addr:${addr} val:${paddedVal} [${writeSize}b]`, 'ok'); toast('Sent ', 'ok'); })
-      .catch(() => { log(`Custom failed → ${addr}`, 'err'); toast('Send failed', 'err'); });
+    const value = document.getElementById('c-val').value.trim().replace(/^0x/i,'');
+    const bytes = advancedMode ? writeSize : 4;
+    if (![1,2,4].includes(bytes) || !/^[0-9a-f]{1,8}$/i.test(addr) || !/^[0-9a-f]+$/i.test(value) || value.length>bytes*2) { toast('Enter a valid address and value for the selected width','err'); return; }
+    try {
+      await verifiedMemoryValue(addr,value.padStart(bytes*2,'0'));
+      toast('Custom write verified','ok');
+    } catch (error) { log(`Custom write not confirmed: ${error.message}`,'err'); toast('Custom write not confirmed','err'); }
   }
+
   // If served from the PS3 web server, auto-fill the IP and connect
   window.addEventListener("DOMContentLoaded", () => {
     if (ip) {
@@ -3193,8 +3102,14 @@
   let srvBusy = false;
 
   async function writeHookBytes(hexStr) {
+    const generation = connectionGeneration;
+    const verifiedWrite = async (address,value) => {
+      if (generation !== connectionGeneration) throw new Error('Console session changed');
+      await verifiedMemoryValue(address,value);
+      if (generation !== connectionGeneration) throw new Error('Console session changed');
+    };
     // Deactivate the branch BEFORE rewriting the stub to prevent crashes.
-    await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=1C4110&val=30640140`);
+    await verifiedWrite(`1C4110`,`30640140`);
     await henDelay();
 
     const chunks = hexStr.match(/.{8}/g) || [];
@@ -3203,7 +3118,7 @@
     // 1. Write the new payload
     for (let i = 0; i < chunks.length; i++) {
       const addr = (base + i * 4).toString(16).toUpperCase();
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${addr}&val=${chunks[i]}`);
+      await verifiedWrite(`${addr}`,`${chunks[i]}`);
       await henDelay();
     }
 
@@ -3212,12 +3127,12 @@
     const MAX_CHUNKS = 57;
     for (let i = chunks.length; i < MAX_CHUNKS; i++) {
       const addr = (base + i * 4).toString(16).toUpperCase();
-      await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=${addr}&val=00000000`);
+      await verifiedWrite(`${addr}`,`00000000`);
       await henDelay();
     }
 
     // 3. Reactivate the branch
-    await ps3fetch(`http://${ip}/setmem.ps3mapi?addr=1C4110&val=48F14DB0`);
+    await verifiedWrite(`1C4110`,`48F14DB0`);
   }
 
   // ── Custom Damage Multiplier ─────────────────────────────────────────────
@@ -3440,6 +3355,7 @@
   }
 
   async function srvSetMode(mode, btn) {
+    btn ||= document.getElementById('srv-'+mode);
     if (typeof hasReadServerSafetyGuide === 'function' && !hasReadServerSafetyGuide()) {
       serverSafetyRequired = true;
       setServerCheatsLocked(true);
@@ -3481,7 +3397,7 @@
       if (mode === 'void') {
         await writeHookBytes(VOID_ON_HEX);
         btn.classList.add('active-cheat');
-        updateCheatStatus('srv-void', 'on');
+        updateCheatStatus('srv-void', 'verified-on');
         log('Void Enemies ON → hook written', 'ok');
         toast('Void Enemies ON', 'ok');
         notifyPS3('Void Enemies: ON');
@@ -3497,7 +3413,7 @@
         await ropkWrite();
         document.getElementById('ropk-controls').style.display = '';
         btn.classList.add('active-cheat');
-        updateCheatStatus('srv-ropk', 'on');
+        updateCheatStatus('srv-ropk', 'verified-on');
         log('Relative OPK ON → hook written', 'ok');
         toast('Relative OPK ON', 'ok');
         notifyPS3('Relative OPK: ON');
@@ -3505,7 +3421,7 @@
         // Off — restore original hook, clear tail
         await writeHookBytes(OFF_HEX);
         btn.classList.add('active-cheat');
-        updateCheatStatus('srv-off', 'on');
+        updateCheatStatus('srv-off', 'verified-on');
         updateCheatStatus('srv-void', 'off');
         updateCheatStatus('srv-ropk', 'off');
         updateCheatStatus('srv-4x-damage', 'off');
@@ -3513,10 +3429,14 @@
         toast('Server Cheats OFF', 'ok');
         notifyPS3('Server Cheats: OFF');
       }
+      return true;
     } catch(e) {
+      srvMode = 'unknown';
+      ['srv-void','srv-ropk','srv-off'].forEach(id => updateCheatStatus(id,'unknown'));
       if (btn?.id) updateCheatStatus(btn.id, 'failed');
       log(`Server cheat (${mode}) failed: ${e.message}`, 'err');
-      toast('Server cheat failed', 'err');
+      toast('Server mode not confirmed', 'err');
+      return false;
     } finally {
       srvBusy = false; // Release the lock so you can click again
     }
@@ -3852,8 +3772,8 @@
     if (!confirm(`Are you sure you want to change CID to: ${newCid}?`)) return;
     try {
       await ps3fetch(`http://${ip}/setcid.ps3mapi?cid=${newCid}`);
-      log('CID updated successfully', 'ok');
-      toast('CID updated', 'ok');
+      log('CID update request acknowledged; resulting CID not read back', '');
+      toast('CID update request acknowledged', '');
     } catch(e) {
       log('Failed to set CID', 'err');
       toast('Failed to set CID', 'err');

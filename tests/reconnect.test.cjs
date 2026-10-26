@@ -34,3 +34,26 @@ test('interval does not overlap a pending probe and current session can reconnec
   assert.equal(h.context._autoReconnectAttempts, 1);
   h.resolve(); await flush(); assert.equal(h.finished(), 1);
 });
+test('quick relink cannot reconnect after the session is replaced',async()=>{
+  let resolveProbe,finished=0;
+  const nodes=new Proxy({}, {get:(target,key)=>target[key]||={value:'192.168.0.62',style:{},classList:{remove(){}}}});
+  const context=vm.createContext({ip:'192.168.0.62',connectionGeneration:1,document:{getElementById:id=>nodes[id]},
+    stopAutoReconnect(){},stopHealthCheck(){},consoleTransport:{cancelAll(){}},resetVerifiedStates(){},
+    setBadge(){},toast(){},log(){},probePS3Reachable:()=>new Promise(resolve=>{resolveProbe=resolve;}),
+    finishSafeAutoReconnect:async()=>{finished++;}});
+  const start=source.indexOf('  async function quickReconnectFromBadge(');
+  vm.runInContext(source.slice(start,source.indexOf('\n  }',start)+4),context);
+  const pending=context.quickReconnectFromBadge();context.connectionGeneration++;resolveProbe();await pending;
+  assert.equal(finished,0);
+});
+test('restart wait does not start a reconnect loop after disconnect',async()=>{
+  let finishWait,reconnects=0;
+  const nodes=new Proxy({}, {get:(target,key)=>target[key]||={style:{},classList:{remove(){}}}});
+  const context=vm.createContext({ip:'192.168.0.62',connectionGeneration:1,document:{getElementById:id=>nodes[id]},
+    RtmDialogs:{confirm:async()=>true},stopAutoReconnect(){},stopHealthCheck(){},consoleTransport:{cancelAll(){},request:async()=>{}},
+    resetVerifiedStates(){},setBadge(){},log(){},sleep:()=>new Promise(resolve=>{finishWait=resolve;}),beginSafeAutoReconnect:()=>reconnects++});
+  const start=source.indexOf('  async function ps3Restart(');
+  vm.runInContext(source.slice(start,source.indexOf('\n  }',start)+4),context);
+  const pending=context.ps3Restart();await flush();context.connectionGeneration++;finishWait();await pending;
+  assert.equal(reconnects,0);
+});

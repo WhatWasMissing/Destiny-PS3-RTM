@@ -4,7 +4,7 @@ const { createTransport } = require('../source/js/transport.js');
 
 test('process scope applies only to memory and call endpoints', async () => {
   const urls = [];
-  const transport = createTransport({ fetch: async url => { urls.push(new URL(url)); return { ok: true }; } });
+  const transport = createTransport({ fetch: async url => { urls.push(new URL(url)); return new Response('ok'); } });
   await transport.request('http://console/setmem.ps3mapi?addr=1234&val=00');
   await transport.request('http://console/getmem.ps3mapi?proc=77&addr=1234');
   await transport.request('http://console/beep.ps3?1');
@@ -31,6 +31,16 @@ test('disconnect cancellation aborts pending requests', async () => {
   const transport = createTransport({ fetch: stalledFetch });
   const pending = transport.request('http://console/index.ps3');
   transport.cancelAll();
-  await assert.rejects(pending, /aborted/);
+  await assert.rejects(pending, /cancelled|aborted/);
   assert.equal(transport.diagnostics()[0].outcome, 'cancelled');
+});
+test('timeout covers a response body that stalls after headers arrive', async () => {
+  const transport = createTransport({fetch:async()=>{
+    const response = new Response(''); response.arrayBuffer = () => new Promise(()=>{}); return response;
+  }});
+  await assert.rejects(transport.request('http://console/getmem.ps3mapi',10),/timed out/);
+});
+test('buffered response remains readable by existing memory parsers',async()=>{
+  const transport=createTransport({fetch:async()=>new Response('00112233')});
+  assert.equal(await (await transport.request('http://console/getmem.ps3mapi')).text(),'00112233');
 });

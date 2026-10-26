@@ -105,3 +105,25 @@ Do not mark the complete objective achieved based on the transport tests alone.
   horizontal overflow. All five navigation tabs now fit without a hidden tab.
 - Desktop rebuild passed Go and JavaScript tests. Broader console operation
   verification, native-window check and final scope audit remain outstanding.
+
+## Legacy operations and session audit
+
+- Quick relink and restart now invalidate prior sessions and use read-only,
+  generation-aware availability probing. Restart no longer leaves a private
+  interval able to reconnect after a later disconnect.
+- Custom writes validate width/overflow and require readback. Legacy fire/multi
+  helpers and typed character writes use verified memory writes.
+- Player/server hook payload writes are verified before branch activation;
+  player hook writes also reject session changes. Failures propagate instead
+  of silently logging installation success. Reset-all reports verified and
+  unconfirmed results independently and retains Deathsinger/server reset paths.
+- Production-function tests cover hook activation order/failure/session change,
+  custom widths, reset-all failure, quick relink and restart cancellation.
+- Request timeout now includes body consumption. Existing response parsers can
+  still read the buffered response. Additional transport tests cover stalled
+  bodies and preserved memory text.
+- Replacement executable launched successfully. Native accessibility reports
+  the expected app origin and controls. Native screenshot capture timed out;
+  visual inspection so far is from the browser rendering of the same frontend.
+- Remaining: full mock-console desktop integration, verify final built artifact,
+  finish operation/status audit and record final requirement-by-requirement proof.
