@@ -44,6 +44,9 @@ test('reset-all reports unverified writes instead of claiming everything reset',
   const context=vm.createContext({connectionGeneration:1,log(){},toast(){},floatToBEHex:()=> '3F800000',dsDetectedOff:'38C60001',srvMode:'off',
     document:{getElementById:id=>({value:'',classList:{contains:()=>id==='tog-god-mode',remove(){}}})},
     patchRunner:{apply:async()=>({status:'unverified'})},requestedCheatState:{},cheatState:{},updateCheatStatus:(_,s)=>statuses.push(s)});
+  const constantStart=source.indexOf('  const UNLIMITED_AMMO_PATCH =');
+  const constantEnd=source.indexOf('\n  };',constantStart)+5;
+  vm.runInContext(source.slice(constantStart,constantEnd),context);
   load(context,'resetAllCheats');const result=await context.resetAllCheats();
   assert.equal(result.verified,0);assert.equal(result.failed,1);assert.deepEqual(statuses,['unknown']);
 });

@@ -43,13 +43,27 @@
 
 
   // ── Reset all active cheats ───────────────────────────────────────────────
+  // Source-backed Destiny 1.24 weapon-ammo patch. Keep the three original
+  // instructions together so the main toggle and Reset All use the same bytes.
+  const UNLIMITED_AMMO_PATCH = {
+    on: [
+      ['003108EC', '3880270F'],
+      ['00310554', '38A0270F'],
+      ['00CF95AC', '60000000FC1EF8003FC0461C63DE3C0093DF0110']
+    ],
+    off: [
+      ['003108EC', '63C40000'],
+      ['00310554', '63C50000'],
+      ['00CF95AC', '63DD0000408200083BA00001807F001CD3DF0110']
+    ]
+  };
+
   async function resetAllCheats() {
     const operationGeneration = connectionGeneration;
     log('Resetting all active cheats…', '');
     const CHEAT_DEFS = [
       { id: 'tog-god-mode',        addr: '00444CA0', offVal: 'C0210358', label: 'Invincibility',         size: 4 },
       { id: 'tog-ohk',             addr: '43E626',   offVal: '3F80',     label: 'One-Hit Enemies',     size: 2 },
-      { id: 'tog-ammo',            addr: '00310F94', offVal: '3F800000', label: 'Unlimited Ammo',    size: 4 },
       { id: 'tog-power',           addr: '02C36FC',  offVal: 'C3C30000', label: 'Infinite Power',  size: 4 },
       { id: 'tog-no-spread',       addr: '30D230',   offVal: '3F800000', label: 'No Spread',       size: 4 },
       { id: 'tog-bouncy-items',    addr: 'DB8BE8',   offVal: '2C030000', label: 'Bouncy Items',    size: 4 },
@@ -72,6 +86,7 @@
       { id: 'tog-no-recoil',     label: 'Steady Aim',           pairs: [['5056DC','3F800000'],['505D24','3F800000'],['30DC44','3F800000']] },
       { id: 'tog-warpriest',     label: 'Warpriest Immunity',    pairs: [['444CA4','C0434DB0'],['1897420','3F800000']] },
       { id: 'tog-unl-abilities', label: 'Unlimited Abilities', pairs: [['2C1DB4','D03B019C'],['CCB9E8','3063FFFF'],['2C36FC','C3C30000']] },
+      { id: 'tog-ammo', label: 'Unlimited Ammo', pairs: UNLIMITED_AMMO_PATCH.off },
     ];
     const BYTES_DEFS = [
       { id: 'tog-no-pushbacks', addr: '1389760', offHex: '3F8000003F8000003F800000', label: 'No Pushback Barriers' },
@@ -2713,6 +2728,9 @@
   }
   async function togFireMulti(onPairs, offPairs, label, btn) {
     return applyToggle(label, btn, isOn => isOn ? onPairs : offPairs);
+  }
+  async function toggleUnlimitedAmmo(btn) {
+    return togFireMulti(UNLIMITED_AMMO_PATCH.on, UNLIMITED_AMMO_PATCH.off, 'Unlimited Ammo', btn);
   }
   async function togFireFloat(addr, onFloat, offFloat, label, btn) {
     return applyToggle(label, btn, isOn => [[addr, floatToBEHex(parseFloat(isOn ? onFloat : offFloat))]]);

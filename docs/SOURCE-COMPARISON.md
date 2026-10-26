@@ -11,6 +11,7 @@ builds use different offsets and were not used as address references.
 |---|---|
 | Brightness presets | Added the local 1.24 C# Bright `50`, Normal `1`, and Inverted `-20` values at `0x006101C0`. Writes require exact readback; the matched ELF default is `1.0`, but the in-game effect remains unobserved. |
 | No Spread, Bouncy Items, 4× Jump Boost, Rock Jump | Added from the local 1.24 C# source. Overlapping patches disable the other active option before a write. |
+| Unlimited Ammo | Corrected the main toggle to the local 1.24 C# three-site patch at `0x003108EC`, `0x00310554`, and `0x00CF95AC`. Enable and reset both verify every patched byte. The former `0x00310F94` target did not contain the UI's claimed OFF instruction in the matching ELF. |
 | Memory Scanner | The scan/diff code already existed; its missing controls are now available in Tools. Reads remain bounded and writes require readback. |
 | PS3 notification | Available as a PS3 system notification through webMAN MOD's documented notification route. It is separate from the old Destiny-internal toast. |
 | Character emblem | Added the 103 entries in the local C# `itemList.cs`; the live scan must find exactly one aligned match before a write. Both writes are read back; a saved recovery stack restores verified partial or completed changes on the same console while each value remains original or matches the intended write. |
@@ -33,6 +34,14 @@ builds use different offsets and were not used as address references.
   `/enablerpc.ps3mapi` routes.
 - Trophy unlock calls the same unsupported function-call layer and has no
   source-level readback or restoration. It remains unavailable.
+- Deathsinger's Power appears in a recovered mobile RTM, and this source tree
+  contains an old scan/toggle implementation, but it remains hidden. The scan
+  accepts the first exact match of generic PowerPC instructions. In the
+  hash-verified 01.24 EBOOT, the aligned OFF patterns occur at seven sites for
+  `38C6FFFF` and over a thousand sites for `38C0FFFF`; the game binary does not
+  identify which is the encounter's deposit handler. Exposing the first-match
+  writer could patch unrelated code, so this feature needs encounter-specific
+  address evidence before it can be safely ported.
 - The local C# client archive collects other players' IP addresses and
   location/provider details. That collection was not ported.
 - The newer local RTM's launch sequence is available for a single ISO in

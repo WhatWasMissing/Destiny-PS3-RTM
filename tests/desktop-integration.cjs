@@ -56,6 +56,18 @@ for(const file of ['desktop-host','transport','operations','backups','connection
   assert.equal(vm.runInContext("cheatRuntimeStatus['integration-toggle']",context),'verified-on');
   await context.togFire('1234','AABBCCDD','00000000','Integration toggle',button);
   assert.equal(vm.runInContext("cheatRuntimeStatus['integration-toggle']",context),'verified-off');
+  const ammo = get('tog-ammo');
+  const ammoOn = [['003108EC','3880270F'],['00310554','38A0270F'],['00CF95AC','60000000FC1EF8003FC0461C63DE3C0093DF0110']];
+  const ammoOff = [['003108EC','63C40000'],['00310554','63C50000'],['00CF95AC','63DD0000408200083BA00001807F001CD3DF0110']];
+  await context.toggleUnlimitedAmmo(ammo);
+  for (const [address,value] of ammoOn) assert.equal(await context.ps3getmem(parseInt(address,16),value.length/2),value);
+  await context.toggleUnlimitedAmmo(ammo);
+  for (const [address,value] of ammoOff) assert.equal(await context.ps3getmem(parseInt(address,16),value.length/2),value);
+  await context.toggleUnlimitedAmmo(ammo);
+  const reset = await context.resetAllCheats();
+  assert.equal(reset.failed,0);
+  for (const [address,value] of ammoOff) assert.equal(await context.ps3getmem(parseInt(address,16),value.length/2),value);
+  assert.equal(await context.ps3getmem(0x00310F94,4),'00000000','the stale single-site ammo address must not be touched');
   const mismatch=get('integration-mismatch');
   await context.togFire('1238','AABBCCDD','00000000','Mismatch',mismatch);
   assert.equal(vm.runInContext("cheatRuntimeStatus['integration-mismatch']",context),'unknown');
