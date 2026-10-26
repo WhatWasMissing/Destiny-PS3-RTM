@@ -17,25 +17,31 @@ import (
 type fakeClient struct {
 	mu sync.Mutex
 
-	statusCode         int
-	statusErr          error
-	readData           []byte
-	readErr            error
-	writeErr           error
-	notifyErr          error
-	reads              int
-	writes             [][3]string
-	notifies           []string
-	launches           []string
-	launchErr          error
-	position           rtmclient.PlayerPosition
-	positionErr        error
-	positionReads      int
-	entityPointers     rtmclient.EntityPointerInspection
-	entityPointerErr   error
-	entityPointerReads int
-	blockRead          bool
-	readStarted        chan struct{}
+	statusCode          int
+	statusErr           error
+	readData            []byte
+	readErr             error
+	writeErr            error
+	notifyErr           error
+	reads               int
+	writes              [][3]string
+	notifies            []string
+	launches            []string
+	launchErr           error
+	position            rtmclient.PlayerPosition
+	positionErr         error
+	positionReads       int
+	entityPointers      rtmclient.EntityPointerInspection
+	entityPointerErr    error
+	entityPointerReads  int
+	playerScale         rtmclient.PlayerScaleState
+	playerScaleErr      error
+	playerScaleReads    int
+	playerScaleWrite    rtmclient.PlayerScaleWrite
+	playerScaleWriteErr error
+	playerScaleWrites   []float32
+	blockRead           bool
+	readStarted         chan struct{}
 }
 
 func (f *fakeClient) Status(context.Context, string) (int, error) {
@@ -76,6 +82,20 @@ func (f *fakeClient) InspectEntityPointers(context.Context, string) (rtmclient.E
 	defer f.mu.Unlock()
 	f.entityPointerReads++
 	return f.entityPointers, f.entityPointerErr
+}
+
+func (f *fakeClient) InspectPlayerScale(context.Context, string) (rtmclient.PlayerScaleState, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.playerScaleReads++
+	return f.playerScale, f.playerScaleErr
+}
+
+func (f *fakeClient) SetPlayerScale(_ context.Context, _ string, scale float32) (rtmclient.PlayerScaleWrite, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.playerScaleWrites = append(f.playerScaleWrites, scale)
+	return f.playerScaleWrite, f.playerScaleWriteErr
 }
 
 func (f *fakeClient) WriteMemory(_ context.Context, _, address string, data []byte) error {
@@ -172,10 +192,12 @@ func TestToolsListAdvertisesBoundedRTMTools(t *testing.T) {
 	}
 	list := resultObject(t, responseByID(t, responses, 2))
 	tools, ok := list["tools"].([]any)
-	if !ok || len(tools) != 8 {
-		t.Fatalf("expected eight tools, got %#v", list["tools"])
+	if !ok || len(tools) != 10 {
+		t.Fatalf("expected ten tools, got %#v", list["tools"])
 	}
 	var sawEntityInspector bool
+	var sawScaleInspector, sawScaleSetter bool
+	var sawSourceScaleRange bool
 	for _, item := range tools {
 		descriptor := item.(map[string]any)
 		if descriptor["inputSchema"].(map[string]any)["additionalProperties"] != false {
@@ -184,9 +206,21 @@ func TestToolsListAdvertisesBoundedRTMTools(t *testing.T) {
 		if descriptor["name"] == "rtm_inspect_entity_pointers" {
 			sawEntityInspector = descriptor["annotations"].(map[string]any)["readOnlyHint"] == true
 		}
+		if descriptor["name"] == "rtm_inspect_player_scale" {
+			sawScaleInspector = descriptor["annotations"].(map[string]any)["readOnlyHint"] == true
+		}
+		if descriptor["name"] == "rtm_set_player_scale" {
+			sawScaleSetter = descriptor["annotations"].(map[string]any)["destructiveHint"] == true
+			properties := descriptor["inputSchema"].(map[string]any)["properties"].(map[string]any)
+			scale := properties["scale"].(map[string]any)
+			sawSourceScaleRange = scale["minimum"] == float64(0.3) && scale["maximum"] == float64(20)
+		}
 	}
 	if !sawEntityInspector {
 		t.Fatal("entity pointer inspector is missing or is not marked read-only")
+	}
+	if !sawScaleInspector || !sawScaleSetter || !sawSourceScaleRange {
+		t.Fatal("player-scale inspect/set tools are missing or their annotations are wrong")
 	}
 }
 
@@ -292,6 +326,39 @@ func TestEntityPointerInspectorPreservesNullAndInvalidPointerStates(t *testing.T
 	}
 }
 
+func TestPlayerScaleToolsReturnReadOnlyStateAndVerifiedWriteResults(t *testing.T) {
+	client := &fakeClient{
+		playerScale: rtmclient.PlayerScaleState{
+			PlayerName: "TestGuardian", Handle: 0x12345, HandleTableAddress: 0x100768A0,
+			ResolvedObject: 0x100668A0, ObjectIndex: 42, Slot: 42,
+			ScaleAddress: 0x1008201C, ScaleRawHex: "3F800000", Scale: 1,
+			ResolverSignatureMatch: true, SnapshotAtomic: false,
+		},
+		playerScaleWrite: rtmclient.PlayerScaleWrite{
+			PlayerScaleState: rtmclient.PlayerScaleState{
+				PlayerName: "TestGuardian", Handle: 0x12345, ObjectIndex: 42, Slot: 42,
+				ScaleAddress: 0x1008201C, ScaleRawHex: "3F800000", ResolverSignatureMatch: true,
+			},
+			NewScale: 5, ReadbackRawHex: "40A00000", ReadbackExact: true,
+		},
+	}
+	responses := runServer(t, client,
+		toolRequest(1, "rtm_inspect_player_scale", `{"target_ipv4":"192.168.0.62"}`)+
+			toolRequest(2, "rtm_set_player_scale", `{"target_ipv4":"192.168.0.62","scale":5}`),
+	)
+	inspection := structuredObject(t, responseByID(t, responses, 1))
+	if inspection["ok"] != true || inspection["read_only"] != true || inspection["snapshot_atomic"] != false || inspection["gameplay_effect_confirmed"] != false || inspection["player_name"] != "TestGuardian" || inspection["scale_address"] != "0x1008201C" || inspection["scale"] != float64(1) || inspection["resolver_signature_match"] != true {
+		t.Fatalf("unexpected player-scale inspection result: %#v", inspection)
+	}
+	write := structuredObject(t, responseByID(t, responses, 2))
+	if write["ok"] != true || write["read_only"] != false || write["snapshot_atomic"] != false || write["scale_address"] != "0x1008201C" || write["original_scale_raw_hex"] != "3F800000" || write["new_scale"] != float64(5) || write["readback_raw_hex"] != "40A00000" || write["readback_exact"] != true || write["server_persistence_confirmed"] != false {
+		t.Fatalf("unexpected player-scale write result: %#v", write)
+	}
+	if client.playerScaleReads != 1 || len(client.playerScaleWrites) != 1 || client.playerScaleWrites[0] != 5 {
+		t.Fatalf("unexpected player-scale calls: reads=%d writes=%#v", client.playerScaleReads, client.playerScaleWrites)
+	}
+}
+
 func float32Value(value float32) *float32 { return &value }
 
 func TestInvalidTargetArgumentsAndOversizedWritesFailBeforeBackend(t *testing.T) {
@@ -305,15 +372,16 @@ func TestInvalidTargetArgumentsAndOversizedWritesFailBeforeBackend(t *testing.T)
 			toolRequest(6, "rtm_write_memory", `{"target_ipv4":"192.168.0.62","address":"FFFFFFFF","hex":"0102"}`)+
 			toolRequest(7, "rtm_launch_game", `{"target_ipv4":"192.168.0.62","iso_path":"/dev_hdd0/PS3ISO/../../play.ps3"}`)+
 			toolRequest(8, "rtm_read_player_position", `{"target_ipv4":"8.8.8.8"}`)+
-			toolRequest(9, "rtm_inspect_entity_pointers", `{"target_ipv4":"8.8.8.8"}`),
+			toolRequest(9, "rtm_inspect_entity_pointers", `{"target_ipv4":"8.8.8.8"}`)+
+			toolRequest(10, "rtm_set_player_scale", `{"target_ipv4":"8.8.8.8","scale":2}`),
 	)
-	for id := float64(1); id <= 9; id++ {
+	for id := float64(1); id <= 10; id++ {
 		result := resultObject(t, responseByID(t, responses, id))
 		if result["isError"] != true {
 			t.Fatalf("invalid request %v was accepted: %#v", id, result)
 		}
 	}
-	if len(client.writes) != 0 || client.reads != 0 || len(client.notifies) != 0 || len(client.launches) != 0 || client.positionReads != 0 || client.entityPointerReads != 0 {
+	if len(client.writes) != 0 || client.reads != 0 || len(client.notifies) != 0 || len(client.launches) != 0 || client.positionReads != 0 || client.entityPointerReads != 0 || client.playerScaleReads != 0 || len(client.playerScaleWrites) != 0 {
 		t.Fatalf("invalid inputs reached backend: %#v", client)
 	}
 }

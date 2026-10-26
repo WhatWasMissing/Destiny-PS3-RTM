@@ -21,6 +21,7 @@
   const PLATE_ADDRESS = 0x010FB514;
   const PLATE_BYTES = '9421FFD0F9E10010FA010018FA210020FA4100287E4000263063FFF43DE0019061EFEBB08A0F00E42C100000820F00E88223001C7C918000E9E10010EA010018EA2100203821003041820008418600107E4FF120EA41FFF84B9060447E4FF120EA41FFF84B90603C';
   const PLATE_BRANCH_ADDRESS = 0x00A015AC;
+  const PLATE_BRANCH_ORIGINAL = '3063FFF44BFFFB15';
   const PLATE_BRANCH_VALUE = '486F9F68';
   const PLATE_FLAG_ADDRESS = 0x0190EC98;
 
@@ -888,20 +889,28 @@
     try {
       const context = newContext();
       requireConnected();
-      const currentBranch = await readHex(PLATE_BRANCH_ADDRESS, 4, context);
+      const branchPair = await readHex(PLATE_BRANCH_ADDRESS, 8, context);
+      const currentBranch = branchPair.slice(0, 8);
       if (currentBranch === PLATE_BRANCH_VALUE) throw new Error('The source branch is already present; no owned restoration snapshot is available');
+      if (branchPair !== PLATE_BRANCH_ORIGINAL) throw new Error(`Unsupported plate-hook instruction pair ${branchPair} at 0x${hexAddress(PLATE_BRANCH_ADDRESS)}`);
       const previous = readBackup(PLATE_BACKUP_KEY);
       if (previous?.ip === ip) throw new Error('A saved plate-hook snapshot exists. Restore it before installing again.');
+      const [body, flag] = await Promise.all([
+        readHex(PLATE_ADDRESS, PLATE_BYTES.length / 2, context),
+        readHex(PLATE_FLAG_ADDRESS, 4, context)
+      ]);
+      if (body !== '00'.repeat(PLATE_BYTES.length / 2)) throw new Error('Plate-hook code cave is not empty; no bytes were changed');
+      if (flag !== '00000000') throw new Error(`Plate-hook state flag is already in use (${flag}); no bytes were changed`);
       const snapshot = {
         ip, branch: currentBranch,
-        body: await readHex(PLATE_ADDRESS, PLATE_BYTES.length / 2, context),
-        flag: await readHex(PLATE_FLAG_ADDRESS, 4, context)
+        body,
+        flag
       };
       writeBackup(PLATE_BACKUP_KEY, snapshot);
       await writeHex(PLATE_ADDRESS, PLATE_BYTES, context);
       await writeHex(PLATE_FLAG_ADDRESS, '00000001', context);
       await writeHex(PLATE_BRANCH_ADDRESS, PLATE_BRANCH_VALUE, context);
-      report('Overwalls plate hook installed and read back; source-build compatibility is not independently known', 'ok');
+      report('Overwalls plate hook installed and read back; the in-game effect is not observed', 'ok');
     } catch (error) { report(`Plate hook not confirmed: ${error.message}`, 'err'); }
   }
   async function restorePlateHook() {

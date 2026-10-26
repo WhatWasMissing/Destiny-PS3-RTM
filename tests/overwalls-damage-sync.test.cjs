@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-function loadOverwallsTools({ writeSequence, syncDamage }) {
+function loadOverwallsTools({ writeSequence, syncDamage, readMemory, writeMemory }) {
   const reports = [];
   const status = { textContent: '' };
   global.localStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} };
@@ -20,6 +20,8 @@ function loadOverwallsTools({ writeSequence, syncDamage }) {
     return [...new Uint8Array(buffer)].map(byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
   };
   global.verifiedMemorySequence = writeSequence;
+  global.ps3getmem = readMemory || (async () => { throw new Error('Unexpected memory read'); });
+  global.verifiedMemoryValue = writeMemory || (async () => { throw new Error('Unexpected memory write'); });
   global.syncDamagePatchState = (...args) => syncDamage(...args);
   global.toast = (message, type) => reports.push([message, type]);
   global.log = (message, type) => reports.push([message, type]);
@@ -85,4 +87,66 @@ test('Overwalls Warpriest variant restores its source-matched primary instructio
 
   await global.owApplyCheatToggle(4, false);
   assert.deepEqual(writes[1], [['00444CA4', 'C04100F0']]);
+});
+
+test('Overwalls plate hook refuses an unknown branch site before writing', async () => {
+  const writes = [];
+  const reads = [];
+  const { reports } = loadOverwallsTools({
+    readMemory: async (address, length) => {
+      reads.push([address, length]);
+      return '6000000060000000';
+    },
+    writeMemory: async (...args) => { writes.push(args); },
+    writeSequence: async () => {},
+    syncDamage: () => {}
+  });
+
+  await global.owInstallPlateHook();
+  assert.deepEqual(reads, [[0x00A015AC, 8]]);
+  assert.deepEqual(writes, []);
+  assert.match(reports.at(-1)[0], /Unsupported plate-hook instruction pair/);
+});
+
+test('Overwalls plate hook requires the pristine branch pair, empty cave, and clear flag', async () => {
+  const writes = [];
+  const reads = new Map([
+    [0x00A015AC, '3063FFF44BFFFB15'],
+    [0x010FB514, '00'.repeat(104)],
+    [0x0190EC98, '00000000']
+  ]);
+  loadOverwallsTools({
+    readMemory: async address => reads.get(address),
+    writeMemory: async (...args) => { writes.push(args); },
+    writeSequence: async () => {},
+    syncDamage: () => {}
+  });
+
+  await global.owInstallPlateHook();
+  assert.deepEqual(writes.map(([address]) => address), ['010FB514', '0190EC98', '00A015AC']);
+});
+
+test('Overwalls plate hook preserves an occupied cave or active state flag', async t => {
+  for (const scenario of [
+    { name: 'occupied cave', body: 'AA'.repeat(104), flag: '00000000', message: /code cave is not empty/ },
+    { name: 'active flag', body: '00'.repeat(104), flag: '00000001', message: /state flag is already in use/ }
+  ]) {
+    await t.test(scenario.name, async () => {
+      const writes = [];
+      const { reports } = loadOverwallsTools({
+        readMemory: async address => new Map([
+          [0x00A015AC, '3063FFF44BFFFB15'],
+          [0x010FB514, scenario.body],
+          [0x0190EC98, scenario.flag]
+        ]).get(address),
+        writeMemory: async (...args) => { writes.push(args); },
+        writeSequence: async () => {},
+        syncDamage: () => {}
+      });
+
+      await global.owInstallPlateHook();
+      assert.deepEqual(writes, []);
+      assert.match(reports.at(-1)[0], scenario.message);
+    });
+  }
 });

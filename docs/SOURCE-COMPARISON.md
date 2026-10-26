@@ -18,18 +18,19 @@ builds use different offsets and were not used as address references.
 | Ammo Editor | Reworked as a read-only, chunked 4 MiB scan. Primary/secondary/heavy use the source's 8-byte reserve/magazine signature and `0x80A6` marker; special ammo uses its Float32 signature, `01 00 00 00` suffix, and `0x8080` marker at `+40`. It lists candidates and requires selecting one address. Writes are verified, guarded rollback is attempted on partial failure, and successful edits can be restored in reverse order while each slot still matches. |
 | Screenshots | Added the five framebuffer profiles and PNG download. Reads are chunked. Optional pause capture requires persisting the original pause byte before writing and restores it in `finally`; if that fails, the app retains a manual recovery action and blocks other connection changes until recovery. |
 | ISO game launch | Added the source sequence from the newer local RTM: mount `/dev_hdd0/PS3ISO/<file>.iso` with `mode=silent`, wait 3 seconds, return to `/wmnav.ps3/game`, wait 1 second, then request `/play.ps3`. The ISO path is restricted to a filename directly inside `PS3ISO`. Each HTTP response is reported by stage; it does not confirm Destiny started. The desktop MCP tool uses the same sequence. |
+| Player Size | Ported the local C# name-to-object lookup and Float32 scale formula for the `0.3`, `1`, `2`, and `20` source values. The app and MCP tool check the 01.24 resolver/helper signatures, emulate the lookup with reads instead of calling the game function, recheck identity and pointer mapping before writes, and require exact scale readback. In-game effect and persistence remain unconfirmed. |
 
 ## Not exposed as working controls
 
-- Player Size and the Destiny-internal toast depend on
+- The Destiny-internal toast depends on
   `soulsAPI.Extension.Call`. The local `soulsAPI.dll` implements this on top of
   memory reads/writes by installing a 136-byte PowerPC stub at `0x004A8040`,
   clearing a shared 10,324-byte mailbox, and invoking calls through staged
   memory. Its `Call` implementation uses a shared mailbox, sleeps a fixed 20 ms,
   and has no completion polling or title/version checks. The DLL has no
   accompanying license in the recovered project. The DLL and extracted machine
-  code are not included in this repository; the previous experimental Player
-  Size UI and connection-time RPC request remain removed. Stock webMAN also
+  code are not included in this repository. Player Size no longer uses this
+  RPC path. Stock webMAN also
   does not implement the HTML copy's `/call.ps3mapi` and
   `/enablerpc.ps3mapi` routes.
 - Trophy unlock calls the same unsupported function-call layer and has no
@@ -37,7 +38,10 @@ builds use different offsets and were not used as address references.
 - Deathsinger's Power appears in a recovered mobile RTM, and this source tree
   contains an old scan/toggle implementation, but it remains hidden. Its
   intended change is PowerPC `addi r6,r6,-1` (`38C6FFFF`) to `addi r6,r6,4095`
-  (`38C60FFF`), replacing a counter decrement with a large increment. The
+  (`38C60FFF`), replacing a counter decrement with a large increment. In the
+  instruction encoding, the low 16 bits are a signed immediate: `FFFF` means
+  `-1`, while `0FFF` means `+4095`. This explains the patch's arithmetic; it
+  does not identify which encounter instruction should be changed. The
   recovered scan accepts the first match of generic instructions without
   requiring instruction alignment. In the hash-verified 01.24 EBOOT the first
   scan hit is `38C0FFFF` at `0x00011670`, in the first `0x10000–0x14000` chunk;

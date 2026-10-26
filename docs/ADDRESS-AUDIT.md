@@ -20,6 +20,11 @@ Its hash and size match the published decrypted BLES01857 **01.24** EBOOT.
 The paired SELF is under `ebootbinelfBAK\EBOOT.BIN`; the decrypted ELF hash
 is the identity used for the comparisons below.
 
+This ELF has no static or dynamic symbol-table sections, and its section-name
+table is zero-filled. A decompiler can still lift PowerPC instructions into
+approximate pseudocode, but function names and boundaries must be reconstructed
+from control flow and call sites.
+
 Primary build references:
 
 - [D1 Reimagined PS3 update export validation](https://github.com/p3n1cillin/d1reimagined-source/blob/main/data/ps3_updates/EXPORT_VALIDATION.md)
@@ -51,6 +56,9 @@ write causes the named in-game effect.
 | Warpriest Immunity - web RTM variant | Local web RTM writes ON `C0434F80` and OFF `C0434DB0` at `0x00444CA4`, plus `3F800000` at `0x01897420` | 01.24 ELF contains `C04100F0` at `0x00444CA4` and `37343036` at `0x01897420` | Both claimed OFF values mismatch the verified executable. The main web RTM control and reset entry are blocked for this build; no replacement values are inferred. |
 | Warpriest Immunity - Overwalls C# variant | C# writes ON `C0420348` and OFF `C04100F0` at `0x00444CA4`, and writes `3F800000` to `0x01891AE0` only when enabled | 01.24 ELF contains the claimed OFF instruction `C04100F0`; `0x01891AE0` lies in zero-filled BSS | The primary OFF instruction matches the executable. The source leaves the secondary BSS word set after disabling; its purpose and runtime effect are unconfirmed. This distinct Overwalls variant remains available in the Overwalls tab. |
 | Deathsinger reset fallback | Recovered mobile RTM scans for generic `38C6FFFF`/`38C0FFFF`; its reset fallback is `0x001C7B58` | ELF has `30C100907C440C0ED0410070308100A0` at the fallback. The scanner's first hit is `38C0FFFF` at `0x00011670`. | First hit is an initialization sentinel, not the encounter counter. The fallback does not contain either accepted instruction; Deathsinger remains hidden. |
+| Overwalls plate hook | Overwalls replaces the two-instruction site at `0x00A015AC` with a branch to its 104-byte body at `0x010FB514`; its state flag is `0x0190EC98` | 01.24 starts with `3063FFF44BFFFB15`; the code-cave first word and BSS flag are zero | Supports the source layout in the pristine ELF. Before writing, the app now requires the exact two-instruction sequence, the complete 104-byte cave to read as zero, and the flag to be zero. This is a build-layout check; it does not verify the hook's in-game effect. |
+| Overwalls physics hook | Source branch site `0x001C4110`; code cave `0x010D8EC0` | 01.24 has original instruction `30640140`; code-cave first word is zero | Confirms the source's initial branch and cave prefix in 01.24; runtime behavior remains unobserved. |
+| Player Size | Local C# identifies a player by name in 24 records, gets its handle at record `+1604`, resolves the object index through `0x002FF2D0`, then writes Float32 scale at `0x01A1D9E8 + ((index & 0x1FFF) * 0xC0) + 0x9C`. | `0x002FF2D0`: resolver signature matches; `0x001FB3C8`: leaf getter `8084001C908300004E800020`. Runtime lookup table `0x01A21CB0` and scale-object base `0x01A1D9E8` are zero-filled BSS in the file. | Confirms resolver/helper code and source arithmetic, but not runtime table contents or visual effect. The app and MCP tool emulate the resolver with reads and do not use the C# RPC stub/scratch area. |
 
 A broader comparison of current fixed-site toggle OFF values against the same
 01.24 ELF also matched Invincibility, No Spread, Infinite Power, Freeze
@@ -82,7 +90,8 @@ readback confirms bytes, not the in-game brightness effect.
 |---|---|---|
 | `0x0190EBB0` | In the zero-filled BSS of the writable segment | Overwalls reads a runtime pointer here; its coordinate fields are at pointer `+0x140`, `+0x144`, and `+0x148`, with activation data at `+0x1B8`. The pointer value itself must be read at runtime. |
 | `0x600...` regions, including `0x600E66B0` and `0x60300000` | Outside every EBOOT load segment | Local RTMs use these as wallet, emblem, ammo, and other player-memory ranges. The ELF alone cannot establish their allocation or contents. |
-| `0x10030000` | Outside every EBOOT load segment | Local Player Size source uses it as scratch data around a function call. The tool's ordinary memory read/write endpoint does not perform that call. |
+| `0x10030000` | Outside every EBOOT load segment | The original C# Player Size source uses this as scratch data around a function call. The app/MCP port does not call that function or use this scratch address. |
+| `0x01A21CB0`, `0x01A1D9E8` | In zero-filled BSS of the writable segment | Player Size lookup table and scale-object base; only live reads can reveal their initialized runtime values. |
 
 Matching static code/data bytes do not prove server persistence. Controlled
 observation in the matching 01.24 runtime is needed to confirm dynamic mappings

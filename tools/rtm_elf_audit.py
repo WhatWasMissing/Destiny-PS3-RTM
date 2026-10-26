@@ -35,6 +35,15 @@ KNOWN_SITES = (
     ("Warpriest Overwalls CSharp - source OFF instruction", 0x00444CA4, "C04100F0"),
     ("Warpriest Overwalls CSharp - secondary BSS initial value", 0x01891AE0, "00000000"),
     ("Deathsinger - reset fallback signature", 0x001C7B58, "38C6FFFF"),
+    ("Overwalls plate hook - source branch-site pair", 0x00A015AC, "3063FFF44BFFFB15"),
+    ("Overwalls plate hook - code-cave initial word", 0x010FB514, "00000000"),
+    ("Overwalls plate hook - state-flag initial BSS", 0x0190EC98, "00000000"),
+    ("Overwalls physics hook - source branch instruction", 0x001C4110, "30640140"),
+    ("Overwalls physics hook - code-cave initial word", 0x010D8EC0, "00000000"),
+    ("Player Size - object-handle resolver signature", 0x002FF2D0, "7C0802A648A99751F821FF81F801009038A0FFFF607F00002C04FFFF418200483C6001A2548404FE30C31CB08066000C7C8419D680E600083061007080C600247C87201490A100707885002080A500087CA530387C852010788400204BEFC09D80A1007090BF00003821008048A9974C"),
+    ("Player Size - resolved-index getter signature", 0x001FB3C8, "8084001C908300004E800020"),
+    ("Player Size - runtime lookup table initial BSS", 0x01A21CB0, "00000000"),
+    ("Player Size - runtime object base initial BSS", 0x01A1D9E8, "00000000"),
 )
 
 

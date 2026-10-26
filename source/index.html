@@ -299,6 +299,7 @@
 <script src="js/memory-features.js"></script>
 <script src="js/emblem-options.js"></script>
 <script src="js/app-core.js"></script>
+<script src="js/player-scale-tools.js"></script>
 <script src="js/launch-tools.js"></script>
 <script src="js/brightness-tools.js"></script>
 <script src="js/accent-settings.js"></script>
@@ -677,6 +678,31 @@
       <button class="btn-apply danger" id="emblem-restore-btn" type="button" onclick="restoreCharacterEmblem()" style="flex:1;margin-top:0;" disabled>Restore</button>
     </div>
     <div class="ow-job-status" id="emblem-status" role="status" aria-live="polite">Read the connected Guardian's current emblem first.</div>
+  </div>
+</div>
+<div class="panel">
+  <div class="panel-header">Player Size · 1.24 source</div>
+  <div class="panel-muted-note" style="margin:0.75rem 1rem 0;">Resolves the current Guardian through the source object list and sets the in-memory scale field. The resolver and lookup helper must match the verified 1.24 code bytes.</div>
+  <div class="slider-body">
+    <div class="slider-row">
+      <span class="slider-label">Scale</span>
+      <input class="rtm-slider" id="player-scale-slider" type="range" min="0.3" max="20" step="0.1" value="1" oninput="syncPlayerScaleValue(this.value)">
+      <span class="slider-val" id="player-scale-value">1×</span>
+    </div>
+    <div class="slider-btns">
+      <button class="slider-preset danger" type="button" onclick="setPlayerScaleValue(0.3)">0.3×</button>
+      <button class="slider-preset accent" type="button" onclick="document.getElementById('player-scale-slider').value=1;syncPlayerScaleValue(1);setPlayerScale()">1×</button>
+      <button class="slider-preset" type="button" onclick="document.getElementById('player-scale-slider').value=2;syncPlayerScaleValue(2);setPlayerScale()">2×</button>
+      <button class="slider-preset gold" type="button" onclick="document.getElementById('player-scale-slider').value=5;syncPlayerScaleValue(5);setPlayerScale()">5×</button>
+      <button class="slider-preset" type="button" onclick="document.getElementById('player-scale-slider').value=10;syncPlayerScaleValue(10);setPlayerScale()">10×</button>
+      <button class="slider-preset danger" type="button" onclick="document.getElementById('player-scale-slider').value=20;syncPlayerScaleValue(20);setPlayerScale()">20×</button>
+    </div>
+    <div class="tuner-actions">
+      <button class="btn-apply" type="button" onclick="readPlayerScale()" style="flex:1">Read Size</button>
+      <button class="btn-apply" type="button" onclick="setPlayerScale()" style="flex:1">Set Size</button>
+      <button class="btn-apply danger" type="button" onclick="resetPlayerScale()" style="flex:1">Reset</button>
+    </div>
+    <div class="ow-job-status" id="player-scale-status" role="status" aria-live="polite">Reads and writes require the matching 1.24 runtime layout; visual effect is not confirmed.</div>
   </div>
 </div></div>
 </div><div class="section" id="sec-gamespeed" style="padding-top:0">

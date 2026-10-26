@@ -26,6 +26,8 @@ type Client interface {
 	ReadMemory(context.Context, string, string, int) ([]byte, error)
 	ReadPlayerPosition(context.Context, string) (rtmclient.PlayerPosition, error)
 	InspectEntityPointers(context.Context, string) (rtmclient.EntityPointerInspection, error)
+	InspectPlayerScale(context.Context, string) (rtmclient.PlayerScaleState, error)
+	SetPlayerScale(context.Context, string, float32) (rtmclient.PlayerScaleWrite, error)
 	WriteMemory(context.Context, string, string, []byte) error
 	Notify(context.Context, string, string) error
 	LaunchGame(context.Context, string, string) (rtmclient.LaunchResult, error)
@@ -113,6 +115,25 @@ var toolList = []tool{
 		Annotations: map[string]any{"readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true},
 	},
 	{
+		Name:        "rtm_inspect_player_scale",
+		Title:       "Inspect Destiny player scale",
+		Description: "Follow the local 1.24 player-name and object-list chain, verify the PPC64 code signatures at 0x002FF2D0 and 0x001FB3C8, and emulate that small resolver using read-only memory requests. Returns the current player scale field and address. It does not execute game code; the snapshot is non-atomic and visual effect is unconfirmed.",
+		InputSchema: objectSchema(map[string]any{
+			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
+		}, "target_ipv4"),
+		Annotations: map[string]any{"readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true},
+	},
+	{
+		Name:        "rtm_set_player_scale",
+		Title:       "Set Destiny player scale",
+		Description: "Set the current local player scale to a finite source-range multiplier from 0.3 through 20 (the source UI offers 0.3, 1, 2 and 20; use 1 to reset). Requires matching 1.24 PPC code signatures and a stable player-name/object-handle chain. The tool rechecks the destination before a verified four-byte Float32 write; it emulates the source resolver rather than executing a game function. Game visual effect and server persistence are not confirmed.",
+		InputSchema: objectSchema(map[string]any{
+			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
+			"scale":       map[string]any{"type": "number", "minimum": 0.3, "maximum": 20, "description": "Float32 player scale multiplier; source buttons include 0.3, 1, 2 and 20; 1 resets the source value."},
+		}, "target_ipv4", "scale"),
+		Annotations: map[string]any{"readOnlyHint": false, "destructiveHint": true, "idempotentHint": true, "openWorldHint": true},
+	},
+	{
 		Name:        "rtm_write_memory",
 		Title:       "Write Destiny memory",
 		Description: "Write 1–8 bytes to the Destiny process and report success only after exact fresh readback. The address is hexadecimal; only use known values for the matching game build. This does not call game functions.",
@@ -159,7 +180,7 @@ var toolList = []tool{
 	},
 }
 
-const instructions = "Use only the user's private PS3 IPv4 address. Memory reads and writes target Destiny process 0x1010200 through webMAN MOD on port 80. Reads are capped at 64 KiB; writes are capped at 8 bytes and require exact readback. rtm_status checks webMAN reachability, not whether Destiny is running. Player-position and entity-pointer tools follow the local Overwalls pointer map using read-only requests; coordinates, pointer semantics, and build compatibility remain unconfirmed. Brightness effects are unverified. Notifications report dispatch, not display. Game-launch steps report HTTP acknowledgement and do not confirm that Destiny started. No generic function-call endpoint is exposed."
+const instructions = "Use only the user's private PS3 IPv4 address. Memory reads and writes target Destiny process 0x1010200 through webMAN MOD on port 80. Reads are capped at 64 KiB; writes are capped at 8 bytes and require exact readback. rtm_status checks webMAN reachability, not whether Destiny is running. Player-position and entity-pointer tools follow the local Overwalls pointer map using read-only requests; coordinates, pointer semantics, and build compatibility remain unconfirmed. Player-scale tools require the verified 1.24 resolver/helper byte signatures and emulate the source lookup without calling game functions; writes recheck the pointer chain and verify the Float32 bytes, but visual effect and server persistence remain unconfirmed. Brightness effects are unverified. Notifications report dispatch, not display. Game-launch steps report HTTP acknowledgement and do not confirm that Destiny started. No generic function-call endpoint is exposed."
 
 func objectSchema(properties map[string]any, required ...string) map[string]any {
 	return map[string]any{"type": "object", "properties": properties, "required": required, "additionalProperties": false}
@@ -404,6 +425,68 @@ func (s *Server) callTool(ctx context.Context, raw json.RawMessage) map[string]a
 			"player":                        entityPointerResult(inspection.Player),
 			"target":                        entityPointerResult(inspection.Target),
 			"build_compatibility_confirmed": false,
+		})
+	case "rtm_inspect_player_scale":
+		var args targetArgs
+		if err := decodeStrict(call.Arguments, &args); err != nil {
+			return errorResult(err)
+		}
+		if err := validateTarget(args.Target); err != nil {
+			return errorResult(err)
+		}
+		state, err := s.client.InspectPlayerScale(ctx, args.Target)
+		if err != nil {
+			return errorResult(err)
+		}
+		return successResult(map[string]any{
+			"ok":                         true,
+			"read_only":                  true,
+			"snapshot_atomic":            state.SnapshotAtomic,
+			"player_name":                state.PlayerName,
+			"handle":                     fmt.Sprintf("0x%08X", state.Handle),
+			"handle_table_entry_address": fmt.Sprintf("0x%08X", state.HandleTableAddress),
+			"resolved_object":            fmt.Sprintf("0x%08X", state.ResolvedObject),
+			"object_index":               state.ObjectIndex,
+			"slot":                       state.Slot,
+			"scale_address":              fmt.Sprintf("0x%08X", state.ScaleAddress),
+			"scale_raw_hex":              state.ScaleRawHex,
+			"scale":                      state.Scale,
+			"resolver_signature_match":   state.ResolverSignatureMatch,
+			"gameplay_effect_confirmed":  false,
+		})
+	case "rtm_set_player_scale":
+		var args struct {
+			Target string  `json:"target_ipv4"`
+			Scale  float32 `json:"scale"`
+		}
+		if err := decodeStrict(call.Arguments, &args); err != nil {
+			return errorResult(err)
+		}
+		if err := validateTarget(args.Target); err != nil {
+			return errorResult(err)
+		}
+		s.memoryWriteMu.Lock()
+		defer s.memoryWriteMu.Unlock()
+		result, err := s.client.SetPlayerScale(ctx, args.Target, args.Scale)
+		if err != nil {
+			return errorResult(err)
+		}
+		return successResult(map[string]any{
+			"ok":                           true,
+			"read_only":                    false,
+			"snapshot_atomic":              result.SnapshotAtomic,
+			"player_name":                  result.PlayerName,
+			"handle":                       fmt.Sprintf("0x%08X", result.Handle),
+			"object_index":                 result.ObjectIndex,
+			"slot":                         result.Slot,
+			"scale_address":                fmt.Sprintf("0x%08X", result.ScaleAddress),
+			"original_scale_raw_hex":       result.ScaleRawHex,
+			"new_scale":                    result.NewScale,
+			"readback_raw_hex":             result.ReadbackRawHex,
+			"readback_exact":               result.ReadbackExact,
+			"resolver_signature_match":     result.ResolverSignatureMatch,
+			"gameplay_effect_confirmed":    false,
+			"server_persistence_confirmed": false,
 		})
 	case "rtm_write_memory":
 		var args struct {

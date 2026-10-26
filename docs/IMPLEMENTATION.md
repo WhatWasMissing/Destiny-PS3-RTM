@@ -181,8 +181,10 @@ reviewable in PR #8; it remains a draft pending live-console compatibility revie
   live game build.
 - Replaced the nonfunctional RPC notification variant with the documented PS3
   system notification flow. Removed experimental Player Size and connection
-  RPC calls; documented Player Size, trophy unlock, and Destiny-internal toast
-  as unsupported by stock webMAN's HTTP PS3MAPI endpoint set.
+  RPC calls at that stage. Player Size has since been ported by emulating its
+  1.24 source resolver using guarded memory reads, without executing the
+  unsupported function-call path; trophy unlock and Destiny-internal toast
+  still depend on that unavailable RPC layer.
 - The client archive/geolocation feature was excluded because it collects
   other players' IP and location/provider data. Older 1.08/phone offsets were
   excluded because they conflict with the local 1.24 source.

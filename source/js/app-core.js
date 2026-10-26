@@ -1552,7 +1552,7 @@
   const SECTIONS = [
     { id: 'sec-connection',          label: 'Connection',      setup: false, lockedOn: true },    { id: 'sec-main-cheats',         label: 'Main Cheats',     setup: true,  description: 'Core player and gameplay cheats.' },
     { id: 'sec-quick-access',        label: 'Quick Access',      setup: true,  description: 'Pinned cheats and macros.' },
-    { id: 'sec-server-cheats',       label: 'Server Cheats',   setup: true,  description: 'Server-side and session-related options.' },    { id: 'sec-character-utils',     label: 'Character Utilities', setup: true, description: 'Read and edit the connected character name.' },    { id: 'sec-gamespeed',           label: 'Gamespeed',       setup: true,  description: 'Game-speed controls and presets.' },
+    { id: 'sec-server-cheats',       label: 'Server Cheats',   setup: true,  description: 'Server-side and session-related options.' },    { id: 'sec-character-utils',     label: 'Character Utilities', setup: true, description: 'Read and edit character name, emblem, and in-memory player scale.' },    { id: 'sec-gamespeed',           label: 'Gamespeed',       setup: true,  description: 'Game-speed controls and presets.' },
     { id: 'sec-damage-tuning',       label: 'Damage Tuning',   setup: true,  description: 'Custom damage-value controls and presets.' },
     { id: 'sec-fov',                 label: 'FOV',             setup: true,  description: 'Field-of-view controls.' },
     { id: 'sec-overwalls',            label: 'Overwalls Tools', setup: true,  description: 'Overwalls scenario, routine, inventory and Flyhack workflows.' },

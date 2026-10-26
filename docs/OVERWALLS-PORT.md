@@ -23,7 +23,7 @@ and soulsAPI reflection code are not bundled.
 | Internal mode, relative OPK, Void Enemies, Warpriest start | Explicit controls; plugin-dependent actions require both Retrofit signatures |
 | Flyhack settings and SPRX checks | Enable, mode, velocity, displacement, deadzone, debounced sliders and signature checks |
 | SPRX module loading | Fixed-path module-load request through authenticated loopback host or same-origin webMAN, followed by readiness polling |
-| Physics and plate hooks | Manual apply with captured prior bytes and guarded restoration; hook site must match known branch values |
+| Physics and plate hooks | Manual apply with captured prior bytes and guarded restoration. The plate hook requires the exact two-instruction source sequence, an empty code cave, and a clear runtime flag before writing. |
 | Split rep boosters and consumable randomization | Source values plus local byte snapshots and guarded restore controls |
 | Individual source toggles and usual/all/off groups | Source toggles and three grouped presets translated to verified writes, including the 20-byte ammo patch and the additional address used by one preset. The Overwalls C# Warpriest variant restores its source-backed primary instruction; its secondary BSS word remains set after disable, as in the source. |
 | One-Hit damage variant | Keeps the Overwalls `547A` value at `0x43E626` and synchronizes the main RTM's One-Hit and damage status only after verified writes; the app does not interpret this variant as a multiplier |
