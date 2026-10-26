@@ -30,3 +30,19 @@ diagnostics; modular code; Overwalls review and port recommendations.
    recommendations with transport/version dependencies and code evidence.
 
 Do not mark the complete objective achieved based on the transport tests alone.
+
+## Second implementation pass
+
+- Settings and teleport modules added; seven Node tests pass (transport, schema
+  rejection, backup round trip and restore rollback).
+- Tools panel verified in browser; diagnostics JSON downloaded successfully.
+- Recovered app creates some content late; extension toolbars initialize after
+  existing DOMContentLoaded callbacks. Browser confirmed both target sections.
+- Teleport editing/sorting/import/export/duplicate checking/20-step undo added.
+  Full browser workflow coverage is still outstanding.
+- Connection generation guards and disconnect cleanup added; race integration
+  tests are still required. The original reconnect and direct read paths still
+  need consolidated handling.
+- Go 1.27.1 is available in the local pokemon-sots toolchain. Desktop host
+  implementation/build remains outstanding.
+- No live PS3 requests were made for these checks.

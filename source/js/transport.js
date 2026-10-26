@@ -37,7 +37,7 @@
     return {
       request,
       cancelAll() { for (const controller of pending) controller.abort(); },
-      diagnostics() { return history.map(entry => ({ ...entry })); }
+      diagnostics() { return history.map(({ time, operation, outcome }) => ({ time, operation, outcome })); }
     };
   }
   root.RtmTransport = { createTransport };

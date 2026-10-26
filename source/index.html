@@ -2471,6 +2471,9 @@
 </head>
 <body>
 <script src="js/transport.js"></script>
+<script src="js/backups.js"></script>
+<script src="js/settings-tools.js"></script>
+<script src="js/teleport-tools.js"></script>
 <script>
   try {
     if ((localStorage.getItem('rtm_appearance') || 'dark') === 'light') {
@@ -3147,10 +3150,15 @@
 
   window.quickReconnectFromBadge = quickReconnectFromBadge;
 
+  let connectionGeneration = 0;
   async function connect() {
+    const generation = ++connectionGeneration;
+    consoleTransport.cancelAll();
+    stopHealthCheck();
     stopAutoReconnect();
     const val = document.getElementById('ip').value.trim();
     if (!val) { toast('Enter a PS3 IP address', 'err'); return; }
+    if (!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(val) || val.split('.').some(part => Number(part) > 255)) { toast('Enter a valid IPv4 address', 'err'); return; }
     ip = val;
     saveIp(val);
 
@@ -3163,10 +3171,12 @@
       // reaches the PS3. If it aborts (timeout) the PS3 isn't reachable.
       await ps3fetch(`http://${ip}/beep.ps3?1`);
       await new Promise(r => setTimeout(r, 400));
+      if (generation !== connectionGeneration) return;
       await doubleBeep();
+      if (generation !== connectionGeneration) return;
       // Enable RPC once at connect time via iframe (avoids download popup).
       // Must be active before any Call() operations.
-      setTimeout(() => enableRPC(), 500);
+      setTimeout(() => { if (generation === connectionGeneration) enableRPC(); }, 500);
       setBadge('connected', 'ONLINE');
       document.getElementById('btn-connect').style.display = 'none';
       document.getElementById('btn-disconnect').style.display = '';
@@ -3183,10 +3193,11 @@
       startHealthCheck();
       // Install player hook — required for gamespeed writes to persist.
       // Mirrors writePlayerHook() from AFKCrucible/Form1.cs (soulsAPI/C#).
-      setTimeout(() => installPlayerHook(), 800);
+      setTimeout(() => { if (generation === connectionGeneration) installPlayerHook().catch(error => log(`Player hook failed: ${error.message}`, 'err')); }, 800);
 
     } catch (e) {
-      const timedOut = e?.name === 'AbortError';
+      if (generation !== connectionGeneration) return;
+      const timedOut = /timed out/i.test(e?.message || '');
       setBadge('failed', 'FAILED');
       document.getElementById('btn-connect').disabled = false;
       log(`Connection failed → ${ip} ${timedOut ? '(timed out)' : '(unreachable)'}`, 'err');
@@ -3196,21 +3207,26 @@
   }
 
   async function disconnect() {
+    ++connectionGeneration;
     stopAutoReconnect();
-    if (ip) {
-      await uninstallPlayerHook();
-      await tripleBeep();
-    }
     stopHealthCheck();
-    ip = '';
-    setBadge('', 'OFFLINE');
-    document.getElementById('btn-connect').style.display = '';
-    document.getElementById('btn-connect').disabled = false;
-    document.getElementById('btn-disconnect').style.display = 'none';
-    document.getElementById('btn-shutdown').classList.remove('enabled');
-    document.getElementById('btn-restart').classList.remove('enabled');
-    log('Disconnected', 'err');
-    toast('Disconnected', '');
+    consoleTransport.cancelAll();
+    try {
+      if (ip) await uninstallPlayerHook();
+    } catch (error) {
+      log(`Disconnected; player hook cleanup could not be confirmed: ${error.message}`, 'err');
+    } finally {
+      consoleTransport.cancelAll();
+      ip = '';
+      setBadge('', 'OFFLINE');
+      document.getElementById('btn-connect').style.display = '';
+      document.getElementById('btn-connect').disabled = false;
+      document.getElementById('btn-disconnect').style.display = 'none';
+      document.getElementById('btn-shutdown').classList.remove('enabled');
+      document.getElementById('btn-restart').classList.remove('enabled');
+      log('Disconnected', '');
+      toast('Disconnected', '');
+    }
   }
 
   // ── Reachability probe / safe Auto Reconnect ─────────────────────────────
@@ -3350,6 +3366,7 @@
 
       try {
         await probePS3Reachable(targetIp, HEALTH_TIMEOUT);
+        if (ip !== targetIp) return;
 
         if (_healthMissed > 0) {
           _healthMissed = 0;
@@ -3358,6 +3375,7 @@
           toast('PS3 back online', 'ok');
         }
       } catch (e) {
+        if (ip !== targetIp) return;
         _healthMissed++;
 
         if (_healthMissed >= HEALTH_MAX_MISS) {
@@ -3653,6 +3671,7 @@
     const folder = teleportFolders.find(f => f.id === id);
     if (!folder || folder.system) return;
     if (!confirm(`Delete folder \"${folder.name}\"? Locations will be moved to Unsorted.`)) return;
+    tpRemember();
     savedTeleports.forEach(p => { if (p.folderId === id) p.folderId = 'unsorted'; });
     teleportFolders = teleportFolders.filter(f => f.id !== id);
     saveTeleportsToStorage(); tpRenderSlots();
@@ -3859,7 +3878,7 @@
     const y = document.getElementById('tp-y').value;
     const z = document.getElementById('tp-z').value;
 
-    if (!x || !y || !z) {
+    if (![x,y,z].every(value => value.trim() !== '' && Number.isFinite(Number(value)))) {
       toast("Read coordinates first", "err");
       return;
     }
@@ -3871,7 +3890,9 @@
     const folderNumber = Number(folderAnswer || 1);
     const folder = Number.isInteger(folderNumber) && folderNumber >= 1 && folderNumber <= teleportFolders.length ? teleportFolders[folderNumber - 1] : teleportFolders[0];
 
-    savedTeleports.push({ name: slotName, x, y, z, folderId: folder.id });
+    if (tpIsDuplicate({x,y,z}) && !confirm('These coordinates are already saved. Save another copy?')) return;
+    tpRemember();
+    savedTeleports.push({ name: slotName.trim().slice(0,200), x, y, z, folderId: folder.id });
     saveTeleportsToStorage();
     tpRenderSlots();
     toast("Position saved!", "ok");
@@ -3896,7 +3917,7 @@
       const children = folder.open ? (entries.length ? entries.map(({p,idx}) => `
         <div class="tp-slot">
           <div class="tp-slot-info"><div class="tp-slot-name">${tpEscape(p.name)}</div><div class="tp-slot-coords">X: ${tpEscape(p.x)} | Y: ${tpEscape(p.y)} | Z: ${tpEscape(p.z)}</div></div>
-          <div class="tp-slot-actions"><button class="tp-load-btn" type="button" onclick="tpLoadSlot(${idx})">Go</button><button class="tp-move-btn" type="button" onclick="tpMoveSlot(${idx})">Move</button><button class="tp-delete-btn" type="button" onclick="tpDeleteSlot(${idx})">×</button></div>
+          <div class="tp-slot-actions"><button class="tp-load-btn" type="button" onclick="tpLoadSlot(${idx})">Go</button><button class="tp-move-btn" type="button" onclick="tpEditSlot(${idx})">Edit</button><button class="tp-move-btn" type="button" onclick="tpMoveSlot(${idx})">Move</button><button class="tp-delete-btn" type="button" onclick="tpDeleteSlot(${idx})">×</button></div>
         </div>`).join('') : '<div class="tp-empty">No saved positions</div>') : '';
       return `<div class="tp-folder"><div class="tp-folder-header"><button type="button" class="tp-folder-toggle" onclick="tpToggleFolder('${folder.id}')">${folder.open ? '▾' : '▸'}</button><span class="tp-folder-icon"></span><span class="tp-folder-name">${tpEscape(folder.name)}</span><span class="tp-folder-count">${entries.length}</span>${folder.system ? '' : `<button type="button" class="tp-folder-menu" onclick="tpRenameFolder('${folder.id}')">Rename</button><button type="button" class="tp-folder-menu danger" onclick="tpDeleteFolder('${folder.id}')">Delete</button>`}</div><div class="tp-folder-body">${children}</div></div>`;
     }).join('') + `<button type="button" class="tp-new-folder-btn" onclick="tpNewFolder()">＋ New Folder</button>`;
@@ -3912,6 +3933,7 @@
   }
 
   function tpDeleteSlot(idx) {
+    tpRemember();
     savedTeleports.splice(idx, 1);
     saveTeleportsToStorage();
     tpRenderSlots();
@@ -7760,7 +7782,7 @@
       btn.className = 'cheat-btn macro-btn';
       btn.style.position = 'relative';
       btn.style.paddingRight = '40px';
-      btn.innerHTML = '<span>' + macro.name + '</span><span class="addr">' + macro.cheatIds.length + ' step' + (macro.cheatIds.length === 1 ? '' : 's') + '</span>';
+      btn.innerHTML = '<span>' + tpEscape(macro.name) + '</span><span class="addr">' + macro.cheatIds.length + ' step' + (macro.cheatIds.length === 1 ? '' : 's') + '</span>';
       btn.addEventListener('click', (e) => {
         if (e.target.closest('.pin-trigger')) return;
         runMacro(i);
