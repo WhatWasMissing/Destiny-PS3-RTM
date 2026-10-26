@@ -19,7 +19,7 @@ and soulsAPI reflection code are not bundled.
 | Crucible farm | Four timing profiles, faction destinations, Tower selection, 12/12/11 match pattern, stop control and repeat-until-stopped option |
 | Taken Archon Priest, Valus, bullets and Echo routines | Sequential source routes with interruptible waits and session checks |
 | Totems | Repeatable two-position loop plus all six source Mid/Right/Left route shortcuts, each stoppable |
-| Character name, Glimmer, Silver and Marks | Read and selective write with memory readback; does not claim server persistence |
+| Character name, Glimmer, Silver and Marks | Read and selective write with memory readback; does not claim server persistence. The emblem scan excludes the wallet fields and `0x0366` marker so currency bytes cannot be mistaken for an emblem ID. |
 | Internal mode, relative OPK, Void Enemies, Warpriest start | Explicit controls; plugin-dependent actions require both Retrofit signatures |
 | Flyhack settings and SPRX checks | Enable, mode, velocity, displacement, deadzone, debounced sliders and signature checks |
 | SPRX module loading | Fixed-path module-load request through authenticated loopback host or same-origin webMAN, followed by readiness polling |

@@ -8,6 +8,7 @@ const {
   BRIGHTNESS_ADDRESS,
   brightnessPreset,
   brightnessPresetForHex,
+  EMBLEM_EXCLUDED_RANGES,
   findEmblemMatches,
   findAmmoCandidates,
   findSpecialAmmoCandidates,
@@ -37,6 +38,22 @@ test('emblem scanner returns aligned 16-bit matches only', () => {
   memory.set([0x12, 0x34], 9);
   memory.set([0x12, 0x34], 12);
   assert.deepEqual(findEmblemMatches(memory, 0x600E0000, 0x1234), [0x600E0002, 0x600E000C]);
+});
+
+test('emblem scanner ignores wallet values and the 0x0366 currency marker', () => {
+  const base = 0x600E66A0;
+  const memory = new Uint8Array(96);
+  for (const address of [0x600E66A0, 0x600E66B0, 0x600E66C0, 0x600E66D0, 0x600E66F0]) {
+    const offset = address - base;
+    memory.set([0x03, 0x66], offset);
+  }
+  assert.deepEqual(findEmblemMatches(memory, base, 0x0366, EMBLEM_EXCLUDED_RANGES), [base]);
+  assert.deepEqual(EMBLEM_EXCLUDED_RANGES, [
+    [0x600E66B0, 0x600E66B4],
+    [0x600E66C0, 0x600E66C2],
+    [0x600E66D0, 0x600E66D4],
+    [0x600E66F0, 0x600E66F4]
+  ]);
 });
 
 test('ammo scan requires the source values and its 0x80A6 slot marker', () => {

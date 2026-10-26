@@ -941,7 +941,7 @@
     }
 
     const emblemId = parseInt(currentHex, 16);
-    const matches = RtmMemoryFeatures.findEmblemMatches(scanBytes, EMBLEM_SCAN_BASE, emblemId);
+    const matches = RtmMemoryFeatures.findEmblemMatches(scanBytes, EMBLEM_SCAN_BASE, emblemId, RtmMemoryFeatures.EMBLEM_EXCLUDED_RANGES);
     if (matches.length !== 1) throw new Error(matches.length
       ? `Current emblem matched ${matches.length} locations; refusing an ambiguous write`
       : 'Could not locate the current emblem in the source address range');
