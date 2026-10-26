@@ -35,6 +35,8 @@ test('brightness candidate probe reads only and reports source preset matches ca
   assert.match(elements.get('brightness-current').textContent, /3F800000/);
   assert.match(elements.get('brightness-status').textContent, /source “Normal” value/);
   assert.match(elements.get('brightness-status').textContent, /Probe only/);
+  assert.match(elements.get('brightness-status').textContent, /does not prove the address is a brightness field/);
+  assert.doesNotMatch(elements.get('brightness-status').textContent, /executable code/);
 
   global.ps3getmem = async () => '00000000';
   await global.readBrightnessCandidate();
