@@ -1415,6 +1415,7 @@
     { id: 'sec-server-cheats',       label: 'Server Cheats',   setup: true,  description: 'Server-side and session-related options.' },    { id: 'sec-character-utils',     label: 'Character Utilities', setup: true, description: 'Read and edit the connected character name.' },    { id: 'sec-gamespeed',           label: 'Gamespeed',       setup: true,  description: 'Game-speed controls and presets.' },
     { id: 'sec-damage-tuning',       label: 'Damage Tuning',   setup: true,  description: 'Custom damage-value controls and presets.' },
     { id: 'sec-fov',                 label: 'FOV',             setup: true,  description: 'Field-of-view controls.' },
+    { id: 'sec-overwalls',            label: 'Overwalls Tools', setup: true,  description: 'Overwalls scenario, routine, inventory and Flyhack workflows.' },
     { id: 'sec-custom-offset',       label: 'Custom Offset',   setup: true,  description: 'Manual memory address/value tools.', recommended: false },
     { id: 'sec-useless',             label: 'Visuals',         setup: true,  description: 'Visual and display-related options.' },    { id: 'activity-loader-panel',   label: 'Activity Loader', setup: true,  description: 'Load missions, strikes, raids and destinations.' }
   ];
@@ -2028,6 +2029,9 @@
       'sec-gamespeed',
       'sec-fov'
     ],
+    overwalls: [
+      'sec-overwalls'
+    ],
     tools: [
       'sec-custom-offset',
       'sec-useless'
@@ -2036,7 +2040,7 @@
 
   function getRTMTab() {
     const saved = localStorage.getItem(RTM_TAB_KEY) || 'home';
-    return ['home','mods','player','tools','all'].includes(saved) ? saved : 'home';
+    return ['home','mods','player','overwalls','tools','all'].includes(saved) ? saved : 'home';
   }
 
   function applyRTMTab() {
@@ -2050,13 +2054,13 @@
       el.classList.toggle('rtm-tab-hidden', !belongs);
     });
 
-    ['home','mods','player','tools','all'].forEach(tab => {
+    ['home','mods','player','overwalls','tools','all'].forEach(tab => {
       document.getElementById(`rtm-tab-${tab}`)?.classList.toggle('active', tab === activeTab);
     });
   }
 
   function setRTMTab(tab) {
-    if (!['home','mods','player','tools','all'].includes(tab)) return;
+    if (!['home','mods','player','overwalls','tools','all'].includes(tab)) return;
     localStorage.setItem(RTM_TAB_KEY, tab);
     applyRTMTab();
     window.scrollTo({ top: 0, behavior: 'smooth' });

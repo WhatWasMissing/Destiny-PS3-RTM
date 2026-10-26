@@ -304,6 +304,7 @@
     <button class="rtm-tab active" id="rtm-tab-home" type="button" onclick="setRTMTab('home')">Home</button>
     <button class="rtm-tab" id="rtm-tab-mods" type="button" onclick="setRTMTab('mods')">Mods</button>
     <button class="rtm-tab" id="rtm-tab-player" type="button" onclick="setRTMTab('player')">Player</button>
+    <button class="rtm-tab" id="rtm-tab-overwalls" type="button" onclick="setRTMTab('overwalls')">Overwalls</button>
     <button class="rtm-tab" id="rtm-tab-tools" type="button" onclick="setRTMTab('tools')">Tools</button>
     <button class="rtm-tab" id="rtm-tab-all" type="button" onclick="setRTMTab('all')">All</button>
   </div>
@@ -755,6 +756,189 @@
 
 </div></div>
 </div>
+<div class="section" id="sec-overwalls" style="padding-top:0">
+  <p class="category-label">Overwalls Tools</p>
+  <div class="ow-note">Ports of the local Overwalls Tool and SPRX Retrofit workflows. Coordinate and memory presets retain their source values and require a connected Destiny process. Multi-step jobs can be stopped at any time.</div>
+
+  <div class="panel">
+    <div class="panel-header">Tower &amp; world shortcuts</div>
+    <div class="cheat-grid ow-button-grid" id="ow-tower-shortcuts"></div>
+    <div class="ow-inline-controls">
+      <label>Teleport activation
+        <select id="ow-teleport-mode" onchange="owSaveOptions()">
+          <option value="external">External · player + 0x1B8</option>
+          <option value="internal">Internal · 0x01FFF028</option>
+          <option value="position">Position only</option>
+        </select>
+      </label>
+      <button class="cheat-btn" type="button" onclick="owReadCoordinates()">Read coordinates</button>
+      <button class="cheat-btn" type="button" onclick="owPDR()">PDR position</button>
+      <button class="cheat-btn" type="button" onclick="owPDRStaticOff()">PDR + Static Actors off</button>
+      <button class="cheat-btn" type="button" onclick="owAboveYou()">Above you +40</button>
+      <button class="cheat-btn" type="button" onclick="owSetOPKPreset('30,-14,0')">Set OPK 30, −14, 0</button>
+      <button class="cheat-btn" type="button" onclick="owSetOPKPreset('5,11,0')">Set OPK 5, 11, 0</button>
+      <button class="cheat-btn" type="button" onclick="owTeleportTarget()">Teleport OPK target</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">Activity shortcuts</div>
+    <div class="ow-inline-controls">
+      <label>Load method
+        <select id="ow-activity-method" onchange="owSaveOptions()">
+          <option value="current">Current · verified 4-address loader</option>
+          <option value="overwalls">Overwalls · original 32-bit loader</option>
+        </select>
+      </label>
+      <button class="cheat-btn" type="button" onclick="owReadActivity()">Read current activity</button>
+      <label>Activity index
+        <input id="ow-activity-index" type="number" min="1" max="65535" value="1" inputmode="numeric">
+      </label>
+      <button class="cheat-btn" type="button" onclick="owLoadActivityFromInput()">Load index</button>
+    </div>
+    <div class="cheat-grid ow-button-grid" id="ow-activity-shortcuts"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">Scenario shortcuts · Overwalls XML</div>
+    <div class="ow-inline-controls">
+      <button class="cheat-btn" type="button" onclick="owImportScenario()">Import scenario XML</button>
+      <button class="cheat-btn" type="button" onclick="owExportScenario()">Export scenario XML</button>
+      <button class="cheat-btn" type="button" onclick="owAddScenarioPosition()">Add position</button>
+      <button class="cheat-btn" type="button" onclick="owClearScenario()">Clear scenario</button>
+      <input id="ow-scenario-file" type="file" accept=".xml,application/xml,text/xml" hidden>
+    </div>
+    <div class="ow-scenario-grid" id="ow-scenario-list"><div class="ow-empty">No scenario loaded. Import an Overwalls XML file or add a position.</div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">Routines &amp; Crucible farming</div>
+    <div class="ow-inline-controls ow-routine-controls">
+      <button class="cheat-btn" type="button" onclick="owRunRaid('archon')">Taken Archon Priest · kill + wipe</button>
+      <button class="cheat-btn" type="button" onclick="owRunRaid('valus')">Valus · kill + wipe</button>
+      <button class="cheat-btn" type="button" onclick="owRunRaid('bullets')">Go bullets + wipe</button>
+      <button class="cheat-btn" type="button" onclick="owRunRaid('echo')">Echo Chamber · kill + wipe</button>
+      <button class="cheat-btn" type="button" onclick="owRunTotems()">AFK Totems · start</button>
+      <button class="cheat-btn ow-stop" type="button" onclick="owStopJob()">Stop routine</button>
+    </div>
+    <div class="ow-inline-controls" aria-label="Totems routes">
+      <button class="cheat-btn" type="button" onclick="owRunTotemRoute(0)">Totems · Mid + Right</button>
+      <button class="cheat-btn" type="button" onclick="owRunTotemRoute(1)">Totems · Right + Mid</button>
+      <button class="cheat-btn" type="button" onclick="owRunTotemRoute(2)">Totems · Mid + Left</button>
+      <button class="cheat-btn" type="button" onclick="owRunTotemRoute(3)">Totems · Right + Left</button>
+      <button class="cheat-btn" type="button" onclick="owRunTotemRoute(4)">Totems · Left + Mid</button>
+      <button class="cheat-btn" type="button" onclick="owRunTotemRoute(5)">Totems · Left + Right</button>
+    </div>
+    <div class="ow-farm-form">
+      <label>Timing profile
+        <select id="ow-farm-profile">
+          <option value="normal">Normal</option>
+          <option value="slow">Slow loads</option>
+          <option value="speed">Game speed</option>
+          <option value="newchar">New character</option>
+        </select>
+      </label>
+      <label>Faction
+        <select id="ow-farm-faction">
+          <option value="dead-orbit">Dead Orbit</option>
+          <option value="new-monarchy">New Monarchy</option>
+          <option value="future-war-cult">Future War Cult</option>
+        </select>
+      </label>
+      <label>Tower activity
+        <select id="ow-farm-tower">
+          <option value="1">Tower</option><option value="2">Moon</option><option value="3">Venus</option>
+          <option value="4">Mars</option><option value="5">Reef</option><option value="6">Dreadnaught</option>
+          <option value="7">Iron Temple</option><option value="8">Random · 2–7</option>
+        </select>
+      </label>
+      <label>Cycles · 0 runs until stopped
+        <input id="ow-farm-cycles" type="number" min="0" max="99" value="1" inputmode="numeric">
+      </label>
+      <button class="btn-apply" type="button" onclick="owStartFarm()">Start Crucible farm</button>
+    </div>
+    <div class="ow-job-status" id="ow-job-status" role="status" aria-live="polite">Ready</div>
+    <div class="ow-muted-note">Farm timings reproduce the Overwalls profiles and are fixed-delay estimates. Activity load completion is not observed. Set cycles to 0 to repeat until you stop it.</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">Character values</div>
+    <div class="ow-stats-grid">
+      <label>Character name<input id="ow-stat-name" maxlength="31" autocomplete="off"></label>
+      <label>Glimmer<input id="ow-stat-glimmer" type="number" step="1"></label>
+      <label>Silver<input id="ow-stat-silver" type="number" step="1"></label>
+      <label>Marks<input id="ow-stat-marks" type="number" step="1"></label>
+    </div>
+    <div class="ow-inline-controls">
+      <button class="cheat-btn" type="button" onclick="owReadCharacterValues()">Read values</button>
+      <button class="cheat-btn" type="button" onclick="owWriteCharacterValues()">Write entered values</button>
+    </div>
+    <div class="ow-muted-note">These are local memory fields from the source. A successful readback confirms memory bytes only; it does not confirm server-side persistence.</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">Internal mode &amp; Flyhack SPRX</div>
+    <div class="ow-inline-controls">
+      <button class="cheat-btn" type="button" onclick="owCheckFlyhack()">Check SPRX readiness</button>
+      <button class="cheat-btn" type="button" onclick="owLoadFlyhack()">Load Destiny_Flyhack.sprx</button>
+      <label>Fly mode
+        <select id="ow-fly-mode"><option value="0">Velocity</option><option value="1">Teleport</option></select>
+      </label>
+      <label>Velocity<input id="ow-fly-velocity" type="number" min="-1000" max="1000" value="30" step="1"></label>
+      <label>Velocity slider<input id="ow-fly-velocity-range" type="range" min="-100" max="100" value="30" oninput="owFlySliderPreview('velocity',this.value)" onpointerup="owFlySliderCommit('velocity')" onkeyup="owFlySliderCommit('velocity')"></label>
+      <label>Teleport displacement · ×0.1<input id="ow-fly-distance" type="number" min="-1000" max="1000" value="10" step="1"></label>
+      <label>Displacement slider<input id="ow-fly-distance-range" type="range" min="0" max="100" value="10" oninput="owFlySliderPreview('distance',this.value)" onpointerup="owFlySliderCommit('distance')" onkeyup="owFlySliderCommit('distance')"></label>
+      <label>Axial deadzone · ×0.1<input id="ow-fly-deadzone" type="number" min="-1000" max="1000" value="25" step="1"></label>
+      <label>Deadzone slider<input id="ow-fly-deadzone-range" type="range" min="0" max="100" value="25" oninput="owFlySliderPreview('deadzone',this.value)" onpointerup="owFlySliderCommit('deadzone')" onkeyup="owFlySliderCommit('deadzone')"></label>
+      <button class="cheat-btn" type="button" onclick="owSetFlyEnabled(true)">Enable Flyhack</button>
+      <button class="cheat-btn" type="button" onclick="owSetFlyEnabled(false)">Disable Flyhack</button>
+      <button class="cheat-btn" type="button" onclick="owApplyFlySettings()">Apply Fly settings</button>
+    </div>
+    <div class="ow-inline-controls">
+      <label>Internal OPK offset<input id="ow-opk-offset" type="number" min="-1000" max="1000" value="30" step="1"></label>
+      <button class="cheat-btn" type="button" onclick="owInternalMode('void')">Internal Void Enemies</button>
+      <button class="cheat-btn" type="button" onclick="owInternalMode('relative')">Internal Relative OPK</button>
+      <button class="cheat-btn" type="button" onclick="owInternalMode('off')">Internal mode off</button>
+      <button class="cheat-btn" type="button" onclick="owSetWarpriestStart()">Toggle Warpriest start</button>
+    </div>
+    <div class="ow-inline-controls">
+      <button class="cheat-btn" type="button" onclick="owInstallPhysicsHook()">Apply Overwalls physics hook</button>
+      <button class="cheat-btn" type="button" onclick="owRestorePhysicsHook()">Restore saved physics hook</button>
+      <button class="cheat-btn" type="button" onclick="owInstallPlateHook()">Install Overwalls plate hook</button>
+      <button class="cheat-btn" type="button" onclick="owRestorePlateHook()">Restore saved plate hook</button>
+    </div>
+    <div class="ow-job-status" id="ow-fly-status" role="status" aria-live="polite">SPRX not checked</div>
+    <div class="ow-muted-note">Loading sends webMAN MOD’s documented PS3MAPI module-load command to <code>/dev_hdd0/tmp/Destiny_Flyhack.sprx</code>. A load response alone is not treated as success; both runtime signatures must read back.</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">Inventory &amp; diagnostics</div>
+    <div class="ow-inline-controls">
+      <label>Split rep booster amount<input id="ow-rep-quantity" type="number" min="1" max="255" value="5" step="1"></label>
+      <button class="cheat-btn" type="button" onclick="owEnableSplitRep()">Enable split rep boosters</button>
+      <button class="cheat-btn" type="button" onclick="owRestoreSplitRep()">Restore saved bytes</button>
+      <button class="cheat-btn" type="button" onclick="owRandomizeConsumables()">Randomize consumables</button>
+      <button class="cheat-btn" type="button" onclick="owRestoreConsumables()">Restore saved bytes</button>
+    </div>
+    <div class="ow-inline-controls">
+      <label>Activity sweep start<input id="ow-sweep-start" type="number" min="1" max="65535" value="1" step="1"></label>
+      <label>Delay · ms<input id="ow-sweep-delay" type="number" min="100" max="10000" value="750" step="50"></label>
+      <button class="cheat-btn" type="button" onclick="owStartActivitySweep()">Start activity ID sweep</button>
+      <button class="cheat-btn" type="button" onclick="owSetSkipCutscene()">Skip cutscene</button>
+      <button class="cheat-btn" type="button" onclick="owApplyCheatPreset('usual')">Enable usual cheats</button>
+      <button class="cheat-btn" type="button" onclick="owApplyCheatPreset('all')">Enable all source cheats</button>
+      <button class="cheat-btn" type="button" onclick="owApplyCheatPreset('off')">Disable all source cheats</button>
+    </div>
+    <p class="ow-subheading">Individual source cheat controls</p>
+    <div class="ow-toggle-grid" id="ow-cheat-controls"></div>
+    <div class="ow-inline-controls">
+      <label>Memory address<input id="ow-dump-address" type="text" value="1811B8C0" maxlength="8"></label>
+      <button class="cheat-btn" type="button" onclick="owReadMemoryDump()">Read 4 KB · 512-byte chunks</button>
+    </div>
+    <textarea id="ow-memory-dump" class="ow-dump-output" rows="7" spellcheck="false" readonly placeholder="Memory read results appear here as hex."></textarea>
+  </div>
+</div>
+
 <div class="section" id="sec-custom-offset" style="padding-top:0">
 <p class="category-label" onclick="toggleSection('sec-custom-offset')">Custom Offset<svg class="collapse-chevron" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg></p>
 <div class="section-body"><div class="panel">
@@ -887,3 +1071,4 @@
 <script src="js/header-art.js"></script>
 
 <script src="js/welcome-art.js"></script>
+<script src="js/overwalls-tools.js"></script>

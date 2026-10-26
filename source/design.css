@@ -58,6 +58,32 @@ body.compact-ui .cheat-feature-label, body.compact-ui .cheat-status-label,
 [id^="rtm-tab-"] { font: 13px var(--sans); padding: 9px 18px; letter-spacing: .02em; }
 .log-entry { font-size: 12px; line-height: 1.7; }
 .log-entry .ts { color: var(--muted); }
+#sec-overwalls .panel { margin: 0 0 14px; }
+.ow-note, .ow-muted-note { margin: 0 16px 12px; padding: 10px 12px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); font: 12px/1.55 var(--sans); }
+.ow-muted-note { margin: 0 16px 14px; border: 0; background: transparent; padding-top: 4px; }
+.ow-inline-controls, .ow-farm-form { display: flex; flex-wrap: wrap; align-items: end; gap: 9px; padding: 0 16px 14px; }
+.ow-inline-controls label, .ow-farm-form label, .ow-stats-grid label { display: flex; flex: 1 1 180px; flex-direction: column; gap: 5px; color: var(--muted); font: 11px var(--sans); }
+.ow-inline-controls input, .ow-inline-controls select, .ow-farm-form input, .ow-farm-form select, .ow-stats-grid input { min-width: 0; width: 100%; padding: 9px 10px; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 3px; font: 13px var(--sans); }
+.ow-inline-controls > button, .ow-farm-form > button { min-height: 40px; flex: 1 1 150px; }
+.ow-button-grid { padding-top: 4px; }
+.ow-button-grid .cheat-btn { min-height: 48px; }
+.ow-subheading { margin: 4px 16px 8px; color: var(--muted); font: 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.ow-toggle-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 7px; padding: 0 16px 14px; }
+.ow-toggle-card { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: 12px var(--sans); }
+.ow-toggle-card strong { min-width: 0; font-weight: 500; }
+.ow-toggle-card > div { display: flex; flex: none; gap: 4px; }
+.ow-toggle-card button { min-height: 30px; padding: 4px 7px; border: 1px solid var(--border); border-radius: 3px; background: var(--card); color: var(--muted); cursor: pointer; font: 11px var(--sans); }
+.ow-scenario-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; padding: 0 16px 16px; }
+.ow-scenario-item { display: flex; min-width: 0; gap: 6px; align-items: stretch; }
+.ow-scenario-item .cheat-btn { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.ow-scenario-actions { display: flex; gap: 4px; }
+.ow-scenario-actions button { min-width: 36px; border: 1px solid var(--border); border-radius: 3px; color: var(--muted); background: var(--surface); cursor: pointer; }
+.ow-empty { grid-column: 1/-1; padding: 20px 12px; border: 1px dashed var(--border); color: var(--muted); text-align: center; font: 12px var(--mono); }
+.ow-job-status { margin: 0 16px 12px; padding: 9px 12px; background: var(--surface); border-left: 3px solid var(--accent); color: var(--text); font: 12px var(--mono); }
+.ow-stop { border-color: var(--danger) !important; color: var(--danger) !important; }
+.ow-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 10px; padding: 0 16px 12px; }
+.ow-dump-output { display: block; width: calc(100% - 32px); margin: 0 16px 16px; padding: 10px; resize: vertical; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 3px; font: 11px/1.5 var(--mono); }
+body.compact-ui #sec-overwalls .ow-muted-note { display: none; }
 #sec-maintenance .connect-row { gap: 10px; }
 #sec-maintenance button { min-height: 42px; }
 button:focus-visible, input:focus-visible, select:focus-visible, [onclick]:focus-visible {
@@ -74,6 +100,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, [onclick]:focus
   .connect-row, .tp-btn-row, .scan-btn-row, .custom-row { flex-wrap: wrap; }
   .ip-input { flex-basis: 100%; }
   #sec-maintenance button { flex: 1 1 140px; }
+  .ow-inline-controls, .ow-farm-form { align-items: stretch; }
+  .ow-inline-controls label, .ow-farm-form label { flex-basis: 100%; }
   .cheat-grid { gap: 8px; padding: 12px; }
   .cheat-btn { font-size: 13px; min-width: 0; overflow-wrap: anywhere; }
   .tp-coord-grid { min-width: 0; }

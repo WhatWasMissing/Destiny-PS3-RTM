@@ -1,6 +1,7 @@
 (function (root) {
   'use strict';
   const keys = new Set(['rtm_saved_ip', 'rtm_saved_teleports', 'rtm_teleport_folders',
+    'overwalls_scenario_positions', 'overwalls_teleport_mode', 'overwalls_activity_method',
     'rtm_pinned_cheats', 'macros', 'cheatAddresses', 'henMode', 'rtm_accent_color',
     'rtm_appearance', 'rtm_auto_reconnect_safe_v1', 'rtm_active_tab', 'rtm_ui_mode',
     'destinyRtmToolSetupV1', 'destinyRtmCharacterUtilsVisibleV1']);
@@ -20,7 +21,7 @@
       if ((key === 'henMode' || key === 'rtm_auto_reconnect_safe_v1' || key === 'destinyRtmToolSetupV1' || key === 'destinyRtmCharacterUtilsVisibleV1' || key.startsWith('destinyRtmSectionVisible_')) && !['0','1'].includes(value)) throw new Error('Invalid switch setting');
       if (key === 'rtm_appearance' && !['light','dark'].includes(value)) throw new Error('Invalid appearance');
       if (key === 'rtm_ui_mode' && !['compact','detailed'].includes(value)) throw new Error('Invalid UI mode');
-      if (key === 'rtm_active_tab' && !['home','mods','player','tools','all'].includes(value)) throw new Error('Invalid tab');
+      if (key === 'rtm_active_tab' && !['home','mods','player','overwalls','tools','all'].includes(value)) throw new Error('Invalid tab');
       if (key === 'rtm_accent_color' && !/^#[0-9a-f]{6}$/i.test(value)) throw new Error('Invalid accent color');
       if (key === 'cheatAddresses') {
         const addresses = JSON.parse(value);
@@ -47,6 +48,18 @@
               !Array.isArray(macro.cheatIds) || macro.cheatIds.length > 500 ||
               !macro.cheatIds.every(id => typeof id === 'string' && /^[a-zA-Z0-9_-]{1,100}$/.test(id))) throw new Error('Invalid macro');
         });
+      }
+      if (key === 'overwalls_teleport_mode' && !['external','internal','position'].includes(value)) throw new Error('Invalid Overwalls teleport mode');
+      if (key === 'overwalls_activity_method' && !['current','overwalls'].includes(value)) throw new Error('Invalid Overwalls activity method');
+      if (key === 'overwalls_scenario_positions') {
+        const data = JSON.parse(value);
+        if (!Array.isArray(data) || data.length > 500 || !data.every(item => item &&
+            typeof item.id === 'string' && item.id.length <= 100 &&
+            typeof item.name === 'string' && item.name.trim() && item.name.length <= 200 &&
+            ['x','y','z'].every(axis => coordinate(item[axis])) &&
+            (item.legacyName === undefined || typeof item.legacyName === 'string' && item.legacyName.length <= 100))) {
+          throw new Error('Invalid Overwalls scenario positions');
+        }
       }
     }
     return bundle;

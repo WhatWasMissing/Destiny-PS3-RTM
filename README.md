@@ -8,9 +8,12 @@ The recovered frontend is preserved in commit `e36edf7`. The working app is in
 
 The reliability branch adds bounded and verified writes, session-aware reconnect,
 settings backup/restore, improved teleport management and a responsive redesign.
-See [Overwalls port recommendations](docs/OVERWALLS-REVIEW.md) and
-[implementation evidence](docs/IMPLEMENTATION.md). Tests use an isolated fake
-console; live game compatibility still depends on the console/game build.
+The Overwalls feature port adds source-specific tower and activity shortcuts,
+scenario XML, routines, inventory tools, and Flyhack support. See the
+[Overwalls port map](docs/OVERWALLS-PORT.md), [initial source review](docs/OVERWALLS-REVIEW.md),
+and [implementation evidence](docs/IMPLEMENTATION.md). Existing automated checks
+use an isolated fake console; live game compatibility still depends on the
+console/game build.
 
 **Proprietary — all rights reserved. Redistribution, rehosting, and sharing modified
 versions require written permission.** See [LICENSE](LICENSE) for the full terms,

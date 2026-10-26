@@ -16,6 +16,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -85,6 +86,68 @@ func (h *host) handler() http.Handler {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(response.StatusCode)
 		w.Write(body)
+	})
+	mux.HandleFunc("/module-load", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost || r.Header.Get("X-RTM-Token") != h.token ||
+			(r.Header.Get("Origin") != "" && r.Header.Get("Origin") != h.origin) {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+		defer r.Body.Close()
+		var input struct {
+			Target string `json:"target"`
+			PID    string `json:"pid"`
+			Path   string `json:"path"`
+		}
+		decoder := json.NewDecoder(io.LimitReader(r.Body, 2048))
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&input); err != nil || input.Path != "/dev_hdd0/tmp/Destiny_Flyhack.sprx" ||
+			strings.ContainsAny(input.Path, "\r\n\x00") {
+			http.Error(w, "Invalid module request", http.StatusBadRequest)
+			return
+		}
+		pid, err := strconv.ParseUint(input.PID, 10, 32)
+		if err != nil || pid == 0 {
+			http.Error(w, "Invalid process ID", http.StatusBadRequest)
+			return
+		}
+		targetIP := net.ParseIP(input.Target)
+		target := &url.URL{Scheme: "http", Host: input.Target}
+		if targetIP == nil || targetIP.To4() == nil || !consoleTarget(target) || !h.validTarget(target) {
+			http.Error(w, "Unsupported console target", http.StatusBadRequest)
+			return
+		}
+		command := fmt.Sprintf("MODULE LOAD %d %s", pid, input.Path)
+		moduleURL := &url.URL{
+			Scheme:   "http",
+			Host:     net.JoinHostPort(targetIP.String(), "80"),
+			Path:     "/ps3mapi.ps3",
+			RawQuery: url.QueryEscape(command),
+		}
+		request, err := http.NewRequestWithContext(r.Context(), http.MethodGet, moduleURL.String(), nil)
+		if err != nil {
+			http.Error(w, "Invalid module request", http.StatusBadRequest)
+			return
+		}
+		response, err := h.client.Do(request)
+		if err != nil {
+			http.Error(w, "Console module-load request failed", http.StatusBadGateway)
+			return
+		}
+		defer response.Body.Close()
+		body, err := io.ReadAll(io.LimitReader(response.Body, 64*1024+1))
+		if err != nil || len(body) > 64*1024 {
+			http.Error(w, "Module-load response exceeded limit or was interrupted", http.StatusBadGateway)
+			return
+		}
+		w.Header().Set("Cache-Control", "no-store")
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		if response.StatusCode < 200 || response.StatusCode >= 300 {
+			http.Error(w, "Console rejected module-load request", http.StatusBadGateway)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(body)
 	})
 	files, _ := fs.Sub(assets, "source")
 	mux.Handle("/", http.FileServer(http.FS(files)))

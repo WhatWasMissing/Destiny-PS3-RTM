@@ -22,6 +22,24 @@
       return nativeFetch('/console?url=' + encodeURIComponent(input), {
         ...options, headers: { 'X-RTM-Token': host.token }
       });
+    },
+    async loadModule(target, pid, path) {
+      if (path !== '/dev_hdd0/tmp/Destiny_Flyhack.sprx' || !/^\d{1,10}$/.test(String(pid))) {
+        throw new Error('Unsupported module request');
+      }
+      const host = await hostConfig();
+      const command = `MODULE LOAD ${String(pid)} ${path}`;
+      const response = host
+        ? await nativeFetch('/module-load', { method: 'POST', headers: {
+            'Content-Type': 'application/json', 'X-RTM-Token': host.token
+          }, body: JSON.stringify({ target: String(target), pid: String(pid), path }) })
+        : location.hostname === String(target)
+          ? await nativeFetch(`/ps3mapi.ps3?${encodeURIComponent(command)}`, { cache: 'no-store' })
+          : null;
+      if (!response) throw new Error('Module loading requires the desktop host or an RTM page served by the target PS3');
+      const body = await response.text();
+      if (!response.ok) throw new Error(`Module-load request returned HTTP ${response.status}`);
+      return body;
     }
   };
 })(globalThis);

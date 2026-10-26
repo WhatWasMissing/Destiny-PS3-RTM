@@ -2,7 +2,7 @@
 
 This frontend started from the exact recovery of `DestinyRTM(3).exe` on
 25 October 2026 and has since been improved on the reliability branch.
-It includes the Home / Mods / Player / Tools / All tabs,
+It includes the Home / Mods / Player / Overwalls / Tools / All tabs,
 character banner, Quick Access, Character Utilities, and saved teleport fixes.
 
 The original recovery is preserved in Git commit
@@ -24,3 +24,8 @@ owned by WhatWasMissing. Third-party rights remain with their owners.
 Desktop builds are now available through the replacement Go host. See
 [desktop build instructions](../docs/DESKTOP-BUILD.md). Original host source
 remains unrecovered; the replacement does not imply native API parity.
+
+Overwalls source behavior is ported in `js/overwalls-tools.js`; see the
+[feature coverage and attribution](../docs/OVERWALLS-PORT.md). Its fixed
+coordinates, hook bytes and plugin signatures belong to the referenced game
+build and are not live-console verified.

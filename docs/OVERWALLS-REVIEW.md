@@ -1,5 +1,9 @@
 # Overwalls architecture and port assessment
 
+This is the initial source review. The recommended feature work was later
+implemented in `source/js/overwalls-tools.js`; current coverage, attribution and
+port boundaries are documented in [OVERWALLS-PORT.md](OVERWALLS-PORT.md).
+
 Inspected local project:
 E:/Destiny PS3 RTMs/fly hack/OverwallsTool - Hybrid/
 
@@ -68,6 +72,6 @@ CCAPI or prove that the undocumented call endpoint exists. Game hooks, native
 RPC and module loading need transport and build compatibility evidence. Local
 currency/display writes also do not establish server-side persistence.
 
-This assessment is based on source inspection, not live-console experiments.
-No Overwalls source was copied into the public repo, no hook code was executed,
-and no farming routines or new console features were enabled.
+The review and port are based on local source inspection, not live-console
+experiments. The interface does not claim that a verified memory write proves
+in-game behavior or server persistence.
