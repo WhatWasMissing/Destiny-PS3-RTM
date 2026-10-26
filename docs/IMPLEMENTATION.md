@@ -127,3 +127,23 @@ Do not mark the complete objective achieved based on the transport tests alone.
   visual inspection so far is from the browser rendering of the same frontend.
 - Remaining: full mock-console desktop integration, verify final built artifact,
   finish operation/status audit and record final requirement-by-requirement proof.
+
+## Desktop integration and final-build tooling
+
+- Added Go-driven integration test running the production frontend modules
+  against the authenticated local host and a byte-addressed fake console.
+  It verifies host detection/auth, read-only relink, verified ON/OFF, readback
+  mismatch, partial failure, disconnect state and sanitized diagnostics.
+  The test rejects any frontend fetch outside the isolated host origin.
+- Extracted connection lifecycle code into connection.js. Browser reload and
+  integration tests pass with the production script order.
+- Added packaged-executable smoke checks to build.ps1: ephemeral loopback start,
+  config and embedded assets, unauthenticated-request rejection and public-target
+  rejection, with automatic cleanup. No PS3 requests are sent by the smoke check.
+- Added guards for late disconnect cleanup and health probes at the same IP;
+  production-function tests cover both. Diagnostics redact popup path text and
+  retain HTTP status codes. Thirty Node tests currently pass.
+- Backup/restore now preserves first-run setup and visibility migration flags.
+  Documentation now describes the replacement desktop project consistently.
+- Stable string/speed/scanner writes also use verified memory operations.
+  Final rebuild after these latest edits and final scope audit are still required.

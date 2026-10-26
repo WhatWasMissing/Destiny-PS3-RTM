@@ -1,7 +1,8 @@
-# Recovered desktop frontend
+# Destiny RTM frontend
 
-`index.html` is the exact frontend recovered from `DestinyRTM(3).exe` on
-25 October 2026. It includes the Home / Mods / Player / Tools / All tabs,
+This frontend started from the exact recovery of `DestinyRTM(3).exe` on
+25 October 2026 and has since been improved on the reliability branch.
+It includes the Home / Mods / Player / Tools / All tabs,
 character banner, Quick Access, Character Utilities, and saved teleport fixes.
 
 The original recovery is preserved in Git commit
@@ -11,9 +12,10 @@ edits on development branches. The working frontend now loads transport code
 from `js/transport.js`. Serve the whole `source/` directory when previewing. The previously edited Android source was an older
 version and is not included here.
 
-This is a frontend backup, not a complete buildable desktop project. The Go
-host source and build configuration have not been recovered. Console operations
-require the original desktop integration and a compatible PS3 connection.
+The original Go host was not recovered. A replacement host and build script are
+included at repository root, providing readable local HTTP transport without
+reproducing CCAPI or claiming undocumented RPC capabilities. Console operations
+require a compatible PS3 connection and game build.
 
 The repository's proprietary no-redistribution LICENSE applies to material
 owned by WhatWasMissing. Third-party rights remain with their owners.

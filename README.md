@@ -2,8 +2,15 @@
 
 ## Source backup and license
 
-The verified current desktop frontend is backed up in [source/](source/README.md).
-This is the recovered frontend only; the desktop host/build project is not included.
+The recovered frontend is preserved in commit `e36edf7`. The working app is in
+[source/](source/README.md), with a replacement Go desktop host and a repeatable
+[Windows build](docs/DESKTOP-BUILD.md).
+
+The reliability branch adds bounded and verified writes, session-aware reconnect,
+settings backup/restore, improved teleport management and a responsive redesign.
+See [Overwalls port recommendations](docs/OVERWALLS-REVIEW.md) and
+[implementation evidence](docs/IMPLEMENTATION.md). Tests use an isolated fake
+console; live game compatibility still depends on the console/game build.
 
 **Proprietary — all rights reserved. Redistribution, rehosting, and sharing modified
 versions require written permission.** See [LICENSE](LICENSE) for the full terms,

@@ -7,11 +7,12 @@ function memory(initial = {}) {
     getItem: k => map.get(k) ?? null, setItem: (k,v) => map.set(k,v), removeItem: k => map.delete(k) };
 }
 test('backups round trip supported preferences and positions without active cheat state', () => {
-  const source = memory({ rtm_saved_ip: '192.168.0.62', rtm_saved_teleports: '[{"name":"Tower","x":0,"y":2,"z":3}]', rtm_active_cheats: '{"god":true}' });
+  const source = memory({ rtm_saved_ip: '192.168.0.62', rtm_saved_teleports: '[{"name":"Tower","x":0,"y":2,"z":3}]', destinyRtmToolSetupV1:'1', rtm_active_cheats: '{"god":true}' });
   const bundle = capture(source), destination = memory();
   assert.equal(bundle.settings.rtm_active_cheats, undefined);
   restore(destination, bundle);
   assert.equal(destination.getItem('rtm_saved_teleports'), source.getItem('rtm_saved_teleports'));
+  assert.equal(destination.getItem('destinyRtmToolSetupV1'),'1');
 });
 test('reject unknown keys, unsupported versions and nonfinite coordinates before mutation', () => {
   const bundle = capture(memory());

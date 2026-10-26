@@ -2,7 +2,8 @@
   'use strict';
   const keys = new Set(['rtm_saved_ip', 'rtm_saved_teleports', 'rtm_teleport_folders',
     'rtm_pinned_cheats', 'macros', 'cheatAddresses', 'henMode', 'rtm_accent_color',
-    'rtm_appearance', 'rtm_auto_reconnect_safe_v1', 'rtm_active_tab', 'rtm_ui_mode']);
+    'rtm_appearance', 'rtm_auto_reconnect_safe_v1', 'rtm_active_tab', 'rtm_ui_mode',
+    'destinyRtmToolSetupV1', 'destinyRtmCharacterUtilsVisibleV1']);
   function allowed(key) { return keys.has(key) || /^destinyRtmSectionVisible_sec-[a-z0-9-]+$/.test(key); }
   const coordinate = value => (typeof value === 'number' || typeof value === 'string' && value.trim() !== '') &&
     Number.isFinite(Number(value)) && Math.abs(Number(value)) <= 3.4028234663852886e38;
@@ -16,7 +17,7 @@
     for (const [key, value] of entries) {
       if (!allowed(key) || typeof value !== 'string' || value.length > 1000000) throw new Error('Invalid setting: ' + key);
       if (key === 'rtm_saved_ip' && value !== '' && (!/^(?:\d{1,3}\.){3}\d{1,3}$/.test(value) || value.split('.').some(part => Number(part) > 255))) throw new Error('Invalid saved console IP');
-      if ((key === 'henMode' || key === 'rtm_auto_reconnect_safe_v1' || key.startsWith('destinyRtmSectionVisible_')) && !['0','1'].includes(value)) throw new Error('Invalid switch setting');
+      if ((key === 'henMode' || key === 'rtm_auto_reconnect_safe_v1' || key === 'destinyRtmToolSetupV1' || key === 'destinyRtmCharacterUtilsVisibleV1' || key.startsWith('destinyRtmSectionVisible_')) && !['0','1'].includes(value)) throw new Error('Invalid switch setting');
       if (key === 'rtm_appearance' && !['light','dark'].includes(value)) throw new Error('Invalid appearance');
       if (key === 'rtm_ui_mode' && !['compact','detailed'].includes(value)) throw new Error('Invalid UI mode');
       if (key === 'rtm_active_tab' && !['home','mods','player','tools','all'].includes(value)) throw new Error('Invalid tab');

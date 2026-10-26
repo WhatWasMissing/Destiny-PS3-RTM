@@ -27,7 +27,12 @@ continues to use direct console HTTP, subject to browser cross-origin rules.
 `source/index.html` alone is no longer a standalone file: distribute the entire
 source directory or use the embedded executable.
 
-Verification so far: Go HTTP tests use a local fake console; packaged executable
-smoke checks verify config, static JavaScript and unauthorized-request rejection.
-Live-console read/write verification and native window inspection remain pending.
+Verification: Go HTTP tests use a local fake console. The desktop integration
+test runs production frontend connection, transport, memory parser and toggle
+code against the authenticated local host, checking readback, mismatches,
+partial failures, disconnect and diagnostics. Packaged executable smoke checks
+verify config, static JavaScript and unauthorized-request rejection. The Edge
+app window launches and exposes expected controls through accessibility;
+native screenshot capture timed out. Browser visual checks cover the same
+frontend in desktop and phone layouts. Live-console verification remains pending.
 The older executable and the recovered baseline are preserved separately.

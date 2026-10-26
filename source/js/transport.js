@@ -19,12 +19,13 @@
       let rejectAbort;
       const aborted = new Promise((_, reject) => { rejectAbort = () => reject(new Error('Request cancelled')); });
       controller.signal.addEventListener('abort', rejectAbort, { once: true });
-      const entry = { time: new Date().toISOString(), operation: url.pathname, outcome: 'pending' };
+      const entry = { time: new Date().toISOString(), operation: url.pathname.startsWith('/popup.ps3/') ? '/popup.ps3' : url.pathname, outcome: 'pending' };
       history.push(entry);
       if (history.length > 200) history.shift();
       try {
         const response = await Promise.race([fetchRequest(url.href, { signal: controller.signal, cache: 'no-store' }), aborted]);
         if (response.type === 'opaque') throw new Error('Console response cannot be verified');
+        entry.httpStatus = response.status;
         if (!response.ok) throw new Error(`Console returned HTTP ${response.status}`);
         // Keep the timeout and session cancellation alive until the body is read.
         const bytes = await Promise.race([response.arrayBuffer(), aborted]);
@@ -46,7 +47,7 @@
     return {
       request,
       cancelAll() { for (const controller of pending) controller.abort(); },
-      diagnostics() { return history.map(({ time, operation, outcome }) => ({ time, operation, outcome })); }
+      diagnostics() { return history.map(({ time, operation, outcome, httpStatus }) => ({ time, operation, outcome, httpStatus })); }
     };
   }
   root.RtmTransport = { createTransport };

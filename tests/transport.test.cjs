@@ -44,3 +44,10 @@ test('buffered response remains readable by existing memory parsers',async()=>{
   const transport=createTransport({fetch:async()=>new Response('00112233')});
   assert.equal(await (await transport.request('http://console/getmem.ps3mapi')).text(),'00112233');
 });
+test('diagnostics preserve HTTP status without exposing popup text or console addresses',async()=>{
+  const transport=createTransport({fetch:async()=>new Response('accepted')});
+  await transport.request('http://192.168.0.62/popup.ps3/private-message');
+  const exported=JSON.stringify(transport.diagnostics());
+  assert.equal(exported.includes('private-message'),false); assert.equal(exported.includes('192.168'),false);
+  assert.equal(transport.diagnostics()[0].httpStatus,200);
+});

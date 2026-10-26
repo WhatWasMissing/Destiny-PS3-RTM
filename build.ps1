@@ -9,5 +9,6 @@ try {
     New-Item -ItemType Directory -Force dist | Out-Null
     & $Go build -trimpath -ldflags '-s -w' -o dist/DestinyRTM.exe .
     if ($LASTEXITCODE -ne 0) { throw 'Desktop build failed' }
+    & ./tests/smoke-desktop.ps1 -Executable ./dist/DestinyRTM.exe
     Get-FileHash dist/DestinyRTM.exe -Algorithm SHA256
 } finally { Pop-Location }

@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync(require.resolve('../source/js/app-core.js'), 'utf8');
+const source = fs.readFileSync(require.resolve('../source/js/connection.js'), 'utf8');
 const start = source.indexOf('  function beginSafeAutoReconnect(');
 const end = source.indexOf('\n  //', start);
 const productionFunction = source.slice(start, end);
@@ -56,4 +56,24 @@ test('restart wait does not start a reconnect loop after disconnect',async()=>{
   vm.runInContext(source.slice(start,source.indexOf('\n  }',start)+4),context);
   const pending=context.ps3Restart();await flush();context.connectionGeneration++;finishWait();await pending;
   assert.equal(reconnects,0);
+});
+test('late disconnect cleanup cannot clear a newer connection',async()=>{
+  let finishCleanup,cancellations=0;
+  const context=vm.createContext({ip:'old',connectionGeneration:1,resetVerifiedStates(){},stopAutoReconnect(){},stopHealthCheck(){},
+    consoleTransport:{cancelAll(){cancellations++;}},uninstallPlayerHook:()=>new Promise(resolve=>{finishCleanup=resolve;}),log(){},toast(){}});
+  const start=source.indexOf('  async function disconnect(');
+  vm.runInContext(source.slice(start,source.indexOf('\n  }',start)+4),context);
+  const pending=context.disconnect();context.connectionGeneration++;context.ip='new';finishCleanup();await pending;
+  assert.equal(context.ip,'new');assert.equal(cancellations,1);
+});
+test('old health response cannot mark a replacement session at the same IP online',async()=>{
+  let tick,finishProbe,badges=0;
+  const context=vm.createContext({ip:'192.168.0.62',connectionGeneration:1,_healthTimer:null,_healthMissed:0,
+    HEALTH_INTERVAL:100,HEALTH_TIMEOUT:10,HEALTH_MAX_MISS:2,stopHealthCheck(){},
+    setInterval:fn=>{tick=fn;return 1;},probePS3Reachable:()=>new Promise(resolve=>{finishProbe=resolve;}),
+    setBadge:()=>badges++,log(){},toast(){}});
+  const start=source.indexOf('  function startHealthCheck(');
+  vm.runInContext(source.slice(start,source.indexOf('\n  }',start)+4),context);
+  context.startHealthCheck();context._healthMissed=1;const pending=tick();context.connectionGeneration++;finishProbe();await pending;
+  assert.equal(badges,0);
 });
