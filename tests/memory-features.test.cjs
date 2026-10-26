@@ -8,6 +8,7 @@ const {
   BRIGHTNESS_ADDRESS,
   brightnessPreset,
   brightnessPresetForHex,
+  classifyDamagePatch,
   EMBLEM_EXCLUDED_RANGES,
   findEmblemMatches,
   findAmmoCandidates,
@@ -30,6 +31,20 @@ test('brightness source presets preserve their exact big-endian Float32 values',
   assert.equal(brightnessPresetForHex('00000000'), null);
   assert.equal(float32FromBE('C1A00000'), -20);
   assert.throws(() => float32FromBE('1234'), /exactly four bytes/);
+});
+
+test('damage variants keep source-specific One-Hit codes distinct', () => {
+  assert.deepEqual(classifyDamagePatch('3F80'), {
+    hex: '3F80', kind: 'normal', label: 'Normal', multiplier: 1, isOneHit: false, isTenX: false
+  });
+  assert.equal(classifyDamagePatch('4120').multiplier, 10);
+  assert.equal(classifyDamagePatch('447A').kind, 'one-hit-main');
+  assert.equal(classifyDamagePatch('447A').multiplier, 1000);
+  assert.equal(classifyDamagePatch('547A').kind, 'one-hit-overwalls');
+  assert.equal(classifyDamagePatch('547A').isOneHit, true);
+  assert.equal(classifyDamagePatch('547A').multiplier, null);
+  assert.equal(classifyDamagePatch('1234').kind, 'custom');
+  assert.throws(() => classifyDamagePatch('123'), /exactly two bytes/);
 });
 
 test('emblem scanner returns aligned 16-bit matches only', () => {

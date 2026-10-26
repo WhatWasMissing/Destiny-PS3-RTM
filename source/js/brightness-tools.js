@@ -40,9 +40,9 @@
       const preset = memory.brightnessPresetForHex(raw);
       current.textContent = `Current word: ${raw} · Float32 ${formatted}`;
       if (preset) {
-        setStatus(`Matches the source “${preset.label}” value (${preset.value}), but this does not prove the address is a brightness field or the correct build. Probe only; 01.24 semantics remain unconfirmed.`, 'warning');
+        setStatus(`Matches the source “${preset.label}” value (${preset.value}). The 01.24 ELF stores Normal (1.0) at this candidate address, but a live read does not prove the field's meaning or in-game effect. Probe only.`, 'warning');
       } else {
-        setStatus('Does not match any listed source preset. The address semantics are unknown for this build; no write was attempted.', 'warning');
+        setStatus('Does not match any listed source preset. The 01.24 ELF confirms this candidate address holds Normal (1.0) by default; no write was attempted.', 'warning');
       }
     } catch (error) {
       if (generation !== connectionGeneration || targetIp !== ip) {

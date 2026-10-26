@@ -30,13 +30,14 @@ builds use different offsets and were not used as address references.
   from local source; they have not been checked against a live console build.
   No live console testing was performed.
 
-Several local source candidates conflict: Brightness, FOV, Flip View, Power
-Boost and One-Hit Enemies. A local ELF previously labelled `PATCH0024` has a
-hash matching Destiny 01.00, not 01.24, so its disassembly cannot validate or
-reject these 01.24 source claims. Brightness remains a read-only probe; the
-other conflicts remain unresolved pending a correctly identified 01.24 ELF and
-runtime evidence. See [ADDRESS-AUDIT.md](ADDRESS-AUDIT.md) for the corrected
-build identity and next verification step.
+Static comparison against the hash-verified 01.24 ELF confirms the source's
+Brightness default, FOV field, Flip View address/default, Power Boost default,
+and One-Hit OFF halfword at their candidate sites. The local 1.24 C# and web RTM
+sources agree on FOV and Flip View addresses. Power Boost ON values still differ
+slightly between source variants, and One-Hit retains two competing ON values
+(`447A` and `547A`). Static bytes establish build compatibility at these sites,
+not live runtime effects. Brightness remains read-only. See
+[ADDRESS-AUDIT.md](ADDRESS-AUDIT.md) for hashes, bytes, and runtime limitations.
 
 The local source establishes provenance, not build compatibility. Public
 webMAN documentation supports memory reads/writes and the PS3 notification

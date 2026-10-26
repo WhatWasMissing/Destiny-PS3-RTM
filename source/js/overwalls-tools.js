@@ -728,6 +728,9 @@
       const context = newContext();
       const pairs = cheatValues(Number(id), Boolean(enabled));
       await writePairs(pairs.map(([address, value]) => [hexAddress(address), value]), context);
+      if (Number(id) === 9 && typeof root.syncDamagePatchState === 'function') {
+        root.syncDamagePatchState(enabled ? '547A' : '3F80', 'Overwalls One-Hit toggle');
+      }
       report(`${cheatNames[id] || 'Source cheat'} ${enabled ? 'enabled' : 'disabled'} · memory bytes verified`, 'ok');
     } catch (error) { report(`Cheat toggle not confirmed: ${error.message}`, 'err'); }
   }
@@ -740,6 +743,9 @@
       const pairs = [];
       for (const id of ids) pairs.push(...cheatValues(id, enabled));
       await writePairs(pairs.map(([address, value]) => [hexAddress(address), value]), context);
+      if (ids.includes(9) && typeof root.syncDamagePatchState === 'function') {
+        root.syncDamagePatchState(enabled ? '547A' : '3F80', `Overwalls ${kind} preset`);
+      }
       report(`${kind === 'usual' ? 'Usual' : kind === 'all' ? 'All' : 'Disable all'} Overwalls cheat preset verified (${pairs.length} memory writes)`, 'ok');
     } catch (error) { report(`Cheat preset not confirmed: ${error.message}`, 'err'); }
   }

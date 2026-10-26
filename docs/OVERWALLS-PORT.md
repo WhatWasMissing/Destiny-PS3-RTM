@@ -26,6 +26,7 @@ and soulsAPI reflection code are not bundled.
 | Physics and plate hooks | Manual apply with captured prior bytes and guarded restoration; hook site must match known branch values |
 | Split rep boosters and consumable randomization | Source values plus local byte snapshots and guarded restore controls |
 | Individual source toggles and usual/all/off groups | All 18 standalone source toggles plus the three grouped presets translated to verified writes, including the 20-byte ammo patch and the additional address used by one preset |
+| One-Hit damage variant | Keeps the Overwalls `547A` value at `0x43E626` and synchronizes the main RTM's One-Hit and damage status only after verified writes; the app does not interpret this variant as a multiplier |
 | Skip cutscene, activity ID sweep and CCAPI memory read | Source address/value, cancellable sweep and 4 KB read in eight 512-byte chunks |
 
 The main RTM already contained equivalents for core gameplay toggles, standard

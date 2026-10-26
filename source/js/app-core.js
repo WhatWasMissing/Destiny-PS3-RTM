@@ -2281,7 +2281,7 @@
     'tog-ohk': {
       feature:'stable', label:'Stable',
       description:'Makes most enemies die from a single hit.',
-      notes:'Instance Leader can change the behaviour of this option. It also conflicts with 4× Damage, so only one should be considered active.'
+      notes:'Instance Leader can change the behaviour of this option. It also conflicts with 10× Damage, so only one should be considered active.'
     },
     'tog-ammo': {
       feature:'stable', label:'Stable',
@@ -2410,7 +2410,7 @@
     },
     'srv-4x-damage': {
       feature:'stable', label:'Stable',
-      description:'Applies a four-times damage mode.',
+      description:'Applies the source RTM’s ten-times damage preset.',
       notes:'Conflicts with One-Hit Enemies. Enabling one should be treated as replacing the other.'
     },
     'srv-off': {
@@ -2621,7 +2621,7 @@
     // itself replaces the old mode. We only need to correct state/UI first.
     if (['tog-ohk','srv-4x-damage','damage-custom'].includes(targetId)) {
       if (targetId !== 'tog-ohk' && cheatState['One-Hit Enemies']) disabled.push('One-Hit Enemies');
-      if (targetId !== 'srv-4x-damage' && server4xDamageState) disabled.push('4× Damage');
+      if (targetId !== 'srv-4x-damage' && server4xDamageState) disabled.push('10× Damage');
       clearDamageConflictUI(targetId);
     }
 
@@ -2692,6 +2692,7 @@
         cheatState[label] = isOn;
         btn?.classList.toggle('active-cheat', isOn);
         setCheatStatusFromButton(btn, isOn ? 'verified-on' : 'verified-off');
+        if (btn?.id === 'tog-ohk') syncDamagePatchState(isOn ? DAMAGE_OHK_HEX : DAMAGE_NORMAL_HEX, 'Main One-Hit toggle');
         log(`${label}: ${isOn ? 'ON' : 'OFF'} verified by memory readback`, 'ok');
         toast(`${label}: ${isOn ? 'ON' : 'OFF'} verified`, 'ok');
       } else {
@@ -3070,11 +3071,7 @@
   }
 
   function damageValueName(hex) {
-    hex = normalizeDamageHex(hex);
-    if (hex === DAMAGE_NORMAL_HEX) return 'Normal';
-    if (hex === DAMAGE_4X_HEX) return '10× preset';
-    if (hex === DAMAGE_OHK_HEX) return 'One-Hit';
-    return 'Custom';
+    return RtmMemoryFeatures.classifyDamagePatch(normalizeDamageHex(hex)).label;
   }
 
   function refreshDamageMultiplierDisplays(multiplier) {
@@ -3120,6 +3117,48 @@
     refreshDamageMultiplierDisplays(multiplier);
   }
 
+  function syncDamagePatchState(value, sourceLabel = 'Damage patch') {
+    const mode = RtmMemoryFeatures.classifyDamagePatch(normalizeDamageHex(value));
+    const oneHitActive = mode.isOneHit;
+
+    customDamageHex = mode.hex;
+    server4xDamageState = mode.isTenX;
+    setCheatLabelState('One-Hit Enemies', oneHitActive);
+    setCheatLabelState('One Hit Kill', oneHitActive);
+    requestedCheatState['One-Hit Enemies'] = oneHitActive;
+    requestedCheatState['One Hit Kill'] = oneHitActive;
+    setAllButtonsActive('tog-ohk', oneHitActive);
+    setAllButtonsActive('srv-4x-damage', mode.isTenX);
+    updateCheatStatus('tog-ohk', oneHitActive ? 'verified-on' : 'verified-off');
+    updateCheatStatus('srv-4x-damage', mode.isTenX ? 'verified-on' : 'verified-off');
+
+    if (mode.multiplier !== null) setDamageMultiplierPreset(mode.multiplier);
+    if (mode.kind === 'one-hit-overwalls') {
+      const value = document.getElementById('damage-multiplier-val');
+      const encoded = document.getElementById('damage-multiplier-hex');
+      const effective = document.getElementById('damage-effective-value');
+      const advanced = document.getElementById('damage-encoded-hex');
+      if (value) value.textContent = 'One-Hit';
+      if (encoded) encoded.textContent = mode.hex;
+      if (effective) effective.textContent = 'Not inferred';
+      if (advanced) advanced.textContent = mode.hex;
+    }
+    const detail = mode.kind === 'one-hit-overwalls'
+      ? `${mode.label} · multiplier not inferred`
+      : mode.kind === 'one-hit-main'
+        ? `${mode.label} · about ${mode.multiplier}×`
+        : mode.kind === 'ten-x'
+          ? `${mode.label}`
+          : mode.kind === 'normal'
+            ? mode.label
+            : `${mode.label} (${mode.hex})`;
+    const status = document.getElementById('damage-current-status');
+    if (status) status.textContent = `${sourceLabel}: ${detail} · 0043E626=${mode.hex}`;
+    return mode;
+  }
+
+  window.syncDamagePatchState = syncDamagePatchState;
+
   async function applyDamageHex(hex, sourceLabel = 'Custom Damage') {
     if (typeof hasReadServerSafetyGuide === 'function' && !hasReadServerSafetyGuide()) {
       serverSafetyRequired = true;
@@ -3143,30 +3182,21 @@
 
     try {
       await writeHexAt(DAMAGE_ADDR, hex);
-      customDamageHex = hex;
-
-      const is4x = hex === DAMAGE_4X_HEX;
-      const isOHK = hex === DAMAGE_OHK_HEX;
-
-      server4xDamageState = is4x;
-      document.getElementById('srv-4x-damage')?.classList.toggle('active-cheat', is4x);
-      updateCheatStatus('srv-4x-damage', is4x ? 'on' : 'off');
-
-      const ohk = document.getElementById('tog-ohk');
-      if (ohk) ohk.classList.toggle('active-cheat', isOHK);
-      updateCheatStatus('tog-ohk', isOHK ? 'on' : 'off');
-
-      if (typeof cheatState !== 'undefined') {
-        cheatState['One-Hit Enemies'] = isOHK;
-        cheatState['One Hit Kill'] = isOHK;
-      }
+      const mode = syncDamagePatchState(hex, sourceLabel);
 
       const effective = damageHexToEffectiveFloat(hex);
       const status = document.getElementById('damage-current-status');
-      if (status) status.textContent = `Applied: ${effective}× (${hex})`;
+      if (status) status.textContent = mode.kind === 'one-hit-overwalls'
+        ? `${sourceLabel}: ${mode.label} · multiplier not inferred`
+        : `Applied: ${effective}× (${hex})`;
 
-      log(`${sourceLabel} → 0043E626 = ${hex} (~${effective}×)`, 'ok');
-      toast(`Damage multiplier applied: ~${effective}×`, 'ok');
+      if (mode.kind === 'one-hit-overwalls') {
+        log(`${sourceLabel} → 0043E626 = ${hex} (${mode.label}; multiplier not inferred)`, 'ok');
+        toast(`${mode.label} patch applied`, 'ok');
+      } else {
+        log(`${sourceLabel} → 0043E626 = ${hex} (~${effective}×)`, 'ok');
+        toast(`Damage multiplier applied: ~${effective}×`, 'ok');
+      }
       return true;
     } catch (e) {
       log(`${sourceLabel} failed: ${e.message}`, 'err');
@@ -3229,28 +3259,14 @@
     updateCheatStatus('srv-4x-damage', 'applying');
     try {
       await writeHexAt(DAMAGE_ADDR, willEnable ? DAMAGE_4X_HEX : DAMAGE_NORMAL_HEX);
-      customDamageHex = willEnable ? DAMAGE_4X_HEX : DAMAGE_NORMAL_HEX;
-      setDamageMultiplierPreset(willEnable ? 10 : 1);
-      server4xDamageState = willEnable;
-      if (btn) btn.classList.toggle('active-cheat', server4xDamageState);
-      updateCheatStatus('srv-4x-damage', server4xDamageState ? 'on' : 'off');
+      syncDamagePatchState(willEnable ? DAMAGE_4X_HEX : DAMAGE_NORMAL_HEX, '10× Damage toggle');
 
-      if (willEnable) {
-        const ohk = document.getElementById('tog-ohk');
-        if (ohk) ohk.classList.remove('active-cheat');
-        updateCheatStatus('tog-ohk', 'off');
-        if (typeof cheatState !== 'undefined') {
-          cheatState['One-Hit Enemies'] = false;
-          cheatState['One Hit Kill'] = false;
-        }
-      }
-
-      log(`4x Damage ${willEnable ? 'ON' : 'OFF'}`, 'ok');
-      toast(`4x Damage ${willEnable ? 'ON' : 'OFF'}`, 'ok');
+      log(`10× Damage ${willEnable ? 'ON' : 'OFF'}`, 'ok');
+      toast(`10× Damage ${willEnable ? 'ON' : 'OFF'}`, 'ok');
     } catch (e) {
       updateCheatStatus('srv-4x-damage', 'failed');
-      log(`4x Damage failed: ${e.message}`, 'err');
-      toast('4x Damage failed', 'err');
+      log(`10× Damage failed: ${e.message}`, 'err');
+      toast('10× Damage failed', 'err');
     } finally {
       server4xDamageBusy = false;
     }
@@ -3269,12 +3285,9 @@
     if (mode === 'off' && server4xDamageState) {
       try {
         await writeHexAt(DAMAGE_ADDR, DAMAGE_NORMAL_HEX);
-        customDamageHex = DAMAGE_NORMAL_HEX;
-        setDamageMultiplierPreset(1);
-        server4xDamageState = false;
-        document.getElementById('srv-4x-damage')?.classList.remove('active-cheat');
+        syncDamagePatchState(DAMAGE_NORMAL_HEX, 'Server Cheats Off');
       } catch (e) {
-        log(`4x Damage restore failed: ${e.message}`, 'err');
+        log(`10× Damage restore failed: ${e.message}`, 'err');
       }
     }
 

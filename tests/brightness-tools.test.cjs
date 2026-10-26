@@ -35,7 +35,8 @@ test('brightness candidate probe reads only and reports source preset matches ca
   assert.match(elements.get('brightness-current').textContent, /3F800000/);
   assert.match(elements.get('brightness-status').textContent, /source “Normal” value/);
   assert.match(elements.get('brightness-status').textContent, /Probe only/);
-  assert.match(elements.get('brightness-status').textContent, /does not prove the address is a brightness field/);
+  assert.match(elements.get('brightness-status').textContent, /01\.24 ELF stores Normal \(1\.0\)/);
+  assert.match(elements.get('brightness-status').textContent, /does not prove the field's meaning/);
   assert.doesNotMatch(elements.get('brightness-status').textContent, /executable code/);
 
   global.ps3getmem = async () => '00000000';
@@ -43,6 +44,7 @@ test('brightness candidate probe reads only and reports source preset matches ca
   assert.equal(reads, 1);
   assert.equal(writes, 0);
   assert.match(elements.get('brightness-status').textContent, /Does not match any listed source preset/);
+  assert.match(elements.get('brightness-status').textContent, /01\.24 ELF confirms this candidate address/);
 });
 
 test('brightness probe discards a read if the console session changes', async () => {

@@ -62,6 +62,18 @@
     return Object.keys(BRIGHTNESS_PRESETS).map(brightnessPreset).find(preset => preset.hex === normalized) || null;
   }
 
+  function classifyDamagePatch(value) {
+    const hex = String(value ?? '').replace(/[^0-9a-f]/gi, '').toUpperCase();
+    if (!/^[0-9A-F]{4}$/.test(hex)) throw new Error('Damage patch must be exactly two bytes');
+    const known = {
+      '3F80': { kind: 'normal', label: 'Normal', multiplier: 1, isOneHit: false, isTenX: false },
+      '4120': { kind: 'ten-x', label: '10× preset', multiplier: 10, isOneHit: false, isTenX: true },
+      '447A': { kind: 'one-hit-main', label: 'One-Hit (main 447A variant)', multiplier: 1000, isOneHit: true, isTenX: false },
+      '547A': { kind: 'one-hit-overwalls', label: 'One-Hit (Overwalls 547A variant)', multiplier: null, isOneHit: true, isTenX: false }
+    };
+    return Object.freeze({ hex, ...(known[hex] || { kind: 'custom', label: 'Custom', multiplier: null, isOneHit: false, isTenX: false }) });
+  }
+
   function findEmblemMatches(bytes, baseAddress, emblemId, excludedRanges = []) {
     const needle = beU16(emblemId);
     const matches = [];
@@ -121,7 +133,7 @@
     return rgba;
   }
 
-  const api = { bytesFromHex, beU16, beU32, beFloat32, float32FromBE, BRIGHTNESS_ADDRESS, BRIGHTNESS_PRESETS, brightnessPreset, brightnessPresetForHex, EMBLEM_EXCLUDED_RANGES, findEmblemMatches, findAmmoCandidates, findSpecialAmmoCandidates, framebufferToRgba };
+  const api = { bytesFromHex, beU16, beU32, beFloat32, float32FromBE, BRIGHTNESS_ADDRESS, BRIGHTNESS_PRESETS, brightnessPreset, brightnessPresetForHex, classifyDamagePatch, EMBLEM_EXCLUDED_RANGES, findEmblemMatches, findAmmoCandidates, findSpecialAmmoCandidates, framebufferToRgba };
   root.RtmMemoryFeatures = api;
   if (typeof module !== 'undefined') module.exports = api;
 })(globalThis);

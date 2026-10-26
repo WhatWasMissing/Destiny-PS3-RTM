@@ -543,7 +543,7 @@
 <div class="cheat-grid" style="grid-template-columns:1fr 1fr;">
 <button class="cheat-btn blue" id="srv-void" onclick="srvSetMode('void',this)"> Void Enemies </button>
 <button class="cheat-btn red" id="srv-ropk" onclick="srvSetMode('ropk',this)"> Relative OPK </button>
-<button class="cheat-btn gold" id="srv-4x-damage" onclick="toggleServer4xDamage(this)"> 4× Damage </button>
+<button class="cheat-btn gold" id="srv-4x-damage" onclick="toggleServer4xDamage(this)"> 10× Damage </button>
 <button class="cheat-btn" id="srv-off" onclick="srvSetMode('off',this)"> Off </button>
 </div>
 <details class="tidy-subpanel">
@@ -704,7 +704,7 @@
   Because the game is only being given the upper 16 bits of the float, some decimal values will be rounded slightly.
 </div>
 <div class="tidy-technical" style="margin:0.55rem 1rem 0;padding:0.6rem 0.75rem;border:1px solid rgba(79,163,224,0.3);border-radius:8px;background:rgba(79,163,224,0.06);color:var(--muted);font-family:var(--mono);font-size:0.59rem;line-height:1.5;">
-  <strong style="color:var(--accent);">Conflict Detection:</strong> Custom Damage, One-Hit Enemies and 4× Damage share the same damage value. Enabling one automatically replaces the others.
+  <strong style="color:var(--accent);">Conflict Detection:</strong> Custom Damage, One-Hit Enemies and 10× Damage share the same damage value. Enabling one automatically replaces the others.
 </div>
 
 <div class="slider-body">
@@ -1184,7 +1184,7 @@
 </div>
 <div class="panel" style="margin:0 1rem 0.75rem">
 <div class="panel-header">Brightness · address probe</div>
-<div class="compact-help-note">Local 1.24 C# sources label 0x006101C0 as Bright 50, Normal 1 and Inverted -20. The ELF previously inspected was identified by its hash as base 01.00 despite its filename, so this source address is not yet verified against 01.24. This probe only reads the live word; it does not write.</div>
+<div class="compact-help-note">The matching 01.24 ELF stores the source's Normal value (Float32 1.0) at 0x006101C0. This probe reads the live word only; the ELF value does not by itself prove the runtime field's meaning or in-game effect.</div>
 <div class="scan-status"><div class="scan-stat" id="brightness-current">Current word: not read</div></div>
 <div class="cheat-grid">
 <button class="cheat-btn" id="brightness-read-btn" type="button" onclick="readBrightnessCandidate()">Read 0x006101C0</button>
