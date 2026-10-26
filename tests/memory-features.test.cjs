@@ -4,6 +4,10 @@ const {
   bytesFromHex,
   beU32,
   beFloat32,
+  float32FromBE,
+  BRIGHTNESS_ADDRESS,
+  brightnessPreset,
+  brightnessPresetForHex,
   findEmblemMatches,
   findAmmoCandidates,
   findSpecialAmmoCandidates,
@@ -13,6 +17,18 @@ const {
 test('memory hex parser rejects partial bytes', () => {
   assert.deepEqual([...bytesFromHex('00 aF')], [0, 0xAF]);
   assert.throws(() => bytesFromHex('ABC'), /whole-byte hex/);
+});
+
+test('brightness source presets preserve their exact big-endian Float32 values', () => {
+  assert.equal(BRIGHTNESS_ADDRESS, 0x006101C0);
+  assert.deepEqual(brightnessPreset('bright'), { name: 'bright', label: 'Bright', value: 50, hex: '42480000' });
+  assert.deepEqual(brightnessPreset('normal'), { name: 'normal', label: 'Normal', value: 1, hex: '3F800000' });
+  assert.deepEqual(brightnessPreset('inverted'), { name: 'inverted', label: 'Inverted', value: -20, hex: 'C1A00000' });
+  assert.throws(() => brightnessPreset('missing'), /Unknown brightness preset/);
+  assert.equal(brightnessPresetForHex('3f800000').name, 'normal');
+  assert.equal(brightnessPresetForHex('00000000'), null);
+  assert.equal(float32FromBE('C1A00000'), -20);
+  assert.throws(() => float32FromBE('1234'), /exactly four bytes/);
 });
 
 test('emblem scanner returns aligned 16-bit matches only', () => {

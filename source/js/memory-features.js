@@ -28,6 +28,32 @@
     return Array.from(new Uint8Array(buffer));
   }
 
+  function float32FromBE(hex) {
+    const normalized = String(hex).replace(/\s/g, '').toUpperCase();
+    if (!/^(?:[0-9A-F]{2}){4}$/.test(normalized)) throw new Error('Expected exactly four bytes of hex');
+    const bytes = Uint8Array.from(normalized.match(/../g), byte => parseInt(byte, 16));
+    return new DataView(bytes.buffer).getFloat32(0, false);
+  }
+
+  const BRIGHTNESS_ADDRESS = 0x006101C0;
+  const BRIGHTNESS_PRESETS = Object.freeze({
+    bright: Object.freeze({ label: 'Bright', value: 50 }),
+    normal: Object.freeze({ label: 'Normal', value: 1 }),
+    inverted: Object.freeze({ label: 'Inverted', value: -20 })
+  });
+
+  function brightnessPreset(name) {
+    const preset = BRIGHTNESS_PRESETS[name];
+    if (!preset) throw new Error('Unknown brightness preset');
+    const hex = beFloat32(preset.value).map(byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
+    return { name, label: preset.label, value: preset.value, hex };
+  }
+
+  function brightnessPresetForHex(hex) {
+    const normalized = String(hex).replace(/\s/g, '').toUpperCase();
+    return Object.keys(BRIGHTNESS_PRESETS).map(brightnessPreset).find(preset => preset.hex === normalized) || null;
+  }
+
   function findEmblemMatches(bytes, baseAddress, emblemId) {
     const needle = beU16(emblemId);
     const matches = [];
@@ -84,7 +110,7 @@
     return rgba;
   }
 
-  const api = { bytesFromHex, beU16, beU32, beFloat32, findEmblemMatches, findAmmoCandidates, findSpecialAmmoCandidates, framebufferToRgba };
+  const api = { bytesFromHex, beU16, beU32, beFloat32, float32FromBE, BRIGHTNESS_ADDRESS, BRIGHTNESS_PRESETS, brightnessPreset, brightnessPresetForHex, findEmblemMatches, findAmmoCandidates, findSpecialAmmoCandidates, framebufferToRgba };
   root.RtmMemoryFeatures = api;
   if (typeof module !== 'undefined') module.exports = api;
 })(globalThis);
