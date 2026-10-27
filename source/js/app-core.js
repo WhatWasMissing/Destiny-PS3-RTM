@@ -125,7 +125,7 @@
     return new Date().toTimeString().slice(0,8);
   }
 
-  function log(msg, type = '') {
+  function log(msg, type = '', automationKind = '') {
     const el = document.getElementById('log');
     const entry = document.createElement('div');
     entry.className = 'log-entry ' + type;
@@ -145,6 +145,7 @@
     }
 
     if (type === 'err' && typeof automationNotify === 'function') {
+      automationNotify(msg, automationKind || 'error', { ip, fallbackKind:automationKind === 'connect' ? 'error' : '' });
     }
   }
 
@@ -1848,6 +1849,145 @@
     if(dock) dock.innerHTML='<div class="dock-log-empty">Log cleared.</div>';
   }
 
+  // ── Optional PS3/XMB notification automation ─────────────────────────────
+  const NOTIFICATION_AUTOMATION_KEY = 'destiny_rtm_notification_automation_v1';
+  const NOTIFICATION_AUTOMATION_DEFAULTS = Object.freeze({
+    master:false, connect:true, activity:true, cheat:false, error:true, restore:true,
+    template:'Destiny RTM: {event}', cooldown:5
+  });
+  const NOTIFICATION_COOLDOWNS = new Set([0,2,5,10,30]);
+  let notificationAutomation = {...NOTIFICATION_AUTOMATION_DEFAULTS};
+  let notificationLastSentAt = 0;
+  let notificationRequestCount = 0;
+
+  function readNotificationAutomation() {
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(NOTIFICATION_AUTOMATION_KEY) || '{}') || {}; } catch (e) {}
+    const cooldown = Number(saved.cooldown);
+    notificationAutomation = {
+      master:saved.master === true,
+      connect:saved.connect !== false,
+      activity:saved.activity !== false,
+      cheat:saved.cheat === true,
+      error:saved.error !== false,
+      restore:saved.restore !== false,
+      template:typeof saved.template === 'string' ? saved.template.slice(0,128) : NOTIFICATION_AUTOMATION_DEFAULTS.template,
+      cooldown:NOTIFICATION_COOLDOWNS.has(cooldown) ? cooldown : NOTIFICATION_AUTOMATION_DEFAULTS.cooldown
+    };
+    applyNotificationAutomationUI();
+  }
+
+  function applyNotificationAutomationUI() {
+    const fields = {
+      master:'auto-notif-master', connect:'auto-notif-connect', activity:'auto-notif-activity',
+      cheat:'auto-notif-cheat', error:'auto-notif-error', restore:'auto-notif-restore'
+    };
+    Object.entries(fields).forEach(([key,id]) => {
+      const input = document.getElementById(id);
+      if (input) input.checked = !!notificationAutomation[key];
+    });
+    const template = document.getElementById('auto-notif-template');
+    if (template) template.value = notificationAutomation.template;
+    const cooldown = document.getElementById('auto-notif-cooldown');
+    if (cooldown) cooldown.value = String(notificationAutomation.cooldown);
+    updateNotificationAutomationStatus(notificationAutomation.master
+      ? `Automatic notices enabled · ${notificationRequestCount} request${notificationRequestCount === 1 ? '' : 's'} sent this session.`
+      : 'Automatic notices are off.');
+  }
+
+  function updateNotificationAutomationStatus(message) {
+    const status = document.getElementById('notif-automation-status');
+    if (status) status.textContent = message;
+  }
+
+  function saveNotificationAutomationFromUI() {
+    const fields = {
+      master:'auto-notif-master', connect:'auto-notif-connect', activity:'auto-notif-activity',
+      cheat:'auto-notif-cheat', error:'auto-notif-error', restore:'auto-notif-restore'
+    };
+    Object.entries(fields).forEach(([key,id]) => {
+      const input = document.getElementById(id);
+      if (input) notificationAutomation[key] = !!input.checked;
+    });
+    const template = document.getElementById('auto-notif-template');
+    if (template) notificationAutomation.template = template.value.slice(0,128) || NOTIFICATION_AUTOMATION_DEFAULTS.template;
+    const cooldown = Number(document.getElementById('auto-notif-cooldown')?.value);
+    notificationAutomation.cooldown = NOTIFICATION_COOLDOWNS.has(cooldown)
+      ? cooldown : NOTIFICATION_AUTOMATION_DEFAULTS.cooldown;
+    try { localStorage.setItem(NOTIFICATION_AUTOMATION_KEY, JSON.stringify(notificationAutomation)); } catch (e) {}
+    updateNotificationAutomationStatus(notificationAutomation.master
+      ? `Automatic notices enabled · ${notificationRequestCount} request${notificationRequestCount === 1 ? '' : 's'} sent this session.`
+      : 'Automatic notices are off.');
+  }
+
+  function notificationAutomationAllows(kind) {
+    return notificationAutomation.master && notificationAutomation[kind] === true;
+  }
+
+  function dispatchNotificationAutomation(event, data = {}) {
+    if (!ip) return {sent:false, reason:'Connect to a PS3 first.'};
+    const now = Date.now();
+    const cooldownMs = notificationAutomation.cooldown * 1000;
+    const waitMs = cooldownMs - (now - notificationLastSentAt);
+    if (cooldownMs && waitMs > 0) return {sent:false, reason:`Wait ${Math.ceil(waitMs / 1000)} seconds before the next notice.`};
+
+    const values = {
+      event:String(event || ''), activity:String(data.activity || ''),
+      cheat:String(data.cheat || ''), ip:String(data.ip || ip || '')
+    };
+    const message = String(notificationAutomation.template || NOTIFICATION_AUTOMATION_DEFAULTS.template)
+      .replace(/\{event\}/g, values.event)
+      .replace(/\{activity\}/g, values.activity)
+      .replace(/\{cheat\}/g, values.cheat)
+      .replace(/\{ip\}/g, values.ip)
+      .trim().slice(0,128);
+    if (!message) return {sent:false, reason:'Enter a message template first.'};
+
+    notificationLastSentAt = now;
+    notifyPS3(message);
+    notificationRequestCount++;
+    updateNotificationAutomationStatus(`Request dispatched · ${notificationRequestCount} this session. PS3 delivery is not confirmed.`);
+    return {sent:true, message};
+  }
+
+  function automationNotify(event, kind, data = {}) {
+    const fallbackKind = kind === 'connect' && data.fallbackKind === 'error' ? 'error' : '';
+    if (!notificationAutomationAllows(kind) && (!fallbackKind || !notificationAutomationAllows(fallbackKind))) {
+      return {sent:false, reason:'This event is disabled.'};
+    }
+    return dispatchNotificationAutomation(event, data);
+  }
+
+  function testNotificationAutomation() {
+    const result = dispatchNotificationAutomation('Automation test', {ip});
+    if (!result.sent) {
+      updateNotificationAutomationStatus(result.reason);
+      toast(result.reason, 'err');
+      return;
+    }
+    log('Test PS3 notification request dispatched; delivery is not confirmed', 'ok');
+    toast('Test request sent', 'ok');
+  }
+
+  function resetNotificationAutomation() {
+    notificationAutomation = {...NOTIFICATION_AUTOMATION_DEFAULTS};
+    try { localStorage.setItem(NOTIFICATION_AUTOMATION_KEY, JSON.stringify(notificationAutomation)); } catch (e) {}
+    applyNotificationAutomationUI();
+    toast('Notification preferences reset', 'ok');
+  }
+
+  window.automationNotify = automationNotify;
+  window.testNotificationAutomation = testNotificationAutomation;
+  window.resetNotificationAutomation = resetNotificationAutomation;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    readNotificationAutomation();
+    document.querySelectorAll('#notification-automation input, #notification-automation select').forEach(input => {
+      input.addEventListener('change', saveNotificationAutomationFromUI);
+      if (input.id === 'auto-notif-template') input.addEventListener('input', saveNotificationAutomationFromUI);
+    });
+  });
+
   // ── Activity ───────────────────────────────────────────────────────
   // Mirrors C# LoadActivity(ushort index): writes index as UInt16 to 4 addresses.
   // comboBox2 items are 1-indexed: item at index 0 = activity 1, etc.
@@ -2025,6 +2165,7 @@
       }
       const name = ALL_ACTIVITIES[index - 1] || `Activity ${index}`;
       log(`Activity index writes verified: ${name}; load completion not observed`, 'ok');
+      automationNotify(`Activity request written: ${name}`, 'activity', {activity:name, ip});
       toast(name.length > 30 ? name.slice(0,30)+'…' : name, 'ok');
     } catch(e) {
       log(`LoadActivity failed: ${e.message}`, 'err');

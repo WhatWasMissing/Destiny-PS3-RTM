@@ -1094,6 +1094,38 @@
     </div>
     <button class="btn-send" type="button" onclick="sendPS3Notification()">▶ Send Notification</button>
   </div>
+</div>
+<div class="panel notification-automation-panel" id="notification-automation">
+  <div class="panel-header">Automatic XMB Notices</div>
+  <div class="notification-automation-body">
+    <p class="notification-automation-note">Send optional PS3 popups for selected RTM events. Off by default; requests are best effort and do not confirm delivery.</p>
+    <label class="notification-automation-master" for="auto-notif-master">
+      <input id="auto-notif-master" type="checkbox">
+      <span><strong>Enable automatic notices</strong><small>Event choices below are saved on this device.</small></span>
+    </label>
+    <div class="notification-automation-grid" aria-label="Automatic notification events">
+      <label class="notification-automation-event"><input id="auto-notif-connect" type="checkbox">Connection and disconnect</label>
+      <label class="notification-automation-event"><input id="auto-notif-activity" type="checkbox">Activity index writes</label>
+      <label class="notification-automation-event"><input id="auto-notif-cheat" type="checkbox">Cheat state changes</label>
+      <label class="notification-automation-event"><input id="auto-notif-error" type="checkbox">Errors and failed actions</label>
+      <label class="notification-automation-event"><input id="auto-notif-restore" type="checkbox">Connection restored</label>
+    </div>
+    <div class="notification-automation-template">
+      <label class="notification-automation-field" for="auto-notif-template">Message template
+        <input id="auto-notif-template" type="text" maxlength="128" value="Destiny RTM: {event}" placeholder="Use {event}, {activity}, {cheat}, or {ip}">
+      </label>
+      <label class="notification-automation-field" for="auto-notif-cooldown">Minimum interval
+        <select id="auto-notif-cooldown" title="Minimum interval between automatic notices">
+          <option value="0">No limit</option><option value="2">2 seconds</option><option value="5" selected>5 seconds</option><option value="10">10 seconds</option><option value="30">30 seconds</option>
+        </select>
+      </label>
+    </div>
+    <p class="notification-automation-status" id="notif-automation-status" role="status" aria-live="polite">Automatic notices are off.</p>
+    <div class="notification-automation-actions">
+      <button type="button" onclick="testNotificationAutomation()">Send test notice</button>
+      <button type="button" onclick="resetNotificationAutomation()">Reset preferences</button>
+    </div>
+  </div>
 </div></div>
 </div>
 
