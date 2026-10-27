@@ -75,6 +75,17 @@ body.compact-ui .cheat-feature-label, body.compact-ui .cheat-status-label,
 .build-profile-status[data-state="pending"] { color:var(--warning); }
 .build-profile-status[data-state="matched"] { color:var(--success); }
 .build-profile-status[data-state="error"] { color:var(--danger); }
+.build-profile-results { margin:0 16px 12px; padding:0; list-style:none; }
+.build-profile-results:not([hidden]) { display:grid; gap:5px; }
+.build-profile-result { display:grid; grid-template-columns:8rem 5.5rem minmax(0,1fr); align-items:start; gap:8px; padding:7px 9px; border:1px solid var(--border); border-radius:var(--radius-control); background:var(--surface); }
+.build-profile-result-identity { display:flex; min-width:0; flex-direction:column; }
+.build-profile-result code { color:var(--text); font:11px/1.5 var(--mono); overflow-wrap:anywhere; }
+.build-profile-result-identity small { color:var(--muted); font:10px/1.4 var(--sans); }
+.build-profile-result .build-profile-result-state { color:var(--muted); font:600 11px/1.5 var(--sans); }
+.build-profile-result[data-state="match"] .build-profile-result-state { color:var(--success); }
+.build-profile-result[data-state="mismatch"] .build-profile-result-state,
+.build-profile-result[data-state="unreadable"] .build-profile-result-state { color:var(--danger); }
+.build-profile-result-detail { min-width:0; color:var(--muted); font:11px/1.5 var(--mono); overflow-wrap:anywhere; }
 .ip-input, .hex-input, .scan-input, #cheat-search, #act-search, #act-select { border-radius: var(--radius-control) !important; font-size: 14px !important; min-height: 40px; }
 .ip-input { height: 42px; }
 .field-label, .slider-label, .scan-field label { font: 12px var(--sans); letter-spacing: 0; text-transform: none; }
@@ -251,6 +262,8 @@ input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, te
   .jukebox-playback #jukebox-stop { width: 100%; }
   .build-profile-check { align-items:stretch; flex-direction:column; }
   .build-profile-check button { width:100%; }
+  .build-profile-result { grid-template-columns:minmax(0,1fr) auto; gap:2px 8px; }
+  .build-profile-result-detail { grid-column:1 / -1; }
 }
 
 .main-conflict-note strong { color: var(--warning) !important; }

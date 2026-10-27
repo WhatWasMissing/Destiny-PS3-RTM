@@ -6,14 +6,17 @@
   const SIGNATURES = Object.freeze([
     Object.freeze({
       address: '00444B64',
+      role: 'Damage scalar consumer',
       hex: '3C600044C03601283CC03F803B4349EC3061034462C4000063850000C05A0000'
     }),
     Object.freeze({
       address: '001FB3C8',
+      role: 'Player lookup helper',
       hex: '8084001C908300004E800020'
     }),
     Object.freeze({
       address: '002FF2D0',
+      role: 'Player object resolver',
       hex: '7C0802A648A99751F821FF81F8010090'
     })
   ]);
@@ -95,12 +98,67 @@
       }
     }
 
+    async function inspect() {
+      const owner = String(options.session() || '');
+      if (!owner) throw new Error('Connect to the console before checking its build');
+      const anchors = [];
+      for (const signature of SIGNATURES) {
+        if (String(options.session() || '') !== owner) {
+          throw new Error('Console session changed during build inspection');
+        }
+        try {
+          const observed = asHex(await options.read(signature.address, signature.hex.length / 2));
+          if (String(options.session() || '') !== owner) {
+            throw new Error('Console session changed during build inspection');
+          }
+          if (observed.length !== signature.hex.length || !/^(?:[0-9A-F]{2})+$/.test(observed)) {
+            anchors.push({
+              address: signature.address,
+              role: signature.role,
+              expected: signature.hex,
+              observed,
+              status: 'unreadable',
+              error: 'Memory read was short or not valid hexadecimal'
+            });
+          } else {
+            anchors.push({
+              address: signature.address,
+              role: signature.role,
+              expected: signature.hex,
+              observed,
+              status: observed === signature.hex ? 'match' : 'mismatch'
+            });
+          }
+        } catch (error) {
+          if (String(options.session() || '') !== owner) {
+            throw new Error('Console session changed during build inspection');
+          }
+          anchors.push({
+            address: signature.address,
+            role: signature.role,
+            expected: signature.hex,
+            observed: '',
+            status: 'unreadable',
+            error: String(error?.message || error)
+          });
+        }
+      }
+      if (String(options.session() || '') !== owner) {
+        throw new Error('Console session changed during build inspection');
+      }
+      return {
+        profile: PROFILE_NAME,
+        status: anchors.every(anchor => anchor.status === 'match') ? 'verified' : 'unverified',
+        anchors
+      };
+    }
+
     function reset() {
       verifiedSession = '';
       verifiedUntil = 0;
     }
 
-    return { ensure, reset };
+    return { ensure, inspect, reset };
   }
 
   root.RtmBuildCompatibility = { create, signatures: SIGNATURES, profileName: PROFILE_NAME };

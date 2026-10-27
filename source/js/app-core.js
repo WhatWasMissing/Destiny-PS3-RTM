@@ -2682,11 +2682,48 @@
     if (state) status.dataset.state = state;
     else delete status.dataset.state;
   }
+  function clearDestinyBuildProfileResults() {
+    const list = document.getElementById('build-profile-results');
+    if (!list) return;
+    list.replaceChildren();
+    list.hidden = true;
+  }
+  function renderDestinyBuildProfileResults(anchors) {
+    const list = document.getElementById('build-profile-results');
+    if (!list) return;
+    list.replaceChildren();
+    for (const anchor of anchors) {
+      const item = document.createElement('li');
+      item.className = 'build-profile-result';
+      item.dataset.state = anchor.status;
+
+      const identity = document.createElement('span');
+      identity.className = 'build-profile-result-identity';
+      const address = document.createElement('code');
+      address.textContent = `0x${anchor.address}`;
+      const role = document.createElement('small');
+      role.textContent = anchor.role || 'Code anchor';
+      identity.append(address, role);
+      const state = document.createElement('span');
+      state.className = 'build-profile-result-state';
+      state.textContent = anchor.status === 'match' ? 'Match' : anchor.status === 'mismatch' ? 'Mismatch' : 'Unreadable';
+      const detail = document.createElement('span');
+      detail.className = 'build-profile-result-detail';
+      if (anchor.status === 'match') detail.textContent = anchor.observed;
+      else if (anchor.status === 'mismatch') detail.textContent = `Observed ${anchor.observed} · expected ${anchor.expected}`;
+      else detail.textContent = anchor.error || 'No bytes returned';
+
+      item.append(identity, state, detail);
+      list.append(item);
+    }
+    list.hidden = false;
+  }
   async function checkDestinyBuildProfile() {
     const button = document.getElementById('build-profile-check-btn');
     const badge = document.getElementById('status-badge');
     if (!button || buildProfileCheckBusy) return;
     if (!ip || !badge?.classList.contains('connected')) {
+      clearDestinyBuildProfileResults();
       setDestinyBuildProfileStatus('Link the console and start Destiny before checking its build.', 'error');
       return;
     }
@@ -2695,33 +2732,32 @@
     const targetIp = ip;
     const generation = connectionGeneration;
     button.disabled = true;
+    clearDestinyBuildProfileResults();
     setDestinyBuildProfileStatus('Checking three code anchors…', 'pending');
     try {
-      const result = await ensureDestinyWriteProfile();
+      const result = await buildCompatibilityGuard.inspect();
       if (generation !== connectionGeneration || targetIp !== ip || !badge.classList.contains('connected')) {
         setDestinyBuildProfileStatus('Console session changed during the check. Check again.', 'error');
         return;
       }
-      setDestinyBuildProfileStatus(
-        result.cached
-          ? 'Last check matched the BLES01857 01.24 signature profile · recent check.'
-          : 'Last check matched the BLES01857 01.24 signature profile · 3 anchors read.',
-        'matched'
-      );
+      renderDestinyBuildProfileResults(result.anchors);
+      const matched = result.anchors.filter(anchor => anchor.status === 'match').length;
+      const mismatches = result.anchors.filter(anchor => anchor.status === 'mismatch');
+      const unreadable = result.anchors.filter(anchor => anchor.status === 'unreadable');
+      if (result.status === 'verified') {
+        setDestinyBuildProfileStatus('Last check matched the BLES01857 01.24 signature profile · 3/3 anchors.', 'matched');
+      } else {
+        const issues = [];
+        if (mismatches.length) issues.push(`mismatch at ${mismatches.map(anchor => `0x${anchor.address}`).join(', ')}`);
+        if (unreadable.length) issues.push(`unreadable at ${unreadable.map(anchor => `0x${anchor.address}`).join(', ')}`);
+        setDestinyBuildProfileStatus(`No verified build match · ${matched}/3 anchors match; ${issues.join('; ')}. Memory writes remain locked.`, 'error');
+      }
     } catch (error) {
       if (generation !== connectionGeneration || targetIp !== ip || !badge.classList.contains('connected')) {
         setDestinyBuildProfileStatus('Console session changed during the check. Check again.', 'error');
       } else {
         const message = String(error?.message || error);
-        const mismatch = message.match(/signature mismatch at (0x[0-9a-f]+)/i);
-        const unreadable = message.match(/Cannot verify Destiny 01\.24 at (0x[0-9a-f]+):?\s*(.*)/i);
-        if (mismatch) {
-          setDestinyBuildProfileStatus(`No match at ${mismatch[1]}. Memory writes remain locked for this build.`, 'error');
-        } else if (unreadable) {
-          setDestinyBuildProfileStatus(`Could not read the code anchor at ${unreadable[1]}${unreadable[2] ? `: ${unreadable[2]}` : ''}.`, 'error');
-        } else {
-          setDestinyBuildProfileStatus(`Build check failed: ${message.replace(/; memory write refused/gi, '')}`, 'error');
-        }
+        setDestinyBuildProfileStatus(`Build check failed: ${message}`, 'error');
       }
     } finally {
       buildProfileCheckBusy = false;
@@ -2746,6 +2782,7 @@
   function resetVerifiedStates() {
     antiMMState = false; server4xDamageState = false; srvMode = 'unknown';
     setDestinyBuildProfileStatus('Not checked for this connection.');
+    clearDestinyBuildProfileResults();
     for (const key of Object.keys(toggleState)) delete toggleState[key];
     const controls = document.getElementById('ropk-controls'); if (controls) controls.style.display = 'none';
     for (const label of Object.keys(cheatState)) delete cheatState[label];

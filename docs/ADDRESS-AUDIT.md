@@ -139,6 +139,11 @@ the local BLES01857 01.00 image at these same addresses. There is no confirmed
 BLUS31181 01.24 ELF in the local inventory, so a successful profile must not
 be described as proof of the BLUS region or whole-image identity.
 
+The Home connection panel also provides a separate read-only build check. It
+re-reads each anchor without using the write gate's short cache and shows the
+observed bytes and match state individually. This display is diagnostic only;
+each write operation still performs its own compatibility check.
+
 The three signature byte ranges are protected from the app's generic write
 tools, so a mistaken raw write cannot erase the evidence needed for later
 checks. The Overwalls plate hook uses a different code site and does not
