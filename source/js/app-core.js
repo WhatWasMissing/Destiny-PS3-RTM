@@ -3542,6 +3542,7 @@
   const ammoRestoreStack = [];
   let ammoScanBusy = false;
   let screenshotObjectUrl = '';
+  let screenshotBlob = null;
   let screenshotPauseRestore = null;
   try { screenshotPauseRestore = JSON.parse(localStorage.getItem(SCREENSHOT_PAUSE_STORAGE_KEY) || 'null'); } catch (e) { screenshotPauseRestore = null; }
   window.rtmFramebufferBusy = !!screenshotPauseRestore;
@@ -3859,6 +3860,23 @@
     status.style.color = failed ? 'var(--danger)' : 'var(--muted)';
   }
 
+  async function copyDestinyScreenshot() {
+    if (!screenshotBlob) { toast('Capture a screenshot first', 'err'); return; }
+    const button = document.getElementById('screenshot-copy-btn');
+    if (button) button.disabled = true;
+    try {
+      await RtmScreenshotTools.copyPngToClipboard(screenshotBlob);
+      setScreenshotStatus('PNG copied to clipboard');
+      toast('Screenshot copied', 'ok');
+    } catch (error) {
+      setScreenshotStatus(`Clipboard copy unavailable: ${error.message}`, true);
+      log(`Framebuffer clipboard copy failed: ${error.message}`, 'err');
+      toast('Could not copy screenshot', 'err');
+    } finally {
+      if (button) button.disabled = !screenshotBlob;
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     if (!screenshotPauseRestore) return;
     const resumeButton = document.getElementById('screenshot-resume-btn');
@@ -3927,6 +3945,7 @@
       image.data.set(rgba);
       context.putImageData(image, 0, 0);
       const blob = await new Promise((resolve, reject) => canvas.toBlob(result => result ? resolve(result) : reject(new Error('Could not encode the PNG')), 'image/png'));
+      screenshotBlob = blob;
       if (screenshotObjectUrl) URL.revokeObjectURL(screenshotObjectUrl);
       screenshotObjectUrl = URL.createObjectURL(blob);
       const preview = document.getElementById('screenshot-preview');
@@ -3937,6 +3956,8 @@
       download.download = `destiny-${profile.width}x${profile.height}-${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
       download.textContent = `Download ${profile.width} × ${profile.height} PNG`;
       download.style.display = 'inline-block';
+      const copyButton = document.getElementById('screenshot-copy-btn');
+      if (copyButton) copyButton.disabled = false;
       imageReady = true;
       setScreenshotStatus(`Captured ${profile.width} × ${profile.height} · PNG ready`);
       log(`Destiny framebuffer captured at ${profile.width} × ${profile.height}`, 'ok');

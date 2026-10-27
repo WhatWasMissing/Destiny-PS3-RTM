@@ -62,6 +62,7 @@
   let job = null;
   let scenario = [];
   let flySliderTimer = null;
+  const scenarioLibrary = Array.isArray(root.DESTINY_RTM_SCENARIO_LIBRARY) ? root.DESTINY_RTM_SCENARIO_LIBRARY : [];
   try {
     const saved = JSON.parse(localStorage.getItem(SCENARIO_KEY) || '[]');
     if (Array.isArray(saved)) scenario = saved.filter(validScenarioPosition).slice(0, 500);
@@ -367,6 +368,34 @@
     const input = document.getElementById('ow-scenario-file');
     input.value = '';
     input.click();
+  }
+  function renderScenarioLibrary() {
+    const select = document.getElementById('ow-scenario-library');
+    if (!select) return;
+    select.innerHTML = '<option value="">Choose an archived scenario…</option>' + scenarioLibrary.map(item =>
+      `<option value="${html(item.id)}">${html(item.name)} · ${Array.isArray(item.positions) ? item.positions.length : 0}</option>`
+    ).join('');
+  }
+  async function loadScenarioLibrary() {
+    const selectedId = document.getElementById('ow-scenario-library')?.value;
+    const entry = scenarioLibrary.find(item => item?.id === selectedId);
+    if (!entry) { report('Choose an archived scenario first', 'err'); return; }
+    let imported;
+    try {
+      if (!Array.isArray(entry.positions) || !entry.positions.length || entry.positions.length > 500) throw new Error('Scenario library entry has an invalid position list');
+      imported = entry.positions.map((position, index) => {
+        const item = { id: `${entry.id}-${index + 1}`, legacyName: position.legacyName, name: position.name,
+          x: Number(position.x), y: Number(position.y), z: Number(position.z) };
+        if (!validScenarioPosition(item)) throw new Error(`Invalid scenario position ${index + 1}`);
+        return item;
+      });
+    } catch (error) { report(`Scenario load failed: ${error.message}`, 'err'); return; }
+    if (scenario.length && !await RtmDialogs.confirm(`Replace the current Overwalls scenario with “${entry.name}” (${imported.length} positions)?`)) return;
+    const previous = scenario;
+    scenario = imported;
+    if (!persistScenario()) { scenario = previous; renderScenario(); return; }
+    renderScenario();
+    report(`Loaded ${entry.name} from the built-in archive · ${imported.length} positions`, 'ok');
   }
   async function importScenarioFile(file) {
     try {
@@ -1007,6 +1036,7 @@
     if (activities) activities.innerHTML = activityPositions.map(entry => `<button class="cheat-btn" type="button" onclick="owActivityLoad('${entry[1]}')"><span class="cheat-name">${html(entry[0])}</span><span class="cheat-desc">${entry[1] === 'randomTower' ? 'Random index 2–7' : `Activity ${entry[1]}`}</span></button>`).join('');
     const toggles = document.getElementById('ow-cheat-controls');
     if (toggles) toggles.innerHTML = Object.entries(cheatNames).map(([id, name]) => `<div class="ow-toggle-card"><strong>${html(name)}</strong><div><button type="button" onclick="owApplyCheatToggle(${id},true)">Enable</button><button type="button" onclick="owApplyCheatToggle(${id},false)">Disable</button></div></div>`).join('');
+    renderScenarioLibrary();
     renderScenario();
   }
 
@@ -1015,7 +1045,7 @@
     owLoadActivityFromInput: () => activityLoad(Number(document.getElementById('ow-activity-index').value)),
     owReadActivity: readActivity, owReadCoordinates: readCoordinates, owPDR: pdr, owPDRStaticOff: pdrStaticOff, owAboveYou: aboveYou,
     owSetOPKPreset: setOPKPreset, owTeleportTarget: runTargetTeleport,
-    owImportScenario: importScenario, owExportScenario: exportScenario, owAddScenarioPosition: addScenarioPosition,
+    owImportScenario: importScenario, owExportScenario: exportScenario, owLoadScenarioLibrary: loadScenarioLibrary, owAddScenarioPosition: addScenarioPosition,
     owClearScenario: clearScenario, owScenarioGo: scenarioGo, owEditScenario: editScenario, owDeleteScenario: deleteScenario,
     owRunRaid: startRaid, owRunTotems: () => runJob('AFK Totems', runTotems), owRunTotemRoute: runTotemRoute, owStopJob: stopJob, owStartFarm: startFarm,
     owReadCharacterValues: readCharacterValues, owWriteCharacterValues: writeCharacterValues,

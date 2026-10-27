@@ -16,6 +16,7 @@
 <script src="js/dialogs.js"></script>
 <script src="js/settings-tools.js"></script>
 <script src="js/teleport-tools.js"></script>
+<script src="js/screenshot-tools.js"></script>
 <script src="js/appearance-init.js"></script>
 <div id="welcome-screen" role="dialog" aria-label="Welcome to Destiny RTM">
   <div class="welcome-card">
@@ -894,6 +895,12 @@
   <div class="panel">
     <div class="panel-header">Scenario shortcuts · Overwalls XML</div>
     <div class="ow-inline-controls">
+      <label for="ow-scenario-library">Archived scenarios
+        <select id="ow-scenario-library"><option value="">Choose an archived scenario…</option></select>
+      </label>
+      <button class="cheat-btn" type="button" onclick="owLoadScenarioLibrary()">Load selected scenario</button>
+    </div>
+    <div class="ow-inline-controls">
       <button class="cheat-btn" type="button" onclick="owImportScenario()">Import scenario XML</button>
       <button class="cheat-btn" type="button" onclick="owExportScenario()">Export scenario XML</button>
       <button class="cheat-btn" type="button" onclick="owAddScenarioPosition()">Add position</button>
@@ -1140,6 +1147,7 @@
     <div class="scan-status"><div class="scan-stat" id="screenshot-status">Ready</div></div>
     <img id="screenshot-preview" alt="Captured Destiny framebuffer" style="display:none;max-width:100%;max-height:420px;object-fit:contain;border:1px solid var(--border);border-radius:8px;background:#080a0f;">
     <a id="screenshot-download" style="display:none;margin-top:8px;" download="destiny-framebuffer.png">Download PNG</a>
+    <button class="btn-apply" id="screenshot-copy-btn" type="button" onclick="copyDestinyScreenshot()" disabled>Copy PNG</button>
   </div>
 </div></div>
 </div>
@@ -1318,4 +1326,5 @@
 <script src="js/header-art.js"></script>
 
 <script src="js/welcome-art.js"></script>
+<script src="js/scenario-library.js"></script>
 <script src="js/overwalls-tools.js"></script>
