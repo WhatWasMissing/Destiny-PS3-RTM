@@ -2674,6 +2674,61 @@
     return buildCompatibilityGuard.ensure();
   }
   window.ensureDestinyWriteProfile = ensureDestinyWriteProfile;
+  let buildProfileCheckBusy = false;
+  function setDestinyBuildProfileStatus(message, state = '') {
+    const status = document.getElementById('build-profile-status');
+    if (!status) return;
+    status.textContent = message;
+    if (state) status.dataset.state = state;
+    else delete status.dataset.state;
+  }
+  async function checkDestinyBuildProfile() {
+    const button = document.getElementById('build-profile-check-btn');
+    const badge = document.getElementById('status-badge');
+    if (!button || buildProfileCheckBusy) return;
+    if (!ip || !badge?.classList.contains('connected')) {
+      setDestinyBuildProfileStatus('Link the console and start Destiny before checking its build.', 'error');
+      return;
+    }
+
+    buildProfileCheckBusy = true;
+    const targetIp = ip;
+    const generation = connectionGeneration;
+    button.disabled = true;
+    setDestinyBuildProfileStatus('Checking three code anchors…', 'pending');
+    try {
+      const result = await ensureDestinyWriteProfile();
+      if (generation !== connectionGeneration || targetIp !== ip || !badge.classList.contains('connected')) {
+        setDestinyBuildProfileStatus('Console session changed during the check. Check again.', 'error');
+        return;
+      }
+      setDestinyBuildProfileStatus(
+        result.cached
+          ? 'Last check matched the BLES01857 01.24 signature profile · recent check.'
+          : 'Last check matched the BLES01857 01.24 signature profile · 3 anchors read.',
+        'matched'
+      );
+    } catch (error) {
+      if (generation !== connectionGeneration || targetIp !== ip || !badge.classList.contains('connected')) {
+        setDestinyBuildProfileStatus('Console session changed during the check. Check again.', 'error');
+      } else {
+        const message = String(error?.message || error);
+        const mismatch = message.match(/signature mismatch at (0x[0-9a-f]+)/i);
+        const unreadable = message.match(/Cannot verify Destiny 01\.24 at (0x[0-9a-f]+):?\s*(.*)/i);
+        if (mismatch) {
+          setDestinyBuildProfileStatus(`No match at ${mismatch[1]}. Memory writes remain locked for this build.`, 'error');
+        } else if (unreadable) {
+          setDestinyBuildProfileStatus(`Could not read the code anchor at ${unreadable[1]}${unreadable[2] ? `: ${unreadable[2]}` : ''}.`, 'error');
+        } else {
+          setDestinyBuildProfileStatus(`Build check failed: ${message.replace(/; memory write refused/gi, '')}`, 'error');
+        }
+      }
+    } finally {
+      buildProfileCheckBusy = false;
+      button.disabled = false;
+    }
+  }
+  window.checkDestinyBuildProfile = checkDestinyBuildProfile;
   const patchRunner = RtmOperations.createRunner({
     session: () => ip && document.getElementById('status-badge').classList.contains('connected') ? `${connectionGeneration}:${ip}` : '',
     beforeApply: (owner, pairs) => buildCompatibilityGuard.ensure(pairs),
@@ -2690,6 +2745,7 @@
   }
   function resetVerifiedStates() {
     antiMMState = false; server4xDamageState = false; srvMode = 'unknown';
+    setDestinyBuildProfileStatus('Not checked for this connection.');
     for (const key of Object.keys(toggleState)) delete toggleState[key];
     const controls = document.getElementById('ropk-controls'); if (controls) controls.style.display = 'none';
     for (const label of Object.keys(cheatState)) delete cheatState[label];

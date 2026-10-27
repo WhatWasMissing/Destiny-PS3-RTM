@@ -66,6 +66,15 @@ body.compact-ui .cheat-feature-label, body.compact-ui .cheat-status-label,
 .rtm-launch-status { margin:6px 0 0; color:var(--muted); font:12px/1.5 var(--sans); }
 .rtm-launch-status[data-state="error"] { color:var(--danger); }
 .rtm-launch-status[data-state="ok"] { color:var(--accent); }
+.build-profile-check { display:flex; align-items:center; justify-content:space-between; gap:14px; margin:0 16px 6px; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-control); background:var(--surface); }
+.build-profile-copy { display:flex; min-width:0; flex-direction:column; gap:2px; }
+.build-profile-copy strong { color:var(--text); font:600 12px/1.4 var(--sans); }
+.build-profile-copy span { color:var(--muted); font:12px/1.45 var(--sans); }
+.build-profile-check button { flex:none; min-height:36px; padding:6px 12px; }
+.build-profile-status { margin:0 16px 10px; color:var(--muted); font:12px/1.45 var(--sans); }
+.build-profile-status[data-state="pending"] { color:var(--warning); }
+.build-profile-status[data-state="matched"] { color:var(--success); }
+.build-profile-status[data-state="error"] { color:var(--danger); }
 .ip-input, .hex-input, .scan-input, #cheat-search, #act-search, #act-select { border-radius: var(--radius-control) !important; font-size: 14px !important; min-height: 40px; }
 .ip-input { height: 42px; }
 .field-label, .slider-label, .scan-field label { font: 12px var(--sans); letter-spacing: 0; text-transform: none; }
@@ -240,6 +249,8 @@ input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, te
   .jukebox-playback { grid-template-columns: 1fr; }
   .jukebox-playback-status { align-items: flex-start; flex-direction: column; gap: 3px; }
   .jukebox-playback #jukebox-stop { width: 100%; }
+  .build-profile-check { align-items:stretch; flex-direction:column; }
+  .build-profile-check button { width:100%; }
 }
 
 .main-conflict-note strong { color: var(--warning) !important; }

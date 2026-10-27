@@ -212,19 +212,60 @@ UI thread.
 The official webMAN interface documents `MEMORY PAGEALLOCATE`, `PAGEFREE`, and
 `THREAD CREATE` through `/ps3mapi.ps3?<command>`. Its current handler ignores
 the syscall result when reporting page allocation/free and responds HTTP 200
-after issuing thread creation. The 1.47.48t fix changed the generated thread
-descriptor from `u64[2]` to `u32[2]`; the commit notes that the previous form
-could start at address zero and crash. These are implementation details of
-webMAN, not proof that a particular installed build or Cobra/HEN payload
-supports the full lifecycle. [Command reference](https://github.com/aldostools/webMAN-MOD/wiki/Web-Commands/e75ae66ee03f1ec8d61ad011e56b62e0a3559bab),
-[server handler](https://github.com/aldostools/webMAN-MOD/blob/master/include/ps3mapi/ps3mapi_server.h),
+after issuing thread creation. In the inspected Cobra source, `THREAD CREATE`
+creates a joinable process thread and calls `ppu_thread_join`, but discards
+both the join result and thread exit code; webMAN then discards the syscall
+result too. A successful HTTP response therefore proves neither execution nor
+completion. [Cobra thread implementation](https://github.com/xXEvilnatXx/Cobra-PS3/blob/main/8.5/4.93/CEX/SRC/stage2/ps3mapi_core.c),
+[webMAN handler](https://github.com/aldostools/webMAN-MOD/blob/master/include/ps3mapi/ps3mapi_server.h).
+
+At inspected webMAN commit `45025987231248e4939a9f00ef851aa4aa0a5345`, the
+HTTP JSON command route `/ps3mapi.ps3?MEMORY SET ...` is not a reliable code-write
+path. Its HTTP branch treats pairs of
+ASCII hex characters as bytes with `*buffer1 = (buffer2[0] << 8) | buffer2[1]`
+and stores the result in an 8-bit `char`; for example, ASCII `"AB"` becomes
+`0x42`, not `0xAB`. The corresponding JSON `MEMORY GET` encoder also shifts the
+masked high nibble of a `char` by eight, so the returned first hex digit is
+always zero. HTTP status 226/200 from those JSON commands cannot establish
+correct bytes. The TCP PS3MAPI commands use their binary data connection and
+bypass these two text conversions, although the handler ignores some memory
+operation return values. [webMAN HTTP entry point](https://github.com/aldostools/webMAN-MOD/blob/45025987231248e4939a9f00ef851aa4aa0a5345/include/cmd/ps3mapi.h#L2-L28),
+[HTTP MEMORY GET/SET handlers](https://github.com/aldostools/webMAN-MOD/blob/45025987231248e4939a9f00ef851aa4aa0a5345/include/ps3mapi/ps3mapi_server.h#L518-L617).
+
+The RTM's `/setmem.ps3mapi` and `/getmem.ps3mapi` requests use webMAN's separate
+GETMEM editor routes, not the HTTP JSON `MEMORY SET/GET` commands. The inspected
+editor converts `val=` with `Hex2Bin` before calling `ps3mapi_patch_process`,
+and renders returned bytes with `%02X`; this is the byte path used for exact
+write readback in the app. The editor handles up to 256 bytes per operation.
+Static source support does not establish the
+behavior of the user's installed webMAN build, so continue to require exact
+readback. Cobra's setter calls the firmware
+`process_write_memory(..., 1)` wrapper, but the inspected source does not
+establish whether that firmware function invalidates the game's instruction
+cache. The `clear_icache` calls in Cobra's executable-page allocator apply to
+its temporary kernel mapper patch, not the newly allocated process page.
+webMAN's payload helper writes binary chunks through `SET_PROC_MEM` before
+thread creation, but it does not verify exact bytes or cache visibility.
+Therefore a GETMEM readback can prove the bytes were stored, not that the
+processor executed them. [webMAN GETMEM editor](https://github.com/aldostools/webMAN-MOD/blob/45025987231248e4939a9f00ef851aa4aa0a5345/include/ps3mapi/ps3mapi.h#L751-L981),
+[Cobra memory implementation](https://github.com/xXEvilnatXx/Cobra-PS3/blob/main/8.5/4.93/CEX/SRC/stage2/ps3mapi_core.c),
+[webMAN payload helper](https://github.com/aldostools/webMAN-MOD/blob/45025987231248e4939a9f00ef851aa4aa0a5345/include/ps3mapi/ps3mapi_payload.h).
+
+The 1.47.48t fix changed the generated thread descriptor from `u64[2]` to
+`u32[2]`; the commit notes that the previous form could start at address zero
+and crash. These are implementation details of particular webMAN/Cobra
+sources, not proof that a user's installed versions support the full lifecycle.
+[Command reference](https://github.com/aldostools/webMAN-MOD/wiki/Web-Commands/e75ae66ee03f1ec8d61ad011e56b62e0a3559bab),
 [fix commit](https://github.com/aldostools/webMAN-MOD/commit/75327b1).
 
-No toast stub is exposed. Safe use still requires a live build/process check,
-nonzero allocation values, exact code readback, a completion marker, and
-verified release with both allocation values. Instruction-cache behavior,
-function thread affinity, observed toast output, and cleanup on the target
-console remain unverified; no live-console writes were made for this audit.
+No toast stub is exposed. A future probe would need a live build/process check,
+nonzero allocation values, exact code readback, and a harmless stub that writes
+a completion marker and returns, followed by marker readback. It would then
+need to call `PAGEFREE` with both retained values. The current HTTP handler
+cannot confirm that freeing succeeded, so cleanup behavior must be validated
+separately before repeated use. Instruction-cache behavior, toast-function
+thread affinity, and observed toast output also remain unverified; no
+live-console writes were made for this audit.
 
 Matching static code/data bytes do not prove server persistence. Controlled
 observation in the matching 01.24 runtime is needed to confirm dynamic mappings

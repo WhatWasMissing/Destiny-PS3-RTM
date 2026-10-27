@@ -328,6 +328,14 @@
 <button class="btn-disconnect" id="btn-disconnect" onclick="disconnect()" style="display:none">Unlink</button>
 
 </div>
+<div class="build-profile-check">
+  <div class="build-profile-copy">
+    <strong>Destiny build profile</strong>
+    <span>Read-only check of three code anchors from BLES01857 01.24. It does not verify the full EBOOT hash or region.</span>
+  </div>
+  <button class="btn-connect" id="build-profile-check-btn" type="button" onclick="checkDestinyBuildProfile()">Check build</button>
+</div>
+<p class="build-profile-status" id="build-profile-status" role="status" aria-live="polite" aria-atomic="true">Not checked for this connection.</p>
 <!-- PS3HEN toggle -->
 <div class="hen-compact">
   <div class="hen-copy">
