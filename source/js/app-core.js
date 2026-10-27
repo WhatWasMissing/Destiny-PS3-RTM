@@ -3904,6 +3904,15 @@
       }
       actions.appendChild(download);
 
+      const downloadJpeg = document.createElement('button');
+      downloadJpeg.type = 'button';
+      downloadJpeg.id = `screenshot-jpeg-${profileId}`;
+      downloadJpeg.textContent = 'Download JPEG';
+      downloadJpeg.setAttribute('aria-label', `Download ${profile.label} JPEG`);
+      downloadJpeg.disabled = !capture;
+      downloadJpeg.addEventListener('click', () => downloadDestinyScreenshotJpeg(profileId));
+      actions.appendChild(downloadJpeg);
+
       const copy = document.createElement('button');
       copy.type = 'button';
       copy.id = `screenshot-copy-${profileId}`;
@@ -3925,6 +3934,38 @@
       actions.appendChild(view);
       card.appendChild(actions);
       gallery.appendChild(card);
+    }
+  }
+
+  async function downloadDestinyScreenshotJpeg(profileId) {
+    if (!SCREENSHOT_PROFILES[profileId]) { toast('Choose a valid screenshot profile', 'err'); return; }
+    const capture = screenshotCaptures.get(profileId);
+    if (!capture) { toast('Capture this profile first', 'err'); return; }
+    const button = document.getElementById(`screenshot-jpeg-${profileId}`);
+    if (button) { button.disabled = true; button.textContent = 'Preparing…'; }
+    try {
+      const jpeg = await RtmScreenshotTools.pngToJpeg(capture.blob);
+      const downloadUrl = URL.createObjectURL(jpeg);
+      try {
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = capture.downloadName.replace(/\.png$/i, '.jpg');
+        link.hidden = true;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      } finally {
+        window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+      }
+      setScreenshotStatus(`${SCREENSHOT_PROFILES[profileId].width} × ${SCREENSHOT_PROFILES[profileId].height} JPEG ready`);
+      toast('JPEG downloaded', 'ok');
+    } catch (error) {
+      setScreenshotStatus(`JPEG export failed: ${error.message}`, true);
+      log(`Framebuffer JPEG export failed: ${error.message}`, 'err');
+      toast('Could not export JPEG', 'err');
+    } finally {
+      const currentButton = document.getElementById(`screenshot-jpeg-${profileId}`);
+      if (currentButton) { currentButton.disabled = !screenshotCaptures.get(profileId); currentButton.textContent = 'Download JPEG'; }
     }
   }
 

@@ -73,6 +73,36 @@ write causes the named in-game effect.
 | Overwalls physics hook | Source branch site `0x001C4110`; code cave `0x010D8EC0` | 01.24 has original instruction `30640140`; code-cave first word is zero | Confirms the source's initial branch and cave prefix in 01.24; runtime behavior remains unobserved. |
 | Player Size | Local C# identifies a player by name in 24 records, gets its handle at record `+1604`, resolves the object index through `0x002FF2D0`, then writes Float32 scale at `0x01A1D9E8 + ((index & 0x1FFF) * 0xC0) + 0x9C`. | `0x002FF2D0`: resolver signature matches; `0x001FB3C8`: leaf getter `8084001C908300004E800020`. Runtime lookup table `0x01A21CB0` and scale-object base `0x01A1D9E8` are zero-filled BSS in the file. | Confirms resolver/helper code and source arithmetic, but not runtime table contents or visual effect. The app and MCP tool emulate the resolver with reads and do not use the C# RPC stub/scratch area. |
 
+### Deathsinger instruction-context audit
+
+The seven aligned `38C6FFFF` hits listed above were decoded from the hash-verified
+01.24 executable with a PowerPC64 big-endian disassembler. Their immediate
+instruction windows explain why an opcode match alone is not enough to identify
+the raid mechanic:
+
+| Address | Nearby instructions | What the local context supports |
+|---|---|---|
+| `0x009AAB00` | `mtctr r0; b 0x9AAB00; bdz ...; addi r6,r6,-1; divd; mulld; subf;` | A counted division/remainder loop that emits byte-sized results. The decrement is part of the loop body. |
+| `0x009AC35C` | `mtctr r0; b 0x9AC35C; bdz ...; addi r6,r6,-1; divd; slwi ...,1; mulld;` | A similar counted division/remainder loop for halfword-sized results. |
+| `0x00A730BC` | Leaf routine `0x00A73080..0x00A730F4`; reads a count, decrements it, then copies three words per shifted element | A vector erase/compaction path with 12-byte elements. The decrement updates the container length. |
+| `0x00B1B76C` | `lwz r6,0x34(r27); slwi r9,r6,5; addi r6,r6,-1; ...; stw r6,0x34(r27)` | A record count is decremented and written back while a 0x20-byte record index is formed inside a larger SIMD/FPU method. No player deposit context is identified. |
+| `0x00D743D8` | helper starts at `0x00D743D0`; `addi r6,r6,-1; ...; li r0,2; slw r4,r0,r6`, followed by divide/remainder arithmetic | Numeric/bit-rounding helper logic. The shift is used by surrounding arithmetic; no encounter-specific data is identified. |
+| `0x010923CC` | function starts at `0x010923C8`; masks `r4`, decrements the transformed value, and calls `0x0108B740` | A shared size/chunk-processing routine, not an identified encounter handler. |
+| `0x0109248C` | same function; `add r6,r6,r0; addi r6,r6,-1; and r6,r6,r11; add r31,r31,r6; bl 0x0108ACD8` | Rounds a chunk size, advances a buffer cursor, and calls a helper. This is consistent with generic memory/chunk processing. |
+
+These are useful negative results: the verified 01.24 image contains the
+instruction shape, but none of the seven decoded windows establishes that it
+updates Deathsinger stacks. A direct linked-branch search found no callers to
+the inferred starts of the vector erase, large record, numeric helper, or
+chunk-processing routines. The stripped ELF has no symbols and indirect calls
+remain possible, so this is supporting context rather than proof. The 01.24
+ELF also contains no aligned ON encoding `38C60FFF`. The lone `38C00FFF` at
+`0x006AEFEC` remains unexplained, and the source reset location `0x001C7B58`
+does not contain either proposed OFF instruction. The encounter patch must
+stay unavailable until an encounter-specific source path or controlled
+runtime evidence identifies both the instruction and its current OFF/ON
+values.
+
 A broader comparison of current fixed-site toggle OFF values against the same
 01.24 ELF also matched Invincibility, No Spread, Infinite Power, Freeze
 Projectiles, Enemy Ignore, Instant Respawn, Steady Aim, Unlimited Abilities,
