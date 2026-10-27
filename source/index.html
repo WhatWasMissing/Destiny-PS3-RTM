@@ -555,7 +555,7 @@
 <div class="cheat-grid" style="grid-template-columns:1fr 1fr;">
 <button class="cheat-btn blue" id="srv-void" onclick="srvSetMode('void',this)"> Void Enemies </button>
 <button class="cheat-btn red" id="srv-ropk" onclick="srvSetMode('ropk',this)"> Relative OPK </button>
-<button class="cheat-btn gold" id="srv-4x-damage" onclick="toggleServer4xDamage(this)"> 10× Damage </button>
+<button class="cheat-btn gold" id="srv-4x-damage" onclick="toggleServer4xDamage(this)"> Damage Preset </button>
 <button class="cheat-btn" id="srv-off" onclick="srvSetMode('off',this)"> Off </button>
 </div>
 <details class="tidy-subpanel">
@@ -733,6 +733,9 @@
 <div class="section-body"><div class="panel">
 <div class="panel-header">Custom Damage Multiplier</div>
 
+<div class="rtm-callout rtm-callout--info">
+  <strong>Source label conflict:</strong> Overwalls C# and the legacy HTML toggle call this “4× Damage,” but that HTML calculator maps the same halfword to its “10×” preset. Both sources write <code>4120</code> at <code>0x0043E626</code>; the in-game multiplier has not been verified.
+</div>
 <div class="rtm-callout rtm-callout--technical">
   Enter the multiplier you want and the RTM will convert it to the 16-bit value used by the existing damage control.
   <strong>1× = <code>3F80</code></strong>,
@@ -741,7 +744,7 @@
   Because the game is only being given the upper 16 bits of the float, some decimal values will be rounded slightly.
 </div>
 <div class="rtm-callout rtm-callout--info">
-  <strong>Conflict Detection:</strong> Custom Damage, One-Hit Enemies and 10× Damage share the same damage value. Enabling one automatically replaces the others.
+  <strong>Conflict Detection:</strong> Custom Damage, One-Hit Enemies and the Damage Preset share the same value. Enabling one automatically replaces the others.
 </div>
 
 <div class="slider-body">

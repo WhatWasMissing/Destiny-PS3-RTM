@@ -2296,7 +2296,7 @@
     'tog-ohk': {
       feature:'stable', label:'Stable',
       description:'Makes most enemies die from a single hit.',
-      notes:'Instance Leader can change the behaviour of this option. It also conflicts with 10× Damage, so only one should be considered active.'
+      notes:'Instance Leader can change the behaviour of this option. It also conflicts with the Damage Preset, so only one should be considered active.'
     },
     'tog-ammo': {
       feature:'stable', label:'Stable',
@@ -2424,9 +2424,9 @@
       notes:'Server Cheats are highly volatile. Make small offset changes and wait for each update to complete.'
     },
     'srv-4x-damage': {
-      feature:'stable', label:'Stable',
-      description:'Applies the source RTM’s ten-times damage preset.',
-      notes:'Conflicts with One-Hit Enemies. Enabling one should be treated as replacing the other.'
+      feature:'experimental', label:'Experimental',
+      description:'Writes the source damage preset at 0x0043E626.',
+      notes:'Overwalls C# and the legacy HTML toggle call this 4× Damage, while the HTML calculator maps the same bytes to its 10× preset. Its in-game multiplier has not been verified.'
     },
     'srv-off': {
       feature:'stable', label:'Safe State',
@@ -2636,7 +2636,7 @@
     // itself replaces the old mode. We only need to correct state/UI first.
     if (['tog-ohk','srv-4x-damage','damage-custom'].includes(targetId)) {
       if (targetId !== 'tog-ohk' && cheatState['One-Hit Enemies']) disabled.push('One-Hit Enemies');
-      if (targetId !== 'srv-4x-damage' && server4xDamageState) disabled.push('10× Damage');
+      if (targetId !== 'srv-4x-damage' && server4xDamageState) disabled.push('Damage Preset');
       clearDamageConflictUI(targetId);
     }
 
@@ -3385,14 +3385,14 @@
     updateCheatStatus('srv-4x-damage', 'applying');
     try {
       await writeHexAt(DAMAGE_ADDR, willEnable ? DAMAGE_4X_HEX : DAMAGE_NORMAL_HEX);
-      syncDamagePatchState(willEnable ? DAMAGE_4X_HEX : DAMAGE_NORMAL_HEX, '10× Damage toggle');
+      syncDamagePatchState(willEnable ? DAMAGE_4X_HEX : DAMAGE_NORMAL_HEX, 'Damage preset toggle');
 
-      log(`10× Damage ${willEnable ? 'ON' : 'OFF'}`, 'ok');
-      toast(`10× Damage ${willEnable ? 'ON' : 'OFF'}`, 'ok');
+      log(`Damage Preset ${willEnable ? 'ON' : 'OFF'}`, 'ok');
+      toast(`Damage Preset ${willEnable ? 'ON' : 'OFF'}`, 'ok');
     } catch (e) {
       updateCheatStatus('srv-4x-damage', 'failed');
-      log(`10× Damage failed: ${e.message}`, 'err');
-      toast('10× Damage failed', 'err');
+      log(`Damage Preset failed: ${e.message}`, 'err');
+      toast('Damage Preset failed', 'err');
     } finally {
       server4xDamageBusy = false;
     }
@@ -3413,7 +3413,7 @@
         await writeHexAt(DAMAGE_ADDR, DAMAGE_NORMAL_HEX);
         syncDamagePatchState(DAMAGE_NORMAL_HEX, 'Server Cheats Off');
       } catch (e) {
-        log(`10× Damage restore failed: ${e.message}`, 'err');
+        log(`Damage Preset restore failed: ${e.message}`, 'err');
       }
     }
 

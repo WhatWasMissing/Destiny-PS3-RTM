@@ -27,6 +27,7 @@ and soulsAPI reflection code are not bundled.
 | Split rep boosters and consumable randomization | Source values plus local byte snapshots and guarded restore controls |
 | Individual source toggles and usual/all/off groups | Source toggles and three grouped presets translated to verified writes, including the 20-byte ammo patch and the additional address used by one preset. The Overwalls C# Warpriest variant restores its source-backed primary instruction; its secondary BSS word remains set after disable, as in the source. |
 | One-Hit damage variant | Keeps the Overwalls `547A` value at `0x43E626` and synchronizes the main RTM's One-Hit and damage status only after verified writes; the app does not interpret this variant as a multiplier |
+| Damage preset label alias | Overwalls `checkBox24` is labeled “4x Damage” at `Form1.cs:4212`; its handler writes UInt16 `0x4120` or `0x3F80` at `0x0043E626` (`Form1.cs:1731-1736`). The legacy HTML toggle logs the same “4x Damage” label, while its damage calculator maps `0x4120` to the “10×” preset. The app exposes one shared “Damage Preset” control and reports the source-label conflict; static bytes do not verify the in-game multiplier. |
 | Skip cutscene, activity ID sweep and CCAPI memory read | Source address/value, cancellable sweep and 4 KB read in eight 512-byte chunks |
 
 The main RTM already contained equivalents for core gameplay toggles, standard
