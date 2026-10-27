@@ -217,8 +217,8 @@ func TestToolsListAdvertisesBoundedRTMTools(t *testing.T) {
 	}
 	list := resultObject(t, responseByID(t, responses, 2))
 	tools, ok := list["tools"].([]any)
-	if !ok || len(tools) != 12 {
-		t.Fatalf("expected twelve tools, got %#v", list["tools"])
+	if !ok || len(tools) != 13 {
+		t.Fatalf("expected thirteen tools, got %#v", list["tools"])
 	}
 	var sawEntityInspector bool
 	var sawScaleInspector, sawScaleSetter bool

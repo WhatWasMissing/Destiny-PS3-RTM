@@ -19,6 +19,7 @@ open the desktop app or automate its UI.
 | `rtm_set_brightness` | Requires the 01.24 signature profile, writes one of the local 1.24 source presets at `0x006101C0`, and verifies the bytes. The in-game effect remains unobserved. |
 | `rtm_set_legacy_scalar_preset` | Experimental write: requires the 01.24 signature profile and selects Normal (`3F800000`) or one of the recovered RTM's source-labeled values (`3FFFFFFF`, about 2×; `42C80000`, 100×) at `0x004449EC`. The 01.24 consumer uses this as a fallback coefficient in an unidentified ratio calculation; the “Max Damage” / “1 Hit Kill 2” gameplay labels are unverified. The tool additionally requires the exact consumer signature at `0x00444B64`, a known current word, and exact readback. |
 | `rtm_notify` | Dispatches a webMAN system notification; display is not confirmed. |
+| `rtm_play_beep_sequence` | Plays one fixed Jukebox preset (`fanfare`, `imperial`, `mario`, `nokia`, `sos`, or `shave`) through `/beep.ps3`. Tone order and pauses mirror `source/js/jukebox.js`; custom tone arrays are not accepted. Playback is serialized and can stop between tones. The result reports HTTP-acknowledged tone requests; sound delivery is not confirmed. This does not access Destiny memory. |
 | `rtm_launch_game` | Mounts one ISO from `/dev_hdd0/PS3ISO/`, waits for webMAN, returns to the game list, and starts the mounted game. HTTP acknowledgement is reported per stage; game start is not confirmed. |
 
 Every tool requires the PS3's private IPv4 address. The server fixes webMAN to

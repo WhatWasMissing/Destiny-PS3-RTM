@@ -200,7 +200,7 @@ func validateIPv4(ipText string) (net.IP, error) {
 	return ip, nil
 }
 
-func (c *Client) endpoint(ipText, path string, query url.Values) (string, error) {
+func (c *Client) endpoint(ipText, path, rawQuery string) (string, error) {
 	ip, err := validateIPv4(ipText)
 	if err != nil {
 		return "", err
@@ -209,7 +209,7 @@ func (c *Client) endpoint(ipText, path string, query url.Values) (string, error)
 	if c.endpointOverride != "" {
 		host = c.endpointOverride
 	}
-	u := url.URL{Scheme: "http", Host: host, Path: path, RawQuery: query.Encode()}
+	u := url.URL{Scheme: "http", Host: host, Path: path, RawQuery: rawQuery}
 	return u.String(), nil
 }
 
@@ -232,10 +232,18 @@ func readBounded(body io.Reader, limit int64) ([]byte, error) {
 }
 
 func (c *Client) request(ctx context.Context, ipText, path string, query url.Values) (*http.Response, error) {
+	rawQuery := ""
+	if query != nil {
+		rawQuery = query.Encode()
+	}
+	return c.requestWithRawQuery(ctx, ipText, path, rawQuery)
+}
+
+func (c *Client) requestWithRawQuery(ctx context.Context, ipText, path, rawQuery string) (*http.Response, error) {
 	if c == nil {
 		return nil, errors.New("client is nil")
 	}
-	endpoint, err := c.endpoint(ipText, path, query)
+	endpoint, err := c.endpoint(ipText, path, rawQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -570,6 +578,20 @@ func (c *Client) Notify(ctx context.Context, ip, message string) error {
 	}
 	query := url.Values{"msg": {message}}
 	response, err := c.request(ctx, ip, "/notify.ps3mapi", query)
+	if err != nil {
+		return err
+	}
+	response.Body.Close()
+	return nil
+}
+
+// Beep sends one webMAN system beep request. Tone IDs mirror the RTM's
+// existing Jukebox: 1 is short/high, 2 is short/low, and 3 is long/low.
+func (c *Client) Beep(ctx context.Context, ip string, tone int) error {
+	if tone < 1 || tone > 3 {
+		return errors.New("tone must be 1, 2, or 3")
+	}
+	response, err := c.requestWithRawQuery(ctx, ip, "/beep.ps3", strconv.Itoa(tone))
 	if err != nil {
 		return err
 	}

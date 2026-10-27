@@ -1558,6 +1558,7 @@
     { id: 'sec-overwalls',            label: 'Overwalls Tools', setup: true,  description: 'Overwalls scenario, routine, inventory and Flyhack workflows.' },
     { id: 'sec-custom-offset',       label: 'Custom Offset',   setup: true,  description: 'Manual memory address/value tools.', recommended: false },
     { id: 'sec-ps3-notify',          label: 'PS3 System Notification', setup: true, description: 'Send a documented PS3MAPI system notification.' },
+    { id: 'sec-jukebox',             label: 'PS3 Jukebox',     setup: true, description: 'Play source-defined PS3 system tone sequences.' },
     { id: 'sec-scanner',             label: 'Memory Scanner',  setup: true,  description: 'Compare bounded memory snapshots and inspect selected values.', recommended: false },
     { id: 'sec-ammo-editor',         label: 'Ammo Editor',     setup: true,  description: 'Experimental source-build scanner; writes one selected ammo slot.', recommended: false },
     { id: 'sec-screenshots',         label: 'Screenshots',     setup: true,  description: 'Experimental source-build framebuffer addresses; may pause the game.', recommended: false },
@@ -2193,6 +2194,7 @@
     tools: [
       'sec-custom-offset',
       'sec-ps3-notify',
+      'sec-jukebox',
       'sec-ammo-editor',
       'sec-screenshots',
       'sec-scanner',

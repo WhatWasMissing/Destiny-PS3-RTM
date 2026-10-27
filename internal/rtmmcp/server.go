@@ -37,15 +37,16 @@ type Server struct {
 	client Client
 	out    io.Writer
 
-	writeMu       sync.Mutex
-	memoryWriteMu sync.Mutex
-	callsMu       sync.Mutex
-	calls         map[string]context.CancelFunc
-	wg            sync.WaitGroup
+	writeMu          sync.Mutex
+	memoryWriteMu    sync.Mutex
+	beepSequenceSlot chan struct{}
+	callsMu          sync.Mutex
+	calls            map[string]context.CancelFunc
+	wg               sync.WaitGroup
 }
 
 func New(client Client) *Server {
-	return &Server{client: client, calls: make(map[string]context.CancelFunc)}
+	return &Server{client: client, calls: make(map[string]context.CancelFunc), beepSequenceSlot: make(chan struct{}, 1)}
 }
 
 type request struct {
@@ -73,6 +74,27 @@ type tool struct {
 	Description string         `json:"description"`
 	InputSchema map[string]any `json:"inputSchema"`
 	Annotations map[string]any `json:"annotations,omitempty"`
+}
+
+type beepNote struct {
+	tone    int
+	pauseMS int
+}
+
+type beepSequence struct {
+	name  string
+	notes []beepNote
+}
+
+// These fixed sequences mirror source/js/jukebox.js. Keep notes and post-tone
+// pauses in sync with the desktop Jukebox; callers cannot supply tone arrays.
+var beepSequences = map[string]beepSequence{
+	"fanfare":  {name: "Victory Fanfare", notes: []beepNote{{1, 180}, {1, 180}, {1, 180}, {2, 400}, {1, 180}, {2, 120}, {1, 400}, {1, 180}, {1, 180}, {1, 180}, {2, 400}, {1, 180}, {2, 120}, {1, 600}}},
+	"imperial": {name: "Imperial March", notes: []beepNote{{2, 350}, {2, 350}, {2, 350}, {3, 500}, {1, 200}, {2, 500}, {2, 350}, {2, 350}, {2, 350}, {3, 500}, {1, 200}, {2, 600}}},
+	"mario":    {name: "Super Mario", notes: []beepNote{{1, 150}, {1, 300}, {1, 150}, {1, 150}, {1, 150}, {2, 150}, {1, 150}, {2, 300}, {1, 150}, {1, 300}, {1, 150}, {1, 150}, {1, 150}, {2, 150}, {1, 150}, {2, 400}}},
+	"nokia":    {name: "Nokia Tune", notes: []beepNote{{1, 150}, {2, 150}, {1, 150}, {2, 300}, {1, 150}, {2, 150}, {1, 300}, {2, 150}, {1, 150}, {2, 150}, {1, 300}, {2, 150}, {1, 150}, {2, 150}, {1, 400}}},
+	"sos":      {name: "SOS", notes: []beepNote{{1, 120}, {1, 120}, {1, 300}, {3, 300}, {3, 300}, {3, 500}, {1, 120}, {1, 120}, {1, 400}}},
+	"shave":    {name: "Shave & Haircut", notes: []beepNote{{1, 180}, {2, 180}, {2, 180}, {2, 180}, {1, 350}, {2, 180}, {1, 500}}},
 }
 
 var toolList = []tool{
@@ -184,6 +206,16 @@ var toolList = []tool{
 		Annotations: map[string]any{"readOnlyHint": false, "destructiveHint": false, "idempotentHint": false, "openWorldHint": true},
 	},
 	{
+		Name:        "rtm_play_beep_sequence",
+		Title:       "Play a PS3 beep sequence",
+		Description: "Play one of the six fixed PS3 system-tone sequences mirrored from the RTM Jukebox. This sends only webMAN /beep.ps3 requests and does not read or write Destiny memory. Playback can be cancelled between tones; the result counts HTTP-acknowledged requests and cannot confirm that audio was heard.",
+		InputSchema: objectSchema(map[string]any{
+			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
+			"sequence":    map[string]any{"type": "string", "enum": []string{"fanfare", "imperial", "mario", "nokia", "sos", "shave"}},
+		}, "target_ipv4", "sequence"),
+		Annotations: map[string]any{"readOnlyHint": false, "destructiveHint": false, "idempotentHint": false, "openWorldHint": true},
+	},
+	{
 		Name:        "rtm_launch_game",
 		Title:       "Launch Destiny from ISO",
 		Description: "Run the recovered Destiny RTM launch sequence: mount one ISO from /dev_hdd0/PS3ISO/, return to the game list, and start the mounted game. Each HTTP step must be acknowledged; Destiny boot cannot be confirmed.",
@@ -199,7 +231,7 @@ var toolList = []tool{
 	},
 }
 
-const instructions = "Use only the user's private PS3 IPv4 address. Memory reads and writes target Destiny process 0x1010200 through webMAN MOD on port 80. Reads are capped at 64 KiB; writes are capped at 8 bytes and require exact readback. rtm_status checks webMAN reachability, not whether Destiny is running. Player-position and entity-pointer tools follow the local Overwalls pointer map using read-only requests; coordinates, pointer semantics, and build compatibility remain unconfirmed. Player-scale tools require the verified 1.24 resolver/helper byte signatures and emulate the source lookup without calling game functions; writes recheck the pointer chain and verify the Float32 bytes, but visual effect and server persistence remain unconfirmed. Brightness and experimental scalar-preset effects are unverified. The scalar setter requires the exact 01.24 consumer signature at 0x00444B64 and transitions only between the three known values at 0x004449EC. Notifications report dispatch, not display. Game-launch steps report HTTP acknowledgement and do not confirm that Destiny started. No generic function-call endpoint is exposed."
+const instructions = "Use only the user's private PS3 IPv4 address. Memory reads and writes target Destiny process 0x1010200 through webMAN MOD on port 80. Reads are capped at 64 KiB; writes are capped at 8 bytes and require exact readback. rtm_status checks webMAN reachability, not whether Destiny is running. Player-position and entity-pointer tools follow the local Overwalls pointer map using read-only requests; coordinates, pointer semantics, and build compatibility remain unconfirmed. Player-scale tools require the verified 1.24 resolver/helper byte signatures and emulate the source lookup without calling game functions; writes recheck the pointer chain and verify the Float32 bytes, but visual effect and server persistence remain unconfirmed. Brightness and experimental scalar-preset effects are unverified. The scalar setter requires the exact 01.24 consumer signature at 0x00444B64 and transitions only between the three known values at 0x004449EC. Notifications report dispatch, not display. The fixed beep-sequence tool sends webMAN system-tone requests only; it reports HTTP-acknowledged tones and cannot confirm that audio was heard. Game-launch steps report HTTP acknowledgement and do not confirm that Destiny started. No generic function-call endpoint is exposed."
 
 func objectSchema(properties map[string]any, required ...string) map[string]any {
 	return map[string]any{"type": "object", "properties": properties, "required": required, "additionalProperties": false}
@@ -654,6 +686,21 @@ func (s *Server) callTool(ctx context.Context, raw json.RawMessage) map[string]a
 			return errorResult(err)
 		}
 		return successResult(map[string]any{"ok": true, "request_dispatched": true, "delivery_confirmed": false})
+	case "rtm_play_beep_sequence":
+		var args struct {
+			Target   string `json:"target_ipv4"`
+			Sequence string `json:"sequence"`
+		}
+		if err := decodeStrict(call.Arguments, &args); err != nil {
+			return errorResult(err)
+		}
+		if err := validateTarget(args.Target); err != nil {
+			return errorResult(err)
+		}
+		if _, ok := beepSequences[args.Sequence]; !ok {
+			return errorResult(errors.New("sequence must be fanfare, imperial, mario, nokia, sos, or shave"))
+		}
+		return s.playBeepSequence(ctx, args.Target, args.Sequence)
 	case "rtm_launch_game":
 		var args struct {
 			Target  string `json:"target_ipv4"`
@@ -687,6 +734,72 @@ func (s *Server) callTool(ctx context.Context, raw json.RawMessage) map[string]a
 		return successResult(data)
 	default:
 		return errorResult(fmt.Errorf("unknown RTM tool %q", call.Name))
+	}
+}
+
+func (s *Server) playBeepSequence(ctx context.Context, target, key string) map[string]any {
+	sequence := beepSequences[key]
+	beeper, ok := s.client.(interface {
+		Beep(context.Context, string, int) error
+	})
+	if !ok {
+		return errorResult(errors.New("RTM client does not support PS3 system beeps"))
+	}
+	select {
+	case s.beepSequenceSlot <- struct{}{}:
+		defer func() { <-s.beepSequenceSlot }()
+	case <-ctx.Done():
+		return beepSequenceError(target, key, sequence, 0, ctx.Err())
+	}
+
+	acknowledged := 0
+	for _, note := range sequence.notes {
+		if err := ctx.Err(); err != nil {
+			return beepSequenceError(target, key, sequence, acknowledged, err)
+		}
+
+		// Finish the current tone request before observing cancellation. This
+		// keeps the reported count tied to HTTP acknowledgements and lets a stop
+		// request take effect between tones, as the UI Jukebox does.
+		toneCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 8*time.Second)
+		err := beeper.Beep(toneCtx, target, note.tone)
+		cancel()
+		if err != nil {
+			return beepSequenceError(target, key, sequence, acknowledged, err)
+		}
+		acknowledged++
+		if err := ctx.Err(); err != nil {
+			return beepSequenceError(target, key, sequence, acknowledged, err)
+		}
+		if err := waitBeepPause(ctx, time.Duration(note.pauseMS)*time.Millisecond); err != nil {
+			return beepSequenceError(target, key, sequence, acknowledged, err)
+		}
+	}
+
+	return successResult(map[string]any{
+		"ok": true, "target_ipv4": target, "sequence": key, "sequence_name": sequence.name,
+		"http_acknowledged_tones": acknowledged, "total_tones": len(sequence.notes),
+		"sequence_complete": true, "audio_heard_confirmed": false, "game_memory_written": false,
+	})
+}
+
+func beepSequenceError(target, key string, sequence beepSequence, acknowledged int, cause error) map[string]any {
+	return structuredErrorResult(map[string]any{
+		"ok": false, "target_ipv4": target, "sequence": key, "sequence_name": sequence.name,
+		"http_acknowledged_tones": acknowledged, "total_tones": len(sequence.notes),
+		"sequence_complete": false, "audio_heard_confirmed": false, "game_memory_written": false,
+		"error": cause.Error(),
+	})
+}
+
+func waitBeepPause(ctx context.Context, pause time.Duration) error {
+	timer := time.NewTimer(pause)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
 	}
 }
 

@@ -28,7 +28,7 @@ try {
     $mcpOutput = $mcpInput | & ./dist/rtm-mcp.exe
     if ($LASTEXITCODE -ne 0 -or $mcpOutput.Count -lt 2) { throw 'RTM MCP protocol smoke check failed' }
     $mcpResponses = @($mcpOutput | ForEach-Object { $_ | ConvertFrom-Json })
-    if ($mcpResponses[0].result.protocolVersion -ne '2025-11-25' -or $mcpResponses[1].result.tools.Count -ne 10) {
+    if ($mcpResponses[0].result.protocolVersion -ne '2025-11-25' -or $mcpResponses[1].result.tools.Count -ne 13) {
         throw 'RTM MCP tool-list smoke check failed'
     }
     & ./tests/smoke-desktop.ps1 -Executable ./dist/DestinyRTM.exe

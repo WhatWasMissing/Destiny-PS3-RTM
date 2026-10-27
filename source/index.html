@@ -301,6 +301,7 @@
 <script src="js/emblem-options.js"></script>
 <script src="js/build-compatibility.js"></script>
 <script src="js/app-core.js"></script>
+<script src="js/jukebox.js"></script>
 <script src="js/player-scale-tools.js"></script>
 <script src="js/launch-tools.js"></script>
 <script src="js/brightness-tools.js"></script>
@@ -1085,6 +1086,35 @@
     <button class="btn-send" type="button" onclick="sendPS3Notification()">▶ Send Notification</button>
   </div>
 </div></div>
+</div>
+
+<div class="section" id="sec-jukebox" style="padding-top:0">
+  <p class="category-label" role="button" tabindex="0" aria-controls="jukebox-body" aria-expanded="true" onclick="toggleSection('sec-jukebox');this.setAttribute('aria-expanded',this.closest('.section').classList.contains('collapsed')?'false':'true')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">PS3 Jukebox<svg class="collapse-chevron" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg></p>
+  <div class="section-body" id="jukebox-body"><div class="panel">
+    <div class="panel-header">System tones</div>
+    <p class="panel-muted-note jukebox-note">Play a short sequence through the PS3 system beep endpoint. This does not write game memory.</p>
+    <div class="jukebox-tone-key" role="group" aria-label="Tone key">
+      <span><kbd>1</kbd> Short, high</span>
+      <span><kbd>2</kbd> Short, low</span>
+      <span><kbd>3</kbd> Long, low</span>
+    </div>
+    <div class="jukebox-presets" role="group" aria-label="Tone sequences">
+      <button class="jukebox-preset" data-jukebox-song="fanfare" type="button" onclick="playJukeboxSong('fanfare')"><span>Victory Fanfare</span><small>14 tones</small></button>
+      <button class="jukebox-preset" data-jukebox-song="imperial" type="button" onclick="playJukeboxSong('imperial')"><span>Imperial March</span><small>12 tones</small></button>
+      <button class="jukebox-preset" data-jukebox-song="mario" type="button" onclick="playJukeboxSong('mario')"><span>Super Mario</span><small>16 tones</small></button>
+      <button class="jukebox-preset" data-jukebox-song="nokia" type="button" onclick="playJukeboxSong('nokia')"><span>Nokia Tune</span><small>15 tones</small></button>
+      <button class="jukebox-preset" data-jukebox-song="sos" type="button" onclick="playJukeboxSong('sos')"><span>SOS</span><small>9 tones</small></button>
+      <button class="jukebox-preset" data-jukebox-song="shave" type="button" onclick="playJukeboxSong('shave')"><span>Shave &amp; Haircut</span><small>7 tones</small></button>
+    </div>
+    <div class="jukebox-playback">
+      <div class="jukebox-playback-status">
+        <p id="jukebox-status" role="status" aria-live="polite">Choose a sequence to play.</p>
+        <span id="jukebox-count">Ready</span>
+      </div>
+      <progress id="jukebox-progress" class="jukebox-progress" value="0" max="1" aria-label="Sequence progress"></progress>
+      <button id="jukebox-stop" class="btn-apply danger" type="button" onclick="stopJukeboxSong()" disabled>Stop sequence</button>
+    </div>
+  </div></div>
 </div>
 
 <div class="section" id="sec-ammo-editor" style="padding-top:0">
