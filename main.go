@@ -30,7 +30,7 @@ var assets embed.FS
 var endpoints = map[string]bool{
 	"/index.ps3": true, "/beep.ps3": true, "/getmem.ps3mapi": true,
 	"/setmem.ps3mapi": true, "/notify.ps3mapi": true,
-	"/shutdown.ps3mapi": true, "/restart.ps3mapi": true,
+	"/shutdown.ps3": true, "/restart.ps3": true,
 	"/getcid.ps3mapi": true, "/setcid.ps3mapi": true,
 	"/wmnav.ps3/game": true, "/play.ps3": true,
 }
@@ -50,6 +50,14 @@ func consoleTarget(target *url.URL) bool {
 }
 
 func supportedConsoleEndpoint(target *url.URL) bool {
+	// The UI's connection indicator is backed by one read-only PS3MAPI query.
+	if target.Path == "/ps3mapi.ps3" {
+		command, err := url.QueryUnescape(target.RawQuery)
+		return err == nil && command == "SERVER GETVERSION"
+	}
+	if target.Path == "/restart.ps3" || target.Path == "/shutdown.ps3" {
+		return target.RawQuery == "" && !target.ForceQuery
+	}
 	if target.Path == "/wmnav.ps3/game" || target.Path == "/play.ps3" {
 		return target.RawQuery == "" && !target.ForceQuery
 	}

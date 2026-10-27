@@ -7,8 +7,21 @@ diagnostics; modular code; Overwalls review and port recommendations.
 
 ## Current evidence
 
+- The desktop connection badge checks `SERVER GETVERSION` through the exact
+  read-only `/ps3mapi.ps3` command when webMAN supports it; if the command is
+  unsupported, it shows `WEBMAN ONLINE` and stops probe-driven relinking rather
+  than treating that response as a dead console. Auto reconnect only retries the
+  version query and does not restart PS3MAPI or reinstall hooks. Health probes defer while another
+  RTM request is pending or has run in the prior five seconds, avoiding a
+  competing check during memory operations. Health and retry logs include the
+  query failure reason; the desktop relay allows only this exact command.
+  Restart/shutdown buttons use webMAN's documented `/restart.ps3` and
+  `/shutdown.ps3` routes. Shutdown invalidates health checks before sending the
+  request. The version
+  response confirms the PS3MAPI HTTP command endpoint, not that Destiny's
+  process is running; memory tools check the game build separately.
 - Original frontend remains in commit e36edf7 and local recovered-current/.
-- Development branch: codex/rtm-reliability.
+- Development branch: `mvq/destiny-rtm-e-drive`.
 - Transport module integrated: bounded requests, HTTP status checks, targeted
   process scoping, cancellation API and bounded diagnostics.
 - Four isolated Node tests pass using fake console responses, including stalled
@@ -75,6 +88,15 @@ Do not mark the complete objective achieved based on the transport tests alone.
   states. Reconnecting blocks patch-runner operations.
 - Late automatic reconnect results cannot overwrite a newer session or a
   disconnect; pending probes do not overlap interval ticks.
+- Auto reconnect is opt-in, and health polling uses the read-only PS3MAPI
+  version query after foreground activity settles. The online status badge is
+  no longer an active relink control, avoiding accidental resets from a click.
+- Health-driven relinking never sends a console restart command. Only the
+  explicit, confirmation-gated Restart action requests `/restart.ps3` and then
+  waits for the console before relinking.
+- The diagnostics export now includes a capped, IP-free connection lifecycle
+  trail alongside request paths/outcomes, so health relinks can be distinguished
+  from explicit restart and manual badge relink actions.
 - Thirteen Node tests pass, including serialized operation session changes,
   readback mismatch/unavailability, partial failures, and tests executing the
   production reconnect function with a fake console probe.
@@ -197,3 +219,96 @@ reviewable in PR #8; it remains a draft pending live-console compatibility revie
   excluded because they conflict with the local 1.24 source.
 - Source locations, online references, and remaining compatibility limits are
   recorded in `SOURCE-COMPARISON.md`.
+
+## Blackrock diagnostics and memory tools
+
+- Added BLES 01.24 read-only snapshots for activity/session state, resource and
+  bootflow state, the local player appearance window, authored spawn-path code
+  signatures, the actor-lookup descriptor, and the bounded self-family
+  item-object pool. A packed-handle resolver probe decodes one catalog tag and
+  reads/rechecks its live bucket descriptor without following into object
+  contents. They verify the
+  supported build before reading and disclose the remaining non-atomic or
+  unresolved mappings in the UI and port notes.
+- The shared session-memory API now splits logical reads of up to `0x600` bytes
+  into PS3MAPI GETMEM requests of at most `0x100` bytes, and counts every
+  physical request against the session capability budget. This matches the
+  current webMAN handler's `BINDATA_SIZE` clamp and prevents short reads from
+  invalidating multi-chunk diagnostics.
+- Added an offline viewer for explicitly selected BLES wire payloads and a
+  bounded local catalog browser. No Blackrock data or code is bundled.
+- The offline character view labels only the 17 exact equipped inventory
+  starts proven by the BLES 01.24 bucket-range and equipped-slot tables; the
+  eight unnamed positions stay numeric.
+- User-imported item/loot catalogs with an explicit BLES `itemIndex` or
+  `blesItemIndex` field can label live and offline inventory rows. Live rows
+  can also use an exact unique unsigned `hash` + `tag` match against the BLES
+  01.24 runtime definition table; the table is fully snapshotted twice before
+  and once after the pool read under fresh capabilities, and any mismatch
+  suppresses those labels. The 8,000-row cap supports browsing the 6,557-row
+  Blackrock table as user-selected local data. Its `def` ordinal is never used.
+- Added `rtmctl inventory-pool` and the MCP tool
+  `rtm_read_live_inventory_pool`; both return pool slots and item indexes only.
+  The MCP call has a two-minute deadline for the capped sequential scan.
+- Corrected the descriptor count read to use the low halfword of the word at
+  `+4` (bytes `+6..+7`), matching the native `lwz`/`extsh` sequence. The
+  resource snapshot's bootflow label now uses the captured state-name value.
+- Refactored the macro dialog onto the shared palette and form styles, removed
+  its malformed input closing tag and hard-coded white field text, and added
+  dialog labeling plus initial focus. The accent foreground now follows the
+  dark/light theme token.
+- Normalized Local Data & Diagnostics table headings, resource block headings,
+  and notes to the app's 12px sans-serif label scale; compact data rows and raw
+  memory values retain their existing typography.
+- Rechecked the three emote-related strings in the hash-verified BLES 01.24 ELF
+  with a PPC64 big-endian disassembler. Startup code established the ELFv1 TOC
+  base at `0x01891798`; no direct pointer, absolute immediate pair, or nearby
+  TOC-relative pair to those strings or the tag-loader labels was found.
+  A 16,626-load / 6,341-cell scan found no direct TOC-cell pointers to the
+  emote or tag-loader labels; computed lookups and deeper indirection remain
+  unresolved.
+- A BLES 01.24 data-flow scan found two direct `lfs` references to the Super
+  Speed source site at `0x001A96C0`; both add that Float32 value inside vector
+  adjustment loops. The source writes only one byte, so semantic and speed
+  behavior remain unconfirmed and activation stays disabled.
+- Moved the local catalog browser and offline inventory decoder into a dedicated
+  Local Data & Diagnostics section registered in the Tools tab and first-run
+  section settings; this fixes their previous placement under Overwalls.
+- Ported Overwalls' scenario-editor “read current coordinates” action into both
+  add and edit dialogs. It checks the BLES 01.24 profile, uses the session-bound
+  read capability to capture XYZ, validates finite Float32 values, and rechecks
+  the player pointer before filling fields. The Local Data & Diagnostics grid
+  now uses one shared read-only/snapshot note and shorter purpose-led card copy.
+- All source JavaScript passed `node --check`, and a structural HTML check
+  confirmed the new section is a sibling of Overwalls. The desktop executable
+  was not rebuilt after this navigation fix because the current shell has no
+  Go compiler on `PATH`.
+- Node syntax checks passed for the changed and newly added JavaScript modules.
+  Go builds of the desktop host, `cmd/rtmctl`, and `cmd/rtm-mcp` passed with the
+  local Go 1.27.1 toolchain. The separate desktop build is
+  `dist/DestinyRTM-diagnostics-mvq.exe`; no test suites, packaged smoke checks,
+  or live-console reads were run in this pass.
+- Blackrock mutating features that need unresolved BLES runtime structures or
+  game-thread calls remain incomplete; see `BLACKROCK-FEATURE-PORT.md`.
+- The PS3MAPI health probe checks the HTTP server version and emits its failure
+  reason. The explicit Restart button calls webMAN's `/restart.ps3` console
+  command; automatic health checks and relinking never restart the console or
+  PS3MAPI service.
+- A second relink trigger was in the old Restart button path: it requested the
+  undocumented `/restart.ps3mapi` URL, then entered its 15-second relink flow
+  even if that request failed. Auto reconnect was enabled by default in that
+  version, so a rejected request could make the UI go offline and repeatedly
+  reconnect without restarting the console. webMAN documents `/restart.ps3` as
+  the console restart command. The current path uses that endpoint and returns
+  early on a definite HTTP rejection, so an invalid request no longer
+  masquerades as a console restart followed by a PS3MAPI reconnect.
+- Source diagnosis for repeated relinks: the earlier monitor fetched the full,
+  dynamic `/index.ps3` page with a 5-second timeout. If the user had auto
+  reconnect enabled, two slow or missed page requests could mark the UI offline
+  and start frequent relinking even while PS3MAPI remained available.
+  The monitor now uses an 8-second read-only `SERVER GETVERSION` check, defaults
+  auto reconnect off, records the failure reason, and defers checks while an RTM
+  request is pending or recently completed. Explicit unsupported/invalid HTTP
+  command responses now disable health-driven relinking and keep a separate
+  `WEBMAN ONLINE` state. A local diagnostics export is still needed to identify
+  a specific console-side drop.

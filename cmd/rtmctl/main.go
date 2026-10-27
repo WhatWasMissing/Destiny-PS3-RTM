@@ -51,7 +51,11 @@ func run(args []string, stdout, stderr io.Writer) error {
 	}
 
 	client := rtmclient.New()
-	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
+	commandTimeout := 12 * time.Second
+	if command == "inventory-pool" {
+		commandTimeout = 2 * time.Minute
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), commandTimeout)
 	defer cancel()
 	switch command {
 	case "status":
@@ -103,6 +107,19 @@ func run(args []string, stdout, stderr io.Writer) error {
 			return json.NewEncoder(stdout).Encode(map[string]any{"ok": true, "request_dispatched": true, "delivery_confirmed": false})
 		}
 		fmt.Fprintln(stdout, "Notification request dispatched; delivery is not confirmed.")
+	case "inventory-pool":
+		snapshot, err := client.ReadLiveItemPool(ctx, *ip)
+		if err != nil {
+			return err
+		}
+		if *jsonOutput {
+			return json.NewEncoder(stdout).Encode(map[string]any{"ok": true, "target": strings.TrimSpace(*ip), "snapshot": snapshot})
+		}
+		fmt.Fprintf(stdout, "BLES 01.24 item pool: %d slots, %d populated (non-atomic read-only snapshot)\n", snapshot.SlotCount, snapshot.OccupiedCount)
+		fmt.Fprintln(stdout, "Slot\tItem index")
+		for _, item := range snapshot.Items {
+			fmt.Fprintf(stdout, "%d\t%d\n", item.Slot, item.ItemIndex)
+		}
 	default:
 		return fmt.Errorf("unknown command %q; run rtmctl help", command)
 	}
@@ -132,11 +149,14 @@ func printUsage(w io.Writer) {
 Usage:
   rtmctl status --ip 192.168.0.62
   rtmctl read --ip 192.168.0.62 --address 0030D230 --length 4
+  rtmctl inventory-pool --ip 192.168.0.62
   rtmctl write --ip 192.168.0.62 --address 0030D230 --hex 3DCCCCCD
   rtmctl notify --ip 192.168.0.62 --message "Hello from RTM"
   rtmctl read --ip 192.168.0.62 --address 0030D230 --length 4 --json
 
 Writes are limited to 1-8 bytes and only report success after matching memory readback.
-The client targets private IPv4 addresses on port 80, uses Destiny PID 0x1010200,
-and does not call undocumented PS3 function-call endpoints.`)
+The client targets private IPv4 addresses on port 80 and uses Destiny PID 0x1010200.
+inventory-pool is read-only, verifies the BLES 01.24 profile plus item-pool code and
+descriptor signatures, and never returns instance or owner IDs. It does not call
+undocumented PS3 function-call endpoints.`)
 }

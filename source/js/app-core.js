@@ -71,7 +71,7 @@
       { id: 'tog-bullets',         addr: '51E7E0',   offVal: '3F800000', label: 'Freeze Projectiles',     size: 4 },
       { id: 'tog-instant-respawn', addr: '0071C348', offVal: '93BF0030', label: 'Instant Respawn',  size: 4 },
       { id: 'tog-rapid-fire',      addr: '307590',   offVal: '3F800000', label: 'Faster Fire Rate',       size: 4 },
-      { id: 'tog-super-speed',     addr: '1A96C0',   offVal: '00',       label: 'Super Speed',      size: 1 },
+      { id: 'tog-super-speed',     addr: '1A96C0',   offVal: '00',       label: 'Super Speed',      size: 1, preconditions: [['1A96C0', '04000000']] },
       { id: 'tog-variable-buff',   addr: '5E614',    offVal: '3F800000', label: 'Power Boost',    size: 4 },
       { id: 'tog-unl-sparrow',     addr: '50A700',   offVal: 'D023002C', label: 'Unlimited Sparrow Boost',size: 4 },
     ];
@@ -104,7 +104,7 @@
       const element = document.getElementById(definition.id);
       if (!element || (!element.classList.contains('active-cheat') && !requestedCheatState[definition.label])) continue;
       try {
-        const result = await patchRunner.apply(definition.pairs);
+        const result = await patchRunner.apply(definition.pairs, definition.preconditions ? {preconditions:definition.preconditions} : {});
         if (result.status !== 'verified') throw new Error('readback unavailable');
         cheatState[definition.label] = false; requestedCheatState[definition.label] = false;
         element.classList.remove('active-cheat'); updateCheatStatus(element,'verified-off'); verified++;
@@ -693,65 +693,6 @@
   // of calling this immediately (which was throwing and aborting the rest
   // of this script — including all the Settings modal code below it).
   document.addEventListener('DOMContentLoaded', tpRenderSlots);
-
-  // ── Fly / Speed Multiplier ────────────────────────────────────────────────
-  // Same base pointer chain as Teleport (0x190EBB0), offset +0x14C (332
-  // decimal) — the float immediately following Z (+0x148), contiguous with
-  // the position struct. Reuses readMemHex/ps3getmem so it gets the same
-  // HTML-response parsing and proc-scoping fixes as the rest of the tool.
-  const SPEED_OFFSET = 0x14C; // 332 decimal
-
-  async function readSpeed() {
-    if (!ip) { toast("Not connected", "err"); return; }
-    try {
-      const ptrHex = await readMemHex("190EBB0", 4);
-      if (!ptrHex) { toast("Failed to read player pointer", "err"); return; }
-
-      const baseAddr = parseInt(ptrHex, 16);
-      if (!baseAddr) { toast("Invalid pointer address", "err"); return; }
-
-      const speedHex = await readMemHex((baseAddr + SPEED_OFFSET).toString(16), 4);
-      if (!speedHex) { toast("Failed to read speed", "err"); return; }
-
-      const speedFloat = beHexToFloat(speedHex);
-      document.getElementById('speed-multiplier').value = speedFloat.toFixed(2);
-      log(`Speed read → x${speedFloat.toFixed(2)}`, 'ok');
-      toast("Speed read successfully", "ok");
-    } catch (e) {
-      toast("Error reading speed", "err");
-      log("Read speed error: " + e.message, "err");
-    }
-  }
-
-  async function writeSpeed() {
-    if (!ip) { toast("Not connected", "err"); return; }
-
-    const speedVal = parseFloat(document.getElementById('speed-multiplier').value);
-    if (isNaN(speedVal)) { toast("Enter a valid number", "err"); return; }
-
-    try {
-      const ptrHex = await readMemHex("190EBB0", 4);
-      if (!ptrHex) { toast("Failed to read player pointer", "err"); return; }
-
-      const baseAddr = parseInt(ptrHex, 16);
-      if (!baseAddr) { toast("Invalid pointer address", "err"); return; }
-
-      const speedAddr = (baseAddr + SPEED_OFFSET).toString(16).toUpperCase();
-      const hexSpeed = floatToBEHex(speedVal);
-
-      await verifiedMemoryValue(speedAddr,hexSpeed);
-      log(`Speed set → x${speedVal} (${hexSpeed})`, 'ok');
-      toast("Speed applied!", "ok");
-    } catch (e) {
-      toast("Failed to apply speed", "err");
-      log("Write speed error: " + e.message, "err");
-    }
-  }
-
-  async function resetSpeed() {
-    document.getElementById('speed-multiplier').value = '1.00';
-    await writeSpeed();
-  }
 
   // ── Character Utilities (Character Utilities) ───────────────
   const CHAR_NAME_ADDR       = 0x32486DC4;
@@ -1568,6 +1509,7 @@
     { id: 'sec-damage-tuning',       label: 'Damage Tuning',   setup: true,  description: 'Custom damage-value controls and presets.' },
     { id: 'sec-fov',                 label: 'FOV',             setup: true,  description: 'Field-of-view controls.' },
     { id: 'sec-overwalls',            label: 'Overwalls Tools', setup: true,  description: 'Overwalls scenario, routine, inventory and Flyhack workflows.' },
+    { id: 'sec-local-data',           label: 'Local Data & Diagnostics', setup: true, description: 'Read-only game snapshots, offline payloads and user-supplied catalogs.' },
     { id: 'sec-custom-offset',       label: 'Custom Offset',   setup: true,  description: 'Manual memory address/value tools.', recommended: false },
     { id: 'sec-ps3-notify',          label: 'PS3 System Notification', setup: true, description: 'Send a documented PS3MAPI system notification.' },
     { id: 'sec-jukebox',             label: 'PS3 Jukebox',     setup: true, description: 'Play source-defined PS3 system tone sequences.' },
@@ -2183,7 +2125,8 @@
     await loadActivity(parseInt(sel.value));
   }
 
-  // Mirrors C# button15: reads current activity index from first address.
+  // Mirrors the local Activity Loader source: activityRead() reads decimal
+  // 811954340 (0x306570A4), the second address in the write list.
   // Read 4 bytes and take the first 2 (big-endian UInt16) — reading len=2 via
   // PS3MAPI can return a padded/misaligned response that inflates the value.
   async function readCurrentActivity() {
@@ -2192,7 +2135,7 @@
       // ReadUInt16 on PS3 (big-endian): read 2 bytes — the index is in the
       // FIRST 2 bytes (hex chars 0–3), not the last 2.  The old slice(4,8)
       // was reading the wrong half and producing garbage values.
-      const hex = await ps3getmem(ACT_ADDRS[0], 2);
+      const hex = await ps3getmem(ACT_ADDRS[1], 2);
       const idx = parseInt(hex.slice(0, 4), 16); // big-endian UInt16
       if (!idx || idx > ALL_ACTIVITIES.length) {
         log(`Read activity: unexpected index ${idx} — are you in a game?`, 'err');
@@ -2350,7 +2293,8 @@
       'sec-ammo-editor',
       'sec-screenshots',
       'sec-scanner',
-      'sec-useless'
+      'sec-useless',
+      'sec-local-data'
     ]
   };
 
@@ -2822,6 +2766,46 @@
     session: () => ip && document.getElementById('status-badge').classList.contains('connected') ? `${connectionGeneration}:${ip}` : '',
     read: (address, length) => ps3getmem(parseInt(address, 16), length)
   });
+  function activitySessionOwner() {
+    const badge = document.getElementById('status-badge');
+    return ip && badge?.classList.contains('connected') ? `${connectionGeneration}:${ip}` : '';
+  }
+  const activitySessionReadCapabilities = new WeakMap();
+  const ACTIVITY_READ_MAX = 0x100; // webMAN PS3MAPI clamps GETMEM to 256 bytes per request.
+  const activitySessionMemoryApi = Object.freeze({
+    session: activitySessionOwner,
+    async verify(expectedSession) {
+      if (!expectedSession || activitySessionOwner() !== expectedSession) throw new Error('Console session changed; reconnect and retry');
+      const result = await buildCompatibilityGuard.inspect();
+      if (activitySessionOwner() !== expectedSession) throw new Error('Console session changed during build verification');
+      if (result.status !== 'verified' || result.profile !== 'BLES01857 01.24 signature profile') {
+        throw new Error('BLES01857 01.24 signature check failed; session inspection refused');
+      }
+      const capability = Object.freeze({});
+      activitySessionReadCapabilities.set(capability, { session: expectedSession, reads: 0, bytes: 0 });
+      return { profile: result.profile, anchors: result.anchors.length, capability };
+    },
+    async read(address, length, expectedSession, capability) {
+      const budget = activitySessionReadCapabilities.get(capability);
+      if (!budget || budget.session !== expectedSession) throw new Error('Verify the BLES01857 01.24 profile before reading session memory');
+      if (!expectedSession || activitySessionOwner() !== expectedSession) throw new Error('Console session changed; read refused');
+      if (!Number.isSafeInteger(address) || address < 0x10000 || address >= 0x40000000 ||
+          !Number.isInteger(length) || length < 1 || length > 0x600 || address + length > 0x40000000) {
+        throw new Error('Activity inspector read is outside its bounded PS3 user-memory range');
+      }
+      const requestCount = Math.ceil(length / ACTIVITY_READ_MAX);
+      if (budget.reads + requestCount > 192 || budget.bytes + length > 0x8000) throw new Error('Activity inspector snapshot read budget exceeded');
+      budget.reads += requestCount;
+      budget.bytes += length;
+      return RtmMemoryReadChunks.readHexChunks(address, length, ps3getmem, {
+        chunkBytes: ACTIVITY_READ_MAX,
+        assertCurrent() {
+          if (activitySessionOwner() !== expectedSession) throw new Error('Console session changed during memory read');
+        }
+      });
+    }
+  });
+  window.rtmActivitySessionMemory = activitySessionMemoryApi;
   function ensureDestinyWriteProfile() {
     return buildCompatibilityGuard.ensure();
   }
@@ -2861,9 +2845,17 @@
       state.textContent = anchor.status === 'match' ? 'Match' : anchor.status === 'mismatch' ? 'Mismatch' : 'Unreadable';
       const detail = document.createElement('span');
       detail.className = 'build-profile-result-detail';
-      if (anchor.status === 'match') detail.textContent = anchor.observed;
-      else if (anchor.status === 'mismatch') detail.textContent = `Observed ${anchor.observed} · expected ${anchor.expected}`;
-      else detail.textContent = anchor.error || 'No bytes returned';
+      if (anchor.status === 'match') {
+        const observed = document.createElement('code');
+        observed.textContent = anchor.observed;
+        detail.append(observed);
+      } else if (anchor.status === 'mismatch') {
+        const observed = document.createElement('code');
+        const expected = document.createElement('code');
+        observed.textContent = anchor.observed;
+        expected.textContent = anchor.expected;
+        detail.append('Observed ', observed, ' · expected ', expected);
+      } else detail.textContent = anchor.error || 'No bytes returned';
 
       item.append(identity, state, detail);
       list.append(item);
@@ -2927,6 +2919,39 @@
     },
     read: (address, length, options) => ps3getmem(address, length, options.timeoutMs || 8000)
   });
+  const SPAWN_EXECUTOR_WRITE_RANGES = Object.freeze([
+    Object.freeze([0x00354074, 0x00354078]), // the one verified hook instruction
+    Object.freeze([0x0183E000, 0x01840000]), // bootstrap and emitted program
+    Object.freeze([0x01C74000, 0x01C74008]), // BRX1 header
+    Object.freeze([0x01C74010, 0x01C74050]), // eight callback/context descriptors
+    Object.freeze([0x01C75000, 0x01C76CD0])  // the exact 0x1CD0 BRC1 block
+  ]);
+  function isSpawnExecutorWriteRange(address, length) {
+    const end = address + length;
+    return SPAWN_EXECUTOR_WRITE_RANGES.some(([start, limit]) => address >= start && end <= limit && end > address);
+  }
+  const spawnExecutorMemoryApi = Object.freeze({
+    session: activitySessionOwner,
+    async writeIfEqual(owner, address, expectedHex, replacementHex) {
+      const before = String(expectedHex || '').replace(/\s/g, '').toUpperCase();
+      const after = String(replacementHex || '').replace(/\s/g, '').toUpperCase();
+      if (!Number.isSafeInteger(address) || address < 0x10000 || address >= 0x40000000 ||
+          !/^(?:[0-9A-F]{2})+$/.test(before) || before.length !== after.length ||
+          !/^(?:[0-9A-F]{2})+$/.test(after) || before.length > 0x200 ||
+          !isSpawnExecutorWriteRange(address, before.length / 2)) {
+        throw new Error('Spawn executor write is outside its exact BLES 01.24-owned ranges or length bounds');
+      }
+      if (!owner || activitySessionOwner() !== owner) throw new Error('Console session changed; spawn executor write refused');
+      const result = await patchRunner.apply([[address, after]], {
+        preconditions: [[address, before]],
+        timeoutMs: 8000
+      });
+      if (activitySessionOwner() !== owner) throw new Error('Console session changed during spawn executor write');
+      if (result.status !== 'verified') throw new Error('Spawn executor write did not pass exact readback verification');
+      return result;
+    }
+  });
+  window.rtmSpawnExecutorMemory = spawnExecutorMemoryApi;
   const requestedCheatState = Object.create(null);
   function ensureOperationSession(generation) {
     if (generation !== connectionGeneration) throw new Error('Console session changed; operation cancelled');
@@ -2945,7 +2970,7 @@
     });
   }
 
-  async function applyToggle(label, btn, pairsForState) {
+  async function applyToggle(label, btn, pairsForState, optionsForState = () => ({})) {
     if (!ip || !document.getElementById('status-badge').classList.contains('connected')) { setCheatStatusFromButton(btn, 'unknown'); toast('Not connected', 'err'); return; }
     if (btn?.disabled) return;
     const generation = connectionGeneration;
@@ -2956,7 +2981,8 @@
       if (isOn && btn?.id) await resolveCheatConflicts(btn.id);
       if (generation !== connectionGeneration) return;
       requestedCheatState[label] = isOn;
-      const result = await patchRunner.apply(pairsForState(isOn));
+      const patchOptions = typeof optionsForState === 'function' ? optionsForState(isOn) : optionsForState;
+      const result = await patchRunner.apply(pairsForState(isOn), patchOptions || {});
       if (generation !== connectionGeneration) return;
       requestedCheatState[label] = isOn;
       if (result.status === 'verified') {
@@ -2974,6 +3000,8 @@
       }
     } catch (error) {
       if (generation !== connectionGeneration) return;
+      if (cheatState[label] === undefined) delete requestedCheatState[label];
+      else requestedCheatState[label] = cheatState[label];
       btn?.classList.remove('active-cheat');
       setCheatStatusFromButton(btn, 'unknown');
       log(`${label}: ${error.message}`, 'err'); toast(`${label}: state unknown`, 'err');
@@ -2982,6 +3010,64 @@
   async function togFire(addr, onVal, offVal, label, btn, size = 4) {
     return applyToggle(label, btn, isOn => [[addr, isOn ? onVal : offVal]]);
   }
+  async function restoreSuperSpeedBaseline(btn) {
+    const address = '1A96C0';
+    const baseline = '00000000';
+    const patched = '04000000';
+    const status = document.getElementById('status-badge');
+    if (!ip || !status?.classList.contains('connected')) {
+      toast('Not connected', 'err');
+      return;
+    }
+    if (btn?.disabled) return;
+
+    const generation = connectionGeneration;
+    const targetIp = ip;
+    if (btn) btn.disabled = true;
+    try {
+      const profile = await buildCompatibilityGuard.inspect();
+      if (generation !== connectionGeneration || targetIp !== ip || !status.classList.contains('connected')) {
+        throw new Error('Console session changed during build verification');
+      }
+      if (profile.status !== 'verified') {
+        throw new Error('BLES01857 01.24 build signature did not match; no write was attempted');
+      }
+
+      const observed = await ps3getmem(parseInt(address, 16), 4);
+      if (generation !== connectionGeneration || targetIp !== ip || !status.classList.contains('connected')) {
+        throw new Error('Console session changed during patch-site inspection');
+      }
+      if (observed === baseline) {
+        log('Super Speed patch site already matches the 01.24 baseline', 'ok');
+        toast('Patch site already at baseline', 'ok');
+        return;
+      }
+      if (observed !== patched) {
+        throw new Error(`Patch site contains ${observed}; expected ${patched}. No write was attempted`);
+      }
+
+      const result = await patchRunner.apply([[address, baseline]], {
+        preconditions: [[address, patched]]
+      });
+      if (generation !== connectionGeneration || targetIp !== ip || !status.classList.contains('connected')) {
+        throw new Error('Console session changed during baseline restore');
+      }
+      if (result.status !== 'verified') throw new Error('Baseline write was not confirmed by memory readback');
+
+      cheatState['Super Speed'] = false;
+      requestedCheatState['Super Speed'] = false;
+      log('Super Speed patch site restored to the verified 01.24 baseline', 'ok');
+      toast('Super Speed patch baseline restored', 'ok');
+    } catch (error) {
+      if (generation === connectionGeneration && targetIp === ip) {
+        log(`Super Speed baseline restore refused: ${error.message}`, 'err');
+        toast(`Baseline restore refused: ${error.message}`, 'err');
+      }
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+  window.restoreSuperSpeedBaseline = restoreSuperSpeedBaseline;
   async function togFireMulti(onPairs, offPairs, label, btn) {
     return applyToggle(label, btn, isOn => isOn ? onPairs : offPairs);
   }

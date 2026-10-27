@@ -7,6 +7,7 @@
 <title>Destiny RTM</title>
 <link rel="stylesheet" href="base.css"/>
 <link rel="stylesheet" href="design.css"/>
+<link rel="stylesheet" href="catalog-browser.css"/>
 </head>
 <body>
 <script src="js/desktop-host.js"></script>
@@ -50,7 +51,8 @@
 <div class="status-badge" id="status-badge"
   role="button"
   tabindex="0"
-  title="Click to quickly reconnect using the current or saved PS3 IP"
+  aria-disabled="false"
+  title="Click to relink when the console is offline"
   onclick="quickReconnectFromBadge()"
   onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();quickReconnectFromBadge();}">OFFLINE</div>
 <button aria-label="Activity log" class="gear-btn" id="activity-log-btn" onclick="toggleActivityDock(); return false;" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 8px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:4px;" title="Activity log" type="button">
@@ -137,7 +139,7 @@
       <div class="settings-row" style="margin-top:8px;">
         <div>
           <div class="settings-label">Auto reconnect</div>
-          <div class="settings-help">If the PS3 stops responding, retry the saved/current IP automatically. This only refreshes the web connection — it does not reinstall hooks or write memory.</div>
+          <div class="settings-help">Optional: retry when PS3MAPI stops responding. The read-only server-version check waits while RTM requests are active; relinking does not restart PS3MAPI, reinstall hooks, or write memory. If webMAN lacks the version command, the app shows WEBMAN ONLINE and disables probe-driven relinking.</div>
         </div>
         <div class="appearance-toggle">
           <button class="appearance-btn" id="auto-reconnect-off" type="button" onclick="setAutoReconnect(false)">Off</button>
@@ -161,25 +163,27 @@
 </div>
 
 <!-- MACRO CREATION OVERLAY -->
-<div id="macro-overlay" onclick="closeMacroModalOutside(event)" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);">
-<div id="macro-modal" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem 1.2rem;min-width:260px;max-width:90vw;max-height:80vh;overflow-y:auto;display:flex;flex-direction:column;">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-<span style="font-family:var(--mono);font-size:0.85rem;color:var(--accent);letter-spacing:0.08em;">CREATE MACRO</span>
-<button onclick="closeMacroModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;line-height:1;padding:2px 6px;"></button>
+<div id="macro-overlay" class="macro-overlay" onclick="closeMacroModalOutside(event)">
+<div id="macro-modal" class="macro-modal" role="dialog" aria-modal="true" aria-labelledby="macro-modal-title">
+<div class="macro-modal-head">
+<h2 id="macro-modal-title" class="macro-modal-title">Create macro</h2>
+<button class="macro-modal-close" type="button" aria-label="Close macro dialog" onclick="closeMacroModal()">×</button>
 </div>
-<input id="macro-name-input" placeholder="Macro name…" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:#fff;padding:10px 14px;font-family:var(--sans);font-size:0.85rem;outline:none;margin-bottom:0.9rem;" type="text">
-<span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem;">Select Cheats (run top to bottom)</span>
-<div id="macro-cheat-list" style="display:flex;flex-direction:column;gap:0.45rem;overflow-y:auto;max-height:45vh;margin-bottom:1.1rem;"></div>
-<div style="display:flex;gap:0.5rem;">
-<button onclick="closeMacroModal()" style="flex:1;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.8rem;cursor:pointer;">Cancel</button>
-<button onclick="saveMacro()" style="flex:1;padding:8px;background:var(--accent);border:1px solid var(--accent);border-radius:8px;color:#fff;font-size:0.8rem;font-weight:600;cursor:pointer;">Save Macro</button>
+<label class="macro-modal-field" for="macro-name-input">Macro name
+<input id="macro-name-input" placeholder="Macro name…" type="text" autocomplete="off">
+</label>
+<p id="macro-cheat-list-label" class="macro-modal-list-label">Choose cheats to run, in order</p>
+<div id="macro-cheat-list" class="macro-cheat-list" aria-labelledby="macro-cheat-list-label"></div>
+<div class="macro-modal-actions">
+<button class="macro-modal-cancel" type="button" onclick="closeMacroModal()">Cancel</button>
+<button class="macro-modal-save" type="button" onclick="saveMacro()">Save macro</button>
 </div>
-</input></div>
+</div>
 </div>
 
 <div class="search-container" style="padding: 1rem 1rem 0;">
 <input id="cheat-search" oninput="filterCheats()" placeholder="Search cheats..." style="width: 100%; background: var(--surface); border: 1px solid var(--border);
-                border-radius: 8px; color: #fff; padding: 10px 14px;
+                border-radius: 8px; color: var(--text); padding: 10px 14px;
                 font-family: var(--sans); font-size: 0.85rem; outline: none;" type="text"/>
 </div>
 <!-- CONNECTION -->
@@ -300,7 +304,21 @@
 <script src="js/memory-features.js"></script>
 <script src="js/emblem-options.js"></script>
 <script src="js/build-compatibility.js"></script>
+<script src="js/memory-read-chunks.js"></script>
 <script src="js/app-core.js"></script>
+<script src="js/spawn-packet.js"></script>
+<script src="js/spawn-data-block.js"></script>
+<script src="js/spawn-executor-images.js"></script>
+<script src="js/spawn-executor-controller.js"></script>
+<script src="js/spawn-executor-runtime.js"></script>
+<script src="js/activity-session-inspector.js"></script>
+<script src="js/spawn-path-check.js"></script>
+<script src="js/spawn-region-preflight.js"></script>
+<script src="js/spawn-tag-resolver-probe.js"></script>
+<script src="js/actor-lookup-descriptor-probe.js"></script>
+<script src="js/player-appearance-probe.js"></script>
+<script src="js/live-inventory-pool.js"></script>
+<script src="js/resource-bootflow-snapshot.js"></script>
 <script src="js/jukebox.js"></script>
 <script src="js/player-scale-tools.js"></script>
 <script src="js/launch-tools.js"></script>
@@ -386,7 +404,8 @@
 <button class="cheat-btn" onclick="readCurrentActivity()" style="flex:1;font-size:0.75rem;padding:6px 10px;">Read Current</button>
 </div>
 </div>
-</div></div><!-- /.section-body -->
+</div><!-- /.activity-loader-panel -->
+</div><!-- /.section-body -->
 </div>
 </div><div class="section" id="sec-quick-access" style="padding-top:0">
 <p class="category-label" onclick="toggleSection('sec-quick-access')">Quick Access<svg class="collapse-chevron" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg></p>
@@ -399,7 +418,7 @@
   <div>
     <div class="quick-access-title">Macros</div>
     <div class="cheat-grid" id="macro-grid">
-<button class="cheat-btn" onclick="openMacroModal()" style="grid-column: span 2;">+ Create Macro</button>
+<button class="cheat-btn macro-create-button" onclick="openMacroModal()">+ Create macro</button>
 </div>
   </div>
 </div>
@@ -515,10 +534,15 @@
   <span class="cheat-desc">Keeps your Sparrow boost available while enabled.</span>
   <span class="addr"></span>
 </button>
-<button class="cheat-btn green" id="tog-super-speed" onclick="togFire('1A96C0','04','00','Super Speed',this,1)">
-  <span class="cheat-name">Super Speed</span>
-  <span class="cheat-desc">Greatly increases your movement speed.</span>
-  <span class="addr"></span>
+<button class="cheat-btn green" id="tog-super-speed" disabled aria-disabled="true" title="Disabled until the 01.24 Float32 addend and its gameplay role are understood">
+  <span class="cheat-name">Super Speed · unavailable</span>
+  <span class="cheat-desc">01.24 reads this as a Float32 addend in two vector-adjustment paths; the C# source changes only its first byte. Its gameplay role and speed effect remain unknown.</span>
+  <span class="addr">1A96C0 · Float32 use unresolved</span>
+</button>
+<button class="cheat-btn blue" id="restore-super-speed" onclick="restoreSuperSpeedBaseline(this)">
+  <span class="cheat-name">Restore Super Speed patch baseline</span>
+  <span class="cheat-desc">Only restores 04000000 to 00000000 after build and site checks.</span>
+  <span class="addr">01.24 only · readback verified</span>
 </button>
 <button class="cheat-btn gold" id="tog-variable-buff" onclick="togFire('5E614','403F0004','3F800000','Power Boost',this)">
   <span class="cheat-name">Power Boost</span>
@@ -1049,6 +1073,256 @@
     </div>
     <textarea id="ow-memory-dump" class="ow-dump-output" rows="7" spellcheck="false" readonly placeholder="Memory read results appear here as hex."></textarea>
   </div>
+
+</div>
+<div class="section" id="sec-local-data" style="padding-top:0">
+  <p class="category-label" onclick="toggleSection('sec-local-data')">Local Data &amp; Diagnostics<svg class="collapse-chevron" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg></p>
+  <div class="section-body">
+
+  <p class="local-data-section-note">Live checks run on demand against the BLES 01.24 profile and only read memory. Snapshot values may change during capture. Local catalog and payload tools stay in this page.</p>
+  <div class="local-data-live-grid">
+    <div class="panel" id="activity-session-inspector-panel">
+      <div class="panel-header">Activity &amp; Session Snapshot</div>
+      <div class="activity-session-inspector-body">
+        <p class="compact-help-note">Capture current activity and session fields from the verified game process.</p>
+        <button class="cheat-btn" id="activity-session-inspect-btn" type="button" onclick="inspectActivitySessions()">Read live session</button>
+        <p id="activity-session-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">No session snapshot taken.</p>
+        <pre id="activity-session-output" class="appearance-probe-output" aria-label="Activity and session snapshot" role="region" tabindex="0" hidden></pre>
+      </div>
+    </div>
+    <div class="panel" id="player-appearance-probe-panel">
+      <div class="panel-header">Local Player Appearance</div>
+      <div class="appearance-probe-body">
+        <p class="compact-help-note">Inspect two short raw windows for the matched local player. Owner bytes are used only for matching.</p>
+        <button class="cheat-btn" id="player-appearance-probe-btn" type="button" onclick="inspectLocalPlayerAppearance()">Read local appearance</button>
+        <p id="player-appearance-probe-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">No player appearance sample taken.</p>
+        <pre id="player-appearance-probe-output" class="appearance-probe-output" aria-label="Local player appearance sample" role="region" tabindex="0" hidden></pre>
+      </div>
+    </div>
+    <div class="panel" id="live-inventory-pool-panel">
+      <div class="panel-header">Live Item Cache · BLES 01.24</div>
+      <div class="live-inventory-pool-body">
+        <p class="compact-help-note">List occupied item-cache slots and indexes. Labels use an exact hash/tag match from the validated BLES 01.24 definition table, or an explicitly BLES-indexed catalog.</p>
+        <div class="live-inventory-pool-actions">
+          <button class="cheat-btn" id="live-inventory-pool-btn" type="button" onclick="inspectLiveItemPool()">Read live item pool</button>
+          <button class="cheat-btn" id="live-inventory-pool-clear" type="button">Clear snapshot</button>
+        </div>
+        <p id="live-inventory-pool-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">No live item-pool snapshot taken.</p>
+        <div id="live-inventory-pool-output" class="live-inventory-pool-output" aria-label="Live item pool slots, indexes, and optional catalog names" role="region" tabindex="0" hidden></div>
+      </div>
+    </div>
+    <div class="panel" id="spawn-path-check-panel">
+      <div class="panel-header">Spawn Path · code check</div>
+      <div class="spawn-path-check-body">
+        <p class="compact-help-note">Compare live code with Blackrock’s hook and BLES object-creation paths. A match does not validate a tag or run spawning.</p>
+        <button class="cheat-btn" id="spawn-path-check-btn" type="button" onclick="inspectSpawnPathCode()">Check spawn-path code</button>
+        <p id="spawn-path-check-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">No spawn-path code check taken.</p>
+        <div id="spawn-path-check-output" class="spawn-path-check-results" aria-label="Spawn-path code signature results" hidden></div>
+      </div>
+    </div>
+    <div class="panel" id="spawn-tag-resolver-panel">
+      <div class="panel-header">Spawn Tag · handle lookup</div>
+      <div class="spawn-tag-resolver-body">
+        <p class="compact-help-note">Check one content tag against the live packed-handle table. Lookup does not prove the resolved object class.</p>
+        <label class="field-label" for="spawn-tag-resolver-input">32-bit tag · Vex Minotaur candidate
+          <input class="hex-input" id="spawn-tag-resolver-input" type="text" value="815BA133" maxlength="10" autocomplete="off" spellcheck="false" />
+        </label>
+        <button class="cheat-btn" id="spawn-tag-resolver-btn" type="button" onclick="inspectSpawnTagResolver()">Check tag lookup</button>
+        <p id="spawn-tag-resolver-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">No tag lookup taken.</p>
+        <pre id="spawn-tag-resolver-output" class="appearance-probe-output" aria-label="Packed-handle resolution candidate" role="region" tabindex="0" hidden></pre>
+      </div>
+    </div>
+    <div class="panel" id="spawn-region-preflight-panel">
+      <div class="panel-header">Spawn Executor · region preflight</div>
+      <div class="appearance-probe-body">
+        <p class="compact-help-note">Check whether Blackrock’s three scratch ranges are zero now. This does not reserve them or install the executor.</p>
+        <button class="cheat-btn" id="spawn-region-preflight-btn" type="button" onclick="inspectSpawnExecutorRegions()">Check executor regions</button>
+        <p id="spawn-region-preflight-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">No executor-region check taken.</p>
+        <pre id="spawn-region-preflight-output" class="appearance-probe-output" aria-label="Spawn executor region availability results" role="region" tabindex="0" hidden></pre>
+      </div>
+    </div>
+    <div class="panel" id="spawn-executor-panel">
+      <div class="panel-header">Enemy Spawn · Blackrock operation 1</div>
+      <div class="spawn-executor-body">
+        <p class="compact-help-note">Recovered from Blackrock's emitted BLES 01.24 executor. The hook write, instruction-cache behavior, tag-to-class mapping, and placement have not been validated on a live console. The catalog's type 9 is not proven to be the expected-type guard value; the field defaults to -1, which disables that guard. Do not run Blackrock's spawn tool or another RTM instance at the same time: their shared queue has no cross-client reservation. Install and spawn are explicit actions; test on a development PS3.</p>
+        <ol class="compact-help-note spawn-workflow-steps">
+          <li>Link the same BLES01857 01.24 console and put Destiny in a playable area where game frames are advancing. A loading screen, menu, or paused game will not service the command. Avoid running another Blackrock/RTM spawn client at the same time.</li>
+          <li>Import/select a tag, leave the expected-type guard at -1 unless its BLES 01.24 class byte is known, and set count, raw mode words, and pose values. The tag must resolve in the running game; the optional tag lookup only checks a pointer candidate and does not prove it is an enemy.</li>
+          <li>If no executor is already active for this Destiny session, press <strong>Install executor</strong>. It repeats the build/signature and zero-region checks before writing. Blackrock installs its base bootstrap during runtime setup and lazily ensures the spawn handler on dispatch; this RTM combines both setup stages in this one button. If Destiny restarted since an earlier install, recover its stale journal before installing again.</li>
+          <li>Press <strong>Spawn selected tag</strong> and wait for a terminal result. While the executor remains installed, further requests can be submitted without reinstalling.</li>
+          <li>After the final request, press <strong>Recover hook</strong>. If recovery leaves executor images resident, restart Destiny before installing again.</li>
+          <li>After a disconnect, relink to the same console and press <strong>Check pending request</strong> before recovery. If it is still active, wait; cancel only if needed, then reconcile again. Recover only after the pending result is cleared.</li>
+        </ol>
+        <div class="spawn-executor-meta"><span id="spawn-executor-journal-state">Journal: loading…</span><span id="spawn-executor-progress" aria-live="polite">Idle</span></div>
+        <div class="spawn-executor-grid">
+          <label for="spawn-tag-input">Entity tag · hex<input class="hex-input" id="spawn-tag-input" value="815BA133" maxlength="10" spellcheck="false" autocomplete="off"></label>
+          <label for="spawn-expected-type">Expected-type guard · optional<input class="hex-input" id="spawn-expected-type" type="number" min="-1" max="255" step="1" value="-1" aria-describedby="spawn-type-help"></label>
+          <label for="spawn-mode-94">Placement mode · +0x94<select class="hex-input" id="spawn-mode-94">
+            <option value="0">Crosshair</option>
+            <option value="1">Player position</option>
+            <option value="2">Coordinates</option>
+          </select></label>
+          <label for="spawn-mode-98">Facing · +0x98<select class="hex-input" id="spawn-mode-98">
+            <option value="0">Face me</option>
+            <option value="1">Along aim</option>
+            <option value="2">World axes</option>
+          </select></label>
+          <label for="spawn-mode-a0">Player position source · +0xA0<select class="hex-input" id="spawn-mode-a0">
+            <option value="0">Engine position · sObject +0xB0</option>
+            <option value="1">Player position · +0x2810 (PS3 unverified)</option>
+          </select></label>
+          <label for="spawn-count">Count · 1–32<input class="hex-input" id="spawn-count" type="number" min="1" max="32" step="1" value="1"></label>
+        </div>
+        <p class="compact-help-note">Crosshair uses the rendered camera at the distance below, with no wall raycast; the emitted command aims at screen center. Player position uses the selected source plus offsets. Coordinates uses X/Y/Z below. The engine position at +0xB0 is verified; +0x2810 is Blackrock's Xbox-derived source and remains unverified on PS3. Facing labels follow Blackrock's tooltip order; their enum order is inferred from the static UI trace.</p>
+        <div class="spawn-placement-shortcuts" aria-label="Blackrock placement shortcuts">
+          <button class="cheat-btn" id="spawn-at-crosshair-btn" type="button" onclick="setSpawnPlacementPreset('crosshair')">At Crosshair</button>
+          <button class="cheat-btn" id="spawn-at-position-btn" type="button" onclick="setSpawnPlacementPreset('player')">At My Position</button>
+        </div>
+        <div class="spawn-executor-grid spawn-catalog-picker">
+          <label for="spawn-catalog-search">Filter imported spawn tags<input class="hex-input" id="spawn-catalog-search" type="search" autocomplete="off" placeholder="Search labels, tags or catalog files…"></label>
+          <label for="spawn-catalog-entry">Copy a tag from an imported catalog<select class="hex-input" id="spawn-catalog-entry"><option value="">No matching imported tags</option></select></label>
+        </div>
+        <p id="spawn-catalog-status" class="compact-help-note" role="status" aria-live="polite">Import a Spawn / hop-on catalog with a tag column, then filter to find a candidate. Catalog type is not known to match the runtime class byte.</p>
+        <details class="spawn-executor-pose">
+          <summary>Placement values · nine Float32 fields</summary>
+        <p id="spawn-type-help" class="compact-help-note">Use -1 to disable the expected-type guard. Only enter a class byte after it has been verified for BLES 01.24; the catalog's type 9 has not been shown to match this field.</p>
+          <p class="compact-help-note">Blackrock's recovered defaults are 6 m distance, 2 m spacing, and 1× scale. Its packet builder maps pose[2] to scale and rejects values at or below zero. Pose[0] is aim distance, pose[1] is grid spacing, pose[3..5] are world offsets, and pose[6..8] supply coordinates in Coordinates mode. Keep unused fields at zero.</p>
+          <div class="spawn-executor-grid spawn-pose-grid">
+            <label for="spawn-pose-0">Distance · pose[0], +0xA4<input class="hex-input" id="spawn-pose-0" type="number" step="any" value="6"></label>
+            <label for="spawn-pose-1">Spacing · pose[1], +0xA8<input class="hex-input" id="spawn-pose-1" type="number" step="any" value="2"></label>
+            <label for="spawn-pose-2">Scale · pose[2], +0xAC (positive)<input class="hex-input" id="spawn-pose-2" type="number" step="any" min="0.000001" value="1"></label>
+            <label for="spawn-pose-3">Offset X · pose[3], +0xB0<input class="hex-input" id="spawn-pose-3" type="number" step="any" value="0"></label>
+            <label for="spawn-pose-4">Offset Y · pose[4], +0xB4<input class="hex-input" id="spawn-pose-4" type="number" step="any" value="0"></label>
+            <label for="spawn-pose-5">Offset Z · pose[5], +0xB8<input class="hex-input" id="spawn-pose-5" type="number" step="any" value="0"></label>
+            <label for="spawn-pose-6">Coordinate X · pose[6], +0xBC<input class="hex-input" id="spawn-pose-6" type="number" step="any" value="0"></label>
+            <label for="spawn-pose-7">Coordinate Y · pose[7], +0xC0<input class="hex-input" id="spawn-pose-7" type="number" step="any" value="0"></label>
+            <label for="spawn-pose-8">Coordinate Z · pose[8], +0xC4<input class="hex-input" id="spawn-pose-8" type="number" step="any" value="0"></label>
+          </div>
+        </details>
+        <div class="resource-bootflow-actions spawn-executor-actions">
+          <button class="cheat-btn" id="spawn-executor-install-btn" type="button" onclick="installSpawnExecutor()">Install executor</button>
+          <button class="cheat-btn" id="spawn-executor-submit-btn" type="button" onclick="submitSpawnRequest()">Spawn selected tag</button>
+          <button class="cheat-btn" id="spawn-executor-cancel-btn" type="button" onclick="cancelSpawnRequest()">Cancel active request</button>
+          <button class="cheat-btn" id="spawn-executor-reconcile-btn" type="button" onclick="reconcileSpawnRequest()" disabled>Check pending request</button>
+          <button class="cheat-btn" id="spawn-executor-recover-btn" type="button" onclick="recoverSpawnExecutor()">Recover hook</button>
+        </div>
+        <p id="spawn-executor-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">No spawn executor action taken.</p>
+        <pre id="spawn-executor-output" class="appearance-probe-output" aria-label="Enemy spawn executor result" role="region" tabindex="0" hidden></pre>
+      </div>
+    </div>
+    <div class="panel" id="actor-lookup-descriptor-panel">
+      <div class="panel-header">Actor Lookup Descriptor · BLES 01.24</div>
+      <div class="appearance-probe-body">
+        <p class="compact-help-note">Inspect the actor-lookup descriptor only. Its relation to the AI pool and capacity are unresolved; records are not read.</p>
+        <div class="resource-bootflow-actions">
+          <button class="cheat-btn" id="actor-lookup-descriptor-read-btn" type="button" onclick="inspectActorLookupDescriptor()">Read lookup descriptor</button>
+          <button class="cheat-btn" id="actor-lookup-descriptor-clear-btn" type="button">Clear snapshot</button>
+        </div>
+        <p id="actor-lookup-descriptor-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">No actor-lookup descriptor sample taken.</p>
+        <pre id="actor-lookup-descriptor-output" class="appearance-probe-output" aria-label="BLES actor-lookup descriptor fields" role="region" tabindex="0" hidden></pre>
+      </div>
+    </div>
+    <div class="panel" id="resource-bootflow-panel">
+      <div class="panel-header">Resource / Bootflow Snapshot · BLES 01.24</div>
+      <div class="resource-bootflow-body">
+        <p class="compact-help-note">Inspect bootflow, resource slots, scheduler, and readiness fields. This is not a tag-loader queue view.</p>
+        <div class="resource-bootflow-actions">
+          <button class="cheat-btn" id="resource-bootflow-read-btn" type="button" onclick="inspectResourceBootflow()">Read resource state</button>
+          <button class="cheat-btn" id="resource-bootflow-clear-btn" type="button">Clear snapshot</button>
+        </div>
+        <p id="resource-bootflow-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">No resource/bootflow snapshot taken.</p>
+        <div id="resource-bootflow-output" class="resource-bootflow-output" aria-label="Resource and bootflow snapshot" role="region" tabindex="0" hidden></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="local-catalog-browser">
+    <div class="panel-header">Local catalog browser</div>
+    <div class="local-catalog-body">
+      <p class="local-catalog-intro">Browse your own activity, spawn, hop-on, item or loot catalogs. Live inventory can use either a BLES itemIndex or blesItemIndex column, or an exact hash and tag pair from the validated BLES 01.24 definition table. Generic IDs and the other build's def ordinal are never joined. Files stay in this page's memory; this panel does not contact the network or read game memory.</p>
+      <div class="local-catalog-import-grid">
+        <label class="local-catalog-control local-catalog-file-control" for="local-catalog-files">
+          Catalog files
+          <input id="local-catalog-files" type="file" multiple accept=".csv,.tsv,.json,.txt,text/csv,text/tab-separated-values,application/json,text/plain" />
+        </label>
+        <label class="local-catalog-control" for="local-catalog-type">
+          Catalog type
+          <select id="local-catalog-type">
+            <option value="auto">Detect from filename</option>
+            <option value="activity">Activity</option>
+            <option value="spawn-hopon">Spawn / hop-on</option>
+            <option value="item-loot">Item / loot</option>
+            <option value="world-data">World data</option>
+            <option value="general">General</option>
+          </select>
+        </label>
+      </div>
+      <div class="local-catalog-actions">
+        <button class="btn-connect" id="local-catalog-import" type="button">Import selected</button>
+        <button class="cheat-btn" id="local-catalog-clear" type="button" disabled>Clear catalogs</button>
+          <span class="local-catalog-limits">CSV / TSV / JSON / TXT · up to 8 files · 8,000 rows/file · 10,000 rows total · 4 MB each · 8 MB total</span>
+      </div>
+      <p class="local-catalog-status" id="local-catalog-status" role="status" aria-live="polite">No catalogs loaded.</p>
+
+      <div class="local-catalog-library" id="local-catalog-library" hidden>
+        <div class="local-catalog-browse-grid">
+          <label class="local-catalog-control" for="local-catalog-select">
+            Catalog
+            <select id="local-catalog-select"></select>
+          </label>
+          <label class="local-catalog-control" for="local-catalog-search">
+            Search rows
+            <input id="local-catalog-search" type="search" autocomplete="off" placeholder="Search this catalog…" />
+          </label>
+          <label class="local-catalog-control" for="local-catalog-field">
+            Search field
+            <select id="local-catalog-field"><option value="">All fields</option></select>
+          </label>
+        </div>
+        <div class="local-catalog-metadata" id="local-catalog-metadata" aria-live="polite"></div>
+        <div class="local-catalog-schema" id="local-catalog-schema"></div>
+        <div class="local-catalog-table-wrap">
+          <table class="local-catalog-table">
+            <thead id="local-catalog-head"></thead>
+            <tbody id="local-catalog-rows"></tbody>
+          </table>
+        </div>
+        <p class="local-catalog-preview-note" id="local-catalog-preview-note"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="offline-inventory-snapshot">
+    <div class="panel-header">Offline inventory snapshot · BLES 01.24</div>
+    <div class="offline-inventory-body">
+      <p class="local-catalog-intro">Decode explicitly selected BLES 01.24 account and character wire payload files. This reads no console memory, performs no network requests or writes, and keeps the decoded rows only in this page. Instance and owner IDs are never displayed or saved. Equipped-position labels appear only at verified inventory starts. Catalog names appear only when an imported catalog is explicitly keyed by BLES itemIndex or blesItemIndex in the valid 0–3180 range. The account section is an unverified vault-like candidate, not a confirmed live vault.</p>
+      <div class="offline-inventory-import-grid">
+        <div class="offline-inventory-import">
+          <label class="local-catalog-control" for="offline-character-payload">
+            Character QZ wire payload · 28,104 bytes
+            <input id="offline-character-payload" type="file" accept=".bin,.dat,application/octet-stream" />
+          </label>
+          <button class="btn-connect" id="offline-character-load" type="button">Read character file</button>
+          <p class="local-catalog-status" id="offline-character-status" role="status" aria-live="polite">No character payload loaded.</p>
+          <div class="offline-inventory-table-wrap" id="offline-character-rows" aria-label="Character inventory slots, verified equipped positions, and optional catalog names" hidden></div>
+        </div>
+        <div class="offline-inventory-import">
+          <label class="local-catalog-control" for="offline-account-payload">
+            Account QZ wire payload · 28,768 bytes
+            <input id="offline-account-payload" type="file" accept=".bin,.dat,application/octet-stream" />
+          </label>
+          <button class="cheat-btn" id="offline-account-load" type="button">Read account candidate</button>
+          <p class="local-catalog-status" id="offline-account-status" role="status" aria-live="polite">No account payload loaded.</p>
+          <div class="offline-inventory-table-wrap" id="offline-vault-candidate-rows" aria-label="Unverified vault-like candidate slots and optional catalog names" hidden></div>
+        </div>
+      </div>
+      <div class="local-catalog-actions">
+        <button class="cheat-btn" id="offline-inventory-clear" type="button">Clear decoded rows</button>
+        <span class="local-catalog-limits">Exact QZ header and file size required · big-endian · slot and item index only</span>
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 
 <div class="section" id="sec-custom-offset" style="padding-top:0">
@@ -1395,8 +1669,9 @@
 
 <script src="js/onboarding-guides.js"></script>
 
-<script src="js/header-art.js"></script>
 
 <script src="js/welcome-art.js"></script>
 <script src="js/scenario-library.js"></script>
 <script src="js/overwalls-tools.js"></script>
+<script src="js/local-catalogs.js"></script>
+<script src="js/offline-inventory-snapshot.js"></script>

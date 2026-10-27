@@ -34,11 +34,12 @@
     };
     action('Export diagnostics', () => download('destiny-rtm-diagnostics.json', {
       format: 'destiny-rtm-diagnostics', version: 1, exportedAt: new Date().toISOString(),
-      requests: consoleTransport.diagnostics()
+      requests: consoleTransport.diagnostics(),
+      connection: window.rtmConnectionDiagnostics?.() || []
     }));
     panel.append(controls, input);
     const note = document.createElement('p'); note.style.cssText = 'padding:0 1rem 1rem;color:var(--muted);font-size:13px';
-    note.textContent = 'Back up positions, folders, macros, pins and preferences. Active console states are excluded. Diagnostics omit IP addresses, memory values and notification text.';
+    note.textContent = 'Back up positions, folders, macros, pins and preferences. Active console states are excluded. Diagnostics include recent request outcomes and connection events, but omit IP addresses, memory values and notification text.';
     panel.append(note); section.append(panel);
     document.getElementById('sec-custom-offset').before(section);
     RTM_TAB_GROUPS.tools.push(section.id); applyRTMTab();

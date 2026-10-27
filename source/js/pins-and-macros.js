@@ -205,12 +205,12 @@
     document.querySelectorAll('.cheat-btn[id]').forEach(btn => {
       const label = getCheatLabel(btn);
       const row = document.createElement('label');
-      row.style.cssText = 'display:flex;align-items:center;gap:10px;cursor:pointer;padding:7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);user-select:none;font-size:0.8rem;';
+      row.className = 'macro-cheat-row';
 
       const cb = document.createElement('input');
       cb.type = 'checkbox';
+      cb.className = 'macro-cheat-checkbox';
       cb.value = btn.id;
-      cb.style.cssText = 'width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;';
 
       const span = document.createElement('span');
       span.textContent = label;
@@ -221,7 +221,9 @@
     });
 
     document.getElementById('macro-name-input').value = '';
-    document.getElementById('macro-overlay').style.display = '';
+    const overlay = document.getElementById('macro-overlay');
+    overlay.style.display = 'flex';
+    document.getElementById('macro-name-input').focus();
   }
 
   function closeMacroModal() {

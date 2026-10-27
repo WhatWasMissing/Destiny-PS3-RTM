@@ -19,6 +19,7 @@ builds use different offsets and were not used as address references.
 | Ammo Editor | Reworked as a read-only, chunked 4 MiB scan. Primary/secondary/heavy use the source's 8-byte reserve/magazine signature and `0x80A6` marker; special ammo uses its Float32 signature, `01 00 00 00` suffix, and `0x8080` marker at `+40`. It lists candidates and requires selecting one address. Writes are verified, guarded rollback is attempted on partial failure, and successful edits can be restored in reverse order while each slot still matches. |
 | Screenshots | The five local C# capture profiles now have independent web gallery slots with per-profile preview, PNG/JPEG download, PNG clipboard copy, and Fit/Stretch controls. Re-capturing one profile replaces only its prior image. Reads are chunked. Optional pause capture checks the source-identified branch at `0x006155BC`, writes the known paused instruction only when the original word matches, and restores only if the site still contains the original or patched word. Failed recovery remains saved locally and blocks another capture until recovery. Older saved recovery records are still handled at their original single-byte address. |
 | ISO game launch | Added the source sequence from the newer local RTM: mount `/dev_hdd0/PS3ISO/<file>.iso` with `mode=silent`, wait 3 seconds, return to `/wmnav.ps3/game`, wait 1 second, then request `/play.ps3`. The ISO path is restricted to a filename directly inside `PS3ISO`. Each HTTP response is reported by stage; it does not confirm Destiny started. The desktop MCP tool uses the same sequence. |
+| Teleport activation variants | Overwalls C# writes XYZ at the player pointer `+0x140`, then Float32 `1.0` at `+0x1B8`; its OPK routine does the same for the separate target pointer. The Overwalls tab mirrors this as External mode, while Internal mode writes `1.0` at `0x01FFF028`. Main Quick Teleport remains XYZ-only. The 01.24 ELF contains code at `0x007580C0` reading a float triplet at object offsets `+0x1B8/+0x1BC/+0x1C0`, but no link to the player pointer was established. The source order is preserved in the explicit mode; runtime effect is unobserved. |
 | Player Size | Ported the local C# name-to-object lookup and Float32 scale formula for the `0.3`, `1`, `2`, and `20` source values. The app and MCP tool check the 01.24 resolver/helper signatures, emulate the lookup with reads instead of calling the game function, recheck identity and pointer mapping before writes, and require exact scale readback. In-game effect and persistence remain unconfirmed. |
 | Damage preset label discrepancy | Overwalls C# and the legacy HTML toggle label the `0x0043E626` `0x4120` halfword “4x Damage,” while that HTML calculator maps the same bytes to its “10×” preset. The app exposes one shared “Damage Preset” control and explains both source labels. The 01.24 build confirms the patch site/OFF bytes, not the actual multiplier. |
 | Experimental Scalar Preset | The recovered RTM's two source labels target the same literal-pool Float32 at `0x004449EC`: Normal `3F800000`, “Max Damage” `3FFFFFFF` (~2), and “1 Hit Kill 2” `42C80000` (100). In 01.24, four callers initialize a 0x140-byte record through `0x0044CAB0`, which sets `+0x11C` to 1.0, then call the consumer at `0x00444A00`. It multiplies `+0x11C` by a ratio, or by the literal-pool scalar when the denominator is below ~0.0001. No direct caller read establishes what `+0x11C` represents, so the source gameplay labels remain unverified. The experimental app/MCP write requires the exact `0x00444B64` code signature, known current values, and readback. |
@@ -74,6 +75,55 @@ identity. Read-only memory tools remain usable on other builds.
   usable write site. The web app therefore exposes no gesture action; its
   emblem write validation rejects emote and other non-emblem IDs, while an
   unlisted current value can still be shown for inspection.
+- Blackrock's `data/inventory/items.tsv` has a `def` ordinal from 0 through
+  6556 across 6,557 rows, plus separate `hash` and `tag` fields. BLES 01.24
+  uses signed 16-bit investment item indexes into a 3,181-entry list (valid
+  indexes 0–3180), with `0x0041436C` resolving the table entry through
+  `0x0028A304` / `0x00288278`. The absolute cached list-pointer cell remains
+  unresolved for 01.24; its only local address derivation is from a BLES 01.00
+  note and is not reused. The live and offline inventory views therefore label
+  items only when the user imports an explicitly BLES-indexed `itemIndex` or
+  `blesItemIndex` column. The `def` ordinal and unverified hash/tag join are
+  never used; no catalog data is bundled.
+- The offline character viewer maps the 17 equipped-slot starts from the BLES
+  01.24 bucket-range/equipped-slot tables to inventory positions. It names the
+  subclass, five armour slots, and three weapons where supported; the other
+  eight are kept as numbered slots, and no IDs are added to the view.
+- The E: `Testing HTML` advertises a **Fly / Speed Multiplier** at
+  `0x0190EBB0` → `+0x14C` as a Float32, with reset value `1.00`. In the
+  hash-verified BLES 01.24 ELF, the global pointer cell is zero-filled BSS and
+  no direct address materialization for that cell was found. The target is a
+  runtime object offset, so its bytes cannot be checked statically without
+  resolving the live pointer. `+0x14C` immediately follows the XYZ values at
+  `+0x140/+0x144/+0x148`, so it could be another adjacent member rather than a
+  speed value. The app's unexposed, unbounded read/write helpers have been
+  removed; keep the control unavailable until a matching-runtime read and an
+  observed in-game effect confirm the field and safe range.
+- The same E: testing page includes **Console ID** read/write controls. This
+  changes console identity through PS3MAPI, not Destiny memory; the current
+  app's matching helpers have no UI, format validation, or readback. It is
+  excluded from the Destiny feature port.
+- The local Activity Loader C# source reads the current activity index from
+  decimal `811954340` (`0x306570A4`) and writes that value plus three other
+  sites. The app's write list already matched all four source sites, but its
+  Read Current action incorrectly read the first write site (`0x30656E6E`);
+  it now reads the source's second site. This is source parity only—the
+  activity field has not been observed in a live matching build.
+- The existing **Super Speed** toggle uses the C# source patch at `0x001A96C0`
+  (`00` off, `04` on). Its paired EBOOT is the base BLES01857 01.00 build;
+  there the address contains `10` (word `1086292F`), so the source's OFF write
+  does not restore that build's stock byte. In verified 01.24, the address is
+  in an RX segment and contains `00`, but this byte match does not prove the
+  field's meaning or speed effect. A 01.24 PPC64 data-flow scan found two
+  direct references that load the site as Float32 and add it within
+  vector-adjustment loops; the C# UI writes only its first byte, which would
+  yield `04000000` (about `1.5e-36`) if the remaining bytes stay zero. This
+  still does not identify the loop's gameplay role or a valid ON value. The
+  toggle is disabled pending semantic confirmation. Its recovery action first checks all three 01.24 build
+  signatures and requires the complete patch-site word to equal `04000000`;
+  it then restores `00000000` with a full-word write, the same precondition,
+  and readback verification. An already-baseline or unexpected value is not
+  written. This is a guarded recovery path, not semantic confirmation.
 - A decompiled Detertrots RTM v1.08 source advertises Headshot Kill,
   two-site Immunity, Stop Bullets, Crosshairs, and Bullet Speed presets.
   Its source OFF bytes match neither the local BLES01857 01.00 nor verified
@@ -153,6 +203,15 @@ webMAN documentation supports memory reads/writes and the PS3 notification
 route, while Bungie's legacy support page identifies the retained PS3 release
 as Update 2.3.1. These references do not independently validate Destiny RTM
 addresses:
+
+Additional local RTMs were checked under `D:\Soul rtm` and `D:\VIRUS`. The
+available `Destiny_RTM_Release` C# source has a `Static Actors` float toggle
+but no spawn routine. The older local HTML RTMs contain Instant Respawn and
+Static Actors controls that are already represented in this app; their copied
+addresses provide no new 01.24 spawn implementation. Blackrock remains the
+only inspected local source for a general entity-spawn action, and its queued
+`sobject_new` consumer is still unmapped to BLES 01.24. See
+[BLACKROCK-FEATURE-PORT.md](BLACKROCK-FEATURE-PORT.md).
 
 - [webMAN MOD web commands](https://github.com/aldostools/webMAN-MOD/wiki/Web-Commands)
 - [webMAN MOD PS3MAPI HTTP router](https://github.com/aldostools/webMAN-MOD/blob/master/include/cmd/ps3mapi.h)

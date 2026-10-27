@@ -1,0 +1,62 @@
+{"pc":"1402d00ba","op":"FUN_1402d20a0","args":[256,[2,25,28,29,30,31]],"kind":"words9","asm":"stdu/mflr/save r2,r25,r28-r31/LR"}
+{"pc":"1402d01a0","op":"raw_word","args":["0x3fe001c7"],"asm":"addis r31,r0,0x1c7","kind":"word"}
+{"pc":"1402d01a0","op":"raw_word","args":["0x3bff4000"],"asm":"addi r31,r31,0x4000","kind":"word"}
+{"pc":"1402d01a0","op":"raw_word","args":["0x801f0004"],"asm":"lwz r0,4(r31)","kind":"word"}
+{"pc":"1402d01a0","op":"raw_word","args":["0x2c000001"],"asm":"cmpwi r0,1","kind":"word"}
+{"pc":"1402d0246","op":"FUN_1402cdfc0","args":["out"],"kind":"fixup"}
+{"pc":"1402d0250","op":"raw_word","args":["0x819f0008"],"asm":"lwz r12,8(r31)","kind":"word"}
+{"pc":"1402d0250","op":"raw_word","args":["0x398c0001"],"asm":"addi r12,r12,1","kind":"word"}
+{"pc":"1402d0250","op":"raw_word","args":["0x919f0008"],"asm":"stw r12,8(r31)","kind":"word"}
+{"pc":"1402d0250","op":"raw_word","args":["0x3bdf0010"],"asm":"addi r30,r31,0x10","kind":"word"}
+{"pc":"1402d0250","op":"raw_word","args":["0x3ba00008"],"asm":"li r29,8","kind":"word"}
+{"pc":"1402d032d","op":"label_mark","args":["task"],"kind":"label"}
+{"pc":"1402d033d","op":"raw_word","args":["0x819e0000"],"asm":"lwz r12,0(r30)","kind":"word"}
+{"pc":"1402d036c","op":"raw_word","args":["0x2c0c0000"],"asm":"cmpwi r12,0","kind":"word"}
+{"pc":"1402d03c9","op":"FUN_1402cdec0","args":["task_next"],"kind":"fixup","asm":"beq task_next"}
+{"pc":"1402d03fe","op":"raw_word","args":["0x3c400189"],"asm":"lis r2,0x189","kind":"word"}
+{"pc":"1402d03fe","op":"raw_word","args":["0x60421798"],"asm":"ori r2,r2,0x1798","kind":"word"}
+{"pc":"1402d03fe","op":"raw_word","args":["0x806c0004"],"asm":"lwz r3,4(r12)","kind":"word"}
+{"pc":"1402d03fe","op":"raw_word","args":["0x7d8903a6"],"asm":"mtctr r12","kind":"word"}
+{"pc":"1402d03fe","op":"raw_word","args":["0x4e800421"],"asm":"bctrl","kind":"word"}
+{"pc":"1402d05b0","op":"label_mark","args":["task_next"],"kind":"label"}
+{"pc":"1402d05b0","op":"raw_word","args":["0x3bde0008"],"asm":"addi r30,r30,8","kind":"word"}
+{"pc":"1402d05b0","op":"raw_word","args":["0x3bbdffff"],"asm":"addi r29,r29,-1","kind":"word"}
+{"pc":"1402d05b0","op":"raw_word","args":["0x2c1d0000"],"asm":"cmpwi r29,0","kind":"word"}
+{"pc":"1402d0582","op":"FUN_1402cdfc0","args":["task"],"kind":"fixup"}
+{"pc":"1402d0590","op":"raw_word","args":["0x3bdf0100"],"asm":"addi r30,r31,0x100","kind":"word"}
+{"pc":"1402d0590","op":"raw_word","args":["0x3ba00010"],"asm":"li r29,16","kind":"word"}
+{"pc":"1402d0a00","op":"label_mark","args":["slot"],"kind":"label"}
+{"pc":"1402d0a00","op":"raw_word","args":["0x801e0000"],"asm":"lwz r0,0(r30)","kind":"word"}
+{"pc":"1402d0a00","op":"raw_word","args":["0x2c000001"],"asm":"cmpwi r0,1","kind":"word"}
+{"pc":"1402d0714","op":"FUN_1402cdfc0","args":["slot_next"],"kind":"fixup"}
+{"pc":"1402d0720","op":"raw_word","args":["0x38000002"],"asm":"addi r0,r0,2","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0x901e0000"],"asm":"stw r0,0(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0xe85e0008"],"asm":"ld r2,8(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0xc83e0050"],"asm":"lfd f1,0x50(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0xc85e0058"],"asm":"lfd f2,0x58(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0xc87e0060"],"asm":"lfd f3,0x60(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0xc89e0068"],"asm":"lfd f4,0x68(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0xe87e0010"],"asm":"ld r3,0x10(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0xe89e0018"],"asm":"ld r4,0x18(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0xe8be0020"],"asm":"ld r5,0x20(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0xe8de0028"],"asm":"ld r6,0x28(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0xe8fe0030"],"asm":"ld r7,0x30(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0xe91e0038"],"asm":"ld r8,0x38(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0xe93e0040"],"asm":"ld r9,0x40(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0xe95e0048"],"asm":"ld r10,0x48(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0x819e0004"],"asm":"lwz r12,4(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0x7d8903a6"],"asm":"mtctr r12","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0x4e800421"],"asm":"bctrl","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0xf87e0070"],"asm":"std r3,0x70(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0xd83e0078"],"asm":"stfd f1,0x78(r30)","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0x7c0004ac"],"asm":"sync","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0x38000003"],"asm":"li r0,3","kind":"word"}
+{"pc":"1402d0720","op":"raw_word","args":["0x901e0000"],"asm":"stw r0,0(r30)","kind":"word"}
+{"pc":"1402d0b80","op":"label_mark","args":["slot_next"],"kind":"label"}
+{"pc":"1402d0b80","op":"raw_word","args":["0x3bde0080"],"asm":"addi r30,r30,0x80","kind":"word"}
+{"pc":"1402d0b80","op":"raw_word","args":["0x3bbdffff"],"asm":"addi r29,r29,-1","kind":"word"}
+{"pc":"1402d0b80","op":"raw_word","args":["0x2c1d0000"],"asm":"cmpwi r29,0","kind":"word"}
+{"pc":"1402d0a54","op":"FUN_1402cdfc0","args":["slot"],"kind":"fixup"}
+{"pc":"1402d0afd","op":"label_mark","args":["out"],"kind":"label"}
+{"pc":"1402d0b00","op":"FUN_1402cff40","args":[256,[2,25,28,29,30,31]],"kind":"words9","asm":"restore LR/r2/r25/r28-r31; addi r1,r1,0x100"}
+{"pc":"1402d0c48","op":"FUN_1402ce0c0","args":["0x48000000","0x3510f0"],"kind":"fixup","asm":"b 0x3510f0"}

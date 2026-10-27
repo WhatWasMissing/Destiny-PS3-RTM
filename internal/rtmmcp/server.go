@@ -128,6 +128,15 @@ var toolList = []tool{
 		Annotations: map[string]any{"readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true},
 	},
 	{
+		Name:        "rtm_read_live_inventory_pool",
+		Title:       "Read live Destiny item-pool slots",
+		Description: "Read the BLES01857 01.24 self-family item-object pool after verifying the three-site build profile, exact getter/lookup code signatures, and live descriptor. The bounded sequential snapshot returns only pool slot and signed item index (at most 646 rows); instance and owner IDs are suppressed. Read-only and non-atomic; does not map items to an active character or vault.",
+		InputSchema: objectSchema(map[string]any{
+			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
+		}, "target_ipv4"),
+		Annotations: map[string]any{"readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true},
+	},
+	{
 		Name:        "rtm_read_player_position",
 		Title:       "Read Destiny player position",
 		Description: "Read the Overwalls source-mapped player pointer at 0x0190EBB0 and decode the three big-endian Float32 coordinates at pointer +0x140. This performs memory reads only; the in-game position and build compatibility are not independently confirmed.",
@@ -349,7 +358,14 @@ func (s *Server) startToolCall(req request) {
 		_ = s.writeResponse(rpcResponse{JSONRPC: "2.0", ID: req.ID, Error: &rpcError{Code: -32600, Message: "Duplicate request id"}})
 		return
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	callTimeout := 15 * time.Second
+	var requestedTool struct {
+		Name string `json:"name"`
+	}
+	if json.Unmarshal(req.Params, &requestedTool) == nil && requestedTool.Name == "rtm_read_live_inventory_pool" {
+		callTimeout = 2 * time.Minute
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), callTimeout)
 	s.calls[key] = cancel
 	s.callsMu.Unlock()
 
@@ -449,6 +465,29 @@ func (s *Server) callTool(ctx context.Context, raw json.RawMessage) map[string]a
 			return errorResult(err)
 		}
 		return successResult(map[string]any{"ok": true, "address": fmt.Sprintf("0x%08X", address), "length": len(data), "hex": strings.ToUpper(hex.EncodeToString(data))})
+	case "rtm_read_live_inventory_pool":
+		var args targetArgs
+		if err := decodeStrict(call.Arguments, &args); err != nil {
+			return errorResult(err)
+		}
+		if err := validateTarget(args.Target); err != nil {
+			return errorResult(err)
+		}
+		reader, ok := s.client.(interface {
+			ReadLiveItemPool(context.Context, string) (rtmclient.InventoryPoolSnapshot, error)
+		})
+		if !ok {
+			return errorResult(errors.New("RTM client does not support the BLES 01.24 live inventory-pool reader"))
+		}
+		snapshot, err := reader.ReadLiveItemPool(ctx, args.Target)
+		if err != nil {
+			return errorResult(err)
+		}
+		return successResult(map[string]any{
+			"ok": true, "read_only": true, "snapshot_atomic": false,
+			"target_ipv4": args.Target, "snapshot": snapshot,
+			"character_or_vault_mapping_confirmed": false,
+		})
 	case "rtm_read_player_position":
 		var args targetArgs
 		if err := decodeStrict(call.Arguments, &args); err != nil {

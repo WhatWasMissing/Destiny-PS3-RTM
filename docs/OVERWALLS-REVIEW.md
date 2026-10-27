@@ -42,7 +42,7 @@ application and Retrofit, not proof of every bundled native transport behavior.
 | Feature | Source evidence | Recommendation |
 |---|---|---|
 | XML scenarios | SaveButtons/LoadButtons/ApplyButtonData at 1346–1388; ButtonData has Name, Text, X, Y, Z | Best next data port: import into RTM folders, mapping Text to the position name. Validate finite coordinates, preserve axis order, skip duplicates and optionally export compatible XML. |
-| Named shortcuts | GridButton_Click and ApplyUserInput, 1298–1316 and 1390–1403 | New position editing covers part of this. Optional shortcut-grid presentation can coexist with folders. |
+| Named shortcuts | GridButton_Click and ApplyUserInput, 1298–1316 and 1390–1403; Form2 coordinate-read button at 47–58 | Ported the missing current-player coordinate capture into the add/edit dialogs. The RTM reads the verified BLES pointer and XYZ block through its bounded read capability and rechecks the player pointer. |
 | Internal/external teleport activation | Teleport, 976–985 | Conditional port: it writes three big-endian floats and selects an internal fixed field or a player-relative activation field. Requires matching game/plugin version and pointer/readback verification. |
 | Plugin readiness diagnostics | button125/button126, 1978–2005 | High priority: independently check the main-hook signature and the SPRX test string. A console connection alone does not prove readiness. |
 | Flyhack settings | checkBox26, comboBox3, setFlyVel/setFlyTpDis/setFlyADead, 1868–2007 | Conditional port after readiness checks: enable, velocity, displacement and axial deadzone. Fixed fields belong to the plugin and are not universal game offsets. |

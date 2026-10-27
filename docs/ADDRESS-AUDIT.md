@@ -113,13 +113,28 @@ registry` at file offset `0x012E1D60` / virtual address `0x012F1D60`,
 the first `PT_LOAD` segment, whose virtual-address delta is `0x10000`.
 
 A whole-file search found no big-endian 32-bit or 64-bit references to
-those string addresses. An aligned instruction scan for `addis` using high
-immediate `0x012F` followed by `addi` or `ori` with each low immediate also
-found no match. TOC-relative references remain unchecked because this
-stripped ELF has no usable symbols and the available disassembler lacks the
-PowerPC target. The strings show emote-related names and a packet-field
-label, but do not identify an activation function, runtime address, or
-patch. No gesture control is justified by this static evidence.
+those string addresses. A full linear disassembly of the executable load
+segments with Capstone's PPC64 big-endian decoder found no `lis`/`addis` plus
+`addi`/`ori` pair that materializes one of the three addresses. Startup code at
+`0x0001238C` loads the second word of the entry descriptor at `0x01849568`,
+establishing the active TOC base `0x01891798`. A scan of the first load segment
+for a nearby `addis rT,r2,HA(target-TOC)` and
+`addi`/`addic`/`ori rT,rT,LO` pair found no direct TOC-relative references to
+the emote strings or World Tag Loader and Resourcerer labels. The ELF has no
+`PT_DYNAMIC` segment. A separate bounded scan checked 16,626 aligned PPC
+load candidates across 6,341 mapped TOC cells against the nine emote,
+World Tag Loader, and Resourcerer string addresses; it found no direct TOC-cell
+pointers to them. Computed/hash lookups and deeper indirection through other
+structures remain unresolved. The strings show emote-related names and a
+packet-field label, but do not identify an activation function, runtime
+address, or patch. No gesture control is justified by this static evidence.
+The three emote strings each occur once. `&packet->emote_index` and
+`&packet->desired_zoom_level` are inline labels in the same read-only metadata
+area; neighboring names include a projectile-chain registry and slot number,
+but the adjacent bytes (`0x14`, `0x05`) do not establish a field layout. The
+ELF has no symbol or relocation sections, and no emote-named callback, handler,
+or caller string was found. Straightforward static references are ruled out;
+computed or runtime indirection remains possible.
 
 ### Legacy Detertrots RTM v1.08 candidates
 
@@ -161,6 +176,21 @@ Characters, Bouncy Items, Sparrow Boost, Super Speed, and the shared Rock
 Jump/No Pushback baseline. The audit helper includes the mismatched web-RTM
 Warpriest values, the Overwalls C# primary OFF instruction and zero-initialized
 BSS word, and the Deathsinger source fallback.
+
+### Super Speed candidate data-flow trace
+
+The source handler in `D:\Soul rtm\Destiny_RTM_Release\project\destinyRTM\Form1.cs`
+calls `WriteByte(1742528, 4)` when enabled and writes byte `0` when disabled;
+decimal `1742528` is `0x001A96C0`. The verified BLES 01.24 ELF stores
+`00000000` at that address. Two direct PPC references at `0x00763828` and
+`0x00764D58` load `0x001A96C0` with `lfs` and add the resulting Float32 to a
+scalar used by vector-adjustment loops (`vsubfp` / `vaddfp`). Thus the site is
+read as a Float32 addend in those paths, not as a directly established speed
+flag. If the other three bytes remain zero after the source's byte write, the
+word becomes `04000000` (Float32 approximately `1.5e-36`), not Float32 `4.0`.
+The static references do not identify the loops' gameplay role or establish a
+useful ON value. The app keeps activation disabled and offers only guarded
+restoration when the full word exactly matches the source-derived `04000000`.
 
 For comparison, the same candidate sites in the **01.00** ELF do not match
 several update-build values. At `0x006101C0` it contains `62A30000`; at
@@ -248,7 +278,7 @@ not establish a damage effect.
 
 | Address | Relation to the 01.24 ELF | Local source use |
 |---|---|---|
-| `0x0190EBB0` | In the zero-filled BSS of the writable segment | Overwalls reads a runtime pointer here; its coordinate fields are at pointer `+0x140`, `+0x144`, and `+0x148`, with activation data at `+0x1B8`. The pointer value itself must be read at runtime. |
+| `0x0190EBB0` | In the zero-filled BSS of the writable segment | Overwalls reads a runtime pointer here, then writes XYZ floats at pointer `+0x140`, `+0x144`, and `+0x148`; its source also writes Float32 `1.0` at `+0x1B8`. The separate Testing HTML labels the dynamic object offset `+0x14C` a speed multiplier, but no BLES code reference to the root or runtime confirmation of that field was found; its semantic label and safe range remain unverified. The 01.24 ELF has an unrelated-by-known-xref float-triplet access at object offsets `+0x1B8/+0x1BC/+0x1C0` (`0x007580C0`); no code link to this root is established. Read the pointer live, and treat the `+0x1B8` effect as unknown. |
 | `0x600...` regions, including `0x600E66B0` and `0x60300000` | Outside every EBOOT load segment | Local RTMs use these as wallet, emblem, ammo, and other player-memory ranges. The ELF alone cannot establish their allocation or contents. |
 | `0x10030000` | Outside every EBOOT load segment | The original C# Player Size source uses this as scratch data around a function call. The app/MCP port does not call that function or use this scratch address. |
 | `0x01A21CB0`, `0x01A1D9E8` | In zero-filled BSS of the writable segment | Player Size lookup table and scale-object base; only live reads can reveal their initialized runtime values. |
@@ -321,6 +351,119 @@ cannot confirm that freeing succeeded, so cleanup behavior must be validated
 separately before repeated use. Instruction-cache behavior, toast-function
 thread affinity, and observed toast output also remain unverified; no
 live-console writes were made for this audit.
+
+## BLES 01.24 resource and bootflow snapshot
+
+The read-only Resource / Bootflow Snapshot samples fixed BLES01857 01.24
+globals and range-checks every dynamic pointer. It reads bootflow pointer cell
+`0x01ABC89C`, then the current/target words at object `+0x118` and the stage
+pointer table at `+0x80`. State IDs are capped at 37; stage words `+0x30/+0x34`
+are decoded only for state 19 (`bap_signin`). Resource labels are pointer
+entries at `0x01315588`; the eight resource rows begin at `0x01ADA1B0`, each
+12 bytes, with pending count at `+0x60`.
+
+The scheduler pointer cell is `0x01A1DCE0`; its bounded queue/retry/active
+fields are at manager `+0x1405C`. Scheduler globals at `0x01A1DCE8` hold a
+u16 active token, job state, and deferred event. If an active token exists,
+the snapshot checks table descriptor `0x019A3F80` for stride `0x40`, capacity
+2, and token bounds before reading only the bounded 0x40-byte record's first
+status word. It does not follow record pointers.
+
+Readiness uses auxiliary pointer cell `0x01ABC8B8` (`+0x80` mode) and table
+`0x01B558F0` (0xEC bytes). The reader computes required/readiness/missing masks
+and summarizes at most the five descriptors wholly contained in that captured
+block; loaded/allocation pointers are not followed. It rechecks bootflow,
+stage, resource rows, scheduler, manager, auxiliary state, and readiness table
+before displaying. The sample is sequential and non-atomic. This is a
+resource/bootflow status view, not a validated tag-loader queue layout.
+
+## BLES 01.24 item-object pool
+
+The read-only inventory pool snapshot uses the BLES getter at `0x0047C1A0` to
+read the manager pointer stored at `0x01AD5FA4`. The pool lookup at
+`0x0047E3CC` derives a descriptor as `manager + 0x49398 + family*0x60 + kind*0x10`;
+the self-family kind-3 descriptor is therefore `manager + 0x49548`. Its
+big-endian fields are data offset (`+0`), a signed count in the low halfword
+of the word at `+4` (bytes `+6..+7`; native code uses `extsh`), stride (`+8`),
+and type handle (`+0xC`). The record
+array starts at `manager + 0x40A0 + dataOffset`.
+
+For BLES01857 01.24, the expected type is `0x80801732`, stride `0xA8`, and
+observed capacity 646. The RTM checks the exact 4-instruction getter signature
+`3C6001AD30635FA0806300044E800020` and the 48-byte lookup prefix
+`78842EA478A526E47CE420147C8438143CE000047C83201460E793987C8428143CA00004788A00203C80000460A9939C`,
+then validates the live descriptor and bounds it using conservative limits
+from Blackrock's same-build checks (`dataOffset + count*stride < 0x45341`,
+manager span capped at `0x50000` bytes). Those ceilings are not established by
+the BLES lookup instructions themselves; the RTM additionally requires the
+BLES runtime signatures and live type/stride/count values. It rechecks the
+manager, descriptor, and boundary records afterward. The scan exposes only
+occupied pool slot and item index;
+it does not expose SOIDs, map records to an active character, or write memory.
+The sequential sample remains non-atomic.
+
+The BLES 01.24 investment item list has 3,181 entries, indexed 0–3180. The
+resolver at `0x0041436C` accepts an i16 item index (`-1` is the empty/sentinel
+value) and resolves its hash/tag entry through `0x0028A304` and `0x00288278`.
+The absolute cached list-pointer cell is unresolved for BLES 01.24. The local
+`0x018E9578` derivation comes from BLES 01.00 notes; the 01.24 notes confirm a
+changed content-list root offset but do not re-derive that cell. Therefore the
+RTM does not read this table or join its hash/tag pairs. Live inventory labels
+remain available only from explicitly BLES-indexed `itemIndex` or
+`blesItemIndex` catalogs.
+
+Blackrock's user-local `data/inventory/items.tsv` has 6,557 rows and fields
+`def`, `hash`, and `tag`. Its `def` ordinal range (0–6556) is not the BLES
+investment index; the app never joins that ordinal or the hash/tag tuple until
+the matching 01.24 list-pointer cell is established. The catalog remains
+user-selected and is not bundled.
+
+The offline character-payload viewer labels equipped positions only at the
+17 starts resolved by the BLES 01.24 bucket-range and equipped-slot tables:
+40, 43, 53, 63, 73, 83, 93, 103, 113, 123, 143, 153, 210, 220, 230, 240,
+and 268. The first nine have source names (subclass, five armour slots, and
+three weapons); the remaining eight are shown only as numbered equipped slots
+because no semantic names are established here. Other inventory rows retain
+their numeric slot. Source evidence is `inventory-items-0124.md:64-90`.
+
+## BLES 01.24 actor-lookup descriptor path
+
+The function at `0x00255FA8` references descriptor `0x01A1E160`. Its code
+loads the descriptor's storage pointer at `+8` and stride at `+0xC`, then reads
+a packed handle at actor `+0x174`, masks it to a 13-bit index, and computes
+`storage + index*stride`. The record word at `+0x30` is consumed as a packed
+status/table key before helper `0x00255E4C`; it is not established as a record
+pointer or spawn argument. The exact 64-byte BLES 01.24 function signature is
+checked by the actor-lookup descriptor probe. The code does not bound the
+13-bit handle against a 40-record capacity.
+
+The probe reads only the 16-byte descriptor after the three-site build check,
+rechecks the code and descriptor, and displays the two unknown leading words,
+storage pointer, and stride. It never follows storage or enumerates records.
+This does not validate capacity, live record meaning, or a spawn action. No
+static cross-reference links this actor-handle lookup descriptor to the
+separately documented AI pool (`40 × 0x28D0`); that pool's stride does not
+establish this descriptor's identity.
+
+### BLES 01.24 packed-handle resolver used by Spawn
+
+The hash-verified EBOOT helper at `0x0013B7E8` matches the 100-byte sequence
+`3C80018980A300007CA66E7054A504FE54C774BE80846D5060E703FF7CE630388084000054C63032806300047C8430147884002080C400307CA531D680C40010808400347CA6281478A6002080C600087CC420387C8428107C641814786300204E800020`.
+It reads the packed handle from input `+0`, shifts by 13 for the bucket
+calculation, uses the low 13 bits as the slot, dereferences the root cell at
+`0x01896D50`, advances by `bucket * 0x40`, reads stride at descriptor `+0x30`,
+storage at `+0x10`, and pointer mask at `+0x34`, then reads record `+8`, masks
+that adjustment, subtracts it from `storage + slot*stride`, and adds input
+`+4` as a suboffset. Blackrock operation 1 leaves descriptor `+4` zero, which
+is why the read-only probe uses suboffset zero.
+
+The exact bytes were checked at this address in the hash-matched BLES 01.24
+ELF. They also occur at `0x0020B4D8` and `0x004AF160`, so this is an
+address-specific check, not a globally unique signature. The function returns
+an adjusted pointer candidate; it contains no tag validity, table-occupancy,
+resource-residency, enemy-class, or spawn-success check. The RTM now checks the
+100 bytes at `0x0013B7E8` before and after the descriptor sample, but still
+does not dereference or classify the candidate pointer.
 
 Matching static code/data bytes do not prove server persistence. Controlled
 observation in the matching 01.24 runtime is needed to confirm dynamic mappings

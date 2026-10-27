@@ -414,10 +414,45 @@
     link.download = 'overwalls-scenario.xml'; link.click();
     setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   }
+  async function readCurrentPlayerCoordsForScenario() {
+    const context = newContext();
+    const memory = root.rtmActivitySessionMemory;
+    if (!memory || typeof memory.verify !== 'function' || typeof memory.read !== 'function') {
+      throw new Error('The BLES 01.24 read-only memory capability is unavailable');
+    }
+    const owner = memory.session();
+    const verified = await memory.verify(owner);
+    checkContext(context);
+    const pointer = parseInt(await memory.read(0x0190EBB0, 4, owner, verified.capability), 16) >>> 0;
+    if (pointer < 0x10000 || pointer + 0x14C > 0x40000000) {
+      throw new Error(`The player coordinate pointer is outside BLES user memory: 0x${hexAddress(pointer)}`);
+    }
+    const values = await memory.read(pointer + 0x140, 12, owner, verified.capability);
+    const pointerAfter = parseInt(await memory.read(0x0190EBB0, 4, owner, verified.capability), 16) >>> 0;
+    checkContext(context);
+    if (pointerAfter !== pointer) throw new Error('The local player changed while coordinates were read; try again');
+    const coordinates = [0, 8, 16].map(offset => finiteFloat(readFloat(values.slice(offset, offset + 8)), 'Coordinate'));
+    return coordinates;
+  }
+
+  function readCurrentPositionDialogAction() {
+    return {
+      label: 'Read current position',
+      async run({ setField, setStatus }) {
+        setStatus('Checking the BLES 01.24 profile and reading the player position…', 'pending');
+        const [x, y, z] = await readCurrentPlayerCoordsForScenario();
+        setField('x', x);
+        setField('y', y);
+        setField('z', z);
+        setStatus(`Current position captured · X ${x.toFixed(3)} · Y ${y.toFixed(3)} · Z ${z.toFixed(3)}`, 'ok');
+      }
+    };
+  }
+
   async function editScenario(index) {
     const current = scenario[index];
     if (!current) return;
-    const result = await RtmDialogs.fields({ title: 'Edit scenario position', fields: [
+    const result = await RtmDialogs.fields({ title: 'Edit scenario position', secondaryActions: [readCurrentPositionDialogAction()], fields: [
       { name: 'name', label: 'Shortcut name', value: current.name },
       { name: 'x', label: 'X coordinate', type: 'number', value: current.x },
       { name: 'y', label: 'Y coordinate', type: 'number', value: current.y },
@@ -429,7 +464,7 @@
     scenario[index] = updated; persistScenario(); renderScenario();
   }
   async function addScenarioPosition() {
-    const result = await RtmDialogs.fields({ title: 'Add scenario position', fields: [
+    const result = await RtmDialogs.fields({ title: 'Add scenario position', secondaryActions: [readCurrentPositionDialogAction()], fields: [
       { name: 'name', label: 'Shortcut name', value: `Position ${scenario.length + 1}` },
       { name: 'x', label: 'X coordinate', type: 'number', value: 0 },
       { name: 'y', label: 'Y coordinate', type: 'number', value: 0 },

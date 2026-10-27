@@ -1,0 +1,20 @@
+{
+  "source": "Blackrock FUN_1402d0030, called by FUN_1402d16d0",
+  "base_address": "0x0183e000",
+  "continuation": "0x003510f0",
+  "word_count": 73,
+  "byte_count": 292,
+  "limit_bytes": 1024,
+  "labels": {
+    "task": "0x0183e04c",
+    "task_next": "0x0183e06c",
+    "slot": "0x0183e084",
+    "slot_next": "0x0183e0ec",
+    "out": "0x0183e0fc"
+  },
+  "fixup_count": 6,
+  "sha256": "19168afea738565520cb7a803354398ff76222d91fad1a6ce7e8700ab4d10dea",
+  "endianness": "big",
+  "validation": "all fixups resolved, range-checked, and independently decoded back to their target addresses",
+  "warning": "offline reconstruction only; not installed or sent to a console"
+}

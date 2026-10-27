@@ -4,7 +4,8 @@
     const fetchRequest = options.fetch || root.fetch.bind(root);
     const pending = new Set();
     const history = [];
-    async function request(input, timeoutMs = 8000) {
+    let lastForegroundRequestAt = 0;
+    async function request(input, timeoutMs = 8000, requestOptions = {}) {
       const url = new URL(input);
       if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Unsupported console protocol');
       if (url.pathname.endsWith('.ps3mapi') &&
@@ -12,6 +13,8 @@
         url.searchParams.set('proc', options.processId || '0x1010200');
       }
       if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error('Invalid request timeout');
+      const isBackground = requestOptions?.background === true;
+      if (!isBackground) lastForegroundRequestAt = Date.now();
       const controller = new AbortController();
       pending.add(controller);
       let timedOut = false;
@@ -47,7 +50,10 @@
     return {
       request,
       cancelAll() { for (const controller of pending) controller.abort(); },
-      diagnostics() { return history.map(({ time, operation, outcome, httpStatus }) => ({ time, operation, outcome, httpStatus })); }
+      shouldDeferBackgroundProbe(quietWindowMs = 5000) {
+        return pending.size > 0 || Date.now() - lastForegroundRequestAt < quietWindowMs;
+      },
+      diagnostics() { return history.map(({ time, operation, outcome, httpStatus, error }) => ({ time, operation, outcome, httpStatus, error })); }
     };
   }
   root.RtmTransport = { createTransport };
