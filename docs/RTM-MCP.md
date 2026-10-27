@@ -1,0 +1,72 @@
+# RTM tools for MCP clients
+
+`rtm-mcp.exe` exposes direct, named tools over MCP's stdio transport. It talks
+to webMAN MOD through the same bounded PS3MAPI client as `rtmctl`; it does not
+open the desktop app or automate its UI.
+
+## Tools
+
+| Tool | What it does |
+|---|---|
+| `rtm_status` | Checks webMAN reachability. It does not confirm Destiny is running. |
+| `rtm_verify_build` | Reads the three code anchors in the BLES01857 01.24 signature profile and reports each match. Read-only; the profile does not prove the whole EBOOT hash or title region. |
+| `rtm_read_memory` | Reads 1–65536 bytes from Destiny PID `0x1010200`. |
+| `rtm_read_player_position` | Follows the Overwalls player pointer at `0x0190EBB0` and decodes X/Y/Z as big-endian Float32 values at pointer offsets `+0x140/+0x144/+0x148`. Read-only; live build compatibility and gameplay meaning remain unconfirmed. |
+| `rtm_inspect_entity_pointers` | Reads Overwalls player and OPK-target roots at `0x0190EBB0` and `0x0190EBB4`. For valid pointers it returns raw bytes and decoded big-endian Float32 X/Y/Z at `+0x140/+0x144/+0x148`, plus the target activation field at `+0x1B8`. Null and invalid pointers are reported without dereferencing; a self-target is marked. The several reads form a non-atomic snapshot. Live pointer semantics and build compatibility remain unconfirmed. |
+| `rtm_inspect_player_scale` | Verifies the 01.24 PPC resolver/helper signatures, follows the local source's player-name/object-list chain, emulates the handle lookup with reads, and returns the current scale field. Read-only; no game function is called. Live pointers and visual effect remain unconfirmed. |
+| `rtm_set_player_scale` | Sets a Float32 scale from `0.3` to `20` (source presets include `0.3`, `1`, `2`, and `20`; `1` resets), with the 01.24 signature profile, source-signature checks, identity/pointer revalidation, and exact readback. The tool emulates the resolver rather than calling code. Visual effect and persistence remain unconfirmed. |
+| `rtm_write_memory` | Requires the 01.24 signature profile, writes 1–8 bytes, and succeeds only after exact readback. It does not call game functions. |
+| `rtm_set_brightness` | Requires the 01.24 signature profile, writes one of the local 1.24 source presets at `0x006101C0`, and verifies the bytes. The in-game effect remains unobserved. |
+| `rtm_set_legacy_scalar_preset` | Experimental write: requires the 01.24 signature profile and selects Normal (`3F800000`) or one of the recovered RTM's source-labeled values (`3FFFFFFF`, about 2×; `42C80000`, 100×) at `0x004449EC`. The 01.24 consumer uses this as a fallback coefficient in an unidentified ratio calculation; the “Max Damage” / “1 Hit Kill 2” gameplay labels are unverified. The tool additionally requires the exact consumer signature at `0x00444B64`, a known current word, and exact readback. |
+| `rtm_notify` | Dispatches a webMAN system notification; display is not confirmed. |
+| `rtm_play_beep_sequence` | Plays one fixed Jukebox preset (`fanfare`, `imperial`, `mario`, `nokia`, `sos`, or `shave`) through `/beep.ps3`. Tone order and pauses mirror `source/js/jukebox.js`; custom tone arrays are not accepted. Playback is serialized and can stop between tones. The result reports HTTP-acknowledged tone requests; sound delivery is not confirmed. This does not access Destiny memory. |
+| `rtm_launch_game` | Mounts one ISO from `/dev_hdd0/PS3ISO/`, waits for webMAN, returns to the game list, and starts the mounted game. HTTP acknowledgement is reported per stage; game start is not confirmed. |
+
+Every tool requires the PS3's private IPv4 address. The server fixes webMAN to
+port 80 and Destiny to PID `0x1010200`, disables redirects and proxy use, and
+does not expose function-call, client-list, IP-collection, or geolocation
+operations. Read/write limits and target validation are enforced by the shared
+client as well as the MCP tool layer. The entity pointer inspector performs
+memory reads only and includes raw hex for each pointer and decoded field;
+non-finite Float32 values are returned as null while their raw bytes are kept.
+
+All memory write tools fail closed unless live code reads match the three-site
+BLES01857 01.24 signature profile documented in `docs/ADDRESS-AUDIT.md`. The
+profile is not a full EBOOT hash or region check. Status, memory reads, pointer
+inspection, and position reads remain available when it does not match. Raw
+write tools also refuse to overwrite the three signature ranges.
+
+`rtm_launch_game` defaults to `/dev_hdd0/PS3ISO/Destiny.iso`. Its optional
+`iso_path` must be a simple `.iso` filename directly inside `/dev_hdd0/PS3ISO/`;
+no other webMAN mount paths are accepted. It follows the recovered source's
+3-second mount delay and 1-second game-list delay. An acknowledged `/play.ps3`
+response does not prove that Destiny finished starting.
+
+## Build and register with Codex
+
+Build the executable from the repository root:
+
+```powershell
+& 'C:\path\to\go.exe' build -trimpath -o .\dist\rtm-mcp.exe .\cmd\rtm-mcp
+```
+
+Register the local stdio server with Codex, replacing the path with this
+checkout's absolute path:
+
+```powershell
+codex mcp add destiny-rtm -- 'C:\path\to\Destiny RTM\dist\rtm-mcp.exe'
+codex mcp list
+```
+
+Codex stores this server in its local MCP configuration. Restart the app or
+start a new task to load the tools. The current task cannot dynamically add
+tools to its own already-established tool list. After registration, call
+`rtm_status` with the PS3's private IPv4 address, then use `rtm_read_memory`
+or a specific write tool as needed.
+
+The stdio stream carries only MCP JSON-RPC messages; diagnostic errors go to
+stderr. No console connection is made during build or protocol smoke tests.
+
+Protocol references: [stdio transport](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports),
+[tools](https://modelcontextprotocol.io/specification/2025-11-25/server/tools),
+and [Codex MCP setup](https://learn.chatgpt.com/docs/extend/mcp).

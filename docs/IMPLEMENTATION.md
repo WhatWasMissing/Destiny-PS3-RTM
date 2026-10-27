@@ -179,10 +179,19 @@ reviewable in PR #8; it remains a draft pending live-console compatibility revie
   persisted manual recovery path. The tool fails closed if it cannot save
   recovery data before pausing. These addresses remain unverified against a
   live game build.
+- Matched the five C# framebuffer panels with independent web gallery slots.
+  Each profile keeps its latest preview and provides its own PNG download,
+  clipboard copy and Fit/Stretch control; recapture revokes only that profile's
+  previous preview URL. Tests cover slot isolation, replacement and cleanup.
+- Bundled the 19 user-archived Overwalls XML scenarios (276 positions) in the
+  Overwalls selector. Loading one confirms replacement of the current scenario;
+  the importer validates coordinates and retains the source labels.
 - Replaced the nonfunctional RPC notification variant with the documented PS3
   system notification flow. Removed experimental Player Size and connection
-  RPC calls; documented Player Size, trophy unlock, and Destiny-internal toast
-  as unsupported by stock webMAN's HTTP PS3MAPI endpoint set.
+  RPC calls at that stage. Player Size has since been ported by emulating its
+  1.24 source resolver using guarded memory reads, without executing the
+  unsupported function-call path; trophy unlock and Destiny-internal toast
+  still depend on that unavailable RPC layer.
 - The client archive/geolocation feature was excluded because it collects
   other players' IP and location/provider data. Older 1.08/phone offsets were
   excluded because they conflict with the local 1.24 source.

@@ -20,6 +20,11 @@ confirms the request was dispatched, not that the PS3 displayed it.
 Add `--json` to a command for one JSON result object. Errors return a nonzero
 exit code and a JSON error object.
 
+Every memory write first checks the three-site BLES01857 01.24 runtime
+signature profile documented in `ADDRESS-AUDIT.md`. A mismatch or unreadable
+signature blocks the write. The profile is not a full EBOOT hash or title-region
+check; read commands continue to work on builds that do not match.
+
 The client rejects public, host-name and IPv6 targets, follows no redirects,
 and does not expose generic function-call routes. It uses only the PS3MAPI
 memory read/write and system notification endpoints.

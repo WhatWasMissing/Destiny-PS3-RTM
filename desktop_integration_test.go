@@ -9,9 +9,12 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
+
+	"destiny-rtm/internal/rtmclient"
 )
 
 type roundTripFunc func(*http.Request) (*http.Response, error)
@@ -21,10 +24,32 @@ func (fn roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { ret
 func TestDesktopFrontendAgainstFakeConsole(t *testing.T) {
 	var lock sync.Mutex
 	memory := map[uint64]byte{}
+	for _, signature := range []struct {
+		address uint64
+		hex     string
+	}{
+		{0x00444B64, "3C600044C03601283CC03F803B4349EC3061034462C4000063850000C05A0000"},
+		{0x001FB3C8, "8084001C908300004E800020"},
+		{0x002FF2D0, "7C0802A648A99751F821FF81F8010090"},
+	} {
+		data, err := hex.DecodeString(signature.hex)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for i, value := range data {
+			memory[signature.address+uint64(i)] = value
+		}
+	}
+	var launchRoutes []string
 	console := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		lock.Lock()
 		defer lock.Unlock()
 		q := r.URL.Query()
+		if strings.HasPrefix(r.URL.Path, "/mount.ps3/") || r.URL.Path == "/wmnav.ps3/game" || r.URL.Path == "/play.ps3" {
+			launchRoutes = append(launchRoutes, r.URL.EscapedPath())
+			fmt.Fprint(w, "accepted")
+			return
+		}
 		switch r.URL.Path {
 		case "/index.ps3":
 			fmt.Fprint(w, "fake console ready")
@@ -75,7 +100,10 @@ func TestDesktopFrontendAgainstFakeConsole(t *testing.T) {
 		copy.URL = &target
 		return http.DefaultTransport.RoundTrip(copy)
 	})
-	h := &host{token: "isolated-test-token", validTarget: consoleTarget, client: &http.Client{Transport: transport, Timeout: time.Second}}
+	hostClient := &http.Client{Transport: transport, Timeout: time.Second}
+	buildVerifier := rtmclient.New()
+	buildVerifier.HTTP = hostClient
+	h := &host{token: "isolated-test-token", validTarget: consoleTarget, client: hostClient, verifyBuild: buildVerifier.VerifyDestiny0124Profile}
 	server := httptest.NewServer(h.handler())
 	defer server.Close()
 	h.origin = server.URL
@@ -84,6 +112,10 @@ func TestDesktopFrontendAgainstFakeConsole(t *testing.T) {
 	output, err := command.CombinedOutput()
 	if err != nil {
 		t.Fatalf("frontend integration failed: %v\n%s", err, output)
+	}
+	wantRoutes := []string{"/mount.ps3/dev_hdd0/PS3ISO/Destiny.iso&mode=silent", "/wmnav.ps3/game", "/play.ps3"}
+	if strings.Join(launchRoutes, "|") != strings.Join(wantRoutes, "|") {
+		t.Fatalf("frontend launch sequence = %#v", launchRoutes)
 	}
 	t.Log(string(output))
 }

@@ -16,6 +16,7 @@
 <script src="js/dialogs.js"></script>
 <script src="js/settings-tools.js"></script>
 <script src="js/teleport-tools.js"></script>
+<script src="js/screenshot-tools.js"></script>
 <script src="js/appearance-init.js"></script>
 <div id="welcome-screen" role="dialog" aria-label="Welcome to Destiny RTM">
   <div class="welcome-card">
@@ -34,16 +35,16 @@
       <div class="debug-login-status" id="debug-login-status"></div>
       <div class="debug-mode-badge" id="debug-mode-badge">DEBUG MODE ACTIVE · WARNING GUIDES BYPASSED</div>
     </div>
-    <div class="welcome-note">Please note this is a WIP bild, expect bugs.</div>
+    <div class="welcome-note">Work in progress. Some features may be incomplete.</div>
   </div>
 </div>
 
 
 <header>
 <svg class="logo-icon" fill="none" viewbox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
-<polygon fill="none" points="18,2 34,10 34,26 18,34 2,26 2,10" stroke="#4fa3e0" stroke-width="1.5"></polygon>
-<polygon fill="none" opacity="0.5" points="18,8 28,13 28,23 18,28 8,23 8,13" stroke="#4fa3e0" stroke-width="1"></polygon>
-<circle cx="18" cy="18" fill="#4fa3e0" r="4"></circle>
+<polygon fill="none" points="18,2 34,10 34,26 18,34 2,26 2,10" stroke="currentColor" stroke-width="1.5"></polygon>
+<polygon fill="none" opacity="0.5" points="18,8 28,13 28,23 18,28 8,23 8,13" stroke="currentColor" stroke-width="1"></polygon>
+<circle cx="18" cy="18" fill="currentColor" r="4"></circle>
 </svg>
 <h1>Destiny<span>ps3 rtm tool</span></h1>
 <div class="status-badge" id="status-badge"
@@ -107,8 +108,8 @@
     <div class="settings-group">
       <div class="settings-group-title">APPEARANCE</div>
       <div class="settings-row">
-        <div><div class="settings-label">Accent colour</div><div class="settings-help">Choose the interface highlight colour.</div></div>
-        <input id="settings-accent" class="settings-color" type="color" value="#4fa3e0" title="Accent colour">
+        <div><div class="settings-label">Accent colour</div><div class="settings-help">Choose a highlight hue; brightness is adjusted for contrast in dark and light modes.</div></div>
+        <input id="settings-accent" class="settings-color" type="color" value="#c4b784" title="Accent colour">
       </div>
 
       <div class="settings-row" style="margin-top:8px;">
@@ -298,7 +299,11 @@
 <script src="js/connection.js"></script>
 <script src="js/memory-features.js"></script>
 <script src="js/emblem-options.js"></script>
+<script src="js/build-compatibility.js"></script>
 <script src="js/app-core.js"></script>
+<script src="js/jukebox.js"></script>
+<script src="js/player-scale-tools.js"></script>
+<script src="js/launch-tools.js"></script>
 <script src="js/brightness-tools.js"></script>
 <script src="js/accent-settings.js"></script>
 <div class="rtm-tabs-wrap">
@@ -323,6 +328,15 @@
 <button class="btn-disconnect" id="btn-disconnect" onclick="disconnect()" style="display:none">Unlink</button>
 
 </div>
+<div class="build-profile-check">
+  <div class="build-profile-copy">
+    <strong>Destiny build profile</strong>
+    <span>Read-only check of three code anchors from BLES01857 01.24. It does not verify the full EBOOT hash or region.</span>
+  </div>
+  <button class="btn-connect" id="build-profile-check-btn" type="button" onclick="checkDestinyBuildProfile()">Check build</button>
+</div>
+<p class="build-profile-status" id="build-profile-status" role="status" aria-live="polite" aria-atomic="true">Not checked for this connection.</p>
+<ul class="build-profile-results" id="build-profile-results" aria-label="Build signature results" hidden></ul>
 <!-- PS3HEN toggle -->
 <div class="hen-compact">
   <div class="hen-copy">
@@ -343,8 +357,16 @@
 <button class="btn-power btn-restart" id="btn-restart" onclick="ps3Restart()" title="Restart PS3">
 <svg fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 .49-3.27"></path></svg> Restart </button>
 </div>
+<div class="rtm-launch" id="rtm-launch">
+  <label for="rtm-launch-iso-path">Destiny ISO path</label>
+  <div class="rtm-launch-controls">
+    <input class="ip-input" id="rtm-launch-iso-path" type="text" value="/dev_hdd0/PS3ISO/Destiny.iso" autocomplete="off" spellcheck="false" aria-describedby="rtm-launch-status"/>
+    <button class="btn-connect" id="btn-launch-destiny" type="button" onclick="launchDestiny()">Launch Destiny</button>
+  </div>
+  <p id="rtm-launch-status" class="rtm-launch-status" aria-live="polite">Mounts the ISO, returns to the game list, then sends the start request. Game start cannot be confirmed.</p>
+</div>
 <div style="padding: 0 1rem 1rem;">
-<button class="cheat-btn" id="tog-anti-mm" onclick="togAntiMatchmaking(this)" style="width:100%;flex-direction:row;justify-content:space-between;padding:12px 14px;border-color:rgba(224,92,79,0.3);">
+<button class="cheat-btn danger-action" id="tog-anti-mm" onclick="togAntiMatchmaking(this)" style="width:100%;flex-direction:row;justify-content:space-between;padding:12px 14px;">
 <span style="display:flex;align-items:center;gap:8px;">
 <svg fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" x2="19.07" y1="4.93" y2="19.07"></line></svg> Anti-Matchmaking </span>
 <span class="addr" id="anti-mm-addr" style="font-size:0.6rem;"></span>
@@ -395,8 +417,8 @@
     <p>If a cheat mentions Instance Leader and appears to work differently between sessions, this is likely why. You normally do not need to change anything manually; just be aware that the result can depend on which console currently has that role.</p>
   </div>
 </details>
-<div class="main-conflict-note" style="margin:0.55rem 1rem 0;padding:0.55rem 0.7rem;border:1px solid rgba(201,168,76,0.28);border-radius:8px;background:rgba(201,168,76,0.05);color:var(--muted);font-family:var(--mono);font-size:0.57rem;line-height:1.45;">
-  <strong style="color:var(--gold);">Conflict Detection:</strong> Infinite Power and Unlimited Abilities share a patch; 4× Jump Boost shares a patch address with Unlimited Abilities; Rock Jump and No Pushback Barriers share the same 12 bytes. Enabling a conflicting option disables the active one first.
+<div class="rtm-callout rtm-callout--warning main-conflict-note">
+  <strong>Conflict Detection:</strong> Infinite Power and Unlimited Abilities share a patch; 4× Jump Boost shares a patch address with Unlimited Abilities; Rock Jump and No Pushback Barriers share the same 12 bytes. Enabling a conflicting option disables the active one first.
 </div>
 <div class="cheat-status-legend">
   <b>Status:</b> Off = default/inactive · Applying = change in progress · On = last successful enable · Failed = last action failed.
@@ -413,9 +435,9 @@
   <span class="cheat-desc">Defeats most enemies with a single hit (enemies one hit you if you are the instance leader).</span>
   <span class="addr"></span>
 </button>
-<button class="cheat-btn gold" id="tog-ammo" onclick="togFire('00310F94','60000000','3F800000','Unlimited Ammo',this)">
+<button class="cheat-btn gold" id="tog-ammo" onclick="toggleUnlimitedAmmo(this)">
   <span class="cheat-name">Unlimited Ammo</span>
-  <span class="cheat-desc">Keeps your weapons supplied with ammo while enabled (Currently never turns off).</span>
+  <span class="cheat-desc">Applies the 1.24 three-site ammo patch. Every write is checked against the original bytes on disable.</span>
   <span class="addr"></span>
 </button>
 <button class="cheat-btn blue" id="tog-no-spread" onclick="togFire('30D230','3DCCCCCD','3F800000','No Spread',this)">
@@ -513,9 +535,9 @@
   <span class="cheat-desc">Applies the source RTM's Rock Jump values. Shares its 12-byte patch with No Pushback Barriers.</span>
   <span class="addr"></span>
 </button>
-<button class="cheat-btn gold" id="tog-warpriest" onclick="togFireMulti([['444CA4','C0434F80'],['1897420','3F800000']],[['444CA4','C0434DB0'],['1897420','3F800000']],'Warpriest Immunity',this)">
-  <span class="cheat-name">Warpriest Immunity</span>
-  <span class="cheat-desc">Removes warpriest immunity while enabled. (Must be instance leader)</span>
+<button class="cheat-btn gold" id="tog-warpriest" disabled title="Blocked: the source patch's OFF bytes do not match the verified BLES01857 01.24 EBOOT">
+  <span class="cheat-name">Warpriest Immunity · source mismatch</span>
+  <span class="cheat-desc">Unavailable for the verified 01.24 build. The source OFF values differ from the executable at both patch sites.</span>
   <span class="addr"></span>
 </button>
 <button class="cheat-btn gold" id="tog-sword-energy" onclick="triggerDynamicCheat('tog-sword-energy')">
@@ -525,7 +547,7 @@
 </button>
 </div>
 <div style="padding: 0.5rem 1rem 1rem;">
-<button onclick="resetAllCheats()" onmousedown="this.style.transform='scale(0.97)'" onmouseout="this.style.background='rgba(224,92,79,0.1)'" onmouseover="this.style.background='rgba(224,92,79,0.2)'" onmouseup="this.style.transform='scale(1)'" style="width:100%;background:rgba(224,92,79,0.1);border:1px solid var(--danger);border-radius:8px;color:var(--danger);font-family:var(--sans);font-weight:700;font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;padding:11px 0;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background 0.2s,transform 0.1s;">
+<button class="btn-reset-all-cheats" onclick="resetAllCheats()">
 <svg fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 .49-3.27"></path></svg> Reset All Cheats </button>
 </div>
 </div></div><!-- /.section-body /.panel -->
@@ -543,7 +565,7 @@
 <div class="cheat-grid" style="grid-template-columns:1fr 1fr;">
 <button class="cheat-btn blue" id="srv-void" onclick="srvSetMode('void',this)"> Void Enemies </button>
 <button class="cheat-btn red" id="srv-ropk" onclick="srvSetMode('ropk',this)"> Relative OPK </button>
-<button class="cheat-btn gold" id="srv-4x-damage" onclick="toggleServer4xDamage(this)"> 4× Damage </button>
+<button class="cheat-btn gold" id="srv-4x-damage" onclick="toggleServer4xDamage(this)"> Damage Preset </button>
 <button class="cheat-btn" id="srv-off" onclick="srvSetMode('off',this)"> Off </button>
 </div>
 <details class="tidy-subpanel">
@@ -632,7 +654,7 @@
 <div class="section-body"><div class="panel">
 <div class="panel-header">Character Name</div>
 
-<div style="margin:0.75rem 1rem 0;padding:0.65rem 0.8rem;border:1px solid rgba(79,163,224,0.30);border-radius:8px;background:rgba(79,163,224,0.06);font-family:var(--mono);font-size:0.60rem;color:var(--muted);line-height:1.5;">
+<div class="rtm-callout rtm-callout--info">
   Read or edit the connected console's character name.
 </div>
 
@@ -669,13 +691,38 @@
     </div>
     <div class="ow-job-status" id="emblem-status" role="status" aria-live="polite">Read the connected Guardian's current emblem first.</div>
   </div>
+</div>
+<div class="panel">
+  <div class="panel-header">Player Size · 1.24 source</div>
+  <div class="panel-muted-note" style="margin:0.75rem 1rem 0;">Resolves the current Guardian through the source object list and sets the in-memory scale field. The resolver and lookup helper must match the verified 1.24 code bytes.</div>
+  <div class="slider-body">
+    <div class="slider-row">
+      <span class="slider-label">Scale</span>
+      <input class="rtm-slider" id="player-scale-slider" type="range" min="0.3" max="20" step="0.1" value="1" oninput="syncPlayerScaleValue(this.value)">
+      <span class="slider-val" id="player-scale-value">1×</span>
+    </div>
+    <div class="slider-btns">
+      <button class="slider-preset danger" type="button" onclick="setPlayerScaleValue(0.3)">0.3×</button>
+      <button class="slider-preset accent" type="button" onclick="document.getElementById('player-scale-slider').value=1;syncPlayerScaleValue(1);setPlayerScale()">1×</button>
+      <button class="slider-preset" type="button" onclick="document.getElementById('player-scale-slider').value=2;syncPlayerScaleValue(2);setPlayerScale()">2×</button>
+      <button class="slider-preset gold" type="button" onclick="document.getElementById('player-scale-slider').value=5;syncPlayerScaleValue(5);setPlayerScale()">5×</button>
+      <button class="slider-preset" type="button" onclick="document.getElementById('player-scale-slider').value=10;syncPlayerScaleValue(10);setPlayerScale()">10×</button>
+      <button class="slider-preset danger" type="button" onclick="document.getElementById('player-scale-slider').value=20;syncPlayerScaleValue(20);setPlayerScale()">20×</button>
+    </div>
+    <div class="tuner-actions">
+      <button class="btn-apply" type="button" onclick="readPlayerScale()" style="flex:1">Read Size</button>
+      <button class="btn-apply" type="button" onclick="setPlayerScale()" style="flex:1">Set Size</button>
+      <button class="btn-apply danger" type="button" onclick="resetPlayerScale()" style="flex:1">Reset</button>
+    </div>
+    <div class="ow-job-status" id="player-scale-status" role="status" aria-live="polite">Reads and writes require the matching 1.24 runtime layout; visual effect is not confirmed.</div>
+  </div>
 </div></div>
 </div><div class="section" id="sec-gamespeed" style="padding-top:0">
 <p class="category-label" onclick="toggleSection('sec-gamespeed')">Gamespeed<svg class="collapse-chevron" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg></p>
 <div class="section-body"><div class="panel">
 <div class="panel-header">Gamespeed</div>
-<div style="margin:0.75rem 1rem 0;padding:0.7rem 0.8rem;border:1px solid rgba(201,168,76,0.38);border-radius:8px;background:rgba(201,168,76,0.07);color:var(--muted);font-family:var(--mono);font-size:0.59rem;line-height:1.5;">
-  <strong style="color:var(--gold);">Load Zone Warning:</strong>
+<div class="rtm-callout rtm-callout--warning">
+  <strong>Load Zone Warning:</strong>
   Modified game speed can interfere with activity/load zones. Reset Game Speed to the normal value before moving through a load zone, then re-apply your preferred speed after the area has finished loading.
 </div>
 <div class="slider-body">
@@ -696,15 +743,18 @@
 <div class="section-body"><div class="panel">
 <div class="panel-header">Custom Damage Multiplier</div>
 
-<div class="tidy-technical" style="margin:0.8rem 1rem 0;padding:0.7rem 0.8rem;border:1px solid rgba(201,168,76,0.38);border-radius:8px;background:rgba(201,168,76,0.07);color:var(--muted);font-family:var(--mono);font-size:0.62rem;line-height:1.55;">
+<div class="rtm-callout rtm-callout--info">
+  <strong>Source label conflict:</strong> Overwalls C# and the legacy HTML toggle call this “4× Damage,” but that HTML calculator maps the same halfword to its “10×” preset. Both sources write <code>4120</code> at <code>0x0043E626</code>; the in-game multiplier has not been verified.
+</div>
+<div class="rtm-callout rtm-callout--technical">
   Enter the multiplier you want and the RTM will convert it to the 16-bit value used by the existing damage control.
-  <strong style="color:var(--text);">1× = 3F80</strong>,
-  <strong style="color:var(--gold);">10× = 4120</strong>,
-  and <strong style="color:var(--danger);">1000× = 447A</strong>.
+  <strong>1× = <code>3F80</code></strong>,
+  <strong class="callout-warning">10× = <code>4120</code></strong>,
+  and <strong class="callout-danger">1000× = <code>447A</code></strong>.
   Because the game is only being given the upper 16 bits of the float, some decimal values will be rounded slightly.
 </div>
-<div class="tidy-technical" style="margin:0.55rem 1rem 0;padding:0.6rem 0.75rem;border:1px solid rgba(79,163,224,0.3);border-radius:8px;background:rgba(79,163,224,0.06);color:var(--muted);font-family:var(--mono);font-size:0.59rem;line-height:1.5;">
-  <strong style="color:var(--accent);">Conflict Detection:</strong> Custom Damage, One-Hit Enemies and 4× Damage share the same damage value. Enabling one automatically replaces the others.
+<div class="rtm-callout rtm-callout--info">
+  <strong>Conflict Detection:</strong> Custom Damage, One-Hit Enemies and the Damage Preset share the same value. Enabling one automatically replaces the others.
 </div>
 
 <div class="slider-body">
@@ -765,6 +815,23 @@
 
   <div id="damage-current-status" style="margin-top:0.7rem;text-align:center;font-family:var(--mono);font-size:0.62rem;color:var(--muted);">
     Current selection: 1× (3F80)
+  </div>
+
+  <div style="margin-top:0.9rem;padding:0.8rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;">
+    <div class="field-label" style="margin-bottom:0.5rem;">Experimental Scalar Preset · 01.24</div>
+    <div class="tidy-technical" style="margin:0 0 0.65rem;color:var(--muted);font-family:var(--mono);font-size:0.59rem;line-height:1.5;">
+      The recovered Ultimate RTM labels these values <strong style="color:var(--text);">Max Damage</strong> (~2×) and <strong style="color:var(--text);">1 Hit Kill 2</strong> (100×), but 01.24 only confirms a fallback coefficient in an unidentified calculation. No damage or kill effect is verified. Applying a preset writes one Float32 after matching-build and current-value checks.
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <select id="legacy-scalar-preset" style="flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px;border-radius:6px;">
+        <option value="normal">Normal · 1×</option>
+        <option value="max_damage">Source label: Max Damage · ~2×</option>
+        <option value="one_hit_kill_2">Source label: 1 Hit Kill 2 · 100×</option>
+      </select>
+      <button class="btn-apply" type="button" onclick="applyLegacyScalarPreset()" style="margin:0;">Apply</button>
+      <button class="btn-apply" type="button" onclick="readLegacyScalarPreset()" style="margin:0;">Read</button>
+    </div>
+    <div id="legacy-scalar-status" role="status" style="margin-top:0.6rem;text-align:center;font-family:var(--mono);font-size:0.59rem;color:var(--muted);">Not read · 004449EC</div>
   </div>
 </div>
 </div></div>
@@ -840,6 +907,12 @@
 
   <div class="panel">
     <div class="panel-header">Scenario shortcuts · Overwalls XML</div>
+    <div class="ow-inline-controls">
+      <label for="ow-scenario-library">Archived scenarios
+        <select id="ow-scenario-library"><option value="">Choose an archived scenario…</option></select>
+      </label>
+      <button class="cheat-btn" type="button" onclick="owLoadScenarioLibrary()">Load selected scenario</button>
+    </div>
     <div class="ow-inline-controls">
       <button class="cheat-btn" type="button" onclick="owImportScenario()">Import scenario XML</button>
       <button class="cheat-btn" type="button" onclick="owExportScenario()">Export scenario XML</button>
@@ -1021,7 +1094,68 @@
     </div>
     <button class="btn-send" type="button" onclick="sendPS3Notification()">▶ Send Notification</button>
   </div>
+</div>
+<div class="panel notification-automation-panel" id="notification-automation">
+  <div class="panel-header">Automatic XMB Notices</div>
+  <div class="notification-automation-body">
+    <p class="notification-automation-note">Send optional PS3 popups for selected RTM events. Off by default; requests are best effort and do not confirm delivery.</p>
+    <label class="notification-automation-master" for="auto-notif-master">
+      <input id="auto-notif-master" type="checkbox">
+      <span><strong>Enable automatic notices</strong><small>Event choices below are saved on this device.</small></span>
+    </label>
+    <div class="notification-automation-grid" aria-label="Automatic notification events">
+      <label class="notification-automation-event"><input id="auto-notif-connect" type="checkbox">Connection and disconnect</label>
+      <label class="notification-automation-event"><input id="auto-notif-activity" type="checkbox">Activity index writes</label>
+      <label class="notification-automation-event"><input id="auto-notif-cheat" type="checkbox">Cheat state changes</label>
+      <label class="notification-automation-event"><input id="auto-notif-error" type="checkbox">Errors and failed actions</label>
+      <label class="notification-automation-event"><input id="auto-notif-restore" type="checkbox">Connection restored</label>
+    </div>
+    <div class="notification-automation-template">
+      <label class="notification-automation-field" for="auto-notif-template">Message template
+        <input id="auto-notif-template" type="text" maxlength="128" value="Destiny RTM: {event}" placeholder="Use {event}, {activity}, {cheat}, or {ip}">
+      </label>
+      <label class="notification-automation-field" for="auto-notif-cooldown">Minimum interval
+        <select id="auto-notif-cooldown" title="Minimum interval between automatic notices">
+          <option value="0">No limit</option><option value="2">2 seconds</option><option value="5" selected>5 seconds</option><option value="10">10 seconds</option><option value="30">30 seconds</option>
+        </select>
+      </label>
+    </div>
+    <p class="notification-automation-status" id="notif-automation-status" role="status" aria-live="polite">Automatic notices are off.</p>
+    <div class="notification-automation-actions">
+      <button type="button" onclick="testNotificationAutomation()">Send test notice</button>
+      <button type="button" onclick="resetNotificationAutomation()">Reset preferences</button>
+    </div>
+  </div>
 </div></div>
+</div>
+
+<div class="section" id="sec-jukebox" style="padding-top:0">
+  <p class="category-label" role="button" tabindex="0" aria-controls="jukebox-body" aria-expanded="true" onclick="toggleSection('sec-jukebox');this.setAttribute('aria-expanded',this.closest('.section').classList.contains('collapsed')?'false':'true')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">PS3 Jukebox<svg class="collapse-chevron" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg></p>
+  <div class="section-body" id="jukebox-body"><div class="panel">
+    <div class="panel-header">System tones</div>
+    <p class="panel-muted-note jukebox-note">Play a short sequence through the PS3 system beep endpoint. This does not write game memory.</p>
+    <div class="jukebox-tone-key" role="group" aria-label="Tone key">
+      <span><kbd>1</kbd> Short, high</span>
+      <span><kbd>2</kbd> Short, low</span>
+      <span><kbd>3</kbd> Long, low</span>
+    </div>
+    <div class="jukebox-presets" role="group" aria-label="Tone sequences">
+      <button class="jukebox-preset" data-jukebox-song="fanfare" type="button" onclick="playJukeboxSong('fanfare')"><span>Victory Fanfare</span><small>14 tones</small></button>
+      <button class="jukebox-preset" data-jukebox-song="imperial" type="button" onclick="playJukeboxSong('imperial')"><span>Imperial March</span><small>12 tones</small></button>
+      <button class="jukebox-preset" data-jukebox-song="mario" type="button" onclick="playJukeboxSong('mario')"><span>Super Mario</span><small>16 tones</small></button>
+      <button class="jukebox-preset" data-jukebox-song="nokia" type="button" onclick="playJukeboxSong('nokia')"><span>Nokia Tune</span><small>15 tones</small></button>
+      <button class="jukebox-preset" data-jukebox-song="sos" type="button" onclick="playJukeboxSong('sos')"><span>SOS</span><small>9 tones</small></button>
+      <button class="jukebox-preset" data-jukebox-song="shave" type="button" onclick="playJukeboxSong('shave')"><span>Shave &amp; Haircut</span><small>7 tones</small></button>
+    </div>
+    <div class="jukebox-playback">
+      <div class="jukebox-playback-status">
+        <p id="jukebox-status" role="status" aria-live="polite">Choose a sequence to play.</p>
+        <span id="jukebox-count">Ready</span>
+      </div>
+      <progress id="jukebox-progress" class="jukebox-progress" value="0" max="1" aria-label="Sequence progress"></progress>
+      <button id="jukebox-stop" class="btn-apply danger" type="button" onclick="stopJukeboxSong()" disabled>Stop sequence</button>
+    </div>
+  </div></div>
 </div>
 
 <div class="section" id="sec-ammo-editor" style="padding-top:0">
@@ -1065,7 +1199,7 @@
 <p class="category-label" onclick="toggleSection('sec-screenshots')">Screenshots<svg class="collapse-chevron" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 21"></polyline></svg></p>
 <div class="section-body"><div class="panel">
   <div class="panel-header">Destiny Framebuffer Capture</div>
-  <div class="panel-muted-note" style="margin:0.75rem 1rem 0;">Captures a GPU-memory buffer defined by the local 1.24 RTM source. Buffer addresses are build-specific and have not been verified against a live console.</div>
+  <div class="panel-muted-note" style="margin:0.75rem 1rem 0;">Captures one selected GPU-memory buffer at a time. Each profile keeps its latest preview, PNG/JPEG downloads, and PNG clipboard copy. Addresses are build-specific and have not been verified against a live console.</div>
   <div class="custom-body">
     <div class="field-wrap">
       <span class="field-label">Capture size</span>
@@ -1079,14 +1213,13 @@
     </div>
     <label class="field-wrap" style="display:flex;align-items:center;gap:10px;">
       <input id="screenshot-pause" type="checkbox" style="width:auto;">
-      <span class="field-label" style="margin:0;">Pause capture and restore the current pause byte</span>
+      <span class="field-label" style="margin:0;">Pause the game during capture, then restore its original instruction</span>
     </label>
     <button class="btn-send" id="screenshot-capture-btn" type="button" onclick="captureDestinyScreenshot()">Capture Framebuffer</button>
     <div class="scan-progress" id="screenshot-progress"><span id="screenshot-progress-text">Reading framebuffer…</span><div class="scan-progress-bar"><div class="scan-progress-fill" id="screenshot-progress-fill"></div></div></div>
-    <button class="btn-apply danger" id="screenshot-resume-btn" type="button" onclick="restoreScreenshotPause()" disabled>Restore Pause Byte</button>
+    <button class="btn-apply danger" id="screenshot-resume-btn" type="button" onclick="restoreScreenshotPause()" disabled>Restore Pause</button>
     <div class="scan-status"><div class="scan-stat" id="screenshot-status">Ready</div></div>
-    <img id="screenshot-preview" alt="Captured Destiny framebuffer" style="display:none;max-width:100%;max-height:420px;object-fit:contain;border:1px solid var(--border);border-radius:8px;background:#080a0f;">
-    <a id="screenshot-download" style="display:none;margin-top:8px;" download="destiny-framebuffer.png">Download PNG</a>
+    <div class="screenshot-gallery" id="screenshot-gallery" aria-live="polite"></div>
   </div>
 </div></div>
 </div>
@@ -1184,12 +1317,15 @@
 </div>
 <div class="panel" style="margin:0 1rem 0.75rem">
 <div class="panel-header">Brightness · address probe</div>
-<div class="compact-help-note">Local 1.24 C# sources label 0x006101C0 as Bright 50, Normal 1 and Inverted -20. The ELF previously inspected was identified by its hash as base 01.00 despite its filename, so this source address is not yet verified against 01.24. This probe only reads the live word; it does not write.</div>
+<div class="compact-help-note">The 1.24 C# source defines Bright 50, Normal 1 and Inverted -20 at 0x006101C0. The matching ELF stores Normal (Float32 1.0) there. Preset writes require exact readback; the in-game effect has not been observed.</div>
 <div class="scan-status"><div class="scan-stat" id="brightness-current">Current word: not read</div></div>
 <div class="cheat-grid">
 <button class="cheat-btn" id="brightness-read-btn" type="button" onclick="readBrightnessCandidate()">Read 0x006101C0</button>
+<button class="cheat-btn" id="brightness-preset-bright" type="button" onclick="applyBrightnessPreset('bright')">Bright · 50</button>
+<button class="cheat-btn" id="brightness-preset-normal" type="button" onclick="applyBrightnessPreset('normal')">Normal · 1</button>
+<button class="cheat-btn" id="brightness-preset-inverted" type="button" onclick="applyBrightnessPreset('inverted')">Inverted · −20</button>
 </div>
-<div class="ow-job-status" id="brightness-status" role="status" aria-live="polite">Probe only · 01.24 address semantics are not confirmed.</div>
+<div class="ow-job-status" id="brightness-status" role="status" aria-live="polite">Preset writes use 0x006101C0 with readback verification; the effect is untested.</div>
 </div>
 <!-- Camera / World -->
 <div class="panel" style="margin:0 1rem 0.75rem">
@@ -1227,9 +1363,9 @@
 <div class="panel" style="margin:0 1rem 0.75rem">
 <div class="panel-header">Game State</div>
 <div class="cheat-grid">
-<button class="cheat-btn blue" onclick="fire('6155BF','00','Pause Game','10',1)"> Pause Game <span class="addr"></span>
+<button class="cheat-btn blue" onclick="setDestinyGamePaused(true)"> Pause Game <span class="addr"></span>
 </button>
-<button class="cheat-btn blue" onclick="fire('6155BF','10','Resume Game','00',1)"> Resume Game <span class="addr"></span>
+<button class="cheat-btn blue" onclick="setDestinyGamePaused(false)"> Resume Game <span class="addr"></span>
 </button>
 </div>
 </div>
@@ -1262,4 +1398,5 @@
 <script src="js/header-art.js"></script>
 
 <script src="js/welcome-art.js"></script>
+<script src="js/scenario-library.js"></script>
 <script src="js/overwalls-tools.js"></script>

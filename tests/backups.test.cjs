@@ -7,11 +7,12 @@ function memory(initial = {}) {
     getItem: k => map.get(k) ?? null, setItem: (k,v) => map.set(k,v), removeItem: k => map.delete(k) };
 }
 test('backups round trip supported preferences and positions without active cheat state', () => {
-  const source = memory({ rtm_saved_ip: '192.168.0.62', rtm_saved_teleports: '[{"name":"Tower","x":0,"y":2,"z":3}]', destinyRtmToolSetupV1:'1', rtm_active_cheats: '{"god":true}' });
+  const source = memory({ rtm_saved_ip: '192.168.0.62', rtm_saved_teleports: '[{"name":"Tower","x":0,"y":2,"z":3}]', rtm_launch_iso_path:'/dev_hdd0/PS3ISO/Destiny.iso', destinyRtmToolSetupV1:'1', rtm_active_cheats: '{"god":true}' });
   const bundle = capture(source), destination = memory();
   assert.equal(bundle.settings.rtm_active_cheats, undefined);
   restore(destination, bundle);
   assert.equal(destination.getItem('rtm_saved_teleports'), source.getItem('rtm_saved_teleports'));
+  assert.equal(destination.getItem('rtm_launch_iso_path'), source.getItem('rtm_launch_iso_path'));
   assert.equal(destination.getItem('destinyRtmToolSetupV1'),'1');
 });
 test('reject unknown keys, unsupported versions and nonfinite coordinates before mutation', () => {
@@ -37,7 +38,8 @@ test('reject coordinates coerced from null, booleans, arrays and float32 overflo
 test('reject malformed addresses, settings enums and duplicate folder IDs', () => {
   for (const settings of [ {cheatAddresses:'{"tog-god":"1234&val=BAD"}'}, {rtm_active_tab:'unknown'},
     {rtm_appearance:'other'}, {henMode:'yes'}, {rtm_saved_ip:'999.0.0.1'},
-    {rtm_teleport_folders:'[{"id":"a","name":"One"},{"id":"a","name":"Two"}]'} ]) {
+    {rtm_teleport_folders:'[{"id":"a","name":"One"},{"id":"a","name":"Two"}]'},
+    {rtm_launch_iso_path:'/dev_hdd0/PS3ISO/../../play.ps3'} ]) {
     assert.throws(() => validate({format:'destiny-rtm-settings',version:1,settings}));
   }
 });

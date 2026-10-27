@@ -41,6 +41,14 @@
     normal: Object.freeze({ label: 'Normal', value: 1 }),
     inverted: Object.freeze({ label: 'Inverted', value: -20 })
   });
+  // The emblem scan covers a broad player-memory range. These bytes are used
+  // by the source wallet editor; 0x600E66C0 contains its 0x0366 marker.
+  const EMBLEM_EXCLUDED_RANGES = Object.freeze([
+    Object.freeze([0x600E66B0, 0x600E66B4]),
+    Object.freeze([0x600E66C0, 0x600E66C2]),
+    Object.freeze([0x600E66D0, 0x600E66D4]),
+    Object.freeze([0x600E66F0, 0x600E66F4])
+  ]);
 
   function brightnessPreset(name) {
     const preset = BRIGHTNESS_PRESETS[name];
@@ -54,11 +62,26 @@
     return Object.keys(BRIGHTNESS_PRESETS).map(brightnessPreset).find(preset => preset.hex === normalized) || null;
   }
 
-  function findEmblemMatches(bytes, baseAddress, emblemId) {
+  function classifyDamagePatch(value) {
+    const hex = String(value ?? '').replace(/[^0-9a-f]/gi, '').toUpperCase();
+    if (!/^[0-9A-F]{4}$/.test(hex)) throw new Error('Damage patch must be exactly two bytes');
+    const known = {
+      '3F80': { kind: 'normal', label: 'Normal', multiplier: 1, isOneHit: false, isTenX: false },
+      '4120': { kind: 'ten-x', label: '10× preset', multiplier: 10, isOneHit: false, isTenX: true },
+      '447A': { kind: 'one-hit-main', label: 'One-Hit (main 447A variant)', multiplier: 1000, isOneHit: true, isTenX: false },
+      '547A': { kind: 'one-hit-overwalls', label: 'One-Hit (Overwalls 547A variant)', multiplier: null, isOneHit: true, isTenX: false }
+    };
+    return Object.freeze({ hex, ...(known[hex] || { kind: 'custom', label: 'Custom', multiplier: null, isOneHit: false, isTenX: false }) });
+  }
+
+  function findEmblemMatches(bytes, baseAddress, emblemId, excludedRanges = []) {
     const needle = beU16(emblemId);
     const matches = [];
     for (let offset = 0; offset + 1 < bytes.length; offset += 2) {
-      if (bytes[offset] === needle[0] && bytes[offset + 1] === needle[1]) matches.push(baseAddress + offset);
+      const address = baseAddress + offset;
+      const excluded = excludedRanges.some(range => Array.isArray(range) && range.length === 2 &&
+        Number.isFinite(range[0]) && Number.isFinite(range[1]) && address < range[1] && address + 2 > range[0]);
+      if (!excluded && bytes[offset] === needle[0] && bytes[offset + 1] === needle[1]) matches.push(address);
     }
     return matches;
   }
@@ -110,7 +133,7 @@
     return rgba;
   }
 
-  const api = { bytesFromHex, beU16, beU32, beFloat32, float32FromBE, BRIGHTNESS_ADDRESS, BRIGHTNESS_PRESETS, brightnessPreset, brightnessPresetForHex, findEmblemMatches, findAmmoCandidates, findSpecialAmmoCandidates, framebufferToRgba };
+  const api = { bytesFromHex, beU16, beU32, beFloat32, float32FromBE, BRIGHTNESS_ADDRESS, BRIGHTNESS_PRESETS, brightnessPreset, brightnessPresetForHex, classifyDamagePatch, EMBLEM_EXCLUDED_RANGES, findEmblemMatches, findAmmoCandidates, findSpecialAmmoCandidates, framebufferToRgba };
   root.RtmMemoryFeatures = api;
   if (typeof module !== 'undefined') module.exports = api;
 })(globalThis);

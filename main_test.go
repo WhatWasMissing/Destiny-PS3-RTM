@@ -77,3 +77,77 @@ func TestHostRejectsUndocumentedFunctionCallRoutes(t *testing.T) {
 		}
 	}
 }
+
+func TestHostRejectsMemoryWriteWithoutBuildVerifier(t *testing.T) {
+	calls := 0
+	console := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		io.WriteString(w, "unexpected write")
+	}))
+	defer console.Close()
+	h := &host{token: "test-token", origin: "http://127.0.0.1:8767", client: console.Client(), validTarget: func(u *url.URL) bool { return u.Scheme+"://"+u.Host == console.URL }}
+	r := httptest.NewRequest(http.MethodGet, h.origin+"/console?url="+url.QueryEscape(console.URL+"/setmem.ps3mapi?addr=1234&val=00&proc=0x1010200"), nil)
+	r.Header.Set("X-RTM-Token", h.token)
+	w := httptest.NewRecorder()
+	h.handler().ServeHTTP(w, r)
+	if w.Code != http.StatusPreconditionFailed || calls != 0 {
+		t.Fatalf("unverified write was forwarded: status=%d calls=%d", w.Code, calls)
+	}
+}
+
+func TestHostProtectsBuildSignatureRanges(t *testing.T) {
+	calls := 0
+	console := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { calls++ }))
+	defer console.Close()
+	h := &host{token: "test-token", origin: "http://127.0.0.1:8767", client: console.Client(), validTarget: func(u *url.URL) bool { return u.Scheme+"://"+u.Host == console.URL }}
+	r := httptest.NewRequest(http.MethodGet, h.origin+"/console?url="+url.QueryEscape(console.URL+"/setmem.ps3mapi?addr=00444B64&val=00&proc=0x1010200"), nil)
+	r.Header.Set("X-RTM-Token", h.token)
+	w := httptest.NewRecorder()
+	h.handler().ServeHTTP(w, r)
+	if w.Code != http.StatusBadRequest || calls != 0 || !strings.Contains(w.Body.String(), "protected 01.24 code signature") {
+		t.Fatalf("protected signature write was not blocked: status=%d calls=%d body=%q", w.Code, calls, w.Body.String())
+	}
+}
+
+func TestHostProxyAllowsOnlyConstrainedLaunchTargets(t *testing.T) {
+	var forwarded []string
+	client := &http.Client{Transport: roundTripFunc(func(request *http.Request) (*http.Response, error) {
+		forwarded = append(forwarded, request.URL.EscapedPath())
+		return &http.Response{StatusCode: http.StatusOK, Header: make(http.Header), Body: io.NopCloser(strings.NewReader("OK")), Request: request}, nil
+	})}
+	h := &host{token: "test-token", origin: "http://127.0.0.1:8767", client: client, validTarget: consoleTarget}
+	valid := []string{
+		"http://192.168.1.62/mount.ps3/dev_hdd0/PS3ISO/Destiny.iso&mode=silent",
+		"http://192.168.1.62/mount.ps3/dev_hdd0/PS3ISO/Destiny%20One.iso&mode=silent",
+		"http://192.168.1.62/wmnav.ps3/game",
+		"http://192.168.1.62/play.ps3",
+	}
+	for _, target := range valid {
+		r := httptest.NewRequest(http.MethodGet, h.origin+"/console?url="+url.QueryEscape(target), nil)
+		r.Header.Set("X-RTM-Token", h.token)
+		w := httptest.NewRecorder()
+		h.handler().ServeHTTP(w, r)
+		if w.Code != http.StatusOK {
+			t.Errorf("valid launch target %q returned %d: %s", target, w.Code, w.Body.String())
+		}
+	}
+	for _, target := range []string{
+		"http://192.168.1.62/mount.ps3/dev_hdd0/PS3ISO/sub/Destiny.iso&mode=silent",
+		"http://192.168.1.62/mount.ps3/dev_hdd0/PS3ISO/../Destiny.iso&mode=silent",
+		"http://192.168.1.62/mount.ps3/dev_hdd0/PS3ISO/Destiny.iso&mode=silent?next=/play.ps3",
+		"http://192.168.1.62/mount.ps3/dev_hdd0/PS3ISO/Destiny.iso",
+		"http://192.168.1.62/play.ps3?next=/mount.ps3/dev_hdd0/PS3ISO/Destiny.iso",
+		"http://192.168.1.62/wmnav.ps3/game?x=1",
+	} {
+		r := httptest.NewRequest(http.MethodGet, h.origin+"/console?url="+url.QueryEscape(target), nil)
+		r.Header.Set("X-RTM-Token", h.token)
+		w := httptest.NewRecorder()
+		h.handler().ServeHTTP(w, r)
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("invalid launch target %q returned %d", target, w.Code)
+		}
+	}
+	if len(forwarded) != len(valid) {
+		t.Fatalf("forwarded %d requests, want %d: %#v", len(forwarded), len(valid), forwarded)
+	}
+}

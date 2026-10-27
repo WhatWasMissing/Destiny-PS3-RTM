@@ -1,20 +1,43 @@
 (function (root) {
   'use strict';
-  function createRunner({ session, write, read }) {
+  function createRunner({ session, write, read, beforeApply }) {
     let tail = Promise.resolve();
     function apply(pairs, options = {}) {
       const owner = session();
-      const normalized = pairs.map(([address, value]) => {
+      const normalize = (entries, label) => entries.map(([address, value]) => {
         const addr = String(address).replace(/^0x/i, '');
         const hex = String(value).replace(/\s/g, '').toUpperCase();
-        if (!/^[0-9a-f]{1,8}$/i.test(addr) || parseInt(addr,16) === 0 || !/^(?:[0-9A-F]{2})+$/.test(hex)) throw new Error('Invalid memory patch');
+        if (!/^[0-9a-f]{1,8}$/i.test(addr) || parseInt(addr,16) === 0 || !/^(?:[0-9A-F]{2})+$/.test(hex)) throw new Error(`Invalid memory ${label}`);
         return [parseInt(addr, 16), hex];
       });
+      if (!Array.isArray(pairs)) throw new TypeError('Memory patches must be an array');
+      const normalized = normalize(pairs, 'patch');
       if (!normalized.length) return Promise.reject(new Error('Empty memory patch'));
+      if (options.preconditions !== undefined && !Array.isArray(options.preconditions)) throw new TypeError('Memory preconditions must be an array');
+      const preconditions = normalize(options.preconditions || [], 'precondition');
+      if (options.beforeWrite !== undefined && typeof options.beforeWrite !== 'function') throw new TypeError('beforeWrite must be a function');
       const check = () => { if (!owner || owner !== session()) throw new Error('Console session changed; operation cancelled'); };
       const run = async () => {
         let completed = 0;
         try {
+          check();
+          if (typeof beforeApply === 'function') await beforeApply(owner, normalized, options);
+          check();
+          for (const [address, expected] of preconditions) {
+            check();
+            let actual;
+            try { actual = await read(address, expected.length / 2, options); }
+            catch (error) { check(); throw new Error(`Could not read memory precondition at 0x${address.toString(16)}: ${error.message}`); }
+            check();
+            if (String(actual).replace(/\s/g, '').toUpperCase() !== expected) {
+              throw new Error(`Memory precondition mismatch at 0x${address.toString(16)}; no write was attempted`);
+            }
+          }
+          if (typeof options.beforeWrite === 'function') {
+            check();
+            await options.beforeWrite(owner, normalized);
+            check();
+          }
           for (const [address, value] of normalized) {
             check(); await write(address, value, options); check(); completed++;
           }

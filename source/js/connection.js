@@ -90,13 +90,14 @@
       await finishSafeAutoReconnect(target);
     } catch (error) {
       if (generation !== connectionGeneration) return;
-      ip = ''; setBadge('failed','FAILED');
+      setBadge('failed','FAILED');
       document.getElementById('btn-connect').style.display = '';
       document.getElementById('btn-connect').disabled = false;
       document.getElementById('btn-disconnect').style.display = 'none';
       document.getElementById('btn-shutdown').classList.remove('enabled');
       document.getElementById('btn-restart').classList.remove('enabled');
       log(`Relink failed: ${error.message}`,'err'); toast('Could not refresh connection','err');
+      ip = '';
     }
   }
 
@@ -140,6 +141,7 @@
       document.getElementById('btn-shutdown').classList.add('enabled');
       document.getElementById('btn-restart').classList.add('enabled');
       log(`Connected → ${ip}`, 'ok');
+      if (typeof automationNotify === 'function') automationNotify('Connected', 'connect', {ip});
       toast('Connected to ' + ip, 'ok');
       // Confirm a successful PS3 link with the webMAN HTTP popup.
       // This is a PS3/XMB notification, separate from the Destiny-internal RTM toast.
@@ -157,7 +159,7 @@
       const timedOut = /timed out/i.test(e?.message || '');
       setBadge('failed', 'FAILED');
       document.getElementById('btn-connect').disabled = false;
-      log(`Connection failed → ${ip} ${timedOut ? '(timed out)' : '(unreachable)'}`, 'err');
+      log(`Connection failed → ${ip} ${timedOut ? '(timed out)' : '(unreachable)'}`, 'err', 'connect');
       toast(timedOut ? 'PS3 not responding' : 'Could not reach PS3', 'err');
       ip = '';
     }
@@ -177,6 +179,7 @@
     } finally {
       if (generation !== connectionGeneration) return;
       consoleTransport.cancelAll();
+      if (typeof automationNotify === 'function') automationNotify('Disconnected', 'connect', {ip});
       ip = '';
       setBadge('', 'OFFLINE');
       document.getElementById('btn-connect').style.display = '';
@@ -252,6 +255,7 @@
     // Deliberately do NOT reinstall the game hook during a quick reconnect.
     // This reconnect path only restores the RTM's HTTP link.
     log(`Auto reconnect restored → ${targetIp}`, 'ok');
+    if (typeof automationNotify === 'function') automationNotify('Connection restored', 'restore', {ip:targetIp});
     toast('PS3 connection restored', 'ok');
     startHealthCheck();
   }
@@ -327,6 +331,7 @@
           _healthMissed = 0;
           setBadge('connected', 'ONLINE');
           log('Connection restored', 'ok');
+          if (typeof automationNotify === 'function') automationNotify('Connection restored', 'restore', {ip:targetIp});
           toast('PS3 back online', 'ok');
         }
       } catch (e) {

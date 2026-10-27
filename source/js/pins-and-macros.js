@@ -116,18 +116,25 @@
   // the original buttons change state.
   function observeCheatStates() {
     const grid = document.getElementById('pinned-grid');
-    if (!grid) return;
-    const observer = new MutationObserver(() => {
-      const clones = grid.children;
-      pinnedCheats.forEach((id, i) => {
-        const original = document.getElementById(id);
-        const clone = clones[i];
-        if (original && clone) {
-          clone.classList.toggle('active-cheat', original.classList.contains('active-cheat'));
+    const activeStates = new WeakMap();
+    const observer = new MutationObserver(mutations => {
+      const changedButtons = new Set(mutations.map(mutation => mutation.target));
+      changedButtons.forEach(original => {
+        const active = original.classList.contains('active-cheat');
+        const previous = activeStates.get(original);
+        activeStates.set(original, active);
+        if (previous !== undefined && previous !== active && typeof automationNotify === 'function') {
+          const label = getCheatLabel(original);
+          automationNotify(`Cheat ${active ? 'activated' : 'deactivated'}: ${label}`, 'cheat', {cheat:label, ip});
         }
+
+        const index = pinnedCheats.indexOf(original.id);
+        const clone = grid && index >= 0 ? grid.children[index] : null;
+        if (clone) clone.classList.toggle('active-cheat', active);
       });
     });
     document.querySelectorAll('.cheat-btn[id]').forEach(btn => {
+      activeStates.set(btn, btn.classList.contains('active-cheat'));
       observer.observe(btn, { attributes: true, attributeFilter: ['class'] });
     });
   }

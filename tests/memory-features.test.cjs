@@ -8,6 +8,8 @@ const {
   BRIGHTNESS_ADDRESS,
   brightnessPreset,
   brightnessPresetForHex,
+  classifyDamagePatch,
+  EMBLEM_EXCLUDED_RANGES,
   findEmblemMatches,
   findAmmoCandidates,
   findSpecialAmmoCandidates,
@@ -31,12 +33,42 @@ test('brightness source presets preserve their exact big-endian Float32 values',
   assert.throws(() => float32FromBE('1234'), /exactly four bytes/);
 });
 
+test('damage variants keep source-specific One-Hit codes distinct', () => {
+  assert.deepEqual(classifyDamagePatch('3F80'), {
+    hex: '3F80', kind: 'normal', label: 'Normal', multiplier: 1, isOneHit: false, isTenX: false
+  });
+  assert.equal(classifyDamagePatch('4120').multiplier, 10);
+  assert.equal(classifyDamagePatch('447A').kind, 'one-hit-main');
+  assert.equal(classifyDamagePatch('447A').multiplier, 1000);
+  assert.equal(classifyDamagePatch('547A').kind, 'one-hit-overwalls');
+  assert.equal(classifyDamagePatch('547A').isOneHit, true);
+  assert.equal(classifyDamagePatch('547A').multiplier, null);
+  assert.equal(classifyDamagePatch('1234').kind, 'custom');
+  assert.throws(() => classifyDamagePatch('123'), /exactly two bytes/);
+});
+
 test('emblem scanner returns aligned 16-bit matches only', () => {
   const memory = new Uint8Array(16);
   memory.set([0x12, 0x34], 2);
   memory.set([0x12, 0x34], 9);
   memory.set([0x12, 0x34], 12);
   assert.deepEqual(findEmblemMatches(memory, 0x600E0000, 0x1234), [0x600E0002, 0x600E000C]);
+});
+
+test('emblem scanner ignores wallet values and the 0x0366 currency marker', () => {
+  const base = 0x600E66A0;
+  const memory = new Uint8Array(96);
+  for (const address of [0x600E66A0, 0x600E66B0, 0x600E66C0, 0x600E66D0, 0x600E66F0]) {
+    const offset = address - base;
+    memory.set([0x03, 0x66], offset);
+  }
+  assert.deepEqual(findEmblemMatches(memory, base, 0x0366, EMBLEM_EXCLUDED_RANGES), [base]);
+  assert.deepEqual(EMBLEM_EXCLUDED_RANGES, [
+    [0x600E66B0, 0x600E66B4],
+    [0x600E66C0, 0x600E66C2],
+    [0x600E66D0, 0x600E66D4],
+    [0x600E66F0, 0x600E66F4]
+  ]);
 });
 
 test('ammo scan requires the source values and its 0x80A6 slot marker', () => {

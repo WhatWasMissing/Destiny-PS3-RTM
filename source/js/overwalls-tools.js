@@ -21,6 +21,7 @@
   const PLATE_ADDRESS = 0x010FB514;
   const PLATE_BYTES = '9421FFD0F9E10010FA010018FA210020FA4100287E4000263063FFF43DE0019061EFEBB08A0F00E42C100000820F00E88223001C7C918000E9E10010EA010018EA2100203821003041820008418600107E4FF120EA41FFF84B9060447E4FF120EA41FFF84B90603C';
   const PLATE_BRANCH_ADDRESS = 0x00A015AC;
+  const PLATE_BRANCH_ORIGINAL = '3063FFF44BFFFB15';
   const PLATE_BRANCH_VALUE = '486F9F68';
   const PLATE_FLAG_ADDRESS = 0x0190EC98;
 
@@ -61,6 +62,7 @@
   let job = null;
   let scenario = [];
   let flySliderTimer = null;
+  const scenarioLibrary = Array.isArray(root.DESTINY_RTM_SCENARIO_LIBRARY) ? root.DESTINY_RTM_SCENARIO_LIBRARY : [];
   try {
     const saved = JSON.parse(localStorage.getItem(SCENARIO_KEY) || '[]');
     if (Array.isArray(saved)) scenario = saved.filter(validScenarioPosition).slice(0, 500);
@@ -366,6 +368,34 @@
     const input = document.getElementById('ow-scenario-file');
     input.value = '';
     input.click();
+  }
+  function renderScenarioLibrary() {
+    const select = document.getElementById('ow-scenario-library');
+    if (!select) return;
+    select.innerHTML = '<option value="">Choose an archived scenario…</option>' + scenarioLibrary.map(item =>
+      `<option value="${html(item.id)}">${html(item.name)} · ${Array.isArray(item.positions) ? item.positions.length : 0}</option>`
+    ).join('');
+  }
+  async function loadScenarioLibrary() {
+    const selectedId = document.getElementById('ow-scenario-library')?.value;
+    const entry = scenarioLibrary.find(item => item?.id === selectedId);
+    if (!entry) { report('Choose an archived scenario first', 'err'); return; }
+    let imported;
+    try {
+      if (!Array.isArray(entry.positions) || !entry.positions.length || entry.positions.length > 500) throw new Error('Scenario library entry has an invalid position list');
+      imported = entry.positions.map((position, index) => {
+        const item = { id: `${entry.id}-${index + 1}`, legacyName: position.legacyName, name: position.name,
+          x: Number(position.x), y: Number(position.y), z: Number(position.z) };
+        if (!validScenarioPosition(item)) throw new Error(`Invalid scenario position ${index + 1}`);
+        return item;
+      });
+    } catch (error) { report(`Scenario load failed: ${error.message}`, 'err'); return; }
+    if (scenario.length && !await RtmDialogs.confirm(`Replace the current Overwalls scenario with “${entry.name}” (${imported.length} positions)?`)) return;
+    const previous = scenario;
+    scenario = imported;
+    if (!persistScenario()) { scenario = previous; renderScenario(); return; }
+    renderScenario();
+    report(`Loaded ${entry.name} from the built-in archive · ${imported.length} positions`, 'ok');
   }
   async function importScenarioFile(file) {
     try {
@@ -728,6 +758,9 @@
       const context = newContext();
       const pairs = cheatValues(Number(id), Boolean(enabled));
       await writePairs(pairs.map(([address, value]) => [hexAddress(address), value]), context);
+      if (Number(id) === 9 && typeof root.syncDamagePatchState === 'function') {
+        root.syncDamagePatchState(enabled ? '547A' : '3F80', 'Overwalls One-Hit toggle');
+      }
       report(`${cheatNames[id] || 'Source cheat'} ${enabled ? 'enabled' : 'disabled'} · memory bytes verified`, 'ok');
     } catch (error) { report(`Cheat toggle not confirmed: ${error.message}`, 'err'); }
   }
@@ -740,6 +773,9 @@
       const pairs = [];
       for (const id of ids) pairs.push(...cheatValues(id, enabled));
       await writePairs(pairs.map(([address, value]) => [hexAddress(address), value]), context);
+      if (ids.includes(9) && typeof root.syncDamagePatchState === 'function') {
+        root.syncDamagePatchState(enabled ? '547A' : '3F80', `Overwalls ${kind} preset`);
+      }
       report(`${kind === 'usual' ? 'Usual' : kind === 'all' ? 'All' : 'Disable all'} Overwalls cheat preset verified (${pairs.length} memory writes)`, 'ok');
     } catch (error) { report(`Cheat preset not confirmed: ${error.message}`, 'err'); }
   }
@@ -802,6 +838,8 @@
       requireConnected();
       if ((await flyhackReady(context)).ready) { flyStatus('SPRX is already loaded and verified', 'ok'); return; }
       if (!root.RtmHost || typeof root.RtmHost.loadModule !== 'function') throw new Error('Module loading is unavailable in this hosting environment');
+      if (typeof root.ensureDestinyWriteProfile !== 'function') throw new Error('Destiny build verification is unavailable; module load refused');
+      await root.ensureDestinyWriteProfile();
       const pid = parseInt(String(GAME_PID).replace(/^0x/i, ''), 16);
       checkContext(context);
       const response = await root.RtmHost.loadModule(ip, String(pid), SPRX_PATH);
@@ -882,20 +920,28 @@
     try {
       const context = newContext();
       requireConnected();
-      const currentBranch = await readHex(PLATE_BRANCH_ADDRESS, 4, context);
+      const branchPair = await readHex(PLATE_BRANCH_ADDRESS, 8, context);
+      const currentBranch = branchPair.slice(0, 8);
       if (currentBranch === PLATE_BRANCH_VALUE) throw new Error('The source branch is already present; no owned restoration snapshot is available');
+      if (branchPair !== PLATE_BRANCH_ORIGINAL) throw new Error(`Unsupported plate-hook instruction pair ${branchPair} at 0x${hexAddress(PLATE_BRANCH_ADDRESS)}`);
       const previous = readBackup(PLATE_BACKUP_KEY);
       if (previous?.ip === ip) throw new Error('A saved plate-hook snapshot exists. Restore it before installing again.');
+      const [body, flag] = await Promise.all([
+        readHex(PLATE_ADDRESS, PLATE_BYTES.length / 2, context),
+        readHex(PLATE_FLAG_ADDRESS, 4, context)
+      ]);
+      if (body !== '00'.repeat(PLATE_BYTES.length / 2)) throw new Error('Plate-hook code cave is not empty; no bytes were changed');
+      if (flag !== '00000000') throw new Error(`Plate-hook state flag is already in use (${flag}); no bytes were changed`);
       const snapshot = {
         ip, branch: currentBranch,
-        body: await readHex(PLATE_ADDRESS, PLATE_BYTES.length / 2, context),
-        flag: await readHex(PLATE_FLAG_ADDRESS, 4, context)
+        body,
+        flag
       };
       writeBackup(PLATE_BACKUP_KEY, snapshot);
       await writeHex(PLATE_ADDRESS, PLATE_BYTES, context);
       await writeHex(PLATE_FLAG_ADDRESS, '00000001', context);
       await writeHex(PLATE_BRANCH_ADDRESS, PLATE_BRANCH_VALUE, context);
-      report('Overwalls plate hook installed and read back; source-build compatibility is not independently known', 'ok');
+      report('Overwalls plate hook installed and read back; the in-game effect is not observed', 'ok');
     } catch (error) { report(`Plate hook not confirmed: ${error.message}`, 'err'); }
   }
   async function restorePlateHook() {
@@ -990,6 +1036,7 @@
     if (activities) activities.innerHTML = activityPositions.map(entry => `<button class="cheat-btn" type="button" onclick="owActivityLoad('${entry[1]}')"><span class="cheat-name">${html(entry[0])}</span><span class="cheat-desc">${entry[1] === 'randomTower' ? 'Random index 2–7' : `Activity ${entry[1]}`}</span></button>`).join('');
     const toggles = document.getElementById('ow-cheat-controls');
     if (toggles) toggles.innerHTML = Object.entries(cheatNames).map(([id, name]) => `<div class="ow-toggle-card"><strong>${html(name)}</strong><div><button type="button" onclick="owApplyCheatToggle(${id},true)">Enable</button><button type="button" onclick="owApplyCheatToggle(${id},false)">Disable</button></div></div>`).join('');
+    renderScenarioLibrary();
     renderScenario();
   }
 
@@ -998,7 +1045,7 @@
     owLoadActivityFromInput: () => activityLoad(Number(document.getElementById('ow-activity-index').value)),
     owReadActivity: readActivity, owReadCoordinates: readCoordinates, owPDR: pdr, owPDRStaticOff: pdrStaticOff, owAboveYou: aboveYou,
     owSetOPKPreset: setOPKPreset, owTeleportTarget: runTargetTeleport,
-    owImportScenario: importScenario, owExportScenario: exportScenario, owAddScenarioPosition: addScenarioPosition,
+    owImportScenario: importScenario, owExportScenario: exportScenario, owLoadScenarioLibrary: loadScenarioLibrary, owAddScenarioPosition: addScenarioPosition,
     owClearScenario: clearScenario, owScenarioGo: scenarioGo, owEditScenario: editScenario, owDeleteScenario: deleteScenario,
     owRunRaid: startRaid, owRunTotems: () => runJob('AFK Totems', runTotems), owRunTotemRoute: runTotemRoute, owStopJob: stopJob, owStartFarm: startFarm,
     owReadCharacterValues: readCharacterValues, owWriteCharacterValues: writeCharacterValues,

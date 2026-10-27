@@ -4,7 +4,7 @@
     'overwalls_scenario_positions', 'overwalls_teleport_mode', 'overwalls_activity_method',
     'rtm_pinned_cheats', 'macros', 'cheatAddresses', 'henMode', 'rtm_accent_color',
     'rtm_appearance', 'rtm_auto_reconnect_safe_v1', 'rtm_active_tab', 'rtm_ui_mode',
-    'destinyRtmToolSetupV1', 'destinyRtmCharacterUtilsVisibleV1']);
+    'destinyRtmToolSetupV1', 'destinyRtmCharacterUtilsVisibleV1', 'rtm_launch_iso_path']);
   function allowed(key) { return keys.has(key) || /^destinyRtmSectionVisible_sec-[a-z0-9-]+$/.test(key); }
   const coordinate = value => (typeof value === 'number' || typeof value === 'string' && value.trim() !== '') &&
     Number.isFinite(Number(value)) && Math.abs(Number(value)) <= 3.4028234663852886e38;
@@ -21,6 +21,7 @@
       if ((key === 'henMode' || key === 'rtm_auto_reconnect_safe_v1' || key === 'destinyRtmToolSetupV1' || key === 'destinyRtmCharacterUtilsVisibleV1' || key.startsWith('destinyRtmSectionVisible_')) && !['0','1'].includes(value)) throw new Error('Invalid switch setting');
       if (key === 'rtm_appearance' && !['light','dark'].includes(value)) throw new Error('Invalid appearance');
       if (key === 'rtm_ui_mode' && !['compact','detailed'].includes(value)) throw new Error('Invalid UI mode');
+      if (key === 'rtm_launch_iso_path' && (value.length > 160 || value.includes('..') || !/^\/dev_hdd0\/PS3ISO\/[A-Za-z0-9][A-Za-z0-9 _().-]{0,124}\.iso$/i.test(value))) throw new Error('Invalid Destiny ISO path');
       if (key === 'rtm_active_tab' && !['home','mods','player','overwalls','tools','all'].includes(value)) throw new Error('Invalid tab');
       if (key === 'rtm_accent_color' && !/^#[0-9a-f]{6}$/i.test(value)) throw new Error('Invalid accent color');
       if (key === 'cheatAddresses') {

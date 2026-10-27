@@ -43,13 +43,27 @@
 
 
   // ── Reset all active cheats ───────────────────────────────────────────────
+  // Source-backed Destiny 1.24 weapon-ammo patch. Keep the three original
+  // instructions together so the main toggle and Reset All use the same bytes.
+  const UNLIMITED_AMMO_PATCH = {
+    on: [
+      ['003108EC', '3880270F'],
+      ['00310554', '38A0270F'],
+      ['00CF95AC', '60000000FC1EF8003FC0461C63DE3C0093DF0110']
+    ],
+    off: [
+      ['003108EC', '63C40000'],
+      ['00310554', '63C50000'],
+      ['00CF95AC', '63DD0000408200083BA00001807F001CD3DF0110']
+    ]
+  };
+
   async function resetAllCheats() {
     const operationGeneration = connectionGeneration;
     log('Resetting all active cheats…', '');
     const CHEAT_DEFS = [
       { id: 'tog-god-mode',        addr: '00444CA0', offVal: 'C0210358', label: 'Invincibility',         size: 4 },
       { id: 'tog-ohk',             addr: '43E626',   offVal: '3F80',     label: 'One-Hit Enemies',     size: 2 },
-      { id: 'tog-ammo',            addr: '00310F94', offVal: '3F800000', label: 'Unlimited Ammo',    size: 4 },
       { id: 'tog-power',           addr: '02C36FC',  offVal: 'C3C30000', label: 'Infinite Power',  size: 4 },
       { id: 'tog-no-spread',       addr: '30D230',   offVal: '3F800000', label: 'No Spread',       size: 4 },
       { id: 'tog-bouncy-items',    addr: 'DB8BE8',   offVal: '2C030000', label: 'Bouncy Items',    size: 4 },
@@ -70,8 +84,8 @@
     const MULTI_DEFS = [
       { id: 'tog-notarget',      label: 'Enemy Ignore',           pairs: [['18681C','3F800000'],['1891E4','3F800000']] },
       { id: 'tog-no-recoil',     label: 'Steady Aim',           pairs: [['5056DC','3F800000'],['505D24','3F800000'],['30DC44','3F800000']] },
-      { id: 'tog-warpriest',     label: 'Warpriest Immunity',    pairs: [['444CA4','C0434DB0'],['1897420','3F800000']] },
       { id: 'tog-unl-abilities', label: 'Unlimited Abilities', pairs: [['2C1DB4','D03B019C'],['CCB9E8','3063FFFF'],['2C36FC','C3C30000']] },
+      { id: 'tog-ammo', label: 'Unlimited Ammo', pairs: UNLIMITED_AMMO_PATCH.off },
     ];
     const BYTES_DEFS = [
       { id: 'tog-no-pushbacks', addr: '1389760', offHex: '3F8000003F8000003F800000', label: 'No Pushback Barriers' },
@@ -111,7 +125,7 @@
     return new Date().toTimeString().slice(0,8);
   }
 
-  function log(msg, type = '') {
+  function log(msg, type = '', automationKind = '') {
     const el = document.getElementById('log');
     const entry = document.createElement('div');
     entry.className = 'log-entry ' + type;
@@ -131,6 +145,7 @@
     }
 
     if (type === 'err' && typeof automationNotify === 'function') {
+      automationNotify(msg, automationKind || 'error', { ip, fallbackKind:automationKind === 'connect' ? 'error' : '' });
     }
   }
 
@@ -917,6 +932,7 @@
     if (!select || !Array.isArray(window.RTM_EMBLEM_OPTIONS)) return;
     select.replaceChildren();
     for (const emblem of window.RTM_EMBLEM_OPTIONS) {
+      if (emblem.itemClass !== 5) continue;
       const option = document.createElement('option');
       option.value = String(emblem.id);
       option.textContent = `${emblem.name} · ${emblem.id}`;
@@ -941,7 +957,7 @@
     }
 
     const emblemId = parseInt(currentHex, 16);
-    const matches = RtmMemoryFeatures.findEmblemMatches(scanBytes, EMBLEM_SCAN_BASE, emblemId);
+    const matches = RtmMemoryFeatures.findEmblemMatches(scanBytes, EMBLEM_SCAN_BASE, emblemId, RtmMemoryFeatures.EMBLEM_EXCLUDED_RANGES);
     if (matches.length !== 1) throw new Error(matches.length
       ? `Current emblem matched ${matches.length} locations; refusing an ambiguous write`
       : 'Could not locate the current emblem in the source address range');
@@ -998,6 +1014,9 @@
     try {
       if (emblemRestoreStack.length >= 32) throw new Error('Restore or review the saved emblem changes before making another edit');
       if (!Number.isInteger(id) || id < 0 || id > 0xFFFF) throw new Error('Select a valid 16-bit emblem');
+      if (!window.RTM_EMBLEM_OPTIONS?.some(option => option.itemClass === 5 && Number(option.id) === id)) {
+        throw new Error('Choose a source-listed emblem (item class 5); emote and other item IDs are not emblem selections');
+      }
       const target = await locateCharacterEmblem(generation);
       const selectedHex = [...RtmMemoryFeatures.beU16(id)].map(byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
       const [targetBefore, currentBefore] = await Promise.all([
@@ -1408,6 +1427,13 @@
     if (result.status !== 'verified') throw new Error('Write acknowledged but readback unavailable; value not confirmed');
     return hex;
   }
+  async function verifiedConditionalMemoryValue(address, expectedHex, hex, beforeWrite) {
+    const options = { timeoutMs: 8000, preconditions: [[address, expectedHex]] };
+    if (beforeWrite) options.beforeWrite = beforeWrite;
+    const result = await patchRunner.apply([[address, hex]], options);
+    if (result.status !== 'verified') throw new Error('Write acknowledged but readback unavailable; value not confirmed');
+    return hex;
+  }
   async function writeFOVValue(value) {
     const number = Number(value);
     if (!RtmBackups.coordinate(value) || number <= 0) throw new Error('Enter a positive finite FOV value');
@@ -1538,12 +1564,13 @@
   const SECTIONS = [
     { id: 'sec-connection',          label: 'Connection',      setup: false, lockedOn: true },    { id: 'sec-main-cheats',         label: 'Main Cheats',     setup: true,  description: 'Core player and gameplay cheats.' },
     { id: 'sec-quick-access',        label: 'Quick Access',      setup: true,  description: 'Pinned cheats and macros.' },
-    { id: 'sec-server-cheats',       label: 'Server Cheats',   setup: true,  description: 'Server-side and session-related options.' },    { id: 'sec-character-utils',     label: 'Character Utilities', setup: true, description: 'Read and edit the connected character name.' },    { id: 'sec-gamespeed',           label: 'Gamespeed',       setup: true,  description: 'Game-speed controls and presets.' },
+    { id: 'sec-server-cheats',       label: 'Server Cheats',   setup: true,  description: 'Server-side and session-related options.' },    { id: 'sec-character-utils',     label: 'Character Utilities', setup: true, description: 'Read and edit character name, emblem, and in-memory player scale.' },    { id: 'sec-gamespeed',           label: 'Gamespeed',       setup: true,  description: 'Game-speed controls and presets.' },
     { id: 'sec-damage-tuning',       label: 'Damage Tuning',   setup: true,  description: 'Custom damage-value controls and presets.' },
     { id: 'sec-fov',                 label: 'FOV',             setup: true,  description: 'Field-of-view controls.' },
     { id: 'sec-overwalls',            label: 'Overwalls Tools', setup: true,  description: 'Overwalls scenario, routine, inventory and Flyhack workflows.' },
     { id: 'sec-custom-offset',       label: 'Custom Offset',   setup: true,  description: 'Manual memory address/value tools.', recommended: false },
     { id: 'sec-ps3-notify',          label: 'PS3 System Notification', setup: true, description: 'Send a documented PS3MAPI system notification.' },
+    { id: 'sec-jukebox',             label: 'PS3 Jukebox',     setup: true, description: 'Play source-defined PS3 system tone sequences.' },
     { id: 'sec-scanner',             label: 'Memory Scanner',  setup: true,  description: 'Compare bounded memory snapshots and inspect selected values.', recommended: false },
     { id: 'sec-ammo-editor',         label: 'Ammo Editor',     setup: true,  description: 'Experimental source-build scanner; writes one selected ammo slot.', recommended: false },
     { id: 'sec-screenshots',         label: 'Screenshots',     setup: true,  description: 'Experimental source-build framebuffer addresses; may pause the game.', recommended: false },
@@ -1718,7 +1745,8 @@
     const overlay = document.getElementById('settings-overlay');
     if (!overlay) return;
     const picker = document.getElementById('settings-accent');
-    const current = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    const styles = getComputedStyle(document.documentElement);
+    const current = styles.getPropertyValue('--accent-choice').trim() || styles.getPropertyValue('--accent').trim();
     if (picker && /^#[0-9a-fA-F]{6}$/.test(current)) picker.value = current;
     renderSettingsSections();
     overlay.style.display = 'flex';
@@ -1793,8 +1821,8 @@
     applySectionVisibility();
     renderSettingsSections();
     const picker = document.getElementById('settings-accent');
-    if (typeof setAccent === 'function') setAccent('#4fa3e0');
-    if (picker) picker.value = '#4fa3e0';
+    if (typeof setAccent === 'function') setAccent('#c4b784');
+    if (picker) picker.value = '#c4b784';
     toast('Settings reset', 'ok');
   }
 
@@ -1824,6 +1852,145 @@
     const dock=document.getElementById('activity-log-dock-body');
     if(dock) dock.innerHTML='<div class="dock-log-empty">Log cleared.</div>';
   }
+
+  // ── Optional PS3/XMB notification automation ─────────────────────────────
+  const NOTIFICATION_AUTOMATION_KEY = 'destiny_rtm_notification_automation_v1';
+  const NOTIFICATION_AUTOMATION_DEFAULTS = Object.freeze({
+    master:false, connect:true, activity:true, cheat:false, error:true, restore:true,
+    template:'Destiny RTM: {event}', cooldown:5
+  });
+  const NOTIFICATION_COOLDOWNS = new Set([0,2,5,10,30]);
+  let notificationAutomation = {...NOTIFICATION_AUTOMATION_DEFAULTS};
+  let notificationLastSentAt = 0;
+  let notificationRequestCount = 0;
+
+  function readNotificationAutomation() {
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(NOTIFICATION_AUTOMATION_KEY) || '{}') || {}; } catch (e) {}
+    const cooldown = Number(saved.cooldown);
+    notificationAutomation = {
+      master:saved.master === true,
+      connect:saved.connect !== false,
+      activity:saved.activity !== false,
+      cheat:saved.cheat === true,
+      error:saved.error !== false,
+      restore:saved.restore !== false,
+      template:typeof saved.template === 'string' ? saved.template.slice(0,128) : NOTIFICATION_AUTOMATION_DEFAULTS.template,
+      cooldown:NOTIFICATION_COOLDOWNS.has(cooldown) ? cooldown : NOTIFICATION_AUTOMATION_DEFAULTS.cooldown
+    };
+    applyNotificationAutomationUI();
+  }
+
+  function applyNotificationAutomationUI() {
+    const fields = {
+      master:'auto-notif-master', connect:'auto-notif-connect', activity:'auto-notif-activity',
+      cheat:'auto-notif-cheat', error:'auto-notif-error', restore:'auto-notif-restore'
+    };
+    Object.entries(fields).forEach(([key,id]) => {
+      const input = document.getElementById(id);
+      if (input) input.checked = !!notificationAutomation[key];
+    });
+    const template = document.getElementById('auto-notif-template');
+    if (template) template.value = notificationAutomation.template;
+    const cooldown = document.getElementById('auto-notif-cooldown');
+    if (cooldown) cooldown.value = String(notificationAutomation.cooldown);
+    updateNotificationAutomationStatus(notificationAutomation.master
+      ? `Automatic notices enabled · ${notificationRequestCount} request${notificationRequestCount === 1 ? '' : 's'} sent this session.`
+      : 'Automatic notices are off.');
+  }
+
+  function updateNotificationAutomationStatus(message) {
+    const status = document.getElementById('notif-automation-status');
+    if (status) status.textContent = message;
+  }
+
+  function saveNotificationAutomationFromUI() {
+    const fields = {
+      master:'auto-notif-master', connect:'auto-notif-connect', activity:'auto-notif-activity',
+      cheat:'auto-notif-cheat', error:'auto-notif-error', restore:'auto-notif-restore'
+    };
+    Object.entries(fields).forEach(([key,id]) => {
+      const input = document.getElementById(id);
+      if (input) notificationAutomation[key] = !!input.checked;
+    });
+    const template = document.getElementById('auto-notif-template');
+    if (template) notificationAutomation.template = template.value.slice(0,128) || NOTIFICATION_AUTOMATION_DEFAULTS.template;
+    const cooldown = Number(document.getElementById('auto-notif-cooldown')?.value);
+    notificationAutomation.cooldown = NOTIFICATION_COOLDOWNS.has(cooldown)
+      ? cooldown : NOTIFICATION_AUTOMATION_DEFAULTS.cooldown;
+    try { localStorage.setItem(NOTIFICATION_AUTOMATION_KEY, JSON.stringify(notificationAutomation)); } catch (e) {}
+    updateNotificationAutomationStatus(notificationAutomation.master
+      ? `Automatic notices enabled · ${notificationRequestCount} request${notificationRequestCount === 1 ? '' : 's'} sent this session.`
+      : 'Automatic notices are off.');
+  }
+
+  function notificationAutomationAllows(kind) {
+    return notificationAutomation.master && notificationAutomation[kind] === true;
+  }
+
+  function dispatchNotificationAutomation(event, data = {}) {
+    if (!ip) return {sent:false, reason:'Connect to a PS3 first.'};
+    const now = Date.now();
+    const cooldownMs = notificationAutomation.cooldown * 1000;
+    const waitMs = cooldownMs - (now - notificationLastSentAt);
+    if (cooldownMs && waitMs > 0) return {sent:false, reason:`Wait ${Math.ceil(waitMs / 1000)} seconds before the next notice.`};
+
+    const values = {
+      event:String(event || ''), activity:String(data.activity || ''),
+      cheat:String(data.cheat || ''), ip:String(data.ip || ip || '')
+    };
+    const message = String(notificationAutomation.template || NOTIFICATION_AUTOMATION_DEFAULTS.template)
+      .replace(/\{event\}/g, values.event)
+      .replace(/\{activity\}/g, values.activity)
+      .replace(/\{cheat\}/g, values.cheat)
+      .replace(/\{ip\}/g, values.ip)
+      .trim().slice(0,128);
+    if (!message) return {sent:false, reason:'Enter a message template first.'};
+
+    notificationLastSentAt = now;
+    notifyPS3(message);
+    notificationRequestCount++;
+    updateNotificationAutomationStatus(`Request dispatched · ${notificationRequestCount} this session. PS3 delivery is not confirmed.`);
+    return {sent:true, message};
+  }
+
+  function automationNotify(event, kind, data = {}) {
+    const fallbackKind = kind === 'connect' && data.fallbackKind === 'error' ? 'error' : '';
+    if (!notificationAutomationAllows(kind) && (!fallbackKind || !notificationAutomationAllows(fallbackKind))) {
+      return {sent:false, reason:'This event is disabled.'};
+    }
+    return dispatchNotificationAutomation(event, data);
+  }
+
+  function testNotificationAutomation() {
+    const result = dispatchNotificationAutomation('Automation test', {ip});
+    if (!result.sent) {
+      updateNotificationAutomationStatus(result.reason);
+      toast(result.reason, 'err');
+      return;
+    }
+    log('Test PS3 notification request dispatched; delivery is not confirmed', 'ok');
+    toast('Test request sent', 'ok');
+  }
+
+  function resetNotificationAutomation() {
+    notificationAutomation = {...NOTIFICATION_AUTOMATION_DEFAULTS};
+    try { localStorage.setItem(NOTIFICATION_AUTOMATION_KEY, JSON.stringify(notificationAutomation)); } catch (e) {}
+    applyNotificationAutomationUI();
+    toast('Notification preferences reset', 'ok');
+  }
+
+  window.automationNotify = automationNotify;
+  window.testNotificationAutomation = testNotificationAutomation;
+  window.resetNotificationAutomation = resetNotificationAutomation;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    readNotificationAutomation();
+    document.querySelectorAll('#notification-automation input, #notification-automation select').forEach(input => {
+      input.addEventListener('change', saveNotificationAutomationFromUI);
+      if (input.id === 'auto-notif-template') input.addEventListener('input', saveNotificationAutomationFromUI);
+    });
+  });
 
   // ── Activity ───────────────────────────────────────────────────────
   // Mirrors C# LoadActivity(ushort index): writes index as UInt16 to 4 addresses.
@@ -2002,6 +2169,7 @@
       }
       const name = ALL_ACTIVITIES[index - 1] || `Activity ${index}`;
       log(`Activity index writes verified: ${name}; load completion not observed`, 'ok');
+      automationNotify(`Activity request written: ${name}`, 'activity', {activity:name, ip});
       toast(name.length > 30 ? name.slice(0,30)+'…' : name, 'ok');
     } catch(e) {
       log(`LoadActivity failed: ${e.message}`, 'err');
@@ -2178,6 +2346,7 @@
     tools: [
       'sec-custom-offset',
       'sec-ps3-notify',
+      'sec-jukebox',
       'sec-ammo-editor',
       'sec-screenshots',
       'sec-scanner',
@@ -2281,7 +2450,7 @@
     'tog-ohk': {
       feature:'stable', label:'Stable',
       description:'Makes most enemies die from a single hit.',
-      notes:'Instance Leader can change the behaviour of this option. It also conflicts with 4× Damage, so only one should be considered active.'
+      notes:'Instance Leader can change the behaviour of this option. It also conflicts with the Damage Preset, so only one should be considered active.'
     },
     'tog-ammo': {
       feature:'stable', label:'Stable',
@@ -2409,9 +2578,9 @@
       notes:'Server Cheats are highly volatile. Make small offset changes and wait for each update to complete.'
     },
     'srv-4x-damage': {
-      feature:'stable', label:'Stable',
-      description:'Applies a four-times damage mode.',
-      notes:'Conflicts with One-Hit Enemies. Enabling one should be treated as replacing the other.'
+      feature:'experimental', label:'Experimental',
+      description:'Writes the source damage preset at 0x0043E626.',
+      notes:'Overwalls C# and the legacy HTML toggle call this 4× Damage, while the HTML calculator maps the same bytes to its 10× preset. Its in-game multiplier has not been verified.'
     },
     'srv-off': {
       feature:'stable', label:'Safe State',
@@ -2621,7 +2790,7 @@
     // itself replaces the old mode. We only need to correct state/UI first.
     if (['tog-ohk','srv-4x-damage','damage-custom'].includes(targetId)) {
       if (targetId !== 'tog-ohk' && cheatState['One-Hit Enemies']) disabled.push('One-Hit Enemies');
-      if (targetId !== 'srv-4x-damage' && server4xDamageState) disabled.push('4× Damage');
+      if (targetId !== 'srv-4x-damage' && server4xDamageState) disabled.push('Damage Preset');
       clearDamageConflictUI(targetId);
     }
 
@@ -2649,8 +2818,108 @@
     return disabled;
   }
 
+  const buildCompatibilityGuard = RtmBuildCompatibility.create({
+    session: () => ip && document.getElementById('status-badge').classList.contains('connected') ? `${connectionGeneration}:${ip}` : '',
+    read: (address, length) => ps3getmem(parseInt(address, 16), length)
+  });
+  function ensureDestinyWriteProfile() {
+    return buildCompatibilityGuard.ensure();
+  }
+  window.ensureDestinyWriteProfile = ensureDestinyWriteProfile;
+  let buildProfileCheckBusy = false;
+  function setDestinyBuildProfileStatus(message, state = '') {
+    const status = document.getElementById('build-profile-status');
+    if (!status) return;
+    status.textContent = message;
+    if (state) status.dataset.state = state;
+    else delete status.dataset.state;
+  }
+  function clearDestinyBuildProfileResults() {
+    const list = document.getElementById('build-profile-results');
+    if (!list) return;
+    list.replaceChildren();
+    list.hidden = true;
+  }
+  function renderDestinyBuildProfileResults(anchors) {
+    const list = document.getElementById('build-profile-results');
+    if (!list) return;
+    list.replaceChildren();
+    for (const anchor of anchors) {
+      const item = document.createElement('li');
+      item.className = 'build-profile-result';
+      item.dataset.state = anchor.status;
+
+      const identity = document.createElement('span');
+      identity.className = 'build-profile-result-identity';
+      const address = document.createElement('code');
+      address.textContent = `0x${anchor.address}`;
+      const role = document.createElement('small');
+      role.textContent = anchor.role || 'Code anchor';
+      identity.append(address, role);
+      const state = document.createElement('span');
+      state.className = 'build-profile-result-state';
+      state.textContent = anchor.status === 'match' ? 'Match' : anchor.status === 'mismatch' ? 'Mismatch' : 'Unreadable';
+      const detail = document.createElement('span');
+      detail.className = 'build-profile-result-detail';
+      if (anchor.status === 'match') detail.textContent = anchor.observed;
+      else if (anchor.status === 'mismatch') detail.textContent = `Observed ${anchor.observed} · expected ${anchor.expected}`;
+      else detail.textContent = anchor.error || 'No bytes returned';
+
+      item.append(identity, state, detail);
+      list.append(item);
+    }
+    list.hidden = false;
+  }
+  async function checkDestinyBuildProfile() {
+    const button = document.getElementById('build-profile-check-btn');
+    const badge = document.getElementById('status-badge');
+    if (!button || buildProfileCheckBusy) return;
+    if (!ip || !badge?.classList.contains('connected')) {
+      clearDestinyBuildProfileResults();
+      setDestinyBuildProfileStatus('Link the console and start Destiny before checking its build.', 'error');
+      return;
+    }
+
+    buildProfileCheckBusy = true;
+    const targetIp = ip;
+    const generation = connectionGeneration;
+    button.disabled = true;
+    clearDestinyBuildProfileResults();
+    setDestinyBuildProfileStatus('Checking three code anchors…', 'pending');
+    try {
+      const result = await buildCompatibilityGuard.inspect();
+      if (generation !== connectionGeneration || targetIp !== ip || !badge.classList.contains('connected')) {
+        setDestinyBuildProfileStatus('Console session changed during the check. Check again.', 'error');
+        return;
+      }
+      renderDestinyBuildProfileResults(result.anchors);
+      const matched = result.anchors.filter(anchor => anchor.status === 'match').length;
+      const mismatches = result.anchors.filter(anchor => anchor.status === 'mismatch');
+      const unreadable = result.anchors.filter(anchor => anchor.status === 'unreadable');
+      if (result.status === 'verified') {
+        setDestinyBuildProfileStatus('Last check matched the BLES01857 01.24 signature profile · 3/3 anchors.', 'matched');
+      } else {
+        const issues = [];
+        if (mismatches.length) issues.push(`mismatch at ${mismatches.map(anchor => `0x${anchor.address}`).join(', ')}`);
+        if (unreadable.length) issues.push(`unreadable at ${unreadable.map(anchor => `0x${anchor.address}`).join(', ')}`);
+        setDestinyBuildProfileStatus(`No verified build match · ${matched}/3 anchors match; ${issues.join('; ')}. Memory writes remain locked.`, 'error');
+      }
+    } catch (error) {
+      if (generation !== connectionGeneration || targetIp !== ip || !badge.classList.contains('connected')) {
+        setDestinyBuildProfileStatus('Console session changed during the check. Check again.', 'error');
+      } else {
+        const message = String(error?.message || error);
+        setDestinyBuildProfileStatus(`Build check failed: ${message}`, 'error');
+      }
+    } finally {
+      buildProfileCheckBusy = false;
+      button.disabled = false;
+    }
+  }
+  window.checkDestinyBuildProfile = checkDestinyBuildProfile;
   const patchRunner = RtmOperations.createRunner({
     session: () => ip && document.getElementById('status-badge').classList.contains('connected') ? `${connectionGeneration}:${ip}` : '',
+    beforeApply: (owner, pairs) => buildCompatibilityGuard.ensure(pairs),
     write: async (address, value, options) => {
       const target = ip;
       await consoleTransport.request(`http://${target}/setmem.ps3mapi?addr=${address.toString(16)}&val=${value}`,options.timeoutMs || 8000);
@@ -2664,6 +2933,8 @@
   }
   function resetVerifiedStates() {
     antiMMState = false; server4xDamageState = false; srvMode = 'unknown';
+    setDestinyBuildProfileStatus('Not checked for this connection.');
+    clearDestinyBuildProfileResults();
     for (const key of Object.keys(toggleState)) delete toggleState[key];
     const controls = document.getElementById('ropk-controls'); if (controls) controls.style.display = 'none';
     for (const label of Object.keys(cheatState)) delete cheatState[label];
@@ -2692,6 +2963,7 @@
         cheatState[label] = isOn;
         btn?.classList.toggle('active-cheat', isOn);
         setCheatStatusFromButton(btn, isOn ? 'verified-on' : 'verified-off');
+        if (btn?.id === 'tog-ohk') syncDamagePatchState(isOn ? DAMAGE_OHK_HEX : DAMAGE_NORMAL_HEX, 'Main One-Hit toggle');
         log(`${label}: ${isOn ? 'ON' : 'OFF'} verified by memory readback`, 'ok');
         toast(`${label}: ${isOn ? 'ON' : 'OFF'} verified`, 'ok');
       } else {
@@ -2712,6 +2984,9 @@
   }
   async function togFireMulti(onPairs, offPairs, label, btn) {
     return applyToggle(label, btn, isOn => isOn ? onPairs : offPairs);
+  }
+  async function toggleUnlimitedAmmo(btn) {
+    return togFireMulti(UNLIMITED_AMMO_PATCH.on, UNLIMITED_AMMO_PATCH.off, 'Unlimited Ammo', btn);
   }
   async function togFireFloat(addr, onFloat, offFloat, label, btn) {
     return applyToggle(label, btn, isOn => [[addr, floatToBEHex(parseFloat(isOn ? onFloat : offFloat))]]);
@@ -3070,11 +3345,7 @@
   }
 
   function damageValueName(hex) {
-    hex = normalizeDamageHex(hex);
-    if (hex === DAMAGE_NORMAL_HEX) return 'Normal';
-    if (hex === DAMAGE_4X_HEX) return '10× preset';
-    if (hex === DAMAGE_OHK_HEX) return 'One-Hit';
-    return 'Custom';
+    return RtmMemoryFeatures.classifyDamagePatch(normalizeDamageHex(hex)).label;
   }
 
   function refreshDamageMultiplierDisplays(multiplier) {
@@ -3120,6 +3391,48 @@
     refreshDamageMultiplierDisplays(multiplier);
   }
 
+  function syncDamagePatchState(value, sourceLabel = 'Damage patch') {
+    const mode = RtmMemoryFeatures.classifyDamagePatch(normalizeDamageHex(value));
+    const oneHitActive = mode.isOneHit;
+
+    customDamageHex = mode.hex;
+    server4xDamageState = mode.isTenX;
+    setCheatLabelState('One-Hit Enemies', oneHitActive);
+    setCheatLabelState('One Hit Kill', oneHitActive);
+    requestedCheatState['One-Hit Enemies'] = oneHitActive;
+    requestedCheatState['One Hit Kill'] = oneHitActive;
+    setAllButtonsActive('tog-ohk', oneHitActive);
+    setAllButtonsActive('srv-4x-damage', mode.isTenX);
+    updateCheatStatus('tog-ohk', oneHitActive ? 'verified-on' : 'verified-off');
+    updateCheatStatus('srv-4x-damage', mode.isTenX ? 'verified-on' : 'verified-off');
+
+    if (mode.multiplier !== null) setDamageMultiplierPreset(mode.multiplier);
+    if (mode.kind === 'one-hit-overwalls') {
+      const value = document.getElementById('damage-multiplier-val');
+      const encoded = document.getElementById('damage-multiplier-hex');
+      const effective = document.getElementById('damage-effective-value');
+      const advanced = document.getElementById('damage-encoded-hex');
+      if (value) value.textContent = 'One-Hit';
+      if (encoded) encoded.textContent = mode.hex;
+      if (effective) effective.textContent = 'Not inferred';
+      if (advanced) advanced.textContent = mode.hex;
+    }
+    const detail = mode.kind === 'one-hit-overwalls'
+      ? `${mode.label} · multiplier not inferred`
+      : mode.kind === 'one-hit-main'
+        ? `${mode.label} · about ${mode.multiplier}×`
+        : mode.kind === 'ten-x'
+          ? `${mode.label}`
+          : mode.kind === 'normal'
+            ? mode.label
+            : `${mode.label} (${mode.hex})`;
+    const status = document.getElementById('damage-current-status');
+    if (status) status.textContent = `${sourceLabel}: ${detail} · 0043E626=${mode.hex}`;
+    return mode;
+  }
+
+  window.syncDamagePatchState = syncDamagePatchState;
+
   async function applyDamageHex(hex, sourceLabel = 'Custom Damage') {
     if (typeof hasReadServerSafetyGuide === 'function' && !hasReadServerSafetyGuide()) {
       serverSafetyRequired = true;
@@ -3143,30 +3456,21 @@
 
     try {
       await writeHexAt(DAMAGE_ADDR, hex);
-      customDamageHex = hex;
-
-      const is4x = hex === DAMAGE_4X_HEX;
-      const isOHK = hex === DAMAGE_OHK_HEX;
-
-      server4xDamageState = is4x;
-      document.getElementById('srv-4x-damage')?.classList.toggle('active-cheat', is4x);
-      updateCheatStatus('srv-4x-damage', is4x ? 'on' : 'off');
-
-      const ohk = document.getElementById('tog-ohk');
-      if (ohk) ohk.classList.toggle('active-cheat', isOHK);
-      updateCheatStatus('tog-ohk', isOHK ? 'on' : 'off');
-
-      if (typeof cheatState !== 'undefined') {
-        cheatState['One-Hit Enemies'] = isOHK;
-        cheatState['One Hit Kill'] = isOHK;
-      }
+      const mode = syncDamagePatchState(hex, sourceLabel);
 
       const effective = damageHexToEffectiveFloat(hex);
       const status = document.getElementById('damage-current-status');
-      if (status) status.textContent = `Applied: ${effective}× (${hex})`;
+      if (status) status.textContent = mode.kind === 'one-hit-overwalls'
+        ? `${sourceLabel}: ${mode.label} · multiplier not inferred`
+        : `Applied: ${effective}× (${hex})`;
 
-      log(`${sourceLabel} → 0043E626 = ${hex} (~${effective}×)`, 'ok');
-      toast(`Damage multiplier applied: ~${effective}×`, 'ok');
+      if (mode.kind === 'one-hit-overwalls') {
+        log(`${sourceLabel} → 0043E626 = ${hex} (${mode.label}; multiplier not inferred)`, 'ok');
+        toast(`${mode.label} patch applied`, 'ok');
+      } else {
+        log(`${sourceLabel} → 0043E626 = ${hex} (~${effective}×)`, 'ok');
+        toast(`Damage multiplier applied: ~${effective}×`, 'ok');
+      }
       return true;
     } catch (e) {
       log(`${sourceLabel} failed: ${e.message}`, 'err');
@@ -3209,6 +3513,105 @@
   window.applyCustomDamageMultiplier = applyCustomDamageMultiplier;
   window.resetCustomDamageMultiplier = resetCustomDamageMultiplier;
 
+  // The recovered RTM labels these Float32 presets as damage modes. Static
+  // PPC tracing only identifies a conditional ratio fallback, so preserve the
+  // source labels and make their unconfirmed gameplay meaning explicit.
+  const LEGACY_SCALAR_ADDR = 0x004449EC;
+  const LEGACY_SCALAR_CODE_ADDR = 0x00444B64;
+  const LEGACY_SCALAR_CODE_HEX = '3C600044C03601283CC03F803B4349EC3061034462C4000063850000C05A0000';
+  const LEGACY_SCALAR_PRESETS = Object.freeze({
+    normal: { hex: '3F800000', label: 'Normal · 1×' },
+    max_damage: { hex: '3FFFFFFF', label: 'Source label: Max Damage · ~2×' },
+    one_hit_kill_2: { hex: '42C80000', label: 'Source label: 1 Hit Kill 2 · 100×' },
+  });
+  let legacyScalarBusy = false;
+
+  function setLegacyScalarStatus(message, isError = false) {
+    const status = document.getElementById('legacy-scalar-status');
+    if (!status) return;
+    status.textContent = message;
+    status.style.color = isError ? 'var(--danger)' : 'var(--muted)';
+  }
+
+  async function hasLegacyScalarBuildSignature() {
+    const raw = await ps3getmem(LEGACY_SCALAR_CODE_ADDR, 32);
+    const actual = String(raw || '').replace(/[^0-9a-f]/gi, '').toUpperCase();
+    return actual === LEGACY_SCALAR_CODE_HEX;
+  }
+
+  async function readLegacyScalarPreset() {
+    if (!ip) {
+      setLegacyScalarStatus('Not connected · 004449EC', true);
+      return false;
+    }
+    try {
+      const supportedBuild = await hasLegacyScalarBuildSignature();
+      const raw = await ps3getmem(LEGACY_SCALAR_ADDR, 4);
+      const hex = String(raw || '').replace(/[^0-9a-f]/gi, '').toUpperCase();
+      if (!/^[0-9A-F]{8}$/.test(hex)) throw new Error('Read returned an invalid 4-byte value');
+      if (!supportedBuild) {
+        setLegacyScalarStatus(`Build signature mismatch · raw 004449EC=${hex}`, true);
+        return false;
+      }
+      const entry = Object.values(LEGACY_SCALAR_PRESETS).find((preset) => preset.hex === hex);
+      setLegacyScalarStatus(`${entry ? entry.label : 'Unknown value'} · 004449EC=${hex}`, !entry);
+      return Boolean(entry);
+    } catch (error) {
+      setLegacyScalarStatus(`Read failed · ${error.message}`, true);
+      return false;
+    }
+  }
+
+  async function applyLegacyScalarPreset() {
+    if (typeof hasReadServerSafetyGuide === 'function' && !hasReadServerSafetyGuide()) {
+      serverSafetyRequired = true;
+      setServerCheatsLocked(true);
+      openServerSafetyGuide();
+      toast('Read the Server Cheats safety guide first', 'err');
+      return false;
+    }
+    if (!ip) {
+      setLegacyScalarStatus('Not connected · 004449EC', true);
+      toast('Not connected', 'err');
+      return false;
+    }
+    if (legacyScalarBusy) return false;
+
+    const select = document.getElementById('legacy-scalar-preset');
+    const preset = LEGACY_SCALAR_PRESETS[select?.value];
+    if (!preset) return false;
+    const target = ip;
+    const generation = connectionGeneration;
+    legacyScalarBusy = true;
+    try {
+      if (!await hasLegacyScalarBuildSignature()) throw new Error('01.24 scalar-consumer signature mismatch; write refused');
+      if (generation !== connectionGeneration || target !== ip) throw new Error('Connection changed; retry the operation');
+      const before = String(await ps3getmem(LEGACY_SCALAR_ADDR, 4) || '').replace(/[^0-9a-f]/gi, '').toUpperCase();
+      if (generation !== connectionGeneration || target !== ip) throw new Error('Connection changed; retry the operation');
+      if (!/^[0-9A-F]{8}$/.test(before) || !Object.values(LEGACY_SCALAR_PRESETS).some((candidate) => candidate.hex === before)) {
+        throw new Error(`Unknown current value ${before || '(unreadable)'}; write refused`);
+      }
+      await verifiedMemoryValue('004449EC', preset.hex);
+      if (generation !== connectionGeneration || target !== ip) throw new Error('Connection changed during write');
+      const readback = String(await ps3getmem(LEGACY_SCALAR_ADDR, 4) || '').replace(/[^0-9a-f]/gi, '').toUpperCase();
+      if (readback !== preset.hex) throw new Error(`Readback mismatch: ${readback || '(unreadable)'}`);
+      setLegacyScalarStatus(`Applied ${preset.label} · 004449EC=${readback}`);
+      log(`Recovered scalar preset → 004449EC=${readback} (${preset.label}; gameplay effect unknown)`, 'ok');
+      toast(`${preset.label} bytes verified`, 'ok');
+      return true;
+    } catch (error) {
+      setLegacyScalarStatus(`Not applied · ${error.message}`, true);
+      log(`Recovered scalar preset refused/failed: ${error.message}`, 'err');
+      toast('Scalar preset was not applied', 'err');
+      return false;
+    } finally {
+      legacyScalarBusy = false;
+    }
+  }
+
+  window.readLegacyScalarPreset = readLegacyScalarPreset;
+  window.applyLegacyScalarPreset = applyLegacyScalarPreset;
+
   let server4xDamageState = false;
   let server4xDamageBusy = false;
 
@@ -3229,28 +3632,14 @@
     updateCheatStatus('srv-4x-damage', 'applying');
     try {
       await writeHexAt(DAMAGE_ADDR, willEnable ? DAMAGE_4X_HEX : DAMAGE_NORMAL_HEX);
-      customDamageHex = willEnable ? DAMAGE_4X_HEX : DAMAGE_NORMAL_HEX;
-      setDamageMultiplierPreset(willEnable ? 10 : 1);
-      server4xDamageState = willEnable;
-      if (btn) btn.classList.toggle('active-cheat', server4xDamageState);
-      updateCheatStatus('srv-4x-damage', server4xDamageState ? 'on' : 'off');
+      syncDamagePatchState(willEnable ? DAMAGE_4X_HEX : DAMAGE_NORMAL_HEX, 'Damage preset toggle');
 
-      if (willEnable) {
-        const ohk = document.getElementById('tog-ohk');
-        if (ohk) ohk.classList.remove('active-cheat');
-        updateCheatStatus('tog-ohk', 'off');
-        if (typeof cheatState !== 'undefined') {
-          cheatState['One-Hit Enemies'] = false;
-          cheatState['One Hit Kill'] = false;
-        }
-      }
-
-      log(`4x Damage ${willEnable ? 'ON' : 'OFF'}`, 'ok');
-      toast(`4x Damage ${willEnable ? 'ON' : 'OFF'}`, 'ok');
+      log(`Damage Preset ${willEnable ? 'ON' : 'OFF'}`, 'ok');
+      toast(`Damage Preset ${willEnable ? 'ON' : 'OFF'}`, 'ok');
     } catch (e) {
       updateCheatStatus('srv-4x-damage', 'failed');
-      log(`4x Damage failed: ${e.message}`, 'err');
-      toast('4x Damage failed', 'err');
+      log(`Damage Preset failed: ${e.message}`, 'err');
+      toast('Damage Preset failed', 'err');
     } finally {
       server4xDamageBusy = false;
     }
@@ -3269,12 +3658,9 @@
     if (mode === 'off' && server4xDamageState) {
       try {
         await writeHexAt(DAMAGE_ADDR, DAMAGE_NORMAL_HEX);
-        customDamageHex = DAMAGE_NORMAL_HEX;
-        setDamageMultiplierPreset(1);
-        server4xDamageState = false;
-        document.getElementById('srv-4x-damage')?.classList.remove('active-cheat');
+        syncDamagePatchState(DAMAGE_NORMAL_HEX, 'Server Cheats Off');
       } catch (e) {
-        log(`4x Damage restore failed: ${e.message}`, 'err');
+        log(`Damage Preset restore failed: ${e.message}`, 'err');
       }
     }
 
@@ -3403,7 +3789,8 @@
   let ammoScanState = null;
   const ammoRestoreStack = [];
   let ammoScanBusy = false;
-  let screenshotObjectUrl = '';
+  const screenshotCaptures = RtmScreenshotTools.createCaptureStore(URL);
+  const screenshotStretchModes = new Set();
   let screenshotPauseRestore = null;
   try { screenshotPauseRestore = JSON.parse(localStorage.getItem(SCREENSHOT_PAUSE_STORAGE_KEY) || 'null'); } catch (e) { screenshotPauseRestore = null; }
   window.rtmFramebufferBusy = !!screenshotPauseRestore;
@@ -3415,8 +3802,9 @@
       catch (error) { throw new Error(`Could not save pause recovery data: ${error.message || error}`); }
       screenshotPauseRestore = state;
     } else {
+      try { localStorage.removeItem(SCREENSHOT_PAUSE_STORAGE_KEY); }
+      catch (error) { throw new Error(`Could not clear pause recovery data: ${error.message || error}`); }
       screenshotPauseRestore = null;
-      try { localStorage.removeItem(SCREENSHOT_PAUSE_STORAGE_KEY); } catch (e) {}
     }
     window.rtmFramebufferRecoveryIp = screenshotPauseRestore?.ip || '';
   }
@@ -3685,32 +4073,105 @@
     'hd-512': { label: '512 × 312 · compact buffer', address: 0xCF060000, width: 512, height: 312 }
   };
   const SCREENSHOT_CHUNK = 0x10000;
+  const DESTINY_PAUSE_SITE = Object.freeze({
+    address: 0x6155BC,
+    runningHex: '41820010',
+    pausedHex: '41820000'
+  });
+  // Older app versions may have saved recovery for this source-unverified byte.
+  const LEGACY_SCREENSHOT_PAUSE_ADDRESS = 0x614BFF;
+  let pauseOperationBusy = false;
+
+  async function readDestinyPauseInstruction(generation = connectionGeneration) {
+    const currentHex = (await ps3getmem(DESTINY_PAUSE_SITE.address, 4)).toUpperCase();
+    ensureOperationSession(generation);
+    if (!/^[0-9A-F]{8}$/.test(currentHex)) throw new Error('Could not read the complete pause instruction');
+    if (![DESTINY_PAUSE_SITE.runningHex, DESTINY_PAUSE_SITE.pausedHex].includes(currentHex)) {
+      throw new Error(`Pause instruction at 0x6155BC changed to ${currentHex}; no write was attempted`);
+    }
+    return currentHex;
+  }
+
+  async function setDestinyGamePaused(paused) {
+    const badge = document.getElementById('status-badge');
+    if (!ip || !badge?.classList.contains('connected')) { toast('Not connected', 'err'); return; }
+    if (pauseOperationBusy) {
+      toast('Another pause operation is in progress', 'err');
+      return;
+    }
+    if (window.rtmFramebufferBusy) {
+      toast('Restore screenshot pause first', 'err');
+      return;
+    }
+    pauseOperationBusy = true;
+    const generation = connectionGeneration;
+    const targetHex = paused ? DESTINY_PAUSE_SITE.pausedHex : DESTINY_PAUSE_SITE.runningHex;
+    const label = paused ? 'Pause Game' : 'Resume Game';
+    try {
+      const currentHex = await readDestinyPauseInstruction(generation);
+      if (currentHex !== targetHex) {
+        await verifiedConditionalMemoryValue(DESTINY_PAUSE_SITE.address.toString(16), currentHex, targetHex);
+        ensureOperationSession(generation);
+      }
+      log(`${label} instruction verified at 0x6155BC`, 'ok');
+      toast(`${label} verified`, 'ok');
+    } catch (error) {
+      log(`${label} was not applied: ${error.message}`, 'err');
+      toast(`${label} not confirmed`, 'err');
+    } finally {
+      pauseOperationBusy = false;
+    }
+  }
+  window.setDestinyGamePaused = setDestinyGamePaused;
 
   async function restoreScreenshotPause() {
     const saved = screenshotPauseRestore;
     const sameSession = saved && saved.ip === ip && saved.generation === connectionGeneration;
     const recoveredSession = saved && saved.pendingRecovery && saved.ip === ip;
     if (!saved || (!sameSession && !recoveredSession) || !document.getElementById('status-badge')?.classList.contains('connected')) {
-      setScreenshotStatus('No pause byte can be restored in this console session.', true);
+      setScreenshotStatus('No saved screenshot pause state can be restored in this console session.', true);
       return;
     }
+    if (pauseOperationBusy) {
+      setScreenshotStatus('Another pause operation is still in progress.', true);
+      return;
+    }
+    pauseOperationBusy = true;
+    const targetIp = ip;
+    const generation = connectionGeneration;
     try {
-      const currentHex = (await ps3getmem(0x614BFF, 1)).toUpperCase();
-      ensureOperationSession(connectionGeneration);
-      if (!/^[0-9A-F]{2}$/.test(currentHex)) throw new Error('Could not read the current pause byte');
-      if (currentHex !== saved.originalHex && currentHex !== '00') {
-        throw new Error(`Pause byte changed to 0x${currentHex}; refusing to overwrite the new value`);
+      const legacyRecovery = saved.address === undefined || saved.address === null;
+      const address = legacyRecovery ? LEGACY_SCREENSHOT_PAUSE_ADDRESS : Number(saved.address);
+      const originalHex = String(saved.originalHex || '').toUpperCase();
+      const patchedHex = legacyRecovery ? '00' : String(saved.patchedHex || '').toUpperCase();
+      const knownRecovery = legacyRecovery
+        ? address === LEGACY_SCREENSHOT_PAUSE_ADDRESS && /^[0-9A-F]{2}$/.test(originalHex)
+        : address === DESTINY_PAUSE_SITE.address && originalHex === DESTINY_PAUSE_SITE.runningHex && patchedHex === DESTINY_PAUSE_SITE.pausedHex;
+      if (!knownRecovery) throw new Error('Saved pause recovery data is not a recognized patch');
+      const currentHex = (await ps3getmem(address, legacyRecovery ? 1 : 4)).toUpperCase();
+      if (generation !== connectionGeneration || targetIp !== ip) throw new Error('Console session changed during pause recovery');
+      if (currentHex !== originalHex && currentHex !== patchedHex) {
+        throw new Error(`Pause site changed to ${currentHex}; refusing to overwrite the new value`);
       }
-      if (currentHex !== saved.originalHex) await verifiedMemoryValue('614BFF', saved.originalHex);
-      ensureOperationSession(connectionGeneration);
+      if (currentHex !== originalHex) {
+        await verifiedConditionalMemoryValue(address.toString(16), patchedHex, originalHex);
+        if (generation !== connectionGeneration || targetIp !== ip) throw new Error('Console session changed during pause recovery');
+      }
+      ensureOperationSession(generation);
       saveScreenshotPauseRestore(null);
       window.rtmFramebufferBusy = false;
       document.getElementById('screenshot-resume-btn').disabled = true;
-      setScreenshotStatus('Original game pause byte restored and verified.');
-      log('Framebuffer capture pause byte restored and verified', 'ok');
+      setScreenshotStatus(legacyRecovery ? 'Legacy screenshot pause byte restored and verified.' : 'Original pause instruction restored and verified.');
+      log('Framebuffer capture pause state restored and verified', 'ok');
     } catch (error) {
-      setScreenshotStatus(`Could not restore the original pause byte: ${error.message}`, true);
+      const message = String(error?.message || error);
+      const prefix = message.startsWith('Could not clear pause recovery data:')
+        ? 'Pause instruction is restored, but its recovery record could not be cleared'
+        : 'Could not restore the saved pause state';
+      setScreenshotStatus(`${prefix}: ${message}`, true);
       log(`Framebuffer pause recovery failed: ${error.message}`, 'err');
+    } finally {
+      pauseOperationBusy = false;
     }
   }
 
@@ -3721,20 +4182,154 @@
     status.style.color = failed ? 'var(--danger)' : 'var(--muted)';
   }
 
+  function renderScreenshotGallery() {
+    const gallery = document.getElementById('screenshot-gallery');
+    if (!gallery) return;
+    gallery.replaceChildren();
+    for (const [profileId, profile] of Object.entries(SCREENSHOT_PROFILES)) {
+      const capture = screenshotCaptures.get(profileId);
+      const stretched = screenshotStretchModes.has(profileId);
+      const card = document.createElement('article');
+      card.className = 'screenshot-card';
+      const heading = document.createElement('div');
+      heading.className = 'screenshot-card-heading';
+      const title = document.createElement('h3');
+      title.textContent = profile.label;
+      heading.appendChild(title);
+      card.appendChild(heading);
+
+      const frame = document.createElement('div');
+      frame.className = 'screenshot-frame';
+      if (capture) {
+        const preview = document.createElement('img');
+        preview.src = capture.objectUrl;
+        preview.alt = `Destiny framebuffer · ${profile.label}`;
+        preview.style.objectFit = stretched ? 'fill' : 'contain';
+        frame.appendChild(preview);
+      } else {
+        const empty = document.createElement('span');
+        empty.className = 'screenshot-placeholder';
+        empty.textContent = 'No capture yet';
+        frame.appendChild(empty);
+      }
+      card.appendChild(frame);
+
+      const actions = document.createElement('div');
+      actions.className = 'screenshot-card-actions';
+      const download = document.createElement('a');
+      download.textContent = 'Download PNG';
+      download.setAttribute('aria-label', `Download ${profile.label} PNG`);
+      download.hidden = !capture;
+      if (capture) {
+        download.href = capture.objectUrl;
+        download.download = capture.downloadName;
+      }
+      actions.appendChild(download);
+
+      const downloadJpeg = document.createElement('button');
+      downloadJpeg.type = 'button';
+      downloadJpeg.id = `screenshot-jpeg-${profileId}`;
+      downloadJpeg.textContent = 'Download JPEG';
+      downloadJpeg.setAttribute('aria-label', `Download ${profile.label} JPEG`);
+      downloadJpeg.disabled = !capture;
+      downloadJpeg.addEventListener('click', () => downloadDestinyScreenshotJpeg(profileId));
+      actions.appendChild(downloadJpeg);
+
+      const copy = document.createElement('button');
+      copy.type = 'button';
+      copy.id = `screenshot-copy-${profileId}`;
+      copy.textContent = 'Copy PNG';
+      copy.setAttribute('aria-label', `Copy ${profile.label} PNG`);
+      copy.disabled = !capture;
+      copy.addEventListener('click', () => copyDestinyScreenshot(profileId));
+      actions.appendChild(copy);
+
+      const view = document.createElement('button');
+      view.type = 'button';
+      view.textContent = stretched ? 'Fit' : 'Stretch';
+      view.setAttribute('aria-label', `${stretched ? 'Fit' : 'Stretch'} ${profile.label} preview`);
+      view.addEventListener('click', () => {
+        if (stretched) screenshotStretchModes.delete(profileId);
+        else screenshotStretchModes.add(profileId);
+        renderScreenshotGallery();
+      });
+      actions.appendChild(view);
+      card.appendChild(actions);
+      gallery.appendChild(card);
+    }
+  }
+
+  async function downloadDestinyScreenshotJpeg(profileId) {
+    if (!SCREENSHOT_PROFILES[profileId]) { toast('Choose a valid screenshot profile', 'err'); return; }
+    const capture = screenshotCaptures.get(profileId);
+    if (!capture) { toast('Capture this profile first', 'err'); return; }
+    const button = document.getElementById(`screenshot-jpeg-${profileId}`);
+    if (button) { button.disabled = true; button.textContent = 'Preparing…'; }
+    try {
+      const jpeg = await RtmScreenshotTools.pngToJpeg(capture.blob);
+      const downloadUrl = URL.createObjectURL(jpeg);
+      try {
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = capture.downloadName.replace(/\.png$/i, '.jpg');
+        link.hidden = true;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      } finally {
+        window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+      }
+      setScreenshotStatus(`${SCREENSHOT_PROFILES[profileId].width} × ${SCREENSHOT_PROFILES[profileId].height} JPEG ready`);
+      toast('JPEG downloaded', 'ok');
+    } catch (error) {
+      setScreenshotStatus(`JPEG export failed: ${error.message}`, true);
+      log(`Framebuffer JPEG export failed: ${error.message}`, 'err');
+      toast('Could not export JPEG', 'err');
+    } finally {
+      const currentButton = document.getElementById(`screenshot-jpeg-${profileId}`);
+      if (currentButton) { currentButton.disabled = !screenshotCaptures.get(profileId); currentButton.textContent = 'Download JPEG'; }
+    }
+  }
+
+  async function copyDestinyScreenshot(profileId) {
+    if (!SCREENSHOT_PROFILES[profileId]) { toast('Choose a valid screenshot profile', 'err'); return; }
+    const capture = screenshotCaptures.get(profileId);
+    if (!capture) { toast('Capture this profile first', 'err'); return; }
+    const button = document.getElementById(`screenshot-copy-${profileId}`);
+    if (button) button.disabled = true;
+    try {
+      await RtmScreenshotTools.copyPngToClipboard(capture.blob);
+      setScreenshotStatus(`${SCREENSHOT_PROFILES[profileId].width} × ${SCREENSHOT_PROFILES[profileId].height} PNG copied to clipboard`);
+      toast('Screenshot copied', 'ok');
+    } catch (error) {
+      setScreenshotStatus(`Clipboard copy unavailable: ${error.message}`, true);
+      log(`Framebuffer clipboard copy failed: ${error.message}`, 'err');
+      toast('Could not copy screenshot', 'err');
+    } finally {
+      if (button) button.disabled = !screenshotCaptures.get(profileId);
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
+    renderScreenshotGallery();
     if (!screenshotPauseRestore) return;
     const resumeButton = document.getElementById('screenshot-resume-btn');
     if (resumeButton) resumeButton.disabled = false;
-    setScreenshotStatus(`A previous capture may have left the game paused. Connect to ${screenshotPauseRestore.ip} and restore its saved pause byte.`, true);
+    setScreenshotStatus(`A previous capture may have left the game paused. Connect to ${screenshotPauseRestore.ip} and restore its saved pause state.`, true);
   });
 
   async function captureDestinyScreenshot() {
     if (!ip || !document.getElementById('status-badge')?.classList.contains('connected')) { toast('Not connected', 'err'); return; }
-    if (screenshotPauseRestore) { setScreenshotStatus('Restore the saved pause byte before another capture.', true); return; }
-    const profile = SCREENSHOT_PROFILES[document.getElementById('screenshot-profile').value];
+    if (screenshotPauseRestore) { setScreenshotStatus('Restore the saved pause state before another capture.', true); return; }
+    const profileId = document.getElementById('screenshot-profile').value;
+    const profile = SCREENSHOT_PROFILES[profileId];
     if (!profile) return;
     const pauseRequested = document.getElementById('screenshot-pause').checked;
-    if (pauseRequested && !await RtmDialogs.confirm('Pause the game briefly while reading the framebuffer? The original pause byte will be restored after capture.')) return;
+    if (pauseRequested && !await RtmDialogs.confirm('Pause the game briefly while reading the framebuffer? The original pause instruction will be restored after capture.')) return;
+    if (pauseRequested && pauseOperationBusy) {
+      setScreenshotStatus('Another pause operation is still in progress.', true);
+      return;
+    }
     const generation = connectionGeneration;
     const targetIp = ip;
     const button = document.getElementById('screenshot-capture-btn');
@@ -3750,17 +4345,31 @@
     let captureError = null;
     let imageReady = false;
 
-    if (pauseRequested) window.rtmFramebufferBusy = true;
+    if (pauseRequested) {
+      pauseOperationBusy = true;
+      window.rtmFramebufferBusy = true;
+    }
     try {
       setScreenshotStatus(`Preparing ${profile.label} capture…`);
       if (pauseRequested) {
-        originalPauseHex = (await ps3getmem(0x614BFF, 1)).toUpperCase();
-        ensureOperationSession(generation);
-        if (!/^[0-9A-F]{2}$/.test(originalPauseHex)) throw new Error('Could not read the current pause byte');
-        if (originalPauseHex !== '00') {
-          saveScreenshotPauseRestore({ originalHex: originalPauseHex, generation, ip: targetIp, pendingRecovery: true });
-          pauseWriteAttempted = true;
-          await verifiedMemoryValue('614BFF', '00');
+        originalPauseHex = await readDestinyPauseInstruction(generation);
+        if (originalPauseHex === DESTINY_PAUSE_SITE.runningHex) {
+          await verifiedConditionalMemoryValue(
+            DESTINY_PAUSE_SITE.address.toString(16),
+            DESTINY_PAUSE_SITE.runningHex,
+            DESTINY_PAUSE_SITE.pausedHex,
+            () => {
+              saveScreenshotPauseRestore({
+                address: DESTINY_PAUSE_SITE.address,
+                originalHex: originalPauseHex,
+                patchedHex: DESTINY_PAUSE_SITE.pausedHex,
+                generation,
+                ip: targetIp,
+                pendingRecovery: true
+              });
+              pauseWriteAttempted = true;
+            }
+          );
           ensureOperationSession(generation);
         }
       }
@@ -3789,16 +4398,9 @@
       image.data.set(rgba);
       context.putImageData(image, 0, 0);
       const blob = await new Promise((resolve, reject) => canvas.toBlob(result => result ? resolve(result) : reject(new Error('Could not encode the PNG')), 'image/png'));
-      if (screenshotObjectUrl) URL.revokeObjectURL(screenshotObjectUrl);
-      screenshotObjectUrl = URL.createObjectURL(blob);
-      const preview = document.getElementById('screenshot-preview');
-      preview.src = screenshotObjectUrl;
-      preview.style.display = '';
-      const download = document.getElementById('screenshot-download');
-      download.href = screenshotObjectUrl;
-      download.download = `destiny-${profile.width}x${profile.height}-${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
-      download.textContent = `Download ${profile.width} × ${profile.height} PNG`;
-      download.style.display = 'inline-block';
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      screenshotCaptures.set(profileId, blob, `destiny-${profileId}-${profile.width}x${profile.height}-${timestamp}.png`);
+      renderScreenshotGallery();
       imageReady = true;
       setScreenshotStatus(`Captured ${profile.width} × ${profile.height} · PNG ready`);
       log(`Destiny framebuffer captured at ${profile.width} × ${profile.height}`, 'ok');
@@ -3811,22 +4413,30 @@
     } finally {
       if (pauseRequested && pauseWriteAttempted && originalPauseHex) {
         try {
-          const currentHex = (await ps3getmem(0x614BFF, 1)).toUpperCase();
-          ensureOperationSession(generation);
-          if (!/^[0-9A-F]{2}$/.test(currentHex)) throw new Error('Could not read the current pause byte');
-          if (currentHex !== originalPauseHex && currentHex !== '00') {
-            throw new Error(`Pause byte changed to 0x${currentHex}; refusing to overwrite the new value`);
+          const currentHex = await readDestinyPauseInstruction(generation);
+          if (currentHex !== originalPauseHex && currentHex !== DESTINY_PAUSE_SITE.pausedHex) {
+            throw new Error(`Pause instruction changed to ${currentHex}; refusing to overwrite the new value`);
           }
-          if (currentHex !== originalPauseHex) await verifiedMemoryValue('614BFF', originalPauseHex);
+          if (currentHex !== originalPauseHex) {
+            await verifiedConditionalMemoryValue(
+              DESTINY_PAUSE_SITE.address.toString(16),
+              DESTINY_PAUSE_SITE.pausedHex,
+              originalPauseHex
+            );
+          }
           ensureOperationSession(generation);
+          const resumeButton = document.getElementById('screenshot-resume-btn');
+          if (resumeButton) resumeButton.disabled = true;
           saveScreenshotPauseRestore(null);
           window.rtmFramebufferBusy = false;
-          document.getElementById('screenshot-resume-btn').disabled = true;
         } catch (error) {
-          saveScreenshotPauseRestore({ originalHex: originalPauseHex, generation, ip: targetIp, pendingRecovery: true });
           window.rtmFramebufferBusy = true;
-          document.getElementById('screenshot-resume-btn').disabled = false;
-          setScreenshotStatus(`Capture ${imageReady ? 'finished' : 'failed'}, but pause recovery needs attention. Use Restore Pause Byte.`, true);
+          const resumeButton = document.getElementById('screenshot-resume-btn');
+          if (resumeButton) resumeButton.disabled = false;
+          const recoveryMessage = String(error?.message || error).startsWith('Could not clear pause recovery data:')
+            ? `Capture ${imageReady ? 'finished' : 'failed'} and the game pause was restored, but its recovery record could not be cleared. Use Restore Pause to retry.`
+            : `Capture ${imageReady ? 'finished' : 'failed'}, but pause recovery needs attention. Use Restore Pause.`;
+          setScreenshotStatus(recoveryMessage, true);
           log(`Framebuffer pause recovery needs manual restore: ${error.message}`, 'err');
         }
       } else if (pauseRequested) {
@@ -3834,9 +4444,12 @@
       }
       progress.style.display = 'none';
       if (button) button.disabled = false;
+      if (pauseRequested) pauseOperationBusy = false;
     }
     if (captureError && screenshotPauseRestore) toast('Screenshot issue · game pause recovery needs attention', 'err');
   }
+
+  window.addEventListener('beforeunload', () => screenshotCaptures.clear(), { once: true });
 
   // ── Memory Scanner ────────────────────────────────────────────────────────
   // Snapshot A/B: reads a memory range from PS3 in chunks, stores raw hex.
