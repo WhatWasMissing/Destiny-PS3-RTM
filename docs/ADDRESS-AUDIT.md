@@ -104,6 +104,55 @@ stay unavailable until an encounter-specific source path or controlled
 runtime evidence identifies both the instruction and its current OFF/ON
 values.
 
+### Emote and gesture string scan
+
+The hash-verified BLES01857 01.24 ELF contains the strings `player emote
+registry` at file offset `0x012E1D60` / virtual address `0x012F1D60`,
+`player emote registry handle` at `0x012E1E50` / `0x012F1E50`, and
+`&packet->emote_index` at `0x012E3AB0` / `0x012F3AB0`. All three lie in
+the first `PT_LOAD` segment, whose virtual-address delta is `0x10000`.
+
+A whole-file search found no big-endian 32-bit or 64-bit references to
+those string addresses. An aligned instruction scan for `addis` using high
+immediate `0x012F` followed by `addi` or `ori` with each low immediate also
+found no match. TOC-relative references remain unchecked because this
+stripped ELF has no usable symbols and the available disassembler lacks the
+PowerPC target. The strings show emote-related names and a packet-field
+label, but do not identify an activation function, runtime address, or
+patch. No gesture control is justified by this static evidence.
+
+### Legacy Detertrots RTM v1.08 candidates
+
+The decompiled source at
+`D:\Soul rtm\AAAUntestedRtms\Detertrots Destiny RTM Tool {Source by UnboundGodz}\Detertrots Destiny RTM Tool 1.08 Source by UnboundGodz\Form1.cs`
+advertises Headshot Kill, two-site Immunity, Stop Bullets, Crosshairs, and
+Bullet Speed presets. Its Damage Modifier presets and One Hit Kill toggle
+share `0x003F0D70`, so they are not independent controls. The source does not
+identify which Destiny executable build these addresses target.
+
+I read the claimed toggle defaults from the source and compared them at the
+same virtual addresses in the local 01.00 and hash-verified 01.24 ELFs. None
+matches either image:
+
+| Feature/site | Source OFF bytes | Source ON bytes | 01.00 bytes | 01.24 bytes |
+|---|---|---|---|---|
+| One Hit Kill / Damage Modifier, `0x003F0D70` | `3C603F80` | `3C60447A` (x999) | `30840001` | `80E60030` |
+| Headshot Kill, `0x003F5F5C` | `3C23D70A` | `41200000` | `7FA001CE` | `90C10030` |
+| Immunity, `0x0017F3C4` | `3F800000` | `C0000000` | `54631838` | `3B400150` |
+| Immunity, `0x0017CA2C` | `3F800000` | `C0000000` | `3B40FFFF` | `40800014` |
+| Stop Bullets, `0x004B0FC0` | `3F800000` | `00000000` | `38A00450` | `80630034` |
+| Crosshairs, `0x002ED578` | `3F800000` | `00000000` | `80830240` | `486B0E09` |
+
+The Damage Modifier buttons also write `3C604000`, `3C6040A0`, `3C604120`,
+and `3C6041A0` to the same address. Fire Speed buttons write
+`40000000`, `40400000`, `40800000`, `3F000000`, `3E4CCCCD`, or `3DCCCCCD`
+at `0x002E78A0`, but the source gives no reset value for that field.
+
+The source's unconditional writes and lack of readback do not supply a safe
+fallback. These controls remain unported until a matching game build and
+feature behavior are identified. Bullet Speed only has preset writes in this
+source excerpt; it provides no verified reset value.
+
 A broader comparison of current fixed-site toggle OFF values against the same
 01.24 ELF also matched Invincibility, No Spread, Infinite Power, Freeze
 Projectiles, Enemy Ignore, Instant Respawn, Steady Aim, Unlimited Abilities,

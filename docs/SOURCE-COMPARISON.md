@@ -15,7 +15,7 @@ builds use different offsets and were not used as address references.
 | Memory Scanner | The scan/diff code already existed; its missing controls are now available in Tools. Reads remain bounded and writes require readback. |
 | PS3 notification | Manual PS3 system notifications use webMAN MOD's documented notification route. Optional event notifications are ported from `C:\Users\novel\Downloads\Destiny_RTM_Welcome_Page.html`; automation is disabled by default and supports connection, activity-write, cheat-state, error, and reconnect events with saved templates and cooldowns. These requests are best effort and do not confirm PS3 delivery. |
 | PS3 Jukebox | Ported all six tone sequences from `C:\Users\novel\Downloads\DestinyRTM1.0.html` (tone IDs and pauses preserved). The source UI exposed only Imperial March and SOS; this app exposes the other four source-defined sequences too, prevents overlapping playback, tracks progress, and stops between system-beep requests. It only calls `/beep.ps3` and does not write Destiny memory. |
-| Character emblem | Added the 103 entries in the local C# `itemList.cs`; the live scan must find exactly one aligned match before a write. Both writes are read back; a saved recovery stack restores verified partial or completed changes on the same console while each value remains original or matches the intended write. |
+| Character emblem | Uses the local C# 103-row `itemList.cs` but exposes only `itemClass == 5` entries, matching `Form1.cs`; emotes and other item classes are excluded from writes. An unknown current value can still be displayed for inspection. The live scan must find exactly one aligned match before a write. Both writes are read back; a saved recovery stack restores verified partial or completed changes on the same console while each value remains original or matches the intended write. |
 | Ammo Editor | Reworked as a read-only, chunked 4 MiB scan. Primary/secondary/heavy use the source's 8-byte reserve/magazine signature and `0x80A6` marker; special ammo uses its Float32 signature, `01 00 00 00` suffix, and `0x8080` marker at `+40`. It lists candidates and requires selecting one address. Writes are verified, guarded rollback is attempted on partial failure, and successful edits can be restored in reverse order while each slot still matches. |
 | Screenshots | The five local C# capture profiles now have independent web gallery slots with per-profile preview, PNG/JPEG download, PNG clipboard copy, and Fit/Stretch controls. Re-capturing one profile replaces only its prior image. Reads are chunked. Optional pause capture checks the source-identified branch at `0x006155BC`, writes the known paused instruction only when the original word matches, and restores only if the site still contains the original or patched word. Failed recovery remains saved locally and blocks another capture until recovery. Older saved recovery records are still handled at their original single-byte address. |
 | ISO game launch | Added the source sequence from the newer local RTM: mount `/dev_hdd0/PS3ISO/<file>.iso` with `mode=silent`, wait 3 seconds, return to `/wmnav.ps3/game`, wait 1 second, then request `/play.ps3`. The ISO path is restricted to a filename directly inside `PS3ISO`. Each HTTP response is reported by stage; it does not confirm Destiny started. The desktop MCP tool uses the same sequence. |
@@ -66,6 +66,19 @@ identity. Read-only memory tools remain usable on other builds.
   is a different feature.
 - Trophy unlock calls the same unsupported function-call layer and has no
   source-level readback or restoration. It remains unavailable.
+- Gesture activation is not established by the item catalog. The local C#
+  `itemList.cs` labels SLOW CLAP (4471) and HAM(MER) IT UP (4467) as
+  itemClass 9 (`emote`), while `Form1.cs` only adds itemClass 5 to the
+  character-emblem selector. The verified 01.24 ELF includes emote-registry
+  and `packet->emote_index` strings, but no identified activation routine or
+  usable write site. The web app therefore exposes no gesture action; its
+  emblem write validation rejects emote and other non-emblem IDs, while an
+  unlisted current value can still be shown for inspection.
+- A decompiled Detertrots RTM v1.08 source advertises Headshot Kill,
+  two-site Immunity, Stop Bullets, Crosshairs, and Bullet Speed presets.
+  Its source OFF bytes match neither the local BLES01857 01.00 nor verified
+  01.24 ELF at the claimed addresses; Damage Modifier and One Hit Kill also
+  share one address. These are unported research leads, not verified mods.
 - Deathsinger's Power appears in
   `D:\VIRUS\1111111111111PhoneRTMtest\DestinyMobileBETA_2.html`, and this source
   tree contains an old scan/toggle implementation, but it remains hidden. Its

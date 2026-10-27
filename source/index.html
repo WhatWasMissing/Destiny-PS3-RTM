@@ -366,7 +366,7 @@
   <p id="rtm-launch-status" class="rtm-launch-status" aria-live="polite">Mounts the ISO, returns to the game list, then sends the start request. Game start cannot be confirmed.</p>
 </div>
 <div style="padding: 0 1rem 1rem;">
-<button class="cheat-btn" id="tog-anti-mm" onclick="togAntiMatchmaking(this)" style="width:100%;flex-direction:row;justify-content:space-between;padding:12px 14px;border-color:rgba(224,92,79,0.3);">
+<button class="cheat-btn danger-action" id="tog-anti-mm" onclick="togAntiMatchmaking(this)" style="width:100%;flex-direction:row;justify-content:space-between;padding:12px 14px;">
 <span style="display:flex;align-items:center;gap:8px;">
 <svg fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" x2="19.07" y1="4.93" y2="19.07"></line></svg> Anti-Matchmaking </span>
 <span class="addr" id="anti-mm-addr" style="font-size:0.6rem;"></span>
@@ -547,7 +547,7 @@
 </button>
 </div>
 <div style="padding: 0.5rem 1rem 1rem;">
-<button onclick="resetAllCheats()" onmousedown="this.style.transform='scale(0.97)'" onmouseout="this.style.background='rgba(224,92,79,0.1)'" onmouseover="this.style.background='rgba(224,92,79,0.2)'" onmouseup="this.style.transform='scale(1)'" style="width:100%;background:rgba(224,92,79,0.1);border:1px solid var(--danger);border-radius:8px;color:var(--danger);font-family:var(--sans);font-weight:700;font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;padding:11px 0;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background 0.2s,transform 0.1s;">
+<button class="btn-reset-all-cheats" onclick="resetAllCheats()">
 <svg fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 .49-3.27"></path></svg> Reset All Cheats </button>
 </div>
 </div></div><!-- /.section-body /.panel -->

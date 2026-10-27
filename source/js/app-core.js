@@ -932,6 +932,7 @@
     if (!select || !Array.isArray(window.RTM_EMBLEM_OPTIONS)) return;
     select.replaceChildren();
     for (const emblem of window.RTM_EMBLEM_OPTIONS) {
+      if (emblem.itemClass !== 5) continue;
       const option = document.createElement('option');
       option.value = String(emblem.id);
       option.textContent = `${emblem.name} · ${emblem.id}`;
@@ -1013,6 +1014,9 @@
     try {
       if (emblemRestoreStack.length >= 32) throw new Error('Restore or review the saved emblem changes before making another edit');
       if (!Number.isInteger(id) || id < 0 || id > 0xFFFF) throw new Error('Select a valid 16-bit emblem');
+      if (!window.RTM_EMBLEM_OPTIONS?.some(option => option.itemClass === 5 && Number(option.id) === id)) {
+        throw new Error('Choose a source-listed emblem (item class 5); emote and other item IDs are not emblem selections');
+      }
       const target = await locateCharacterEmblem(generation);
       const selectedHex = [...RtmMemoryFeatures.beU16(id)].map(byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
       const [targetBefore, currentBefore] = await Promise.all([
