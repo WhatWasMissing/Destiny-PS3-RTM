@@ -1181,11 +1181,11 @@
     </div>
     <label class="field-wrap" style="display:flex;align-items:center;gap:10px;">
       <input id="screenshot-pause" type="checkbox" style="width:auto;">
-      <span class="field-label" style="margin:0;">Pause capture and restore the current pause byte</span>
+      <span class="field-label" style="margin:0;">Pause the game during capture, then restore its original instruction</span>
     </label>
     <button class="btn-send" id="screenshot-capture-btn" type="button" onclick="captureDestinyScreenshot()">Capture Framebuffer</button>
     <div class="scan-progress" id="screenshot-progress"><span id="screenshot-progress-text">Reading framebuffer…</span><div class="scan-progress-bar"><div class="scan-progress-fill" id="screenshot-progress-fill"></div></div></div>
-    <button class="btn-apply danger" id="screenshot-resume-btn" type="button" onclick="restoreScreenshotPause()" disabled>Restore Pause Byte</button>
+    <button class="btn-apply danger" id="screenshot-resume-btn" type="button" onclick="restoreScreenshotPause()" disabled>Restore Pause</button>
     <div class="scan-status"><div class="scan-stat" id="screenshot-status">Ready</div></div>
     <div class="screenshot-gallery" id="screenshot-gallery" aria-live="polite"></div>
   </div>
@@ -1331,9 +1331,9 @@
 <div class="panel" style="margin:0 1rem 0.75rem">
 <div class="panel-header">Game State</div>
 <div class="cheat-grid">
-<button class="cheat-btn blue" onclick="fire('6155BF','00','Pause Game','10',1)"> Pause Game <span class="addr"></span>
+<button class="cheat-btn blue" onclick="setDestinyGamePaused(true)"> Pause Game <span class="addr"></span>
 </button>
-<button class="cheat-btn blue" onclick="fire('6155BF','10','Resume Game','00',1)"> Resume Game <span class="addr"></span>
+<button class="cheat-btn blue" onclick="setDestinyGamePaused(false)"> Resume Game <span class="addr"></span>
 </button>
 </div>
 </div>

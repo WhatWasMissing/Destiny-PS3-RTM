@@ -57,6 +57,7 @@ uses the fixed webMAN PS3MAPI command path, but actual plugin loading and game
 compatibility still require a live console and matching module build.
 
 The framebuffer offsets, emblem scan location, and ammo signature come from the
-local RTM source. They have not been validated against a live console. A saved
-pause byte is kept locally if screenshot recovery fails so the user can reconnect
-to that console and restore the value.
+local RTM source. They have not been validated against a live console. The
+framebuffer pause patch now checks the source-mapped instruction at
+`0x006155BC`; a saved recovery record is kept locally if restoration fails so
+the user can reconnect to that console and restore the original instruction.

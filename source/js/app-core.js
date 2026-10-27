@@ -1422,6 +1422,13 @@
     if (result.status !== 'verified') throw new Error('Write acknowledged but readback unavailable; value not confirmed');
     return hex;
   }
+  async function verifiedConditionalMemoryValue(address, expectedHex, hex, beforeWrite) {
+    const options = { timeoutMs: 8000, preconditions: [[address, expectedHex]] };
+    if (beforeWrite) options.beforeWrite = beforeWrite;
+    const result = await patchRunner.apply([[address, hex]], options);
+    if (result.status !== 'verified') throw new Error('Write acknowledged but readback unavailable; value not confirmed');
+    return hex;
+  }
   async function writeFOVValue(value) {
     const number = Number(value);
     if (!RtmBackups.coordinate(value) || number <= 0) throw new Error('Enter a positive finite FOV value');
@@ -3650,8 +3657,9 @@
       catch (error) { throw new Error(`Could not save pause recovery data: ${error.message || error}`); }
       screenshotPauseRestore = state;
     } else {
+      try { localStorage.removeItem(SCREENSHOT_PAUSE_STORAGE_KEY); }
+      catch (error) { throw new Error(`Could not clear pause recovery data: ${error.message || error}`); }
       screenshotPauseRestore = null;
-      try { localStorage.removeItem(SCREENSHOT_PAUSE_STORAGE_KEY); } catch (e) {}
     }
     window.rtmFramebufferRecoveryIp = screenshotPauseRestore?.ip || '';
   }
@@ -3920,32 +3928,105 @@
     'hd-512': { label: '512 × 312 · compact buffer', address: 0xCF060000, width: 512, height: 312 }
   };
   const SCREENSHOT_CHUNK = 0x10000;
+  const DESTINY_PAUSE_SITE = Object.freeze({
+    address: 0x6155BC,
+    runningHex: '41820010',
+    pausedHex: '41820000'
+  });
+  // Older app versions may have saved recovery for this source-unverified byte.
+  const LEGACY_SCREENSHOT_PAUSE_ADDRESS = 0x614BFF;
+  let pauseOperationBusy = false;
+
+  async function readDestinyPauseInstruction(generation = connectionGeneration) {
+    const currentHex = (await ps3getmem(DESTINY_PAUSE_SITE.address, 4)).toUpperCase();
+    ensureOperationSession(generation);
+    if (!/^[0-9A-F]{8}$/.test(currentHex)) throw new Error('Could not read the complete pause instruction');
+    if (![DESTINY_PAUSE_SITE.runningHex, DESTINY_PAUSE_SITE.pausedHex].includes(currentHex)) {
+      throw new Error(`Pause instruction at 0x6155BC changed to ${currentHex}; no write was attempted`);
+    }
+    return currentHex;
+  }
+
+  async function setDestinyGamePaused(paused) {
+    const badge = document.getElementById('status-badge');
+    if (!ip || !badge?.classList.contains('connected')) { toast('Not connected', 'err'); return; }
+    if (pauseOperationBusy) {
+      toast('Another pause operation is in progress', 'err');
+      return;
+    }
+    if (window.rtmFramebufferBusy) {
+      toast('Restore screenshot pause first', 'err');
+      return;
+    }
+    pauseOperationBusy = true;
+    const generation = connectionGeneration;
+    const targetHex = paused ? DESTINY_PAUSE_SITE.pausedHex : DESTINY_PAUSE_SITE.runningHex;
+    const label = paused ? 'Pause Game' : 'Resume Game';
+    try {
+      const currentHex = await readDestinyPauseInstruction(generation);
+      if (currentHex !== targetHex) {
+        await verifiedConditionalMemoryValue(DESTINY_PAUSE_SITE.address.toString(16), currentHex, targetHex);
+        ensureOperationSession(generation);
+      }
+      log(`${label} instruction verified at 0x6155BC`, 'ok');
+      toast(`${label} verified`, 'ok');
+    } catch (error) {
+      log(`${label} was not applied: ${error.message}`, 'err');
+      toast(`${label} not confirmed`, 'err');
+    } finally {
+      pauseOperationBusy = false;
+    }
+  }
+  window.setDestinyGamePaused = setDestinyGamePaused;
 
   async function restoreScreenshotPause() {
     const saved = screenshotPauseRestore;
     const sameSession = saved && saved.ip === ip && saved.generation === connectionGeneration;
     const recoveredSession = saved && saved.pendingRecovery && saved.ip === ip;
     if (!saved || (!sameSession && !recoveredSession) || !document.getElementById('status-badge')?.classList.contains('connected')) {
-      setScreenshotStatus('No pause byte can be restored in this console session.', true);
+      setScreenshotStatus('No saved screenshot pause state can be restored in this console session.', true);
       return;
     }
+    if (pauseOperationBusy) {
+      setScreenshotStatus('Another pause operation is still in progress.', true);
+      return;
+    }
+    pauseOperationBusy = true;
+    const targetIp = ip;
+    const generation = connectionGeneration;
     try {
-      const currentHex = (await ps3getmem(0x614BFF, 1)).toUpperCase();
-      ensureOperationSession(connectionGeneration);
-      if (!/^[0-9A-F]{2}$/.test(currentHex)) throw new Error('Could not read the current pause byte');
-      if (currentHex !== saved.originalHex && currentHex !== '00') {
-        throw new Error(`Pause byte changed to 0x${currentHex}; refusing to overwrite the new value`);
+      const legacyRecovery = saved.address === undefined || saved.address === null;
+      const address = legacyRecovery ? LEGACY_SCREENSHOT_PAUSE_ADDRESS : Number(saved.address);
+      const originalHex = String(saved.originalHex || '').toUpperCase();
+      const patchedHex = legacyRecovery ? '00' : String(saved.patchedHex || '').toUpperCase();
+      const knownRecovery = legacyRecovery
+        ? address === LEGACY_SCREENSHOT_PAUSE_ADDRESS && /^[0-9A-F]{2}$/.test(originalHex)
+        : address === DESTINY_PAUSE_SITE.address && originalHex === DESTINY_PAUSE_SITE.runningHex && patchedHex === DESTINY_PAUSE_SITE.pausedHex;
+      if (!knownRecovery) throw new Error('Saved pause recovery data is not a recognized patch');
+      const currentHex = (await ps3getmem(address, legacyRecovery ? 1 : 4)).toUpperCase();
+      if (generation !== connectionGeneration || targetIp !== ip) throw new Error('Console session changed during pause recovery');
+      if (currentHex !== originalHex && currentHex !== patchedHex) {
+        throw new Error(`Pause site changed to ${currentHex}; refusing to overwrite the new value`);
       }
-      if (currentHex !== saved.originalHex) await verifiedMemoryValue('614BFF', saved.originalHex);
-      ensureOperationSession(connectionGeneration);
+      if (currentHex !== originalHex) {
+        await verifiedConditionalMemoryValue(address.toString(16), patchedHex, originalHex);
+        if (generation !== connectionGeneration || targetIp !== ip) throw new Error('Console session changed during pause recovery');
+      }
+      ensureOperationSession(generation);
       saveScreenshotPauseRestore(null);
       window.rtmFramebufferBusy = false;
       document.getElementById('screenshot-resume-btn').disabled = true;
-      setScreenshotStatus('Original game pause byte restored and verified.');
-      log('Framebuffer capture pause byte restored and verified', 'ok');
+      setScreenshotStatus(legacyRecovery ? 'Legacy screenshot pause byte restored and verified.' : 'Original pause instruction restored and verified.');
+      log('Framebuffer capture pause state restored and verified', 'ok');
     } catch (error) {
-      setScreenshotStatus(`Could not restore the original pause byte: ${error.message}`, true);
+      const message = String(error?.message || error);
+      const prefix = message.startsWith('Could not clear pause recovery data:')
+        ? 'Pause instruction is restored, but its recovery record could not be cleared'
+        : 'Could not restore the saved pause state';
+      setScreenshotStatus(`${prefix}: ${message}`, true);
       log(`Framebuffer pause recovery failed: ${error.message}`, 'err');
+    } finally {
+      pauseOperationBusy = false;
     }
   }
 
@@ -4089,17 +4170,21 @@
     if (!screenshotPauseRestore) return;
     const resumeButton = document.getElementById('screenshot-resume-btn');
     if (resumeButton) resumeButton.disabled = false;
-    setScreenshotStatus(`A previous capture may have left the game paused. Connect to ${screenshotPauseRestore.ip} and restore its saved pause byte.`, true);
+    setScreenshotStatus(`A previous capture may have left the game paused. Connect to ${screenshotPauseRestore.ip} and restore its saved pause state.`, true);
   });
 
   async function captureDestinyScreenshot() {
     if (!ip || !document.getElementById('status-badge')?.classList.contains('connected')) { toast('Not connected', 'err'); return; }
-    if (screenshotPauseRestore) { setScreenshotStatus('Restore the saved pause byte before another capture.', true); return; }
+    if (screenshotPauseRestore) { setScreenshotStatus('Restore the saved pause state before another capture.', true); return; }
     const profileId = document.getElementById('screenshot-profile').value;
     const profile = SCREENSHOT_PROFILES[profileId];
     if (!profile) return;
     const pauseRequested = document.getElementById('screenshot-pause').checked;
-    if (pauseRequested && !await RtmDialogs.confirm('Pause the game briefly while reading the framebuffer? The original pause byte will be restored after capture.')) return;
+    if (pauseRequested && !await RtmDialogs.confirm('Pause the game briefly while reading the framebuffer? The original pause instruction will be restored after capture.')) return;
+    if (pauseRequested && pauseOperationBusy) {
+      setScreenshotStatus('Another pause operation is still in progress.', true);
+      return;
+    }
     const generation = connectionGeneration;
     const targetIp = ip;
     const button = document.getElementById('screenshot-capture-btn');
@@ -4115,17 +4200,31 @@
     let captureError = null;
     let imageReady = false;
 
-    if (pauseRequested) window.rtmFramebufferBusy = true;
+    if (pauseRequested) {
+      pauseOperationBusy = true;
+      window.rtmFramebufferBusy = true;
+    }
     try {
       setScreenshotStatus(`Preparing ${profile.label} capture…`);
       if (pauseRequested) {
-        originalPauseHex = (await ps3getmem(0x614BFF, 1)).toUpperCase();
-        ensureOperationSession(generation);
-        if (!/^[0-9A-F]{2}$/.test(originalPauseHex)) throw new Error('Could not read the current pause byte');
-        if (originalPauseHex !== '00') {
-          saveScreenshotPauseRestore({ originalHex: originalPauseHex, generation, ip: targetIp, pendingRecovery: true });
-          pauseWriteAttempted = true;
-          await verifiedMemoryValue('614BFF', '00');
+        originalPauseHex = await readDestinyPauseInstruction(generation);
+        if (originalPauseHex === DESTINY_PAUSE_SITE.runningHex) {
+          await verifiedConditionalMemoryValue(
+            DESTINY_PAUSE_SITE.address.toString(16),
+            DESTINY_PAUSE_SITE.runningHex,
+            DESTINY_PAUSE_SITE.pausedHex,
+            () => {
+              saveScreenshotPauseRestore({
+                address: DESTINY_PAUSE_SITE.address,
+                originalHex: originalPauseHex,
+                patchedHex: DESTINY_PAUSE_SITE.pausedHex,
+                generation,
+                ip: targetIp,
+                pendingRecovery: true
+              });
+              pauseWriteAttempted = true;
+            }
+          );
           ensureOperationSession(generation);
         }
       }
@@ -4169,22 +4268,30 @@
     } finally {
       if (pauseRequested && pauseWriteAttempted && originalPauseHex) {
         try {
-          const currentHex = (await ps3getmem(0x614BFF, 1)).toUpperCase();
-          ensureOperationSession(generation);
-          if (!/^[0-9A-F]{2}$/.test(currentHex)) throw new Error('Could not read the current pause byte');
-          if (currentHex !== originalPauseHex && currentHex !== '00') {
-            throw new Error(`Pause byte changed to 0x${currentHex}; refusing to overwrite the new value`);
+          const currentHex = await readDestinyPauseInstruction(generation);
+          if (currentHex !== originalPauseHex && currentHex !== DESTINY_PAUSE_SITE.pausedHex) {
+            throw new Error(`Pause instruction changed to ${currentHex}; refusing to overwrite the new value`);
           }
-          if (currentHex !== originalPauseHex) await verifiedMemoryValue('614BFF', originalPauseHex);
+          if (currentHex !== originalPauseHex) {
+            await verifiedConditionalMemoryValue(
+              DESTINY_PAUSE_SITE.address.toString(16),
+              DESTINY_PAUSE_SITE.pausedHex,
+              originalPauseHex
+            );
+          }
           ensureOperationSession(generation);
+          const resumeButton = document.getElementById('screenshot-resume-btn');
+          if (resumeButton) resumeButton.disabled = true;
           saveScreenshotPauseRestore(null);
           window.rtmFramebufferBusy = false;
-          document.getElementById('screenshot-resume-btn').disabled = true;
         } catch (error) {
-          saveScreenshotPauseRestore({ originalHex: originalPauseHex, generation, ip: targetIp, pendingRecovery: true });
           window.rtmFramebufferBusy = true;
-          document.getElementById('screenshot-resume-btn').disabled = false;
-          setScreenshotStatus(`Capture ${imageReady ? 'finished' : 'failed'}, but pause recovery needs attention. Use Restore Pause Byte.`, true);
+          const resumeButton = document.getElementById('screenshot-resume-btn');
+          if (resumeButton) resumeButton.disabled = false;
+          const recoveryMessage = String(error?.message || error).startsWith('Could not clear pause recovery data:')
+            ? `Capture ${imageReady ? 'finished' : 'failed'} and the game pause was restored, but its recovery record could not be cleared. Use Restore Pause to retry.`
+            : `Capture ${imageReady ? 'finished' : 'failed'}, but pause recovery needs attention. Use Restore Pause.`;
+          setScreenshotStatus(recoveryMessage, true);
           log(`Framebuffer pause recovery needs manual restore: ${error.message}`, 'err');
         }
       } else if (pauseRequested) {
@@ -4192,6 +4299,7 @@
       }
       progress.style.display = 'none';
       if (button) button.disabled = false;
+      if (pauseRequested) pauseOperationBusy = false;
     }
     if (captureError && screenshotPauseRestore) toast('Screenshot issue · game pause recovery needs attention', 'err');
   }
