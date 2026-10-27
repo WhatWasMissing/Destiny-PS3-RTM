@@ -11,6 +11,12 @@
   const CONSUMABLE_BACKUP_KEY = 'overwalls_consumable_backup';
   const PLATE_BACKUP_KEY = 'overwalls_plate_hook_backup';
   const PHYSICS_BACKUP_KEY = 'overwalls_physics_hook_backup';
+  const WARPRIEST_BACKUP_KEY = 'overwalls_warpriest_secondary_backup';
+  const WARPRIEST_PRIMARY_ADDRESS = '00444CA4';
+  const WARPRIEST_SECONDARY_ADDRESS = '01891AE0';
+  const WARPRIEST_PRIMARY_ON = 'C0420348';
+  const WARPRIEST_PRIMARY_OFF = 'C04100F0';
+  const WARPRIEST_SECONDARY_ON = '3F800000';
   const PHYSICS_ADDRESS = 0x010D8EC0;
   const PHYSICS_BYTES = '9421FFB0F9E10010FA010018FA210020FA4100287DE000263C6001906063EBB08203001482240140825000007C119000418200084800000C90830000480000A089E300072C0F000140820094820300007C04800041820088DA010030DA210038C2100140C2230040EE10882AD2040140C2100144C2230044EE10882AD2040144C2100148C2230048EE10882AD2040148CA010030CA21003889E300062C0F00014082003CC21001B0C223004CEE10882AD20401B0C21001B4C2230050EE10882AD20401B4C21001B8C2230054EE10882AD20401B8CA010030CA2100387DEFF120E9E10010EA010018EA210020EA410028306401403C80010A382100504B0EB15C';
   const SPRX_PATH = '/dev_hdd0/tmp/Destiny_Flyhack.sprx';
@@ -128,6 +134,14 @@
     checkContext(context);
     const normalized = pairs.map(([address, value]) => [normalizeAddress(address), String(value).replace(/\s/g, '').toUpperCase()]);
     const result = await verifiedMemorySequence(normalized);
+    checkContext(context);
+    return result;
+  }
+  async function writePairsIfEqual(pairs, preconditions, context) {
+    checkContext(context);
+    const normalized = pairs.map(([address, value]) => [normalizeAddress(address), String(value).replace(/\s/g, '').toUpperCase()]);
+    const expected = preconditions.map(([address, value]) => [normalizeAddress(address), String(value).replace(/\s/g, '').toUpperCase()]);
+    const result = await verifiedConditionalMemorySequence(normalized, expected);
     checkContext(context);
     return result;
   }
@@ -788,9 +802,109 @@
     const split = definition.length / 2;
     return definition.slice(enabled ? 0 : split, enabled ? split : undefined);
   }
+  function readWarpriestSnapshot() {
+    let raw;
+    try { raw = localStorage.getItem(WARPRIEST_BACKUP_KEY); }
+    catch (error) { throw new Error(`Could not read Warpriest recovery data: ${error.message}`); }
+    if (raw === null) return null;
+    let snapshot;
+    try { snapshot = JSON.parse(raw); }
+    catch (_) { throw new Error('Warpriest recovery data is unreadable; it was left untouched'); }
+    if (!snapshot || snapshot.version !== 1 || typeof snapshot.ip !== 'string' ||
+        !/^[0-9A-F]{8}$/.test(snapshot.playerPointer) || !/^[0-9A-F]{8}$/.test(snapshot.originalHex) ||
+        snapshot.originalHex === WARPRIEST_SECONDARY_ON) {
+      throw new Error('Warpriest recovery data is invalid; it was left untouched');
+    }
+    return snapshot;
+  }
+  async function readWarpriestPlayerAnchor(context) {
+    const anchor = await readHex(0x0190EBB0, 4, context);
+    const pointer = parseInt(anchor, 16) >>> 0;
+    if (pointer < 0x10000 || pointer > 0x7FFFFFFF) throw new Error('A live player pointer is required to bind Warpriest recovery to this game session');
+    return anchor;
+  }
+  async function setWarpriestImmunity(enabled, context) {
+    checkContext(context);
+    const primary = await readHex(parseInt(WARPRIEST_PRIMARY_ADDRESS, 16), 4, context);
+    const secondary = await readHex(parseInt(WARPRIEST_SECONDARY_ADDRESS, 16), 4, context);
+    checkContext(context);
+    if (![WARPRIEST_PRIMARY_ON, WARPRIEST_PRIMARY_OFF].includes(primary)) {
+      throw new Error(`Warpriest instruction is unknown (${primary}); no write was attempted`);
+    }
+    let snapshot = readWarpriestSnapshot();
+    if (snapshot && snapshot.ip !== ip) throw new Error('Warpriest recovery data belongs to another console; reconnect to that console first');
+    if (!enabled && snapshot && primary === WARPRIEST_PRIMARY_OFF && secondary === snapshot.originalHex) {
+      localStorage.removeItem(WARPRIEST_BACKUP_KEY);
+      return 'Warpriest bytes already match the saved original; recovery record cleared without writing';
+    }
+    let playerAnchor = null;
+    if (snapshot) {
+      playerAnchor = await readWarpriestPlayerAnchor(context);
+      if (snapshot.playerPointer !== playerAnchor) {
+        if (primary === WARPRIEST_PRIMARY_OFF && secondary === snapshot.originalHex) {
+          localStorage.removeItem(WARPRIEST_BACKUP_KEY);
+          snapshot = null;
+          playerAnchor = null;
+        } else {
+          throw new Error('The live player pointer changed since enable; saved recovery data was left untouched');
+        }
+      }
+    }
+
+    if (enabled) {
+      if (!snapshot && primary === WARPRIEST_PRIMARY_ON && secondary === WARPRIEST_SECONDARY_ON) {
+        return 'Immune Warpriest is already active; its prior secondary value is unknown, so no recovery snapshot was fabricated';
+      }
+      if (!snapshot && secondary === WARPRIEST_SECONDARY_ON) {
+        throw new Error('The secondary word already has the target value but no original snapshot exists; refusing an un-restorable enable');
+      }
+      if (snapshot && ![snapshot.originalHex, WARPRIEST_SECONDARY_ON].includes(secondary)) {
+        throw new Error('The secondary word changed since enable; saved recovery data was left untouched');
+      }
+      if (!snapshot) {
+        playerAnchor = await readWarpriestPlayerAnchor(context);
+        snapshot = { version: 1, ip, playerPointer: playerAnchor, originalHex: secondary };
+        writeBackup(WARPRIEST_BACKUP_KEY, snapshot);
+      }
+      const pairs = [];
+      if (primary !== WARPRIEST_PRIMARY_ON) pairs.push([WARPRIEST_PRIMARY_ADDRESS, WARPRIEST_PRIMARY_ON]);
+      if (secondary !== WARPRIEST_SECONDARY_ON) pairs.push([WARPRIEST_SECONDARY_ADDRESS, WARPRIEST_SECONDARY_ON]);
+      if (pairs.length) await writePairsIfEqual(pairs, [
+        [WARPRIEST_PRIMARY_ADDRESS, primary], [WARPRIEST_SECONDARY_ADDRESS, secondary],
+        ['0190EBB0', playerAnchor]
+      ], context);
+      return pairs.length
+        ? 'Immune Warpriest enabled; original secondary bytes are saved for guarded restoration'
+        : 'Immune Warpriest already enabled; recovery snapshot retained';
+    }
+
+    if (!snapshot) {
+      if (primary !== WARPRIEST_PRIMARY_OFF) await writePairsIfEqual(
+        [[WARPRIEST_PRIMARY_ADDRESS, WARPRIEST_PRIMARY_OFF]],
+        [[WARPRIEST_PRIMARY_ADDRESS, primary]], context
+      );
+      return 'Warpriest primary instruction disabled; secondary word left unchanged because no original snapshot exists';
+    }
+    if (![snapshot.originalHex, WARPRIEST_SECONDARY_ON].includes(secondary)) {
+      throw new Error('The secondary word changed since enable; saved recovery data was left untouched');
+    }
+    const pairs = [];
+    if (primary !== WARPRIEST_PRIMARY_OFF) pairs.push([WARPRIEST_PRIMARY_ADDRESS, WARPRIEST_PRIMARY_OFF]);
+    if (secondary !== snapshot.originalHex) pairs.push([WARPRIEST_SECONDARY_ADDRESS, snapshot.originalHex]);
+    if (pairs.length) await writePairsIfEqual(pairs, [
+      [WARPRIEST_PRIMARY_ADDRESS, primary], [WARPRIEST_SECONDARY_ADDRESS, secondary],
+      ['0190EBB0', playerAnchor]
+    ], context);
+    localStorage.removeItem(WARPRIEST_BACKUP_KEY);
+    return 'Immune Warpriest disabled; saved secondary bytes restored and verified';
+  }
   async function applyCheatToggle(id, enabled) {
     try {
       const context = newContext();
+      if (Number(id) === 4) {
+        report(await setWarpriestImmunity(Boolean(enabled), context), 'ok');
+        return;
+      }
       const pairs = cheatValues(Number(id), Boolean(enabled));
       await writePairs(pairs.map(([address, value]) => [hexAddress(address), value]), context);
       if (Number(id) === 9 && typeof root.syncDamagePatchState === 'function') {
@@ -806,12 +920,14 @@
       const ids = kind === 'usual' ? usualPresetIds : allPresetIds;
       const enabled = kind !== 'off';
       const pairs = [];
-      for (const id of ids) pairs.push(...cheatValues(id, enabled));
-      await writePairs(pairs.map(([address, value]) => [hexAddress(address), value]), context);
+      for (const id of ids) if (id !== 4) pairs.push(...cheatValues(id, enabled));
+      if (pairs.length) await writePairs(pairs.map(([address, value]) => [hexAddress(address), value]), context);
+      let warpriestStatus = '';
+      if (ids.includes(4)) warpriestStatus = ` · ${await setWarpriestImmunity(enabled, context)}`;
       if (ids.includes(9) && typeof root.syncDamagePatchState === 'function') {
         root.syncDamagePatchState(enabled ? '547A' : '3F80', `Overwalls ${kind} preset`);
       }
-      report(`${kind === 'usual' ? 'Usual' : kind === 'all' ? 'All' : 'Disable all'} Overwalls cheat preset verified (${pairs.length} memory writes)`, 'ok');
+      report(`${kind === 'usual' ? 'Usual' : kind === 'all' ? 'All' : 'Disable all'} Overwalls cheat preset verified${warpriestStatus}`, 'ok');
     } catch (error) { report(`Cheat preset not confirmed: ${error.message}`, 'err'); }
   }
   async function setSkipCutscene() {

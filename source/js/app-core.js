@@ -1363,6 +1363,11 @@
     if (result.status !== 'verified') throw new Error('Write acknowledged but readback unavailable; value not confirmed');
     return result;
   }
+  async function verifiedConditionalMemorySequence(pairs, preconditions, timeoutMs = 8000) {
+    const result = await patchRunner.apply(pairs, { timeoutMs, preconditions });
+    if (result.status !== 'verified') throw new Error('Conditional write acknowledged but readback unavailable; value not confirmed');
+    return result;
+  }
   async function verifiedMemoryValue(address, hex, timeoutMs = 8000) {
     const result = await verifiedMemorySequence([[address,hex]],timeoutMs);
     if (result.status !== 'verified') throw new Error('Write acknowledged but readback unavailable; value not confirmed');
