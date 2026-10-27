@@ -179,6 +179,13 @@ reviewable in PR #8; it remains a draft pending live-console compatibility revie
   persisted manual recovery path. The tool fails closed if it cannot save
   recovery data before pausing. These addresses remain unverified against a
   live game build.
+- Matched the five C# framebuffer panels with independent web gallery slots.
+  Each profile keeps its latest preview and provides its own PNG download,
+  clipboard copy and Fit/Stretch control; recapture revokes only that profile's
+  previous preview URL. Tests cover slot isolation, replacement and cleanup.
+- Bundled the 19 user-archived Overwalls XML scenarios (276 positions) in the
+  Overwalls selector. Loading one confirms replacement of the current scenario;
+  the importer validates coordinates and retains the source labels.
 - Replaced the nonfunctional RPC notification variant with the documented PS3
   system notification flow. Removed experimental Player Size and connection
   RPC calls at that stage. Player Size has since been ported by emulating its

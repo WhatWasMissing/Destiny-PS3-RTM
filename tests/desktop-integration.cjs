@@ -36,7 +36,7 @@ const context=vm.createContext({
   }
 });
 context.window=context;
-for(const file of ['desktop-host','transport','operations','backups','connection','build-compatibility','app-core','launch-tools']) {
+for(const file of ['desktop-host','transport','operations','backups','connection','build-compatibility','screenshot-tools','app-core','launch-tools']) {
   vm.runInContext(fs.readFileSync(`source/js/${file}.js`,'utf8'),context,{filename:file+'.js'});
 }
 (async()=>{

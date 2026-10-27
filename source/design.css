@@ -104,6 +104,17 @@ body.compact-ui .cheat-feature-label, body.compact-ui .cheat-status-label,
 .ow-stop { border-color: var(--danger) !important; color: var(--danger) !important; }
 .ow-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 10px; padding: 0 16px 12px; }
 .ow-dump-output { display: block; width: calc(100% - 32px); margin: 0 16px 16px; padding: 10px; resize: vertical; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-control); font: 12px/1.5 var(--mono); }
+.screenshot-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 235px), 1fr)); gap: 10px; padding: 4px 0 14px; }
+.screenshot-card { min-width: 0; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--surface); }
+.screenshot-card-heading { min-height: 40px; display: flex; align-items: center; padding: 8px 10px; color: var(--text); }
+.screenshot-card-heading h3 { margin: 0; font: 600 12px var(--sans); }
+.screenshot-frame { display: grid; aspect-ratio: 16 / 9; min-height: 125px; place-items: center; overflow: hidden; background: #0b0d0e; border-block: 1px solid var(--border); }
+.screenshot-frame img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.screenshot-placeholder { color: var(--muted); font: 12px var(--sans); }
+.screenshot-card-actions { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; }
+.screenshot-card-actions a, .screenshot-card-actions button { display: inline-flex; min-height: 34px; flex: 1 1 68px; align-items: center; justify-content: center; padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--card); color: var(--text); cursor: pointer; font: 12px var(--sans); text-decoration: none; }
+.screenshot-card-actions a[hidden] { display: none; }
+.screenshot-card-actions button:disabled { cursor: not-allowed; opacity: .58; }
 body.compact-ui #sec-overwalls .ow-muted-note { display: none; }
 #sec-maintenance .connect-row { gap: 10px; }
 #sec-maintenance button { min-height: 42px; }

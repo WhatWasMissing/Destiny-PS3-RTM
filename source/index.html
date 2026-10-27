@@ -1125,7 +1125,7 @@
 <p class="category-label" onclick="toggleSection('sec-screenshots')">Screenshots<svg class="collapse-chevron" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 21"></polyline></svg></p>
 <div class="section-body"><div class="panel">
   <div class="panel-header">Destiny Framebuffer Capture</div>
-  <div class="panel-muted-note" style="margin:0.75rem 1rem 0;">Captures a GPU-memory buffer defined by the local 1.24 RTM source. Buffer addresses are build-specific and have not been verified against a live console.</div>
+  <div class="panel-muted-note" style="margin:0.75rem 1rem 0;">Captures one selected GPU-memory buffer at a time. Each profile keeps its latest preview, download, and clipboard copy. Addresses are build-specific and have not been verified against a live console.</div>
   <div class="custom-body">
     <div class="field-wrap">
       <span class="field-label">Capture size</span>
@@ -1145,9 +1145,7 @@
     <div class="scan-progress" id="screenshot-progress"><span id="screenshot-progress-text">Reading framebuffer…</span><div class="scan-progress-bar"><div class="scan-progress-fill" id="screenshot-progress-fill"></div></div></div>
     <button class="btn-apply danger" id="screenshot-resume-btn" type="button" onclick="restoreScreenshotPause()" disabled>Restore Pause Byte</button>
     <div class="scan-status"><div class="scan-stat" id="screenshot-status">Ready</div></div>
-    <img id="screenshot-preview" alt="Captured Destiny framebuffer" style="display:none;max-width:100%;max-height:420px;object-fit:contain;border:1px solid var(--border);border-radius:8px;background:#080a0f;">
-    <a id="screenshot-download" style="display:none;margin-top:8px;" download="destiny-framebuffer.png">Download PNG</a>
-    <button class="btn-apply" id="screenshot-copy-btn" type="button" onclick="copyDestinyScreenshot()" disabled>Copy PNG</button>
+    <div class="screenshot-gallery" id="screenshot-gallery" aria-live="polite"></div>
   </div>
 </div></div>
 </div>

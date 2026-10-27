@@ -3541,8 +3541,8 @@
   let ammoScanState = null;
   const ammoRestoreStack = [];
   let ammoScanBusy = false;
-  let screenshotObjectUrl = '';
-  let screenshotBlob = null;
+  const screenshotCaptures = RtmScreenshotTools.createCaptureStore(URL);
+  const screenshotStretchModes = new Set();
   let screenshotPauseRestore = null;
   try { screenshotPauseRestore = JSON.parse(localStorage.getItem(SCREENSHOT_PAUSE_STORAGE_KEY) || 'null'); } catch (e) { screenshotPauseRestore = null; }
   window.rtmFramebufferBusy = !!screenshotPauseRestore;
@@ -3860,24 +3860,95 @@
     status.style.color = failed ? 'var(--danger)' : 'var(--muted)';
   }
 
-  async function copyDestinyScreenshot() {
-    if (!screenshotBlob) { toast('Capture a screenshot first', 'err'); return; }
-    const button = document.getElementById('screenshot-copy-btn');
+  function renderScreenshotGallery() {
+    const gallery = document.getElementById('screenshot-gallery');
+    if (!gallery) return;
+    gallery.replaceChildren();
+    for (const [profileId, profile] of Object.entries(SCREENSHOT_PROFILES)) {
+      const capture = screenshotCaptures.get(profileId);
+      const stretched = screenshotStretchModes.has(profileId);
+      const card = document.createElement('article');
+      card.className = 'screenshot-card';
+      const heading = document.createElement('div');
+      heading.className = 'screenshot-card-heading';
+      const title = document.createElement('h3');
+      title.textContent = profile.label;
+      heading.appendChild(title);
+      card.appendChild(heading);
+
+      const frame = document.createElement('div');
+      frame.className = 'screenshot-frame';
+      if (capture) {
+        const preview = document.createElement('img');
+        preview.src = capture.objectUrl;
+        preview.alt = `Destiny framebuffer · ${profile.label}`;
+        preview.style.objectFit = stretched ? 'fill' : 'contain';
+        frame.appendChild(preview);
+      } else {
+        const empty = document.createElement('span');
+        empty.className = 'screenshot-placeholder';
+        empty.textContent = 'No capture yet';
+        frame.appendChild(empty);
+      }
+      card.appendChild(frame);
+
+      const actions = document.createElement('div');
+      actions.className = 'screenshot-card-actions';
+      const download = document.createElement('a');
+      download.textContent = 'Download PNG';
+      download.setAttribute('aria-label', `Download ${profile.label} PNG`);
+      download.hidden = !capture;
+      if (capture) {
+        download.href = capture.objectUrl;
+        download.download = capture.downloadName;
+      }
+      actions.appendChild(download);
+
+      const copy = document.createElement('button');
+      copy.type = 'button';
+      copy.id = `screenshot-copy-${profileId}`;
+      copy.textContent = 'Copy PNG';
+      copy.setAttribute('aria-label', `Copy ${profile.label} PNG`);
+      copy.disabled = !capture;
+      copy.addEventListener('click', () => copyDestinyScreenshot(profileId));
+      actions.appendChild(copy);
+
+      const view = document.createElement('button');
+      view.type = 'button';
+      view.textContent = stretched ? 'Fit' : 'Stretch';
+      view.setAttribute('aria-label', `${stretched ? 'Fit' : 'Stretch'} ${profile.label} preview`);
+      view.addEventListener('click', () => {
+        if (stretched) screenshotStretchModes.delete(profileId);
+        else screenshotStretchModes.add(profileId);
+        renderScreenshotGallery();
+      });
+      actions.appendChild(view);
+      card.appendChild(actions);
+      gallery.appendChild(card);
+    }
+  }
+
+  async function copyDestinyScreenshot(profileId) {
+    if (!SCREENSHOT_PROFILES[profileId]) { toast('Choose a valid screenshot profile', 'err'); return; }
+    const capture = screenshotCaptures.get(profileId);
+    if (!capture) { toast('Capture this profile first', 'err'); return; }
+    const button = document.getElementById(`screenshot-copy-${profileId}`);
     if (button) button.disabled = true;
     try {
-      await RtmScreenshotTools.copyPngToClipboard(screenshotBlob);
-      setScreenshotStatus('PNG copied to clipboard');
+      await RtmScreenshotTools.copyPngToClipboard(capture.blob);
+      setScreenshotStatus(`${SCREENSHOT_PROFILES[profileId].width} × ${SCREENSHOT_PROFILES[profileId].height} PNG copied to clipboard`);
       toast('Screenshot copied', 'ok');
     } catch (error) {
       setScreenshotStatus(`Clipboard copy unavailable: ${error.message}`, true);
       log(`Framebuffer clipboard copy failed: ${error.message}`, 'err');
       toast('Could not copy screenshot', 'err');
     } finally {
-      if (button) button.disabled = !screenshotBlob;
+      if (button) button.disabled = !screenshotCaptures.get(profileId);
     }
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    renderScreenshotGallery();
     if (!screenshotPauseRestore) return;
     const resumeButton = document.getElementById('screenshot-resume-btn');
     if (resumeButton) resumeButton.disabled = false;
@@ -3887,7 +3958,8 @@
   async function captureDestinyScreenshot() {
     if (!ip || !document.getElementById('status-badge')?.classList.contains('connected')) { toast('Not connected', 'err'); return; }
     if (screenshotPauseRestore) { setScreenshotStatus('Restore the saved pause byte before another capture.', true); return; }
-    const profile = SCREENSHOT_PROFILES[document.getElementById('screenshot-profile').value];
+    const profileId = document.getElementById('screenshot-profile').value;
+    const profile = SCREENSHOT_PROFILES[profileId];
     if (!profile) return;
     const pauseRequested = document.getElementById('screenshot-pause').checked;
     if (pauseRequested && !await RtmDialogs.confirm('Pause the game briefly while reading the framebuffer? The original pause byte will be restored after capture.')) return;
@@ -3945,19 +4017,9 @@
       image.data.set(rgba);
       context.putImageData(image, 0, 0);
       const blob = await new Promise((resolve, reject) => canvas.toBlob(result => result ? resolve(result) : reject(new Error('Could not encode the PNG')), 'image/png'));
-      screenshotBlob = blob;
-      if (screenshotObjectUrl) URL.revokeObjectURL(screenshotObjectUrl);
-      screenshotObjectUrl = URL.createObjectURL(blob);
-      const preview = document.getElementById('screenshot-preview');
-      preview.src = screenshotObjectUrl;
-      preview.style.display = '';
-      const download = document.getElementById('screenshot-download');
-      download.href = screenshotObjectUrl;
-      download.download = `destiny-${profile.width}x${profile.height}-${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
-      download.textContent = `Download ${profile.width} × ${profile.height} PNG`;
-      download.style.display = 'inline-block';
-      const copyButton = document.getElementById('screenshot-copy-btn');
-      if (copyButton) copyButton.disabled = false;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      screenshotCaptures.set(profileId, blob, `destiny-${profileId}-${profile.width}x${profile.height}-${timestamp}.png`);
+      renderScreenshotGallery();
       imageReady = true;
       setScreenshotStatus(`Captured ${profile.width} × ${profile.height} · PNG ready`);
       log(`Destiny framebuffer captured at ${profile.width} × ${profile.height}`, 'ok');
@@ -3996,6 +4058,8 @@
     }
     if (captureError && screenshotPauseRestore) toast('Screenshot issue · game pause recovery needs attention', 'err');
   }
+
+  window.addEventListener('beforeunload', () => screenshotCaptures.clear(), { once: true });
 
   // ── Memory Scanner ────────────────────────────────────────────────────────
   // Snapshot A/B: reads a memory range from PS3 in chunks, stores raw hex.
