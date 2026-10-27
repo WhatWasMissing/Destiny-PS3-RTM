@@ -436,14 +436,25 @@ status/table key before helper `0x00255E4C`; it is not established as a record
 pointer or spawn argument. The exact 64-byte BLES 01.24 function signature is
 checked by the actor-lookup descriptor probe. The code does not bound the
 13-bit handle against a 40-record capacity.
+The current hash-verified BLES 01.24 ELF also shows direct callers at
+`0x00256130`, `0x00256F08`, and `0x002570C8`. The first caller checks that the
+actor handle is not `0xFFFFFFFF` before calling the helper; another checks the
+same handle sentinel, and the third checks an actor state byte before calling
+the helper. In the helper, the selected slot's `+0x40` and `+0x44` fields are
+cleared and the actor's `+0x174` handle is reset to `0xFFFFFFFF`. This is stronger
+evidence for a packed-handle slot lookup/cleanup path, but it still does not
+identify the descriptor as the separate 40-entry AI pool or establish that
+its slot records are loaded-enemy addresses.
 
 The probe reads only the 16-byte descriptor after the three-site build check,
 rechecks the code and descriptor, and displays the two unknown leading words,
 storage pointer, and stride. It never follows storage or enumerates records.
 This does not validate capacity, live record meaning, or a spawn action. No
-static cross-reference links this actor-handle lookup descriptor to the
-separately documented AI pool (`40 × 0x28D0`); that pool's stride does not
-establish this descriptor's identity.
+static cross-reference found in this audit links this actor-handle lookup
+descriptor to the separately documented AI pool (`40 × 0x28D0`); that pool's
+stride does not establish this descriptor's identity. The probe therefore
+remains descriptor-only until a runtime sample establishes the pointer,
+capacity, stride, record layout, and relation to live actors.
 
 ### BLES 01.24 packed-handle resolver used by Spawn
 
