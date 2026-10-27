@@ -40,7 +40,16 @@ identity. Read-only memory tools remain usable on other builds.
   code are not included in this repository. Player Size no longer uses this
   RPC path. Stock webMAN also
   does not implement the HTML copy's `/call.ps3mapi` and
-  `/enablerpc.ps3mapi` routes.
+  `/enablerpc.ps3mapi` routes. The phone build initializes `0x10030000`, writes
+  UTF-16BE title/body strings at `0x10030200`/`0x10030400`, then calls
+  `0x00748714` with buffers at `0x01B300E8` and `0x01B2FF58`. In the verified
+  BLES01857 01.24 ELF, the called functions at `0x00750540` and `0x00748714`
+  are executable and the latter buffers are zero-filled BSS, but
+  `0x10030000` is outside every mapped ELF segment. Its requested RPC-stub
+  address `0x004A8040` contains executable game code. These facts do not
+  establish usable scratch memory or safe call semantics, so the in-game toast
+  remains a research candidate; the existing webMAN system notification is a
+  different feature.
 - Trophy unlock calls the same unsupported function-call layer and has no
   source-level readback or restoration. It remains unavailable.
 - Deathsinger's Power appears in
@@ -71,6 +80,20 @@ identity. Read-only memory tools remain usable on other builds.
   encounter-specific address therefore remains unknown. Locating it requires
   encounter-specific runtime evidence or source/disassembly that identifies
   the function.
+- `D:\VIRUS\PDR.html` has a “Player Hook” and “True Death” action. The True
+  Death write is already ported as **PDR position** in the Overwalls tab:
+  `source/js/overwalls-tools.js` bounds the pointer read from `0x0190EBB0` and
+  verifies the Float32 writes `47C35000` at `+0x148` and `3F800000` at `+0x1B0`.
+  The related PDR + Static Actors off action is ported there as well. Neither
+  operation's in-game result has been observed. The PDR **Player Hook** is a
+  separate variant: it redirects `0x001C4110` to a 46-word code block at
+  `0x010D8EE8`; the existing Overwalls physics hook and Server Cheats use that
+  same branch site and a 116-byte block beginning at `0x010D8EC0`. Those cave
+  ranges overlap from `0x010D8EE8` through `0x010D8F33`, so PDR's hook cannot be
+  added as an independent toggle. It also writes `3F99999A` at `0x0190EBAC`,
+  a field used by the existing hook, and performs no readback or restoration.
+  This alternate hook remains unavailable until its interaction with the
+  existing hook is modeled and safely reversible.
 - The main web-RTM Warpriest Immunity variant is present in local HTML, but
   its source OFF values (`C0434DB0` at `0x00444CA4` and `3F800000` at
   `0x01897420`) do not match BLES01857 01.24 (`C04100F0` and `37343036`). The
