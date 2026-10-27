@@ -198,6 +198,34 @@ not establish a damage effect.
 | `0x10030000` | Outside every EBOOT load segment | The original C# Player Size source uses this as scratch data around a function call. The app/MCP port does not call that function or use this scratch address. |
 | `0x01A21CB0`, `0x01A1D9E8` | In zero-filled BSS of the writable segment | Player Size lookup table and scale-object base; only live reads can reveal their initialized runtime values. |
 
+## Process-thread call path audit
+
+The 01.24 ELF's entry point is `0x01849568`, which contains a 32-bit function
+descriptor `[0x0001238C, 0x01891798]`. Scanning the inferred contiguous OPD
+range `0x01849508` through `0x01889790` finds 32,850 descriptors with the same
+TOC, `0x01891798`. The next descriptor at `0x01889798` has a different TOC
+(`0x018C218C`) and is outside that inferred range. This supplies a static TOC
+candidate for a short thread stub that calls code in the main EBOOT; it does
+not prove the toast callees are thread-safe or can run outside Destiny's normal
+UI thread.
+
+The official webMAN interface documents `MEMORY PAGEALLOCATE`, `PAGEFREE`, and
+`THREAD CREATE` through `/ps3mapi.ps3?<command>`. Its current handler ignores
+the syscall result when reporting page allocation/free and responds HTTP 200
+after issuing thread creation. The 1.47.48t fix changed the generated thread
+descriptor from `u64[2]` to `u32[2]`; the commit notes that the previous form
+could start at address zero and crash. These are implementation details of
+webMAN, not proof that a particular installed build or Cobra/HEN payload
+supports the full lifecycle. [Command reference](https://github.com/aldostools/webMAN-MOD/wiki/Web-Commands/e75ae66ee03f1ec8d61ad011e56b62e0a3559bab),
+[server handler](https://github.com/aldostools/webMAN-MOD/blob/master/include/ps3mapi/ps3mapi_server.h),
+[fix commit](https://github.com/aldostools/webMAN-MOD/commit/75327b1).
+
+No toast stub is exposed. Safe use still requires a live build/process check,
+nonzero allocation values, exact code readback, a completion marker, and
+verified release with both allocation values. Instruction-cache behavior,
+function thread affinity, observed toast output, and cleanup on the target
+console remain unverified; no live-console writes were made for this audit.
+
 Matching static code/data bytes do not prove server persistence. Controlled
 observation in the matching 01.24 runtime is needed to confirm dynamic mappings
 and in-game effects.

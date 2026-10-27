@@ -39,18 +39,31 @@ identity. Read-only memory tools remain usable on other builds.
   and has no completion polling or title/version checks. The DLL has no
   accompanying license in the recovered project. The DLL and extracted machine
   code are not included in this repository. Player Size no longer uses this
-  RPC path. Stock webMAN also
-  does not implement the HTML copy's `/call.ps3mapi` and
-  `/enablerpc.ps3mapi` routes. The phone build initializes `0x10030000`, writes
+  RPC path. Stock webMAN does not implement the HTML copy's `/call.ps3mapi` and
+  `/enablerpc.ps3mapi` routes. A separate path exists in webMAN: its documented
+  `/ps3mapi.ps3?<command>` endpoint lists `MEMORY PAGEALLOCATE`, `PAGEFREE`, and
+  `THREAD CREATE`. The current handler builds a 32-bit entry/TOC descriptor for
+  the new thread, but returns HTTP 200 without checking the syscall result; an
+  HTTP acknowledgement cannot confirm that the thread was created. A webMAN
+  fix in 1.47.48t corrected an earlier descriptor-width bug that could crash
+  on thread creation. These commands are version/payload dependent and have
+  not been validated against the user's installed console software. See the
+  [webMAN PS3MAPI command reference](https://github.com/aldostools/webMAN-MOD/wiki/Web-Commands/e75ae66ee03f1ec8d61ad011e56b62e0a3559bab),
+  [handler source](https://github.com/aldostools/webMAN-MOD/blob/master/include/ps3mapi/ps3mapi_server.h),
+  and [thread descriptor fix](https://github.com/aldostools/webMAN-MOD/commit/75327b1).
+  The phone build initializes `0x10030000`, writes
   UTF-16BE title/body strings at `0x10030200`/`0x10030400`, then calls
   `0x00748714` with buffers at `0x01B300E8` and `0x01B2FF58`. In the verified
   BLES01857 01.24 ELF, the called functions at `0x00750540` and `0x00748714`
   are executable and the latter buffers are zero-filled BSS, but
   `0x10030000` is outside every mapped ELF segment. Its requested RPC-stub
-  address `0x004A8040` contains executable game code. These facts do not
-  establish usable scratch memory or safe call semantics, so the in-game toast
-  remains a research candidate; the existing webMAN system notification is a
-  different feature.
+  address `0x004A8040` contains executable game code. Static ELF analysis finds
+  a candidate module TOC at `0x01891798`, but does not establish that these
+  Destiny functions are safe from a PS3MAPI-created thread, that the allocated
+  code will be instruction-cache coherent, or that the toast will appear.
+  Until runtime behavior and allocation cleanup are validated, the in-game
+  toast remains a research candidate; the existing webMAN system notification
+  is a different feature.
 - Trophy unlock calls the same unsupported function-call layer and has no
   source-level readback or restoration. It remains unavailable.
 - Deathsinger's Power appears in
