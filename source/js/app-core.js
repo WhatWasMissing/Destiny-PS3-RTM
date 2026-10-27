@@ -1732,7 +1732,8 @@
     const overlay = document.getElementById('settings-overlay');
     if (!overlay) return;
     const picker = document.getElementById('settings-accent');
-    const current = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    const styles = getComputedStyle(document.documentElement);
+    const current = styles.getPropertyValue('--accent-choice').trim() || styles.getPropertyValue('--accent').trim();
     if (picker && /^#[0-9a-fA-F]{6}$/.test(current)) picker.value = current;
     renderSettingsSections();
     overlay.style.display = 'flex';
@@ -1807,8 +1808,8 @@
     applySectionVisibility();
     renderSettingsSections();
     const picker = document.getElementById('settings-accent');
-    if (typeof setAccent === 'function') setAccent('#4fa3e0');
-    if (picker) picker.value = '#4fa3e0';
+    if (typeof setAccent === 'function') setAccent('#c4b784');
+    if (picker) picker.value = '#c4b784';
     toast('Settings reset', 'ok');
   }
 

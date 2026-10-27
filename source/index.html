@@ -35,16 +35,16 @@
       <div class="debug-login-status" id="debug-login-status"></div>
       <div class="debug-mode-badge" id="debug-mode-badge">DEBUG MODE ACTIVE · WARNING GUIDES BYPASSED</div>
     </div>
-    <div class="welcome-note">Please note this is a WIP bild, expect bugs.</div>
+    <div class="welcome-note">Work in progress. Some features may be incomplete.</div>
   </div>
 </div>
 
 
 <header>
 <svg class="logo-icon" fill="none" viewbox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
-<polygon fill="none" points="18,2 34,10 34,26 18,34 2,26 2,10" stroke="#4fa3e0" stroke-width="1.5"></polygon>
-<polygon fill="none" opacity="0.5" points="18,8 28,13 28,23 18,28 8,23 8,13" stroke="#4fa3e0" stroke-width="1"></polygon>
-<circle cx="18" cy="18" fill="#4fa3e0" r="4"></circle>
+<polygon fill="none" points="18,2 34,10 34,26 18,34 2,26 2,10" stroke="currentColor" stroke-width="1.5"></polygon>
+<polygon fill="none" opacity="0.5" points="18,8 28,13 28,23 18,28 8,23 8,13" stroke="currentColor" stroke-width="1"></polygon>
+<circle cx="18" cy="18" fill="currentColor" r="4"></circle>
 </svg>
 <h1>Destiny<span>ps3 rtm tool</span></h1>
 <div class="status-badge" id="status-badge"
@@ -108,8 +108,8 @@
     <div class="settings-group">
       <div class="settings-group-title">APPEARANCE</div>
       <div class="settings-row">
-        <div><div class="settings-label">Accent colour</div><div class="settings-help">Choose the interface highlight colour.</div></div>
-        <input id="settings-accent" class="settings-color" type="color" value="#4fa3e0" title="Accent colour">
+        <div><div class="settings-label">Accent colour</div><div class="settings-help">Choose a highlight hue; brightness is adjusted for contrast in dark and light modes.</div></div>
+        <input id="settings-accent" class="settings-color" type="color" value="#c4b784" title="Accent colour">
       </div>
 
       <div class="settings-row" style="margin-top:8px;">
@@ -407,8 +407,8 @@
     <p>If a cheat mentions Instance Leader and appears to work differently between sessions, this is likely why. You normally do not need to change anything manually; just be aware that the result can depend on which console currently has that role.</p>
   </div>
 </details>
-<div class="main-conflict-note" style="margin:0.55rem 1rem 0;padding:0.55rem 0.7rem;border:1px solid rgba(201,168,76,0.28);border-radius:8px;background:rgba(201,168,76,0.05);color:var(--muted);font-family:var(--mono);font-size:0.57rem;line-height:1.45;">
-  <strong style="color:var(--gold);">Conflict Detection:</strong> Infinite Power and Unlimited Abilities share a patch; 4× Jump Boost shares a patch address with Unlimited Abilities; Rock Jump and No Pushback Barriers share the same 12 bytes. Enabling a conflicting option disables the active one first.
+<div class="rtm-callout rtm-callout--warning main-conflict-note">
+  <strong>Conflict Detection:</strong> Infinite Power and Unlimited Abilities share a patch; 4× Jump Boost shares a patch address with Unlimited Abilities; Rock Jump and No Pushback Barriers share the same 12 bytes. Enabling a conflicting option disables the active one first.
 </div>
 <div class="cheat-status-legend">
   <b>Status:</b> Off = default/inactive · Applying = change in progress · On = last successful enable · Failed = last action failed.
@@ -644,7 +644,7 @@
 <div class="section-body"><div class="panel">
 <div class="panel-header">Character Name</div>
 
-<div style="margin:0.75rem 1rem 0;padding:0.65rem 0.8rem;border:1px solid rgba(79,163,224,0.30);border-radius:8px;background:rgba(79,163,224,0.06);font-family:var(--mono);font-size:0.60rem;color:var(--muted);line-height:1.5;">
+<div class="rtm-callout rtm-callout--info">
   Read or edit the connected console's character name.
 </div>
 
@@ -711,8 +711,8 @@
 <p class="category-label" onclick="toggleSection('sec-gamespeed')">Gamespeed<svg class="collapse-chevron" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg></p>
 <div class="section-body"><div class="panel">
 <div class="panel-header">Gamespeed</div>
-<div style="margin:0.75rem 1rem 0;padding:0.7rem 0.8rem;border:1px solid rgba(201,168,76,0.38);border-radius:8px;background:rgba(201,168,76,0.07);color:var(--muted);font-family:var(--mono);font-size:0.59rem;line-height:1.5;">
-  <strong style="color:var(--gold);">Load Zone Warning:</strong>
+<div class="rtm-callout rtm-callout--warning">
+  <strong>Load Zone Warning:</strong>
   Modified game speed can interfere with activity/load zones. Reset Game Speed to the normal value before moving through a load zone, then re-apply your preferred speed after the area has finished loading.
 </div>
 <div class="slider-body">
@@ -733,15 +733,15 @@
 <div class="section-body"><div class="panel">
 <div class="panel-header">Custom Damage Multiplier</div>
 
-<div class="tidy-technical" style="margin:0.8rem 1rem 0;padding:0.7rem 0.8rem;border:1px solid rgba(201,168,76,0.38);border-radius:8px;background:rgba(201,168,76,0.07);color:var(--muted);font-family:var(--mono);font-size:0.62rem;line-height:1.55;">
+<div class="rtm-callout rtm-callout--technical">
   Enter the multiplier you want and the RTM will convert it to the 16-bit value used by the existing damage control.
-  <strong style="color:var(--text);">1× = 3F80</strong>,
-  <strong style="color:var(--gold);">10× = 4120</strong>,
-  and <strong style="color:var(--danger);">1000× = 447A</strong>.
+  <strong>1× = <code>3F80</code></strong>,
+  <strong class="callout-warning">10× = <code>4120</code></strong>,
+  and <strong class="callout-danger">1000× = <code>447A</code></strong>.
   Because the game is only being given the upper 16 bits of the float, some decimal values will be rounded slightly.
 </div>
-<div class="tidy-technical" style="margin:0.55rem 1rem 0;padding:0.6rem 0.75rem;border:1px solid rgba(79,163,224,0.3);border-radius:8px;background:rgba(79,163,224,0.06);color:var(--muted);font-family:var(--mono);font-size:0.59rem;line-height:1.5;">
-  <strong style="color:var(--accent);">Conflict Detection:</strong> Custom Damage, One-Hit Enemies and 10× Damage share the same damage value. Enabling one automatically replaces the others.
+<div class="rtm-callout rtm-callout--info">
+  <strong>Conflict Detection:</strong> Custom Damage, One-Hit Enemies and 10× Damage share the same damage value. Enabling one automatically replaces the others.
 </div>
 
 <div class="slider-body">
