@@ -26,37 +26,78 @@ not identify the 01.24 item-list resolver and must not be used as 01.24
 runtime pointers. No 01.24 index-to-name resolver or live list pointer has yet
 been independently located in this RTM work.
 
-## Local package evidence and catalog limits
+## 01.24 package evidence and item names
 
 D1 Reimagined research describes the investment-globals item list as indexed
 definitions and its package parser supports the 01.24 root reference at `+0xE8`
 (the older layout uses `+0xD8`). That parser validates the item-array element
 class and can emit each index, definition tag, bucket, type, and name.
 
-The matching PS3 package files located on this PC are
-`ps3_investment_globals_012c_0.pkg` and
-`ps3_investment_globals_012e_0.pkg` in the BLES base-disc `PS3_GAME/USRDIR/packages`
-directory. Their package headers report patch ID 0 and a 2014 build time. The
-parser produced 3,181 rows from these files, but this is **base-disc package
-output**, not proof that these are the 01.24 item definitions. No matching
-01.24 investment-globals packages were found in the searched Destiny, research,
-download, desktop, and document folders. The external D1 notes also report a
-3,181-entry list, but the 01.24 package set used for that result is not present
-here for independent reproduction.
+The local BLUS base-disc copies of packages `012c_0`, `012e_0`, and `012f_0`
+match the BLES base-package SHA-256 values in D1 Reimagined's
+`data/SHA256SUMS.txt` byte for byte. Their patch ID is 0; parsing only those
+base-disc files yields 3,181 item rows. That is a base-disc count, not the final
+01.24 list length.
+
+The Sony BLES01857 update list includes 01.24. The final item-related package
+files listed by the accompanying 01.24 package inventory were last changed in
+01.23. The non-stale patch chains recovered from those BLES updates are:
+
+| Package family | Final patch files | Update versions |
+| --- | --- | --- |
+| `012c` | `_1`–`_4` | 01.13, 01.20, 01.22, 01.23 |
+| `012e` | `_1`–`_2` | 01.13, 01.20 |
+| `012f` | `_1`–`_4` | 01.13, 01.20, 01.22, 01.23 |
+| `0130` | `_1`–`_4` | 01.13, 01.20, 01.22, 01.23 |
+| `0131` | `_1`–`_4` | 01.13, 01.20, 01.22, 01.23 |
+
+The later `_5` files in these chains are marked stale by the inventory and were
+excluded. Every extracted update entry matched the BLES inventory's exact path
+and byte length, and its Tiger package header matched platform PS3 and the
+filename's patch ID. The files and their SHA-256 provenance are kept outside
+Git under `E:\DestinyResearch\destiny-0124-inventory\`.
+
+With those updates, the BLES 01.24 root's `+0xE8` reference resolves to the
+`0x808033E8` item array in package family `012f`: 6,557 indexes, numbered
+`0`–`6556`. The item definitions and localized string references resolve
+through the final `012f`, `0130`, and `0131` package chains. The item data was
+decoded with the locally available Oodle runtime. For shifted localized text,
+the stored UTF-8 was decoded first and the per-entry shift was then applied to
+each Unicode code point; this recovers accented names such as Häkke, Façade,
+Válka, and Dämmerung.
+
+The resulting local catalog is
+`E:\DestinyResearch\destiny-0124-inventory\BLES01857-01.24-items.tsv`.
+It contains 6,389 named rows with `itemIndex`, `name`, `bucket`, `type`, and
+`tag`; 168 entries with no name in the package data are omitted. Its SHA-256 is
+`82C6588678EBFC24DC897FBBEB861A4D0B6F565487C2E3BB16161916F0DA38D4`. It is
+not included in the executable or Git; the RTM's user-selected catalog importer
+accepts it by the explicit `itemIndex` column. The known 01.24 fixture indexes
+710, 204, 198, 200, 206, 202, and 862 resolve to Striker, Lightmail armour,
+Mark of the Risen, and Generalist Shell respectively.
+
+The local Blackrock preview's `data/inventory/items.tsv` also has 6,557 rows
+with `def` values 0–6556. In a same-position comparison, 6,306 of the 6,389
+named BLES rows have the same name after Unicode normalization, case-folding,
+and trimming outer quotes/whitespace; 6,388 have the same type. This corroborates
+the ordering for this local preview dataset, but differences remain (including
+`Classified` labels). None of the 6,389 compared Blackrock `tag` values equals
+the BLES definition tag at the same position. The RTM catalog therefore remains
+derived directly from BLES 01.24 packages; Blackrock's `hash` and `tag` columns
+are not treated as BLES item indexes.
 
 The RTM's item-catalog importer therefore accepts nonnegative signed-16-bit
 indexes (`0`–`32767`), which matches the index field's numeric representation
-without asserting an unverified 01.24 list length. A user-selected catalog
+and now covers the verified 01.24 item-list range. A user-selected catalog
 still needs to be keyed by `itemIndex` or `blesItemIndex` and contain a name
-column. Do not bundle the base-disc mapping or infer a label by joining
-Blackrock's `def` ordinal with its `hash`/`tag` columns.
+column. Do not bundle game-derived names or infer an item index from a
+Blackrock hash/tag value.
 
-## Next evidence needed
+## Remaining live validation
 
-To build a verified label catalog, obtain the BLES01857 01.24 investment-globals
-package set (at least the package-012c root and package-012e definitions plus
-their required string tables), validate its patch/build identity, then export
-an importer-ready TSV with `itemIndex`, `name`, `bucket`, `type`, and `tag`.
-The current console request timed out while reading the initial compatibility
-signature, before any inventory-specific address was queried. No live 01.24
-item-list pointer or label read has been validated on the PS3.
+This package-derived catalog does not identify a live 01.24 item-list pointer
+or index-to-name resolver in the executable. The last read-only console request
+timed out before the initial compatibility signature, so no item-pool read or
+catalog label has yet been checked against the development PS3. The catalog can
+be imported for live/offline inventory labels once the console connection is
+available; that path still only reads item indexes and does not write memory.

@@ -416,21 +416,26 @@ read-only snapshot; the latter is not an index-to-name resolver. The prior
 addresses came from the 01.00 ELF and do not establish 01.24 lookup addresses.
 No 01.24 item-list pointer has been independently located in this RTM work.
 
-The local package parser produced 3,181 item rows from BLES base-disc packages
-whose headers report patch ID 0. That count is not independently verified for
-01.24; although D1 Reimagined notes report the same count from investment
-packages, the 01.24 package set used for those notes is not present here. The
-RTM does not bundle or infer names from the base-disc mapping. It accepts
-explicitly selected `itemIndex` or `blesItemIndex` catalogs and allows
-nonnegative signed-16-bit indexes without asserting an exact 01.24 list length.
-See `research/inventory-items-0124.md` for package identity and remaining
-verification steps.
+The package audit now resolves the BLES 01.24 `+0xE8` item-list reference to a
+`0x808033E8` array in package family `012f`: 6,557 positions (`0`–`6556`). The
+final non-stale BLES package chains for `012c`, `012e`, `012f`, `0130`, and
+`0131` were reconstructed from the 01.24 update inventory; the relevant files
+were checked against its paths, sizes, and patch IDs. The local `012c_0`,
+`012e_0`, and `012f_0` base files match the research checksums byte for byte.
+The importer-ready 6,389-name TSV is kept outside Git at
+`E:\DestinyResearch\destiny-0124-inventory\BLES01857-01.24-items.tsv` and is
+not bundled. This is a static package result, not a located live list pointer
+or an index-to-name resolver in the executable. The RTM still labels inventory
+only from an explicitly selected `itemIndex` or `blesItemIndex` catalog.
+See `research/inventory-items-0124.md` for package provenance, name decoding,
+the Blackrock cross-check, and live-validation limits.
 
-Blackrock's user-local `data/inventory/items.tsv` has 6,557 rows and fields
-`def`, `hash`, and `tag`. Its `def` ordinal range (0–6556) is not the BLES
-investment index. The app never joins that ordinal or the hash/tag tuple;
-labels are supplied only by a user-selected catalog explicitly keyed by BLES
-item index. Catalog data is not bundled.
+Blackrock's local `data/inventory/items.tsv` has 6,557 rows and sequential
+`def` values 0–6556. Its same-position names and types closely match the direct
+BLES package export, which corroborates the ordering of this preview dataset.
+The rows still contain mismatched/`Classified` names and different tag values,
+so this agreement is not used as a runtime join key; the RTM imports the direct
+BLES catalog by `itemIndex`. Catalog data is not bundled.
 
 The offline character-payload viewer labels equipped positions only at the
 17 starts resolved by the BLES 01.24 bucket-range and equipped-slot tables:
