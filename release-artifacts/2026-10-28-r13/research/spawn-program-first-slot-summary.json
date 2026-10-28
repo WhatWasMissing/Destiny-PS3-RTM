@@ -1,0 +1,49 @@
+{
+  "source_events": "spawn-program-candidate.jsonl",
+  "base_address": "0x183e400",
+  "word_count": 727,
+  "byte_count": 2908,
+  "max_program_bytes": 3072,
+  "fixup_count": 149,
+  "local_label_count": 50,
+  "sha256": "3b4a46a3aa4246709d99c8e71a643dabdea134f5f387498d1cd375da0885fb76",
+  "endianness": "big",
+  "direct_target_fixups": [
+    {
+      "line": 1437,
+      "op": "FUN_14030b530",
+      "site_word": 553,
+      "target": 1305912,
+      "delta": -24117100,
+      "width": 26,
+      "word": "0x4a900095"
+    },
+    {
+      "line": 1493,
+      "op": "FUN_14030b530",
+      "site_word": 604,
+      "target": 2536932,
+      "delta": -22886284,
+      "width": 26,
+      "word": "0x4aa2c875"
+    },
+    {
+      "line": 1565,
+      "op": "FUN_1402ce0c0",
+      "site_word": 643,
+      "target": "0x26b398",
+      "delta": -22887028,
+      "width": 26,
+      "word": "0x4aa2c58d"
+    },
+    {
+      "line": 1583,
+      "op": "FUN_1402ce0c0",
+      "site_word": 646,
+      "target": "0x26b448",
+      "delta": -22886864,
+      "width": 26,
+      "word": "0x4aa2c631"
+    }
+  ]
+}

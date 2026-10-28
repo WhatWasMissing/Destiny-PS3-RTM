@@ -70,6 +70,33 @@
     return rows;
   }
 
+  function decodeCharacterBuffer(buffer) {
+    if (!buffer || typeof buffer.byteLength !== 'number' || buffer.byteLength !== CHARACTER_FILE_BYTES) {
+      throw new Error(`Expected exactly ${CHARACTER_FILE_BYTES.toLocaleString()} bytes for a BLES 01.24 character payload.`);
+    }
+    validateWirePayload(buffer, CHARACTER_TYPE_HASH, CHARACTER_BODY_BYTES);
+    return decodeRows(buffer, QZ_HEADER_BYTES + CHARACTER_INVENTORY_OFFSET, INVENTORY_ROWS_OFFSET, CHARACTER_SLOT_COUNT);
+  }
+
+  function compareCharacterRows(beforeRows, afterRows) {
+    const beforeBySlot = new Map(beforeRows.map(row => [row.slot, row]));
+    const afterBySlot = new Map(afterRows.map(row => [row.slot, row]));
+    const slots = [...new Set([...beforeBySlot.keys(), ...afterBySlot.keys()])].sort((a, b) => a - b);
+    const changes = [];
+    let unchangedCount = 0;
+
+    for (const slot of slots) {
+      const before = beforeBySlot.get(slot) || null;
+      const after = afterBySlot.get(slot) || null;
+      if (!before) changes.push({ slot, change: 'Added', before: null, after });
+      else if (!after) changes.push({ slot, change: 'Removed', before, after: null });
+      else if (before.itemIndex !== after.itemIndex) changes.push({ slot, change: 'Changed', before, after });
+      else unchangedCount++;
+    }
+
+    return { changes, unchangedCount };
+  }
+
   function clearRows(target) {
     target.replaceChildren();
     target.hidden = true;
@@ -213,11 +240,12 @@
     byId('offline-account-load').addEventListener('click', () => loadPayload('account'));
     byId('offline-inventory-clear').addEventListener('click', clearViewer);
     window.addEventListener('rtm-local-item-catalogs-changed', () => {
-      if (lastCharacterRows) renderRows(byId('offline-character-rows'), lastCharacterRows, 'No populated character inventory slots in this payload.');
+      if (lastCharacterRows) renderRows(byId('offline-character-rows'), lastCharacterRows, 'No populated character inventory slots in this payload.', true);
       if (lastAccountRows) renderRows(byId('offline-vault-candidate-rows'), lastAccountRows, 'No nonzero item-instance fields were found in this candidate block.');
     });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialize, { once: true });
   else initialize();
+  window.rtmOfflineInventorySnapshot = Object.freeze({ characterFileBytes: CHARACTER_FILE_BYTES, decodeCharacterBuffer, compareCharacterRows });
 })();

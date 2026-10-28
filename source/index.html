@@ -1357,6 +1357,26 @@
           <div class="offline-inventory-table-wrap" id="offline-vault-candidate-rows" aria-label="Unverified vault-like candidate slots and optional catalog names" hidden></div>
         </div>
       </div>
+      <div class="offline-inventory-comparison" id="offline-inventory-comparison">
+        <div class="offline-inventory-comparison-heading">
+          <strong>Compare character snapshots</strong>
+          <span>Spot slot and item-index changes between two BLES 01.24 files.</span>
+        </div>
+        <div class="offline-inventory-comparison-inputs">
+          <label class="local-catalog-control" for="offline-inventory-before-file">
+            Before snapshot · 28,104 bytes
+            <input id="offline-inventory-before-file" type="file" accept=".bin,.dat,application/octet-stream" />
+          </label>
+          <label class="local-catalog-control" for="offline-inventory-after-file">
+            After snapshot · 28,104 bytes
+            <input id="offline-inventory-after-file" type="file" accept=".bin,.dat,application/octet-stream" />
+          </label>
+        </div>
+        <button class="cheat-btn" id="offline-inventory-compare" type="button">Compare snapshots</button>
+        <p class="local-catalog-status" id="offline-inventory-diff-status" role="status" aria-live="polite">No comparison loaded.</p>
+        <div class="offline-inventory-table-wrap" id="offline-inventory-diff-rows" aria-label="Changed character inventory slots by item index" hidden></div>
+        <p class="offline-inventory-comparison-note">Comparison uses occupied slot and item index only. It cannot detect a different item instance with the same index; identifiers and owner fields remain hidden.</p>
+      </div>
       <div class="local-catalog-actions">
         <button class="cheat-btn" id="offline-inventory-clear" type="button">Clear decoded rows</button>
         <span class="local-catalog-limits">Exact QZ header and file size required · big-endian · slot and item index only</span>
@@ -1715,3 +1735,4 @@
 <script src="js/overwalls-tools.js"></script>
 <script src="js/local-catalogs.js"></script>
 <script src="js/offline-inventory-snapshot.js"></script>
+<script src="js/offline-inventory-comparison.js"></script>

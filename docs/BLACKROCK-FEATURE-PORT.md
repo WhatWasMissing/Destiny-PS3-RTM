@@ -24,6 +24,7 @@ memory features still use BLES evidence and the RTM's verified runtime profile.
 | Actor lookup descriptor probe | `source/js/actor-lookup-descriptor-probe.js` | Verifies the five-anchor BLES profile and an exact 64-byte actor-path signature at `0x00255FA8`, then reads/rechecks only the 20-byte descriptor at `0x01A1E160`. Shows its raw leading words, storage pointer, stride, and capacity; checks active dimensions against capacity 40 and stride `0x28D0`; never follows storage. It accepts only the address spans used by Blackrock's recovered host reader. See [ADDRESS-AUDIT.md](ADDRESS-AUDIT.md#bles-0124-actor-lookup-descriptor-path) and [the reproducible PPC evidence](../research/actor-pool-descriptor.md). |
 | Allocated actor-candidate snapshot | `internal/rtmclient/actor_pool.go`, CLI `rtmctl actor-candidates`, MCP `rtm_read_allocated_actor_candidates` | Verifies the five-anchor BLES profile plus exact datum/allocator and `+0x226C` caller/resolver signatures, requires a stable non-null player pointer, follows the `0x34`-byte descriptor → allocator header → bitmap descriptor → bitmap words, and reads at most 40 allocated slots. Preserves the full reconstructed datum and selected raw fields from each first `0x48` bytes. Samples/rechecks the raw nested handle and reports decoded bucket/slot arithmetic but never follows it. Remains sequential/non-atomic; it identifies allocated candidates, not enemies or spawnable tags. The `+0x30` word is a unit-datum candidate; `+0x24/+0x28` are opaque, and `+0x40/+0x44` are raw member-owner fields. It does not inspect the separate cleanup bitmap. |
 | Offline inventory snapshot viewer | `source/js/offline-inventory-snapshot.js` | Reads explicitly selected BLES 01.24 QZ payload files (28,104-byte character or 28,768-byte account). It validates the big-endian type hash (`EB4B8439` character; `B5DF2907` account) and body size, then shows character slot and item index, with optional name, bucket, and type labels from a matching user-imported BLES-indexed catalog. Header SOID bytes are skipped; row instance IDs are reduced to a transient empty/nonempty check and never surfaced or persisted. Account +0x4C0 appears only as an unverified vault-like candidate. No live memory, writes, actions, network, or persistence. |
+| Offline inventory comparison | `source/js/offline-inventory-comparison.js` | Compares two explicitly selected character QZ payloads by slot and item index, and reports added, removed, and changed rows. Instance and owner identifiers remain hidden; a different instance with the same item index is indistinguishable. This is a read-only before/after aid, not inventory mutation. |
 | Verified equipped-position labels | `source/js/offline-inventory-snapshot.js` | Labels only the 17 BLES 01.24 equipped inventory starts proven by the bucket-range and equipped-slot tables. Nine have known subclass/armour/weapon names; the other eight remain numbered. Every non-start row keeps its numeric inventory slot. |
 | Local catalog browser | `source/js/local-catalogs.js` | Imports user-selected CSV, TSV, JSON, and text catalogs in page memory, with per-file, total-size, and row caps. Supports activity, spawn/hop-on, item/loot, and world-data categories. Spawn rows preserve a bounded numeric `type` as unverified metadata; selecting a row copies its tag, and a separate explicit action can copy that number to the experimental expected-type guard. The catalog-to-BLES guard mapping remains unverified. Inventory labels use an explicitly BLES-indexed `itemIndex` or `blesItemIndex` column only. The Blackrock `def` ordinal and unverified `hash`/`tag` joins are ignored. No catalog data or executable code is bundled. |
 
@@ -61,6 +62,10 @@ additional spawn actions; broad inventory/vault editing; loot-event and Grimoire
 faction matrices; world mutations and hooks; component/facet/effect probes;
 and broader player/loadout/stat inspection. Blackrock's package data does not
 prove these features' addresses or layouts apply to BLES01857.
+
+The offline inventory comparison improves snapshot review but does not close
+the live inventory mutation gap. No BLES 01.24 item-action handler, transaction
+format, or persistence/readback path has been verified.
 
 The hash-matched BLES ELF now confirms Blackrock's `actors` descriptor at
 `0x01A1E160` as `AI Actor Manager + 0x10`, initialized with capacity 40 and
@@ -410,12 +415,13 @@ also identify account/character profiles and SOIDs. The traced inventory
 snapshot path sends PS3MAPI `MEMORY GET` commands containing address/length;
 the returned profile bytes are received into a separate local buffer and
 formatted for the UI. No SOID bytes were found in that path's send payload.
-The traced item-action path sends `MEMORY SET` requests and its raw action
-buffer to the configured console through PS3MAPI. A 1,706-function direct-call
-sweep from the Vault callbacks and action backend found no direct path to the
-BAP endpoint initializer or SOID diagnostics UI. Indirect dispatch is not fully
-resolved, so this is not a binary-wide network audit. The account/vault editor
-is still unported. The live item-pool snapshot reports only cached item indexes;
+Blackrock also contains a generic PS3MAPI `MEMORY SET` writer, but the current
+static trace has not connected the inventory request callback or its native
+route record to that writer. The action's final transport and request bytes
+remain unresolved. A 1,706-function direct-call sweep from the Vault callbacks
+and action backend found no direct path to the BAP endpoint initializer or
+SOID diagnostics UI. Indirect dispatch is not fully resolved, so this is not a
+binary-wide network audit. The account/vault editor is still unported. The live item-pool snapshot reports only cached item indexes;
 it does not map records to the active character, modify items, or prove vault
 ownership. The offline viewer handles explicit serialized 01.24 wire payloads
 and labels the account vault-like block as unverified. Blackrock's host-side

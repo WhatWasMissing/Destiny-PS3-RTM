@@ -19,8 +19,41 @@ selected-item location and transfer/equip constraints, and its transfer route
 builds item-specific request state through `FUN_140353b60`. The host callback
 in `FUN_1400e5190` is identified as
 `brps3::invui::...::runRequest(Ctx&, inventory::ActionRequest const&)`; the
-available static dump shows confirmation and a refreshed inventory read. It
-does not expose the complete PS3 request bytes or a resolved BLES call target.
+function at `0x1400E5190` writes a `[inventory]` status/log line, calls request
+interface virtual methods, and uses `Inventory confirm` before a fresh
+inventory read. Its false-predicate branch schedules a closure through
+`FUN_1400191E0`, which copies closures into a local ring-buffer task queue and
+signals the queue. This establishes local deferred work, not the final action
+transport.
+
+`FUN_140353B60` constructs a native route/restriction record of about `0x34`
+bytes. Its two direct callers use the fields for local route/UI validation;
+the record is not serialized by this helper. A separate generic PS3MAPI
+`MEMORY SET %u %X` command string at VA `0x140586D80` is referenced by the
+writer `FUN_140449280` (`0x140449280`–`0x14044990D`), which calls transport
+helper `FUN_140448D80` at `0x140449500`. The writer's two direct callers are
+`FUN_1402C9740` and `FUN_1402C9B80`. Static tracing has not linked
+`runRequest`, its queued callback, or the `0x34` route record to those write
+wrappers. The inventory action's ultimate transport and action bytes therefore
+remain unresolved.
+
+## Separate documented Bungie API route
+
+Bungie's D1 API documentation separately lists signed-in `POST /TransferItem/`
+and `POST /EquipItem/` operations with the `MoveEquipDestinyItems` scope. The
+documented transfer body contains `itemReferenceHash`, `itemId`, `characterId`,
+`membershipType`, `stackSize`, and `transferToVault`. This is an alternate
+official API route, not evidence about Blackrock's callback path or a PS3
+memory handler. The D1 Companion stopped exposing most character data in 2017;
+Bungie's legacy-support page says the third-party API continued, subject to
+availability. Practical account access and action support still need a
+user-authorized OAuth/API-key check. The RTM does not use extracted Bungie
+cookies or store credentials.
+
+Sources: [Bungie D1 API endpoint reference](https://www.bungie.net/d1/platform/Destiny/help/),
+[D1 TransferItem request details](https://www.bungie.net/d1/platform/Destiny/help/HelpDetail/POST?uri=TransferItem%2F),
+[D1 EquipItem reference](https://www.bungie.net/d1/platform/Destiny/help/HelpDetail/POST?uri=EquipItem%2F),
+[Bungie Legacy Support for Destiny 1 FAQ](https://help.bungie.net/hc/en-us/articles/360049199871-Legacy-Support-for-Destiny-1-FAQ).
 
 The audit report lives outside this repository at
 `E:\DestinyResearch\BlackrockAudit\inventory-mutators.txt`. These findings
