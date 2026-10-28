@@ -16,6 +16,7 @@ memory features still use BLES evidence and the RTM's verified runtime profile.
 | Activity pool diagnostics | Included in the session snapshot | BLES 01.24 initializer evidence supplies the three descriptor addresses, labels, element sizes, and capacities. `0x01A20B70` and `0x01A20BF0` are raw-only; only `0x01A20C70` has resolver-backed field labels. The feature does not traverse pool storage beyond the guarded context-handle resolver. |
 | Local player appearance probe | `source/js/player-appearance-probe.js` | Uses the BLES 01.24 player-pool header and sparse bitmap, requires stride `0x2930`, caps scans at 64 slots, matches the local descriptor transiently, rechecks all captured bitmap words, and returns two short raw windows only for one stable match. It never displays owner bytes and performs no writes. |
 | Live item-object pool snapshot | `source/js/live-inventory-pool.js` | Requires the 5-anchor profile plus exact BLES 01.24 manager-getter and pool-lookup signatures. It validates the self-family kind-3 descriptor (`0x80801732`, stride `0xA8`, signed count 1–646), applies conservative Blackrock-derived range ceilings, reads in 18-chunk batches under fresh session capabilities, then rechecks the descriptor and boundary rows. It extracts the raw item index at object `+0x24`. An explicitly BLES-indexed user catalog can add name, bucket, and type labels; the pool lookup at `0x0047E3CC` is by family and instance ID, not item index. No 01.24 index-to-name resolver or live item-list pointer is established. Read-only and explicitly non-atomic. |
+| Live item-pool comparison | `source/js/live-inventory-pool.js` | Keeps the latest two complete samples in page memory and compares only pool slot plus item index. Comparison is enabled only when the RTM session token, manager/descriptor, pool address, and size match. SOIDs and owners are never returned or displayed. Samples remain sequential/non-atomic; same-index replacement, ownership, transfer, and persistence cannot be distinguished or proven. |
 | Spawn-path code check | `source/js/spawn-path-check.js` | Compares three BLES 01.24 authored-member signatures, Blackrock's confirmed `0x354074` hook-site instruction, the object-creation entry and manager-registration continuation at `0x13ED38` / `0x13ED90`, and the main ELFv1 descriptor/TOC. This identifies matching code only; it does not verify a selected tag's live class, prove descriptor/placement behavior, or execute the path. |
 | Spawn executor region preflight | `source/js/spawn-region-preflight.js` | Reads the exact zero-only bootstrap ranges (`0x183E000/0x2000`, `0x1C74000/0xC000`, `0x183D200/0xE00`) behind fresh BLES 01.24 capabilities. Logical reads are split into PS3MAPI GETMEM requests no larger than `0x100` bytes. It does not reserve the memory, install the hook, or prove the regions stay free. |
 | Reconstructed spawn images | `source/js/spawn-executor-images.js` | Embeds the audited 2,908-byte spawn program and 292-byte bootstrap as immutable image factories. SHA-256 and byte-for-byte checks compare them with the generated research binaries. |
@@ -63,9 +64,9 @@ faction matrices; world mutations and hooks; component/facet/effect probes;
 and broader player/loadout/stat inspection. Blackrock's package data does not
 prove these features' addresses or layouts apply to BLES01857.
 
-The offline inventory comparison improves snapshot review but does not close
-the live inventory mutation gap. No BLES 01.24 item-action handler, transaction
-format, or persistence/readback path has been verified.
+The live and offline inventory comparisons improve before/after snapshot review
+but do not close the inventory mutation gap. No BLES 01.24 item-action handler,
+transaction format, or persistence/readback path has been verified.
 
 The hash-matched BLES ELF now confirms Blackrock's `actors` descriptor at
 `0x01A1E160` as `AI Actor Manager + 0x10`, initialized with capacity 40 and

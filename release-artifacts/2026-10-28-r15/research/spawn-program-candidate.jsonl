@@ -1,0 +1,734 @@
+{"line":574,"op":"FUN_1402d20a0","args":[1152,[2,25,28,29,30,31]],"kind":"words9","provenance":"SpawnInit.c:574 direct call; frame size 0x480; saved GPR list recovered from DAT_140657f88 initialized by ctor at 0x140004aa3"}
+{"line":575,"op":"FUN_14030dc40","args":[12,3],"kind":"word","provenance":"SpawnInit.c:575 direct operands"}
+{"line":576,"op":"FUN_1402d1ad0","args":[11,15],"kind":"word","provenance":"SpawnInit.c:576 direct operands"}
+{"line":577,"op":"FUN_1403cb810","args":["chk"],"kind":"fixup","provenance":"SpawnInit.c:577; DAT_14057fd50 decoded as chk","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":578,"op":"FUN_1402cdec0","args":["ret"],"kind":"fixup","provenance":"SpawnInit.c:578 direct label","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":579,"op":"FUN_14030dc40","args":[31,12],"kind":"word","provenance":"SpawnInit.c:579 direct operands"}
+{"line":580,"op":"FUN_1402d1f50","args":[0,0,31],"kind":"word","provenance":"SpawnInit.c:580 direct operands","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":581,"op":"FUN_1402d1ec0","args":[12,1112687409],"kind":"words2","provenance":"SpawnInit.c:581 literal 0x42524331 (decimal 1112687409)"}
+{"line":582,"op":"FUN_14035d820","args":[0,12],"kind":"word","provenance":"SpawnInit.c:582 direct operands"}
+{"line":583,"op":"FUN_1402cdfc0","args":["ret"],"kind":"fixup","provenance":"SpawnInit.c:583 direct label","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":584,"op":"FUN_1402d1f50","args":[0,4,31],"kind":"word","provenance":"SpawnInit.c:584 direct operands","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":585,"op":"FUN_1402cfd50","args":[0,1],"kind":"word","provenance":"SpawnInit.c:585 direct operands"}
+{"line":586,"op":"FUN_1402cdfc0","args":["ret"],"kind":"fixup","provenance":"SpawnInit.c:586 direct label","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":587,"op":"FUN_1402d1f50","args":[12,8,31],"kind":"word","provenance":"SpawnInit.c:587 direct operands","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":588,"op":"FUN_1402cc150","args":[12,12,1],"kind":"word","provenance":"SpawnInit.c:588 direct operands"}
+{"line":589,"op":"FUN_1402d45d0","args":[12,8,31],"kind":"word","provenance":"SpawnInit.c:589 direct operands","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":590,"op":"FUN_1402d1ad0","args":[25,8],"kind":"word","provenance":"SpawnInit.c:590 direct operands"}
+{"line":591,"op":"FUN_1402cc150","args":[30,31,336],"kind":"word","provenance":"SpawnInit.c:591 direct operands"}
+{"line":592,"op":"FUN_1402d1ad0","args":[29,8],"kind":"word","provenance":"SpawnInit.c:592 direct operands"}
+{"line":594,"op":"label_mark","args":["slot"],"kind":"label","provenance":"SpawnInit.c:594 local label; name resolved from source and PE label references"}
+{"line":595,"op":"FUN_1402d1f50","args":[0,0,30],"kind":"word","provenance":"SpawnInit.c:595 direct operands","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":596,"op":"FUN_1402cfd50","args":[0,2],"kind":"word","provenance":"SpawnInit.c:596 direct operands"}
+{"line":597,"op":"FUN_1402cdec0","args":["step"],"kind":"fixup","provenance":"SpawnInit.c:597 direct label","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":600,"op":"FUN_1402cdfc0","args":["next"],"kind":"fixup","provenance":"SpawnInit.c:600 direct label","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":601,"op":"FUN_14037d810","args":[0,0,30],"kind":"word","provenance":"SpawnInit.c:601 direct operands","encoder":"XO-form base 0x7c000028"}
+{"line":602,"op":"FUN_1402cfd50","args":[0,1],"kind":"word","provenance":"SpawnInit.c:602 direct operands"}
+{"line":603,"op":"FUN_1402cdfc0","args":["next"],"kind":"fixup","provenance":"SpawnInit.c:603 direct label","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":604,"op":"FUN_1402d1ad0","args":[0,2],"kind":"word","provenance":"SpawnInit.c:604 direct operands"}
+{"line":605,"op":"FUN_1403800b0","args":[0,0,30],"kind":"word","provenance":"SpawnInit.c:605 direct operands","encoder":"XO-form base 0x7c00012d"}
+{"line":606,"op":"FUN_1402cdfc0","args":["next"],"kind":"fixup","provenance":"SpawnInit.c:606 direct label","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":608,"op":"label_mark","args":["step"],"kind":"label","provenance":"SpawnInit.c:608 local label; name resolved from source and PE label references"}
+{"line":609,"op":"FUN_1402d1f50","args":[12,28,30],"kind":"word","provenance":"SpawnInit.c:609 direct operands","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":610,"op":"FUN_1402cc150","args":[12,12,1],"kind":"word","provenance":"SpawnInit.c:610 direct operands"}
+{"line":611,"op":"FUN_1402d45d0","args":[12,28,30],"kind":"word","provenance":"SpawnInit.c:611 direct operands","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":613,"op":"FUN_1402d1f50","args":[0,16,30],"kind":"word","provenance":"SpawnInit.c:613 direct operands","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":614,"op":"FUN_1402cfd50","args":[0,0],"kind":"word","provenance":"SpawnInit.c:614 direct operands"}
+{"line":615,"op":"FUN_1402d1ad0","args":[3,1],"kind":"word","provenance":"SpawnInit.c:615 direct operands"}
+{"line":616,"op":"FUN_1402cdfc0","args":["finish_done"],"kind":"fixup","provenance":"SpawnInit.c:616 direct label","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":617,"op":"FUN_1402d1f50","args":[0,4,30],"kind":"word","provenance":"SpawnInit.c:617 direct operands","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":618,"op":"FUN_1402cfd50","args":[0,1],"kind":"word","provenance":"SpawnInit.c:618 direct operands"}
+{"line":619,"op":"FUN_1402cdec0","args":["spawn"],"kind":"fixup","provenance":"SpawnInit.c:619 direct label","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":620,"op":"FUN_1402cfd50","args":[0,2],"kind":"word","provenance":"SpawnInit.c:620 direct operands"}
+{"line":621,"op":"FUN_1402cdec0","args":["loot_event"],"kind":"fixup","provenance":"SpawnInit.c:621 direct label","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":623,"op":"label_mark","args":["bad_args"],"kind":"label","provenance":"SpawnInit.c:623 local label; name resolved from source and PE label references"}
+{"line":624,"op":"FUN_1402d1ad0","args":[3,2],"kind":"word","provenance":"SpawnInit.c:624 direct operands"}
+{"line":627,"op":"label_mark","args":["refuse"],"kind":"label","provenance":"SpawnInit.c:627 local label; name resolved from source and PE label references"}
+{"line":628,"op":"FUN_1402d1f50","args":[0,20,30],"kind":"word","provenance":"SpawnInit.c:628 direct operands","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":629,"op":"FUN_1402cfd50","args":[0,0],"kind":"word","provenance":"SpawnInit.c:629 direct operands"}
+{"line":630,"op":"FUN_1402cdfc0","args":["finish_done"],"kind":"fixup","provenance":"SpawnInit.c:630 direct label","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":632,"op":"FUN_1402d1ad0","args":[0,4],"kind":"word","provenance":"SpawnInit.c:632 direct operands"}
+{"line":633,"op":"FUN_14030b430","args":["finish"],"kind":"fixup","provenance":"SpawnInit.c:633 direct label","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":635,"op":"label_mark","args":["complete"],"kind":"label","provenance":"SpawnInit.c:635 local label; name resolved from source and PE label references"}
+{"line":636,"op":"FUN_1402d1ad0","args":[3,0],"kind":"word","provenance":"SpawnInit.c:636 direct operands"}
+{"line":639,"op":"label_mark","args":["finish_done"],"kind":"label","provenance":"SpawnInit.c:639 local label; name resolved from source and PE label references"}
+{"line":640,"op":"FUN_1402d1ad0","args":[0,3],"kind":"word","provenance":"SpawnInit.c:640 direct operands"}
+{"line":643,"op":"label_mark","args":["finish"],"kind":"label","provenance":"SpawnInit.c:643 local label; name resolved from source and PE label references"}
+{"line":644,"op":"FUN_1402d45d0","args":[3,12,30],"kind":"word","provenance":"SpawnInit.c:644 direct operands","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":645,"op":"FUN_1403cf2c0","args":[],"kind":"word","provenance":"SpawnInit.c:645 helper appends 0x7c2004ac"}
+{"line":646,"op":"FUN_1402d45d0","args":[0,0,30],"kind":"word","provenance":"SpawnInit.c:646 direct operands","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":649,"op":"label_mark","args":["next"],"kind":"label","provenance":"SpawnInit.c:649 local label; name resolved from source and PE label references"}
+{"line":650,"op":"FUN_1402cc150","args":[30,30,880],"kind":"word","provenance":"SpawnInit.c:650 direct operands"}
+{"line":651,"op":"FUN_1402cc150","args":[29,29,-1],"kind":"word","provenance":"SpawnInit.c:651 signed immediate"}
+{"line":652,"op":"FUN_1402cfd50","args":[29,0],"kind":"word","provenance":"SpawnInit.c:652 direct operands"}
+{"line":653,"op":"FUN_1402cdfc0","args":["slot"],"kind":"fixup","provenance":"SpawnInit.c:653 direct label","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":656,"op":"label_mark","args":["ret"],"kind":"label","provenance":"SpawnInit.c:656 local label; name resolved from source and PE label references"}
+{"line":658,"op":"FUN_1402cff40","args":[1152,[2,25,28,29,30,31]],"kind":"words9","provenance":"SpawnInit.c:658 direct call; frame size 0x480; restores saved GPR list from DAT_140657f88"}
+{"line":659,"op":"FUN_1402fa0e0","args":[],"kind":"word","provenance":"SpawnInit.c:659 emits 0x4e800020"}
+{"line":661,"op":"label_mark","args":["spawn"],"kind":"label","provenance":"SpawnInit.c:660 assigns static label text \"spawn\"; line 661 marks current code position"}
+{"line":663,"op":"FUN_1402d1f50","args":[12,156,30],"kind":"word","provenance":"SpawnInit.c:663 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":664,"op":"FUN_1402cc150","args":[12,12,-1],"kind":"word","provenance":"SpawnInit.c:664 decompiler operands; builder/context pointer omitted"}
+{"line":665,"op":"FUN_1403832b0","args":[12,31],"kind":"word","provenance":"SpawnInit.c:665 decompiler operands; builder/context pointer omitted"}
+{"line":666,"op":"FUN_1403c4c90","args":["bad_args"],"kind":"fixup","provenance":"SpawnInit.c:666 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":667,"op":"FUN_1402d1f50","args":[12,148,30],"kind":"word","provenance":"SpawnInit.c:667 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":668,"op":"FUN_1403832b0","args":[12,2],"kind":"word","provenance":"SpawnInit.c:668 decompiler operands; builder/context pointer omitted"}
+{"line":669,"op":"FUN_1403c4c90","args":["bad_args"],"kind":"fixup","provenance":"SpawnInit.c:669 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":670,"op":"FUN_1402d1f50","args":[12,152,30],"kind":"word","provenance":"SpawnInit.c:670 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":671,"op":"FUN_1403832b0","args":[12,2],"kind":"word","provenance":"SpawnInit.c:671 decompiler operands; builder/context pointer omitted"}
+{"line":672,"op":"FUN_1403c4c90","args":["bad_args"],"kind":"fixup","provenance":"SpawnInit.c:672 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":673,"op":"FUN_1402d1f50","args":[12,160,30],"kind":"word","provenance":"SpawnInit.c:673 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":674,"op":"FUN_1403832b0","args":[12,1],"kind":"word","provenance":"SpawnInit.c:674 decompiler operands; builder/context pointer omitted"}
+{"line":675,"op":"FUN_1403c4c90","args":["bad_args"],"kind":"fixup","provenance":"SpawnInit.c:675 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":677,"op":"label_mark","args":["spawn_point"],"kind":"label","provenance":"SpawnInit.c:677 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":678,"op":"FUN_1402cfd50","args":[25,0],"kind":"word","provenance":"SpawnInit.c:678 decompiler operands; builder/context pointer omitted"}
+{"line":679,"op":"FUN_1403c4d90","args":["next"],"kind":"fixup","provenance":"SpawnInit.c:679 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":681,"op":"FUN_1402d1f50","args":[28,20,30],"kind":"word","provenance":"SpawnInit.c:681 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":682,"op":"FUN_140435750","args":[3],"kind":"word","provenance":"SpawnInit.c:682 decompiler operands; builder/context pointer omitted"}
+{"line":683,"op":"FUN_1402d1f50","args":[5,144,30],"kind":"word","provenance":"SpawnInit.c:683 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":684,"op":"FUN_1402cfd50","args":[5,0],"kind":"word","provenance":"SpawnInit.c:684 decompiler operands; builder/context pointer omitted"}
+{"line":685,"op":"FUN_140382b00","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:685 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":686,"op":"FUN_140362de0","args":[6,5,19,18,31],"kind":"word","provenance":"PE callsite 0x14043815a: arg4=0x12 and stack arg5=0x1f"}
+{"line":687,"op":"FUN_1403832b0","args":[6,1024],"kind":"word","provenance":"SpawnInit.c:687 decompiler operands; builder/context pointer omitted"}
+{"line":688,"op":"FUN_1403c4e90","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:688 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":689,"op":"FUN_140435750","args":[4],"kind":"word","provenance":"SpawnInit.c:689 decompiler operands; builder/context pointer omitted"}
+{"line":691,"op":"FUN_1402d1e70","args":[7,418],"kind":"word","provenance":"FUN_1404356a0(0x1a1d9e0) computes 0x1a2: upper half 0x1a1 plus bit 15 set"}
+{"line":693,"op":"FUN_1402d1f50","args":[9,-9748,7],"kind":"word","provenance":"PE callsite 0x1404381d4: FUN_140435680 yields RAX=-0x2620; LEA R8,[RAX+0xc] => -0x2614","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":694,"op":"FUN_1403832b0","args":[9,192],"kind":"word","provenance":"SpawnInit.c:694 decompiler operands; builder/context pointer omitted"}
+{"line":695,"op":"FUN_1402cdfc0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:695 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":696,"op":"FUN_1402d1f50","args":[10,-9744,7],"kind":"word","provenance":"PE callsite 0x14043820f: RAX=-0x2620; LEA R8,[RAX+0x10] => -0x2610","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":697,"op":"FUN_1402cc150","args":[12,10,-1],"kind":"word","provenance":"SpawnInit.c:697 decompiler operands; builder/context pointer omitted"}
+{"line":698,"op":"FUN_1403832b0","args":[12,65535],"kind":"word","provenance":"SpawnInit.c:698 decompiler operands; builder/context pointer omitted"}
+{"line":699,"op":"FUN_1403c4c90","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:699 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":700,"op":"FUN_1402d1f50","args":[12,-9752,7],"kind":"word","provenance":"PE callsite 0x140438264: RAX=-0x2620; LEA R8,[RAX+8] => -0x2618","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":701,"op":"FUN_1403cb810","args":["chk3"],"kind":"fixup","provenance":"SpawnInit.c:701 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":702,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:702 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":703,"op":"FUN_1403c71a0","args":[10,10,192],"kind":"word","provenance":"SpawnInit.c:703 decompiler operands; builder/context pointer omitted"}
+{"line":704,"op":"FUN_1403618d0","args":[12,12,10],"kind":"word","provenance":"SpawnInit.c:704 decompiler operands; builder/context pointer omitted"}
+{"line":705,"op":"FUN_1402cc150","args":[12,12,-4],"kind":"word","provenance":"SpawnInit.c:705 decompiler operands; builder/context pointer omitted"}
+{"line":706,"op":"FUN_1403cb810","args":["chk3"],"kind":"fixup","provenance":"SpawnInit.c:706 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":707,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:707 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":708,"op":"FUN_140435750","args":[5],"kind":"word","provenance":"SpawnInit.c:708 decompiler operands; builder/context pointer omitted"}
+{"line":709,"op":"FUN_1404356c0","args":[12,27384276],"kind":"words2","provenance":"SpawnInit.c:709 decompiler operands; builder/context pointer omitted"}
+{"line":710,"op":"FUN_1403cb810","args":["chk3"],"kind":"fixup","provenance":"SpawnInit.c:710 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":711,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:711 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":712,"op":"FUN_1402cc150","args":[12,12,964],"kind":"word","provenance":"SpawnInit.c:712 decompiler operands; builder/context pointer omitted"}
+{"line":713,"op":"FUN_1403cb810","args":["chk3"],"kind":"fixup","provenance":"SpawnInit.c:713 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":714,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:714 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":715,"op":"FUN_140435750","args":[6],"kind":"word","provenance":"SpawnInit.c:715 decompiler operands; builder/context pointer omitted"}
+{"line":716,"op":"FUN_1402d1f50","args":[0,0,12],"kind":"word","provenance":"SpawnInit.c:716 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":717,"op":"FUN_1402d45d0","args":[0,40,30],"kind":"word","provenance":"SpawnInit.c:717 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":718,"op":"FUN_1403832b0","args":[0,4],"kind":"word","provenance":"SpawnInit.c:718 decompiler operands; builder/context pointer omitted"}
+{"line":719,"op":"FUN_1403c4c90","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:719 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":720,"op":"FUN_140435750","args":[7],"kind":"word","provenance":"SpawnInit.c:720 decompiler operands; builder/context pointer omitted"}
+{"line":721,"op":"FUN_1404356c0","args":[12,25783632],"kind":"words2","provenance":"SpawnInit.c:721 decompiler operands; builder/context pointer omitted"}
+{"line":722,"op":"FUN_1402d45d0","args":[12,40,30],"kind":"word","provenance":"SpawnInit.c:722 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":723,"op":"FUN_1403cb810","args":["chk3"],"kind":"fixup","provenance":"SpawnInit.c:723 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":724,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:724 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":725,"op":"FUN_1402d1f50","args":[8,0,12],"kind":"word","provenance":"SpawnInit.c:725 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":726,"op":"FUN_1402d1f50","args":[9,8,12],"kind":"word","provenance":"SpawnInit.c:726 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":727,"op":"FUN_1402d1f50","args":[10,16,12],"kind":"word","provenance":"SpawnInit.c:727 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":728,"op":"FUN_1403832b0","args":[10,64],"kind":"word","provenance":"SpawnInit.c:728 decompiler operands; builder/context pointer omitted"}
+{"line":729,"op":"FUN_1402cdfc0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:729 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":730,"op":"FUN_14035d820","args":[9,8],"kind":"word","provenance":"SpawnInit.c:730 decompiler operands; builder/context pointer omitted"}
+{"line":731,"op":"FUN_1403c4d90","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:731 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":732,"op":"FUN_140385b00","args":[10,8,9],"kind":"word","provenance":"SpawnInit.c:732 decompiler operands; builder/context pointer omitted"}
+{"line":733,"op":"FUN_1403c0000","args":[10,10,6],"kind":"word","provenance":"SpawnInit.c:733 decompiler operands; builder/context pointer omitted"}
+{"line":734,"op":"FUN_1403832b0","args":[10,16384],"kind":"word","provenance":"SpawnInit.c:734 decompiler operands; builder/context pointer omitted"}
+{"line":735,"op":"FUN_1403c4c90","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:735 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":736,"op":"FUN_14030dc40","args":[12,8],"kind":"word","provenance":"SpawnInit.c:736 decompiler operands; builder/context pointer omitted"}
+{"line":737,"op":"FUN_1403cb810","args":["chk3"],"kind":"fixup","provenance":"SpawnInit.c:737 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":738,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:738 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":739,"op":"FUN_1402cc150","args":[12,9,-4],"kind":"word","provenance":"SpawnInit.c:739 decompiler operands; builder/context pointer omitted"}
+{"line":740,"op":"FUN_1403cb810","args":["chk3"],"kind":"fixup","provenance":"SpawnInit.c:740 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":741,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:741 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":742,"op":"FUN_140435750","args":[264],"kind":"word","provenance":"SpawnInit.c:742 decompiler operands; builder/context pointer omitted"}
+{"line":743,"op":"FUN_1402d45d0","args":[10,40,30],"kind":"word","provenance":"SpawnInit.c:743 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":744,"op":"FUN_14035d820","args":[6,10],"kind":"word","provenance":"SpawnInit.c:744 decompiler operands; builder/context pointer omitted"}
+{"line":745,"op":"FUN_140382b00","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:745 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":746,"op":"FUN_1403855f0","args":[12,6,6],"kind":"word","provenance":"PE callsite 0x1404385bf: hidden base operand=6"}
+{"line":747,"op":"FUN_1403618d0","args":[12,12,8],"kind":"word","provenance":"SpawnInit.c:747 decompiler operands; builder/context pointer omitted"}
+{"line":748,"op":"FUN_1402d1f50","args":[7,16,12],"kind":"word","provenance":"SpawnInit.c:748 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":749,"op":"FUN_1402d1f50","args":[9,24,12],"kind":"word","provenance":"SpawnInit.c:749 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":750,"op":"FUN_1402d1f50","args":[10,48,12],"kind":"word","provenance":"SpawnInit.c:750 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":751,"op":"FUN_1402d1f50","args":[4,52,12],"kind":"word","provenance":"SpawnInit.c:751 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":752,"op":"FUN_140435750","args":[520],"kind":"word","provenance":"SpawnInit.c:752 decompiler operands; builder/context pointer omitted"}
+{"line":753,"op":"FUN_1402cfd50","args":[7,0],"kind":"word","provenance":"SpawnInit.c:753 decompiler operands; builder/context pointer omitted"}
+{"line":754,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:754 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":755,"op":"FUN_1402cfd50","args":[9,0],"kind":"word","provenance":"SpawnInit.c:755 decompiler operands; builder/context pointer omitted"}
+{"line":756,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:756 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":757,"op":"FUN_140435750","args":[776],"kind":"word","provenance":"SpawnInit.c:757 decompiler operands; builder/context pointer omitted"}
+{"line":758,"op":"FUN_14030dc40","args":[12,7],"kind":"word","provenance":"SpawnInit.c:758 decompiler operands; builder/context pointer omitted"}
+{"line":759,"op":"FUN_1403cb810","args":["chk3"],"kind":"fixup","provenance":"SpawnInit.c:759 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":760,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:760 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":761,"op":"FUN_1402cc150","args":[12,9,16],"kind":"word","provenance":"SpawnInit.c:761 decompiler operands; builder/context pointer omitted"}
+{"line":762,"op":"FUN_1403cb810","args":["chk3"],"kind":"fixup","provenance":"SpawnInit.c:762 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":763,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:763 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":764,"op":"FUN_140435750","args":[1032],"kind":"word","provenance":"SpawnInit.c:764 decompiler operands; builder/context pointer omitted"}
+{"line":765,"op":"FUN_1402d45d0","args":[10,40,30],"kind":"word","provenance":"SpawnInit.c:765 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":766,"op":"FUN_1403832b0","args":[10,16],"kind":"word","provenance":"SpawnInit.c:766 decompiler operands; builder/context pointer omitted"}
+{"line":767,"op":"FUN_1402cdfc0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:767 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":768,"op":"FUN_140435750","args":[1288],"kind":"word","provenance":"SpawnInit.c:768 decompiler operands; builder/context pointer omitted"}
+{"line":769,"op":"FUN_1402d1f50","args":[10,0,12],"kind":"word","provenance":"SpawnInit.c:769 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":770,"op":"FUN_1402d45d0","args":[10,40,30],"kind":"word","provenance":"SpawnInit.c:770 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":771,"op":"FUN_140362de0","args":[5,5,0,19,31],"kind":"word","provenance":"PE callsite 0x1404387b0: hidden args are 0x13 and stack arg 0x1f"}
+{"line":772,"op":"FUN_14035d820","args":[5,10],"kind":"word","provenance":"SpawnInit.c:772 decompiler operands; builder/context pointer omitted"}
+{"line":773,"op":"FUN_140382b00","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:773 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":774,"op":"FUN_140435750","args":[1544],"kind":"word","provenance":"SpawnInit.c:774 decompiler operands; builder/context pointer omitted"}
+{"line":775,"op":"FUN_1403855f0","args":[5,5,4],"kind":"word","provenance":"SpawnInit.c:775 decompiler operands; builder/context pointer omitted"}
+{"line":776,"op":"FUN_1403618d0","args":[12,7,5],"kind":"word","provenance":"SpawnInit.c:776 decompiler operands; builder/context pointer omitted"}
+{"line":777,"op":"FUN_1402d45d0","args":[12,40,30],"kind":"word","provenance":"SpawnInit.c:777 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":778,"op":"FUN_1403cb810","args":["chk3"],"kind":"fixup","provenance":"SpawnInit.c:778 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":779,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:779 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":780,"op":"FUN_140435750","args":[9],"kind":"word","provenance":"SpawnInit.c:780 decompiler operands; builder/context pointer omitted"}
+{"line":781,"op":"FUN_1402d1f50","args":[6,0,12],"kind":"word","provenance":"SpawnInit.c:781 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":782,"op":"FUN_1402d1f50","args":[7,8,12],"kind":"word","provenance":"SpawnInit.c:782 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":783,"op":"FUN_1402d45d0","args":[6,40,30],"kind":"word","provenance":"SpawnInit.c:783 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":784,"op":"FUN_1402d1ec0","args":[0,2155874100],"kind":"words2","provenance":"SpawnInit.c:784 decompiler operands; builder/context pointer omitted"}
+{"line":785,"op":"FUN_14035d820","args":[6,0],"kind":"word","provenance":"SpawnInit.c:785 decompiler operands; builder/context pointer omitted"}
+{"line":786,"op":"FUN_1402cdfc0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:786 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":787,"op":"FUN_140435750","args":[10],"kind":"word","provenance":"SpawnInit.c:787 decompiler operands; builder/context pointer omitted"}
+{"line":788,"op":"FUN_1403cb7b0","args":[7,7,4],"kind":"word","provenance":"SpawnInit.c:788 decompiler operands; builder/context pointer omitted"}
+{"line":789,"op":"FUN_140385b00","args":[12,7,12],"kind":"word","provenance":"SpawnInit.c:789 decompiler operands; builder/context pointer omitted"}
+{"line":790,"op":"FUN_1402d45d0","args":[12,40,30],"kind":"word","provenance":"SpawnInit.c:790 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":791,"op":"FUN_1402d1ad0","args":[11,0],"kind":"word","provenance":"SpawnInit.c:791 decompiler operands; builder/context pointer omitted"}
+{"line":792,"op":"FUN_1403cb810","args":["chk"],"kind":"fixup","provenance":"SpawnInit.c:792 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":793,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:793 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":794,"op":"FUN_1402cc150","args":[12,12,90],"kind":"word","provenance":"SpawnInit.c:794 decompiler operands; builder/context pointer omitted"}
+{"line":795,"op":"FUN_1402d1ad0","args":[11,0],"kind":"word","provenance":"SpawnInit.c:795 decompiler operands; builder/context pointer omitted"}
+{"line":796,"op":"FUN_1403cb810","args":["chk"],"kind":"fixup","provenance":"SpawnInit.c:796 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":797,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:797 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":798,"op":"FUN_140383960","args":[6,0,12],"kind":"word","provenance":"SpawnInit.c:798 decompiler operands; builder/context pointer omitted","encoder":"primary opcode 0x22"}
+{"line":799,"op":"FUN_1402d45d0","args":[6,40,30],"kind":"word","provenance":"SpawnInit.c:799 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":800,"op":"FUN_140435750","args":[11],"kind":"word","provenance":"SpawnInit.c:800 decompiler operands; builder/context pointer omitted"}
+{"line":801,"op":"FUN_1402cfd50","args":[6,0],"kind":"word","provenance":"SpawnInit.c:801 decompiler operands; builder/context pointer omitted"}
+{"line":802,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:802 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":803,"op":"FUN_140435750","args":[12],"kind":"word","provenance":"SpawnInit.c:803 decompiler operands; builder/context pointer omitted"}
+{"line":804,"op":"FUN_1402cfd50","args":[6,6],"kind":"word","provenance":"SpawnInit.c:804 decompiler operands; builder/context pointer omitted"}
+{"line":805,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:805 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":806,"op":"FUN_140435750","args":[13],"kind":"word","provenance":"SpawnInit.c:806 decompiler operands; builder/context pointer omitted"}
+{"line":807,"op":"FUN_1402d1f50","args":[7,36,30],"kind":"word","provenance":"SpawnInit.c:807 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":808,"op":"FUN_1402cfd50","args":[7,-1],"kind":"word","provenance":"SpawnInit.c:808 decompiler operands; builder/context pointer omitted"}
+{"line":809,"op":"FUN_1402cdec0","args":["type_ok"],"kind":"fixup","provenance":"SpawnInit.c:809 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":810,"op":"FUN_14035d820","args":[6,7],"kind":"word","provenance":"SpawnInit.c:810 decompiler operands; builder/context pointer omitted"}
+{"line":811,"op":"FUN_1402cdfc0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:811 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":813,"op":"label_mark","args":["type_ok"],"kind":"label","provenance":"SpawnInit.c:813 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":814,"op":"FUN_1402d45d0","args":[6,36,30],"kind":"word","provenance":"SpawnInit.c:814 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":816,"op":"FUN_1402d1f50","args":[0,32,30],"kind":"word","provenance":"SpawnInit.c:816 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":817,"op":"FUN_1402cfd50","args":[0,0],"kind":"word","provenance":"SpawnInit.c:817 decompiler operands; builder/context pointer omitted"}
+{"line":818,"op":"FUN_1402cdfc0","args":["point"],"kind":"fixup","provenance":"SpawnInit.c:818 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":820,"op":"FUN_1402d1e70","args":[9,430],"kind":"word","provenance":"FUN_1404356a0(0x1ae6f10) computes 0x1ae"}
+{"line":821,"op":"FUN_1403d9ca0","args":[13,24,31],"kind":"word","provenance":"SpawnInit.c:821 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":822,"op":"FUN_1403d9ca0","args":[12,20,31],"kind":"word","provenance":"SpawnInit.c:822 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":828,"op":"FUN_1403d9ca0","args":[1,28444,9],"kind":"word","provenance":"SpawnInit.c:826\u0013833 iteration 1","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":829,"op":"FUN_140437480","args":[1,1],"kind":"word","provenance":"SpawnInit.c:826\u0013833 iteration 1"}
+{"line":830,"op":"FUN_140437580","args":[0,1,13],"kind":"word","provenance":"SpawnInit.c:826\u0013833 iteration 1"}
+{"line":831,"op":"FUN_140382b00","args":["nocam"],"kind":"fixup","provenance":"SpawnInit.c:826\u0013833 iteration 1","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":828,"op":"FUN_1403d9ca0","args":[1,28460,9],"kind":"word","provenance":"SpawnInit.c:826\u0013833 iteration 2","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":829,"op":"FUN_140437480","args":[1,1],"kind":"word","provenance":"SpawnInit.c:826\u0013833 iteration 2"}
+{"line":830,"op":"FUN_140437580","args":[0,1,13],"kind":"word","provenance":"SpawnInit.c:826\u0013833 iteration 2"}
+{"line":831,"op":"FUN_140382b00","args":["nocam"],"kind":"fixup","provenance":"SpawnInit.c:826\u0013833 iteration 2","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":828,"op":"FUN_1403d9ca0","args":[1,28476,9],"kind":"word","provenance":"SpawnInit.c:826\u0013833 iteration 3","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":829,"op":"FUN_140437480","args":[1,1],"kind":"word","provenance":"SpawnInit.c:826\u0013833 iteration 3"}
+{"line":830,"op":"FUN_140437580","args":[0,1,13],"kind":"word","provenance":"SpawnInit.c:826\u0013833 iteration 3"}
+{"line":831,"op":"FUN_140382b00","args":["nocam"],"kind":"fixup","provenance":"SpawnInit.c:826\u0013833 iteration 3","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":834,"op":"FUN_1403d9ca0","args":[1,28492,9],"kind":"word","provenance":"SpawnInit.c:834 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":835,"op":"FUN_1404378d0","args":[1,1,12],"kind":"word","provenance":"SpawnInit.c:835 decompiler operands; builder/context pointer omitted"}
+{"line":836,"op":"FUN_140437480","args":[1,1],"kind":"word","provenance":"SpawnInit.c:836 decompiler operands; builder/context pointer omitted"}
+{"line":837,"op":"FUN_140437580","args":[0,1,13],"kind":"word","provenance":"SpawnInit.c:837 decompiler operands; builder/context pointer omitted"}
+{"line":838,"op":"FUN_140382b00","args":["nocam"],"kind":"fixup","provenance":"SpawnInit.c:838 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":839,"op":"FUN_1403d9ca0","args":[4,28440,9],"kind":"word","provenance":"SpawnInit.c:839 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":840,"op":"FUN_1403d9ca0","args":[5,28456,9],"kind":"word","provenance":"SpawnInit.c:840 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":841,"op":"FUN_1403d9ca0","args":[6,28472,9],"kind":"word","provenance":"SpawnInit.c:841 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":842,"op":"FUN_140437780","args":[7,4,4],"kind":"word","provenance":"PE callsite 0x140438ca8: hidden fourth operand=4"}
+{"line":843,"op":"FUN_1404376d0","args":[7,5,5,7],"kind":"word","provenance":"PE callsite 0x140438cc6: hidden fifth operand=7"}
+{"line":844,"op":"FUN_1404376d0","args":[7,6,6,7],"kind":"word","provenance":"PE callsite 0x140438ce4: hidden fifth operand=7"}
+{"line":845,"op":"FUN_1404378d0","args":[1,7,12],"kind":"word","provenance":"SpawnInit.c:845 decompiler operands; builder/context pointer omitted"}
+{"line":846,"op":"FUN_140437480","args":[1,1],"kind":"word","provenance":"SpawnInit.c:846 decompiler operands; builder/context pointer omitted"}
+{"line":847,"op":"FUN_1403d9ca0","args":[13,28,31],"kind":"word","provenance":"SpawnInit.c:847 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":848,"op":"FUN_140437580","args":[0,1,13],"kind":"word","provenance":"SpawnInit.c:848 decompiler operands; builder/context pointer omitted"}
+{"line":849,"op":"FUN_140382b00","args":["nocam"],"kind":"fixup","provenance":"SpawnInit.c:849 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":850,"op":"FUN_140437880","args":[7,7],"kind":"word","provenance":"SpawnInit.c:850 decompiler operands; builder/context pointer omitted"}
+{"line":851,"op":"FUN_1404377e0","args":[7,7],"kind":"word","provenance":"SpawnInit.c:851 decompiler operands; builder/context pointer omitted"}
+{"line":852,"op":"FUN_1404375e0","args":[4,4,7],"kind":"word","provenance":"SpawnInit.c:852 decompiler operands; builder/context pointer omitted"}
+{"line":853,"op":"FUN_1404375e0","args":[5,5,7],"kind":"word","provenance":"SpawnInit.c:853 decompiler operands; builder/context pointer omitted"}
+{"line":854,"op":"FUN_1404375e0","args":[6,6,7],"kind":"word","provenance":"SpawnInit.c:854 decompiler operands; builder/context pointer omitted"}
+{"line":855,"op":"FUN_140435410","args":[1,4,112,30],"kind":"words3","provenance":"PE callsite 0x140438dd2: hidden fifth operand=0x1e"}
+{"line":856,"op":"FUN_1403d9ca0","args":[8,28480,9],"kind":"word","provenance":"SpawnInit.c:856 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":857,"op":"FUN_1403d9ca0","args":[9,28484,9],"kind":"word","provenance":"SpawnInit.c:857 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":858,"op":"FUN_1403d9ca0","args":[10,28488,9],"kind":"word","provenance":"SpawnInit.c:858 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":863,"op":"FUN_1403d9ca0","args":[1,28432,9],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 1","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":864,"op":"FUN_1403d9ca0","args":[2,28436,9],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 1","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":865,"op":"FUN_1403d9ca0","args":[3,28440,9],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 1","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":866,"op":"FUN_140437780","args":[0,1,8],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 1"}
+{"line":867,"op":"FUN_1404376d0","args":[0,2,9,0],"kind":"word","provenance":"PE callsite 0x140438eb0 hidden arg=0; iteration 1"}
+{"line":868,"op":"FUN_1404376d0","args":[0,3,10,0],"kind":"word","provenance":"PE callsite 0x140438ecb hidden arg=0; iteration 1"}
+{"line":869,"op":"FUN_1404377e0","args":[0,0],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 1"}
+{"line":870,"op":"FUN_1403db950","args":[0,96,30],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 1","encoder":"D-form opcode 0xd0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":863,"op":"FUN_1403d9ca0","args":[1,28448,9],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 2","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":864,"op":"FUN_1403d9ca0","args":[2,28452,9],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 2","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":865,"op":"FUN_1403d9ca0","args":[3,28456,9],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 2","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":866,"op":"FUN_140437780","args":[0,1,8],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 2"}
+{"line":867,"op":"FUN_1404376d0","args":[0,2,9,0],"kind":"word","provenance":"PE callsite 0x140438eb0 hidden arg=0; iteration 2"}
+{"line":868,"op":"FUN_1404376d0","args":[0,3,10,0],"kind":"word","provenance":"PE callsite 0x140438ecb hidden arg=0; iteration 2"}
+{"line":869,"op":"FUN_1404377e0","args":[0,0],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 2"}
+{"line":870,"op":"FUN_1403db950","args":[0,100,30],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 2","encoder":"D-form opcode 0xd0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":863,"op":"FUN_1403d9ca0","args":[1,28464,9],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 3","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":864,"op":"FUN_1403d9ca0","args":[2,28468,9],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 3","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":865,"op":"FUN_1403d9ca0","args":[3,28472,9],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 3","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":866,"op":"FUN_140437780","args":[0,1,8],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 3"}
+{"line":867,"op":"FUN_1404376d0","args":[0,2,9,0],"kind":"word","provenance":"PE callsite 0x140438eb0 hidden arg=0; iteration 3"}
+{"line":868,"op":"FUN_1404376d0","args":[0,3,10,0],"kind":"word","provenance":"PE callsite 0x140438ecb hidden arg=0; iteration 3"}
+{"line":869,"op":"FUN_1404377e0","args":[0,0],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 3"}
+{"line":870,"op":"FUN_1403db950","args":[0,104,30],"kind":"word","provenance":"SpawnInit.c:861\u0013873 iteration 3","encoder":"D-form opcode 0xd0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":874,"op":"FUN_1402d1ad0","args":[0,1],"kind":"word","provenance":"SpawnInit.c:874 decompiler operands; builder/context pointer omitted"}
+{"line":875,"op":"FUN_1402d45d0","args":[0,124,30],"kind":"word","provenance":"SpawnInit.c:875 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":876,"op":"FUN_1402d45d0","args":[0,108,30],"kind":"word","provenance":"SpawnInit.c:876 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":878,"op":"label_mark","args":["nocam"],"kind":"label","provenance":"SpawnInit.c:878 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":880,"op":"FUN_1402d1f50","args":[0,148,30],"kind":"word","provenance":"SpawnInit.c:880 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":881,"op":"FUN_1402cfd50","args":[0,1],"kind":"word","provenance":"SpawnInit.c:881 decompiler operands; builder/context pointer omitted"}
+{"line":882,"op":"FUN_1402cdec0","args":["player"],"kind":"fixup","provenance":"SpawnInit.c:882 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":883,"op":"FUN_1402d1f50","args":[0,152,30],"kind":"word","provenance":"SpawnInit.c:883 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":884,"op":"FUN_1402cfd50","args":[0,0],"kind":"word","provenance":"SpawnInit.c:884 decompiler operands; builder/context pointer omitted"}
+{"line":885,"op":"FUN_1402cdfc0","args":["noplayer"],"kind":"fixup","provenance":"SpawnInit.c:885 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":886,"op":"FUN_1402d1f50","args":[0,108,30],"kind":"word","provenance":"SpawnInit.c:886 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":887,"op":"FUN_1402cfd50","args":[0,0],"kind":"word","provenance":"SpawnInit.c:887 decompiler operands; builder/context pointer omitted"}
+{"line":888,"op":"FUN_1402cdfc0","args":["noplayer"],"kind":"fixup","provenance":"SpawnInit.c:888 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":890,"op":"label_mark","args":["player"],"kind":"label","provenance":"SpawnInit.c:890 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":892,"op":"FUN_1404356c0","args":[12,28480592],"kind":"words2","provenance":"SpawnInit.c:892 decompiler operands; builder/context pointer omitted"}
+{"line":893,"op":"FUN_1403cb810","args":["chk3"],"kind":"fixup","provenance":"SpawnInit.c:893 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":894,"op":"FUN_1402cdec0","args":["noplayer"],"kind":"fixup","provenance":"SpawnInit.c:894 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":895,"op":"FUN_1402d1f50","args":[0,8,12],"kind":"word","provenance":"SpawnInit.c:895 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":896,"op":"FUN_1403832b0","args":[0,10544],"kind":"word","provenance":"SpawnInit.c:896 decompiler operands; builder/context pointer omitted"}
+{"line":897,"op":"FUN_1402cdfc0","args":["noplayer"],"kind":"fixup","provenance":"SpawnInit.c:897 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":898,"op":"FUN_1402d1f50","args":[12,4,12],"kind":"word","provenance":"SpawnInit.c:898 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":899,"op":"FUN_1403cb810","args":["chk3"],"kind":"fixup","provenance":"SpawnInit.c:899 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":900,"op":"FUN_1402cdec0","args":["noplayer"],"kind":"fixup","provenance":"SpawnInit.c:900 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":901,"op":"FUN_14030dc40","args":[9,12],"kind":"word","provenance":"SpawnInit.c:901 decompiler operands; builder/context pointer omitted"}
+{"line":902,"op":"FUN_1402d1f50","args":[5,132,9],"kind":"word","provenance":"SpawnInit.c:902 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":903,"op":"FUN_1403cb810","args":["sobj"],"kind":"fixup","provenance":"SpawnInit.c:903 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":904,"op":"FUN_1402cdfc0","args":["noplayer"],"kind":"fixup","provenance":"SpawnInit.c:904 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":905,"op":"FUN_1402d1f50","args":[0,160,30],"kind":"word","provenance":"SpawnInit.c:905 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":906,"op":"FUN_1402cfd50","args":[0,0],"kind":"word","provenance":"SpawnInit.c:906 decompiler operands; builder/context pointer omitted"}
+{"line":907,"op":"FUN_1402cc150","args":[12,12,176],"kind":"word","provenance":"SpawnInit.c:907 decompiler operands; builder/context pointer omitted"}
+{"line":908,"op":"FUN_1402cdec0","args":["player_pos"],"kind":"fixup","provenance":"SpawnInit.c:908 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":909,"op":"FUN_1402cc150","args":[12,9,10256],"kind":"word","provenance":"SpawnInit.c:909 decompiler operands; builder/context pointer omitted"}
+{"line":910,"op":"FUN_1403cb810","args":["chk3"],"kind":"fixup","provenance":"SpawnInit.c:910 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":911,"op":"FUN_1402cdec0","args":["noplayer"],"kind":"fixup","provenance":"SpawnInit.c:911 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":913,"op":"label_mark","args":["player_pos"],"kind":"label","provenance":"SpawnInit.c:913 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":915,"op":"FUN_140435410","args":[0,1,0,12],"kind":"words3","provenance":"PE callsite 0x1404391e5: hidden fifth operand=0x0c"}
+{"line":916,"op":"FUN_1403cb810","args":["bounded"],"kind":"fixup","provenance":"SpawnInit.c:916 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":917,"op":"FUN_140382b00","args":["noplayer"],"kind":"fixup","provenance":"SpawnInit.c:917 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":918,"op":"FUN_1403d9ca0","args":[0,40,31],"kind":"word","provenance":"SpawnInit.c:918 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":919,"op":"FUN_140437580","args":[0,1,0],"kind":"word","provenance":"SpawnInit.c:919 decompiler operands; builder/context pointer omitted"}
+{"line":920,"op":"FUN_1402cdfc0","args":["player_nz"],"kind":"fixup","provenance":"SpawnInit.c:920 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":921,"op":"FUN_140437580","args":[0,2,0],"kind":"word","provenance":"SpawnInit.c:921 decompiler operands; builder/context pointer omitted"}
+{"line":922,"op":"FUN_1402cdfc0","args":["player_nz"],"kind":"fixup","provenance":"SpawnInit.c:922 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":923,"op":"FUN_140437580","args":[0,3,0],"kind":"word","provenance":"SpawnInit.c:923 decompiler operands; builder/context pointer omitted"}
+{"line":924,"op":"FUN_1402cdec0","args":["noplayer"],"kind":"fixup","provenance":"SpawnInit.c:924 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":926,"op":"label_mark","args":["player_nz"],"kind":"label","provenance":"SpawnInit.c:926 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":928,"op":"FUN_140435410","args":[1,1,128,30],"kind":"words3","provenance":"PE callsite 0x1404392cd: hidden fifth operand=0x1e"}
+{"line":929,"op":"FUN_1402d1ad0","args":[0,1],"kind":"word","provenance":"SpawnInit.c:929 decompiler operands; builder/context pointer omitted"}
+{"line":930,"op":"FUN_1402d45d0","args":[0,140,30],"kind":"word","provenance":"SpawnInit.c:930 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":931,"op":"FUN_1402d1f50","args":[12,108,30],"kind":"word","provenance":"SpawnInit.c:931 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":932,"op":"FUN_1402cfd50","args":[12,0],"kind":"word","provenance":"SpawnInit.c:932 decompiler operands; builder/context pointer omitted"}
+{"line":933,"op":"FUN_1402cdfc0","args":["noplayer"],"kind":"fixup","provenance":"SpawnInit.c:933 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":934,"op":"FUN_140435410","args":[1,1,96,30],"kind":"words3","provenance":"PE callsite 0x140439350: hidden fifth operand=0x1e"}
+{"line":935,"op":"FUN_1402d45d0","args":[0,108,30],"kind":"word","provenance":"SpawnInit.c:935 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":937,"op":"label_mark","args":["noplayer"],"kind":"label","provenance":"SpawnInit.c:937 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":939,"op":"FUN_1402d1f50","args":[0,148,30],"kind":"word","provenance":"SpawnInit.c:939 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":940,"op":"FUN_1402cfd50","args":[0,0],"kind":"word","provenance":"SpawnInit.c:940 decompiler operands; builder/context pointer omitted"}
+{"line":941,"op":"FUN_1402cdfc0","args":["c_player"],"kind":"fixup","provenance":"SpawnInit.c:941 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":942,"op":"FUN_140435750","args":[14],"kind":"word","provenance":"SpawnInit.c:942 decompiler operands; builder/context pointer omitted"}
+{"line":943,"op":"FUN_1402d1f50","args":[12,124,30],"kind":"word","provenance":"SpawnInit.c:943 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":944,"op":"FUN_1402cfd50","args":[12,0],"kind":"word","provenance":"SpawnInit.c:944 decompiler operands; builder/context pointer omitted"}
+{"line":945,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:945 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":946,"op":"FUN_1403d9ca0","args":[4,164,30],"kind":"word","provenance":"SpawnInit.c:946 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":950,"op":"FUN_1403d9ca0","args":[1,96,30],"kind":"word","provenance":"SpawnInit.c:949\u0013955 iteration 1","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":951,"op":"FUN_1403d9ca0","args":[0,112,30],"kind":"word","provenance":"SpawnInit.c:949\u0013955 iteration 1","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":953,"op":"FUN_1404376d0","args":[1,0,4,4],"kind":"word","provenance":"PE callsite 0x14043947a hidden arg=4; iteration 1"}
+{"line":950,"op":"FUN_1403d9ca0","args":[2,100,30],"kind":"word","provenance":"SpawnInit.c:949\u0013955 iteration 2","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":951,"op":"FUN_1403d9ca0","args":[0,116,30],"kind":"word","provenance":"SpawnInit.c:949\u0013955 iteration 2","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":953,"op":"FUN_1404376d0","args":[2,0,4,4],"kind":"word","provenance":"PE callsite 0x14043947a hidden arg=4; iteration 2"}
+{"line":950,"op":"FUN_1403d9ca0","args":[3,104,30],"kind":"word","provenance":"SpawnInit.c:949\u0013955 iteration 3","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":951,"op":"FUN_1403d9ca0","args":[0,120,30],"kind":"word","provenance":"SpawnInit.c:949\u0013955 iteration 3","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":953,"op":"FUN_1404376d0","args":[3,0,4,4],"kind":"word","provenance":"PE callsite 0x14043947a hidden arg=4; iteration 3"}
+{"line":956,"op":"FUN_14030b430","args":["c_offset"],"kind":"fixup","provenance":"SpawnInit.c:956 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":958,"op":"label_mark","args":["c_player"],"kind":"label","provenance":"SpawnInit.c:958 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":959,"op":"FUN_1402cfd50","args":[0,1],"kind":"word","provenance":"SpawnInit.c:959 decompiler operands; builder/context pointer omitted"}
+{"line":960,"op":"FUN_1402cdfc0","args":["c_coords"],"kind":"fixup","provenance":"SpawnInit.c:960 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":962,"op":"FUN_140435750","args":[15],"kind":"word","provenance":"SpawnInit.c:962 decompiler operands; builder/context pointer omitted"}
+{"line":963,"op":"FUN_1402d1f50","args":[12,140,30],"kind":"word","provenance":"SpawnInit.c:963 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":964,"op":"FUN_1402cfd50","args":[12,0],"kind":"word","provenance":"SpawnInit.c:964 decompiler operands; builder/context pointer omitted"}
+{"line":965,"op":"FUN_1402cdec0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:965 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":966,"op":"FUN_140435410","args":[0,1,128,30],"kind":"words3","provenance":"PE callsite 0x140439541: hidden fifth operand=0x1e"}
+{"line":968,"op":"label_mark","args":["c_offset"],"kind":"label","provenance":"SpawnInit.c:968 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":972,"op":"FUN_1403d9ca0","args":[0,176,30],"kind":"word","provenance":"SpawnInit.c:970\u0013975 iteration 1","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":974,"op":"FUN_1404374d0","args":[1,1,0],"kind":"word","provenance":"SpawnInit.c:970\u0013975 iteration 1"}
+{"line":972,"op":"FUN_1403d9ca0","args":[0,180,30],"kind":"word","provenance":"SpawnInit.c:970\u0013975 iteration 2","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":974,"op":"FUN_1404374d0","args":[2,2,0],"kind":"word","provenance":"SpawnInit.c:970\u0013975 iteration 2"}
+{"line":972,"op":"FUN_1403d9ca0","args":[0,184,30],"kind":"word","provenance":"SpawnInit.c:970\u0013975 iteration 3","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":974,"op":"FUN_1404374d0","args":[3,3,0],"kind":"word","provenance":"SpawnInit.c:970\u0013975 iteration 3"}
+{"line":976,"op":"FUN_14030b430","args":["c_check"],"kind":"fixup","provenance":"SpawnInit.c:976 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":978,"op":"label_mark","args":["c_coords"],"kind":"label","provenance":"SpawnInit.c:978 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":980,"op":"FUN_140435410","args":[0,1,188,30],"kind":"words3","provenance":"PE callsite 0x140439605: hidden fifth operand=0x1e"}
+{"line":982,"op":"label_mark","args":["c_check"],"kind":"label","provenance":"SpawnInit.c:982 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":984,"op":"FUN_140435750","args":[16],"kind":"word","provenance":"SpawnInit.c:984 decompiler operands; builder/context pointer omitted"}
+{"line":985,"op":"FUN_1403cb810","args":["bounded"],"kind":"fixup","provenance":"SpawnInit.c:985 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":986,"op":"FUN_140382b00","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:986 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":987,"op":"FUN_140435410","args":[1,1,48,30],"kind":"words3","provenance":"PE callsite 0x14043967d: hidden fifth operand=0x1e"}
+{"line":988,"op":"FUN_1403d9ca0","args":[1,20,31],"kind":"word","provenance":"SpawnInit.c:988 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":989,"op":"FUN_1403d9ca0","args":[2,40,31],"kind":"word","provenance":"SpawnInit.c:989 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":990,"op":"FUN_1402d1f50","args":[0,124,30],"kind":"word","provenance":"SpawnInit.c:990 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":991,"op":"FUN_1402cfd50","args":[0,0],"kind":"word","provenance":"SpawnInit.c:991 decompiler operands; builder/context pointer omitted"}
+{"line":992,"op":"FUN_1402cdec0","args":["basis"],"kind":"fixup","provenance":"SpawnInit.c:992 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":993,"op":"FUN_1403d9ca0","args":[3,112,30],"kind":"word","provenance":"SpawnInit.c:993 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":994,"op":"FUN_1403d9ca0","args":[4,116,30],"kind":"word","provenance":"SpawnInit.c:994 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":995,"op":"FUN_140437780","args":[5,3,3],"kind":"word","provenance":"PE callsite 0x14043972f: hidden fourth operand=3"}
+{"line":996,"op":"FUN_1404376d0","args":[5,4,4,5],"kind":"word","provenance":"PE callsite 0x14043974d: hidden fifth operand=5"}
+{"line":997,"op":"FUN_140437880","args":[5,5],"kind":"word","provenance":"SpawnInit.c:997 decompiler operands; builder/context pointer omitted"}
+{"line":998,"op":"FUN_1403d9ca0","args":[6,32,31],"kind":"word","provenance":"SpawnInit.c:998 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":999,"op":"FUN_140437580","args":[0,5,6],"kind":"word","provenance":"SpawnInit.c:999 decompiler operands; builder/context pointer omitted"}
+{"line":1000,"op":"FUN_1403c4d90","args":["basis"],"kind":"fixup","provenance":"SpawnInit.c:1000 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1001,"op":"FUN_1404375e0","args":[1,3,5],"kind":"word","provenance":"SpawnInit.c:1001 decompiler operands; builder/context pointer omitted"}
+{"line":1002,"op":"FUN_1404375e0","args":[2,4,5],"kind":"word","provenance":"SpawnInit.c:1002 decompiler operands; builder/context pointer omitted"}
+{"line":1004,"op":"label_mark","args":["basis"],"kind":"label","provenance":"SpawnInit.c:1004 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1005,"op":"FUN_1403db950","args":[1,64,30],"kind":"word","provenance":"SpawnInit.c:1005 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xd0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1006,"op":"FUN_1403db950","args":[2,68,30],"kind":"word","provenance":"SpawnInit.c:1006 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xd0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1007,"op":"FUN_1403db950","args":[2,80,30],"kind":"word","provenance":"SpawnInit.c:1007 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xd0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1008,"op":"FUN_1404377e0","args":[1,1],"kind":"word","provenance":"SpawnInit.c:1008 decompiler operands; builder/context pointer omitted"}
+{"line":1009,"op":"FUN_1403db950","args":[1,84,30],"kind":"word","provenance":"SpawnInit.c:1009 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xd0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1011,"op":"FUN_1402d1ad0","args":[0,1],"kind":"word","provenance":"SpawnInit.c:1011 decompiler operands; builder/context pointer omitted"}
+{"line":1012,"op":"FUN_1402d45d0","args":[0,32,30],"kind":"word","provenance":"SpawnInit.c:1012 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1014,"op":"label_mark","args":["point"],"kind":"label","provenance":"SpawnInit.c:1014 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1016,"op":"FUN_1402cc150","args":[11,31,60],"kind":"word","provenance":"SpawnInit.c:1016 decompiler operands; builder/context pointer omitted"}
+{"line":1017,"op":"FUN_1402cc150","args":[12,31,188],"kind":"word","provenance":"SpawnInit.c:1017 decompiler operands; builder/context pointer omitted"}
+{"line":1018,"op":"FUN_1402d1ad0","args":[0,32],"kind":"word","provenance":"SpawnInit.c:1018 decompiler operands; builder/context pointer omitted"}
+{"line":1019,"op":"FUN_1402d1fe0","args":[0],"kind":"word","provenance":"SpawnInit.c:1019 decompiler operands; builder/context pointer omitted"}
+{"line":1021,"op":"label_mark","args":["copy"],"kind":"label","provenance":"SpawnInit.c:1021 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1022,"op":"FUN_1403d9d20","args":[0,4,11],"kind":"word","provenance":"SpawnInit.c:1022 decompiler operands; builder/context pointer omitted"}
+{"line":1023,"op":"FUN_14043cee0","args":[0,4,12],"kind":"word","provenance":"SpawnInit.c:1023 decompiler operands; builder/context pointer omitted"}
+{"line":1024,"op":"FUN_1403d8060","args":["copy"],"kind":"fixup","provenance":"SpawnInit.c:1024 branch fixup target; DAT_14055ae00 resolves to local label copy marked at line 1021","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1026,"op":"FUN_1402d1f50","args":[0,144,30],"kind":"word","provenance":"SpawnInit.c:1026 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1027,"op":"FUN_1402d45d0","args":[0,192,31],"kind":"word","provenance":"SpawnInit.c:1027 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1028,"op":"FUN_1402d1f50","args":[0,172,30],"kind":"word","provenance":"SpawnInit.c:1028 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1029,"op":"FUN_1402d45d0","args":[0,236,31],"kind":"word","provenance":"SpawnInit.c:1029 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1030,"op":"FUN_1402d1f50","args":[5,156,30],"kind":"word","provenance":"SpawnInit.c:1030 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1031,"op":"FUN_1402d1ad0","args":[6,1],"kind":"word","provenance":"SpawnInit.c:1031 decompiler operands; builder/context pointer omitted"}
+{"line":1033,"op":"label_mark","args":["per_row"],"kind":"label","provenance":"SpawnInit.c:1033 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1034,"op":"FUN_1403cf310","args":[7,6,6],"kind":"word","provenance":"PE callsite 0x140439a2e: hidden fourth operand=6"}
+{"line":1035,"op":"FUN_14035d820","args":[7,5],"kind":"word","provenance":"SpawnInit.c:1035 decompiler operands; builder/context pointer omitted"}
+{"line":1036,"op":"FUN_140382b00","args":["per_row_ok"],"kind":"fixup","provenance":"SpawnInit.c:1036 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1037,"op":"FUN_1402cc150","args":[6,6,1],"kind":"word","provenance":"SpawnInit.c:1037 decompiler operands; builder/context pointer omitted"}
+{"line":1038,"op":"FUN_14030b430","args":["per_row"],"kind":"fixup","provenance":"SpawnInit.c:1038 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1041,"op":"label_mark","args":["per_row_ok"],"kind":"label","provenance":"SpawnInit.c:1041 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1042,"op":"FUN_1403618d0","args":[7,5,6],"kind":"word","provenance":"SpawnInit.c:1042 decompiler operands; builder/context pointer omitted"}
+{"line":1043,"op":"FUN_1402cc150","args":[7,7,-1],"kind":"word","provenance":"SpawnInit.c:1043 decompiler operands; builder/context pointer omitted"}
+{"line":1044,"op":"FUN_140435900","args":[7,7,6],"kind":"word","provenance":"SpawnInit.c:1044 decompiler operands; builder/context pointer omitted","encoder":"XO-form base 0x7c000396"}
+{"line":1046,"op":"FUN_140435900","args":[8,28,6],"kind":"word","provenance":"SpawnInit.c:1046 decompiler operands; builder/context pointer omitted","encoder":"XO-form base 0x7c000396"}
+{"line":1047,"op":"FUN_1403cf310","args":[9,8,6],"kind":"word","provenance":"SpawnInit.c:1047 decompiler operands; builder/context pointer omitted"}
+{"line":1048,"op":"FUN_140385b00","args":[10,9,28],"kind":"word","provenance":"SpawnInit.c:1048 decompiler operands; builder/context pointer omitted"}
+{"line":1049,"op":"FUN_14030dc40","args":[4,6],"kind":"word","provenance":"SpawnInit.c:1049 decompiler operands; builder/context pointer omitted"}
+{"line":1050,"op":"FUN_1402cc150","args":[12,7,-1],"kind":"word","provenance":"SpawnInit.c:1050 decompiler operands; builder/context pointer omitted"}
+{"line":1051,"op":"FUN_14035d820","args":[8,12],"kind":"word","provenance":"SpawnInit.c:1051 decompiler operands; builder/context pointer omitted"}
+{"line":1052,"op":"FUN_1402cdfc0","args":["in_row"],"kind":"fixup","provenance":"SpawnInit.c:1052 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1053,"op":"FUN_140385b00","args":[4,9,5],"kind":"word","provenance":"SpawnInit.c:1053 decompiler operands; builder/context pointer omitted"}
+{"line":1055,"op":"label_mark","args":["in_row"],"kind":"label","provenance":"SpawnInit.c:1055 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1057,"op":"FUN_1403618d0","args":[10,10,10],"kind":"word","provenance":"SpawnInit.c:1057 decompiler operands; builder/context pointer omitted"}
+{"line":1058,"op":"FUN_140385b00","args":[10,4,10],"kind":"word","provenance":"SpawnInit.c:1058 decompiler operands; builder/context pointer omitted"}
+{"line":1059,"op":"FUN_1402cc150","args":[10,10,1],"kind":"word","provenance":"SpawnInit.c:1059 decompiler operands; builder/context pointer omitted"}
+{"line":1060,"op":"FUN_1403618d0","args":[8,8,8],"kind":"word","provenance":"SpawnInit.c:1060 decompiler operands; builder/context pointer omitted"}
+{"line":1061,"op":"FUN_140385b00","args":[8,7,8],"kind":"word","provenance":"SpawnInit.c:1061 decompiler operands; builder/context pointer omitted"}
+{"line":1062,"op":"FUN_1402cc150","args":[8,8,1],"kind":"word","provenance":"SpawnInit.c:1062 decompiler operands; builder/context pointer omitted"}
+{"line":1063,"op":"FUN_1402d4540","args":[10,192,1],"kind":"word","provenance":"SpawnInit.c:1063 decompiler operands; builder/context pointer omitted"}
+{"line":1064,"op":"FUN_1402d4540","args":[8,200,1],"kind":"word","provenance":"SpawnInit.c:1064 decompiler operands; builder/context pointer omitted"}
+{"line":1065,"op":"FUN_1402d1a70","args":[1,192,1],"kind":"word","provenance":"SpawnInit.c:1065 decompiler operands; builder/context pointer omitted"}
+{"line":1066,"op":"FUN_1402d1a70","args":[2,200,1],"kind":"word","provenance":"SpawnInit.c:1066 decompiler operands; builder/context pointer omitted"}
+{"line":1067,"op":"FUN_140437530","args":[1,1],"kind":"word","provenance":"SpawnInit.c:1067 decompiler operands; builder/context pointer omitted"}
+{"line":1068,"op":"FUN_140437530","args":[2,2],"kind":"word","provenance":"SpawnInit.c:1068 decompiler operands; builder/context pointer omitted"}
+{"line":1069,"op":"FUN_140437830","args":[1,1],"kind":"word","provenance":"SpawnInit.c:1069 decompiler operands; builder/context pointer omitted"}
+{"line":1070,"op":"FUN_140437830","args":[2,2],"kind":"word","provenance":"SpawnInit.c:1070 decompiler operands; builder/context pointer omitted"}
+{"line":1071,"op":"FUN_1403d9ca0","args":[3,168,30],"kind":"word","provenance":"SpawnInit.c:1071 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1072,"op":"FUN_1403d9ca0","args":[0,16,31],"kind":"word","provenance":"SpawnInit.c:1072 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1073,"op":"FUN_140437780","args":[3,3,0],"kind":"word","provenance":"SpawnInit.c:1073 decompiler operands; builder/context pointer omitted"}
+{"line":1074,"op":"FUN_140437780","args":[1,1,3],"kind":"word","provenance":"SpawnInit.c:1074 decompiler operands; builder/context pointer omitted"}
+{"line":1075,"op":"FUN_140437780","args":[2,2,3],"kind":"word","provenance":"SpawnInit.c:1075 decompiler operands; builder/context pointer omitted"}
+{"line":1082,"op":"raw_word","args":["0xc0fe0030"],"kind":"word","provenance":"SpawnInit.c:1076 local_148 assignment; append at 1082","assignment_line":1076}
+{"line":1086,"op":"FUN_1402d4c00","args":["0xc01e0050"],"kind":"word","provenance":"FUN_1402d3f80(0x50)=0x50; OR with 0xc01e0000"}
+{"line":1087,"op":"FUN_1402d4c00","args":[3959423090],"kind":"word","provenance":"SpawnInit.c:1087 decompiler operands; builder/context pointer omitted"}
+{"line":1088,"op":"FUN_1402d4c00","args":[3974561834],"kind":"word","provenance":"SpawnInit.c:1088 decompiler operands; builder/context pointer omitted"}
+{"line":1095,"op":"raw_word","args":["0xc01e0040"],"kind":"word","provenance":"SpawnInit.c:1089 local_148 assignment; append at 1095","assignment_line":1089}
+{"line":1099,"op":"FUN_1402d4c00","args":[3959423154],"kind":"word","provenance":"SpawnInit.c:1099 decompiler operands; builder/context pointer omitted"}
+{"line":1105,"op":"raw_word","args":["0xece7002a"],"kind":"word","provenance":"SpawnInit.c:1098 local_148 assignment; append at 1105","assignment_line":1098}
+{"line":1114,"op":"raw_word","args":["0xc11e0034"],"kind":"word","provenance":"SpawnInit.c:1108 local_148 assignment; append at 1114","assignment_line":1108}
+{"line":1118,"op":"FUN_1402d4c00","args":["0xC01E0054"],"kind":"word","provenance":"SpawnInit.c: `uVar8 = FUN_1402d3f80(0x54)` then `uVar8 | 0xc01e0000`"}
+{"line":1119,"op":"FUN_1402d4c00","args":[3959423090],"kind":"word","provenance":"SpawnInit.c:1119 decompiler operands; builder/context pointer omitted"}
+{"line":1120,"op":"FUN_1402d4c00","args":[3976724522],"kind":"word","provenance":"SpawnInit.c:1120 decompiler operands; builder/context pointer omitted"}
+{"line":1127,"op":"raw_word","args":["0xc01e0044"],"kind":"word","provenance":"SpawnInit.c:1121 local_148 assignment; append at 1127","assignment_line":1121}
+{"line":1130,"op":"FUN_1402d4c00","args":[3959423154],"kind":"word","provenance":"SpawnInit.c:1130 decompiler operands; builder/context pointer omitted"}
+{"line":1137,"op":"raw_word","args":["0xed08002a"],"kind":"word","provenance":"SpawnInit.c:1131 local_148 assignment; append at 1137","assignment_line":1131}
+{"line":1146,"op":"raw_word","args":["0xc13e0038"],"kind":"word","provenance":"SpawnInit.c:1140 local_148 assignment; append at 1146","assignment_line":1140}
+{"line":1149,"op":"FUN_140435410","args":[1,7,224,31],"kind":"words3","provenance":"PE callsite 0x140439f7e: hidden fifth operand=0x1f"}
+{"line":1155,"op":"raw_word","args":["0x57892036"],"kind":"word","provenance":"SpawnInit.c:1150 local_148 assignment; append at 1155","assignment_line":1150}
+{"line":1158,"op":"FUN_1403618d0","args":[9,9,30],"kind":"word","provenance":"SpawnInit.c:1158 decompiler operands; builder/context pointer omitted"}
+{"line":1159,"op":"FUN_140435410","args":[1,7,372,9],"kind":"words3","provenance":"PE callsite 0x140439fe6: hidden fifth operand=0x09"}
+{"line":1166,"op":"raw_word","args":["0x801e0098"],"kind":"word","provenance":"SpawnInit.c:1160 local_148 assignment; append at 1166","assignment_line":1160}
+{"line":1169,"op":"FUN_1402cfd50","args":[0,1],"kind":"word","provenance":"SpawnInit.c:1169 decompiler operands; builder/context pointer omitted"}
+{"line":1170,"op":"FUN_1402cdec0","args":["dir_aim"],"kind":"fixup","provenance":"SpawnInit.c:1170 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1171,"op":"FUN_1402cfd50","args":[0,0],"kind":"word","provenance":"SpawnInit.c:1171 decompiler operands; builder/context pointer omitted"}
+{"line":1172,"op":"FUN_1402cdfc0","args":["rot_identity"],"kind":"fixup","provenance":"SpawnInit.c:1172 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1179,"op":"raw_word","args":["0x801e006c"],"kind":"word","provenance":"SpawnInit.c:1173 local_148 assignment; append at 1179","assignment_line":1173}
+{"line":1182,"op":"FUN_1402cfd50","args":[0,0],"kind":"word","provenance":"SpawnInit.c:1182 decompiler operands; builder/context pointer omitted"}
+{"line":1183,"op":"FUN_1402cdec0","args":["rot_identity"],"kind":"fixup","provenance":"SpawnInit.c:1183 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1184,"op":"FUN_1403d9ca0","args":[1,96,30],"kind":"word","provenance":"SpawnInit.c:1184 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1185,"op":"FUN_1404378d0","args":[1,1,7],"kind":"word","provenance":"SpawnInit.c:1185 decompiler operands; builder/context pointer omitted"}
+{"line":1186,"op":"FUN_1403d9ca0","args":[2,100,30],"kind":"word","provenance":"SpawnInit.c:1186 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1187,"op":"FUN_1404378d0","args":[2,2,8],"kind":"word","provenance":"SpawnInit.c:1187 decompiler operands; builder/context pointer omitted"}
+{"line":1188,"op":"FUN_1403d9ca0","args":[3,40,31],"kind":"word","provenance":"SpawnInit.c:1188 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1189,"op":"FUN_14030b430","args":["rot"],"kind":"fixup","provenance":"SpawnInit.c:1189 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1196,"op":"label_mark","args":["dir_aim"],"kind":"label","provenance":"SpawnInit.c:1196 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1197,"op":"FUN_1402d1f50","args":[0,124,30],"kind":"word","provenance":"SpawnInit.c:1197 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1198,"op":"FUN_1402cfd50","args":[0,0],"kind":"word","provenance":"SpawnInit.c:1198 decompiler operands; builder/context pointer omitted"}
+{"line":1199,"op":"FUN_1402cdec0","args":["rot_identity"],"kind":"fixup","provenance":"SpawnInit.c:1199 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1201,"op":"FUN_140435410","args":[0,1,112,30],"kind":"words3","provenance":"PE callsite 0x14043a1d9: hidden fifth operand=0x1e"}
+{"line":1206,"op":"label_mark","args":["rot"],"kind":"label","provenance":"SpawnInit.c:1206 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1213,"op":"raw_word","args":["0xec810072"],"kind":"word","provenance":"SpawnInit.c:1207 local_148 assignment; append at 1213","assignment_line":1207}
+{"line":1216,"op":"FUN_1404376d0","args":[4,2,2,4],"kind":"word","provenance":"PE callsite 0x14043a261: hidden fifth operand=4"}
+{"line":1223,"op":"raw_word","args":["0xeca320fa"],"kind":"word","provenance":"SpawnInit.c:1217 local_148 assignment; append at 1223","assignment_line":1217}
+{"line":1233,"op":"raw_word","args":["0xc1bf002c"],"kind":"word","provenance":"SpawnInit.c:1227 local_148 assignment; append at 1233","assignment_line":1227}
+{"line":1241,"op":"raw_word","args":["0xfc056800"],"kind":"word","provenance":"SpawnInit.c:1236 local_148 assignment; append at 1241","assignment_line":1236}
+{"line":1244,"op":"FUN_140382b00","args":["rot_identity"],"kind":"fixup","provenance":"SpawnInit.c:1244 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1251,"op":"raw_word","args":["0xc1bf0020"],"kind":"word","provenance":"SpawnInit.c:1245 local_148 assignment; append at 1251","assignment_line":1245}
+{"line":1259,"op":"raw_word","args":["0xfc056800"],"kind":"word","provenance":"SpawnInit.c:1254 local_148 assignment; append at 1259","assignment_line":1254}
+{"line":1262,"op":"FUN_1403c4e90","args":["rot_identity"],"kind":"fixup","provenance":"SpawnInit.c:1262 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1268,"op":"raw_word","args":["0xecc0202c"],"kind":"word","provenance":"SpawnInit.c:1263 local_148 assignment; append at 1268","assignment_line":1263}
+{"line":1271,"op":"FUN_140437880","args":[7,5],"kind":"word","provenance":"SpawnInit.c:1271 decompiler operands; builder/context pointer omitted"}
+{"line":1278,"op":"raw_word","args":["0xc15f0010"],"kind":"word","provenance":"SpawnInit.c:1272 local_148 assignment; append at 1278","assignment_line":1272}
+{"line":1281,"op":"FUN_1403d9ca0","args":[11,20,31],"kind":"word","provenance":"PE callsite 0x14043a435: hidden mask operand=0x1f","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1289,"op":"raw_word","args":["0xc19f0028"],"kind":"word","provenance":"SpawnInit.c:1282 local_148 assignment; append at 1289","assignment_line":1282}
+{"line":1297,"op":"raw_word","args":["0xfd005890"],"kind":"word","provenance":"SpawnInit.c:1292 local_148 assignment; append at 1297","assignment_line":1292}
+{"line":1305,"op":"raw_word","args":["0xfd206090"],"kind":"word","provenance":"SpawnInit.c:1300 local_148 assignment; append at 1305","assignment_line":1300}
+{"line":1313,"op":"raw_word","args":["0xfc066800"],"kind":"word","provenance":"SpawnInit.c:1308 local_148 assignment; append at 1313","assignment_line":1308}
+{"line":1322,"op":"FUN_1402cfda0","args":[1098907648,"yaw"],"kind":"fixup","provenance":"PE callsite 0x14043a55f; third argument is stack string `yaw`","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1335,"op":"raw_word","args":["0xed013024"],"kind":"word","provenance":"SpawnInit.c:1330 local_148 assignment; append at 1335","assignment_line":1330}
+{"line":1343,"op":"raw_word","args":["0xed223024"],"kind":"word","provenance":"SpawnInit.c:1338 local_148 assignment; append at 1343","assignment_line":1338}
+{"line":1352,"op":"FUN_1402ce0c0","args":[1207959553,"half"],"kind":"fixup","provenance":"PE callsite 0x14043a648; third argument is stack string `half`","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1367,"op":"label_mark","args":["yaw"],"kind":"label","provenance":"SpawnInit.c:1367 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1373,"op":"raw_word","args":["0xfc804090"],"kind":"word","provenance":"SpawnInit.c:1368 local_148 assignment; append at 1373","assignment_line":1368}
+{"line":1381,"op":"raw_word","args":["0xfca04890"],"kind":"word","provenance":"SpawnInit.c:1376 local_148 assignment; append at 1381","assignment_line":1376}
+{"line":1398,"op":"raw_word","args":["0xed063824"],"kind":"word","provenance":"SpawnInit.c:1393 local_148 assignment; append at 1398","assignment_line":1393}
+{"line":1406,"op":"raw_word","args":["0xed233824"],"kind":"word","provenance":"SpawnInit.c:1401 local_148 assignment; append at 1406","assignment_line":1401}
+{"line":1409,"op":"FUN_1403cb810","args":["half"],"kind":"fixup","provenance":"SpawnInit.c:1409 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1410,"op":"FUN_140437780","args":[0,5,9],"kind":"word","provenance":"SpawnInit.c:1410 decompiler operands; builder/context pointer omitted"}
+{"line":1411,"op":"FUN_1403db950","args":[0,208,31],"kind":"word","provenance":"SpawnInit.c:1411 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xd0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1412,"op":"FUN_140437780","args":[0,4,9],"kind":"word","provenance":"SpawnInit.c:1412 decompiler operands; builder/context pointer omitted"}
+{"line":1413,"op":"FUN_1404377e0","args":[0,0],"kind":"word","provenance":"SpawnInit.c:1413 decompiler operands; builder/context pointer omitted"}
+{"line":1414,"op":"FUN_1403db950","args":[0,212,31],"kind":"word","provenance":"SpawnInit.c:1414 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xd0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1415,"op":"FUN_140437780","args":[0,5,8],"kind":"word","provenance":"SpawnInit.c:1415 decompiler operands; builder/context pointer omitted"}
+{"line":1416,"op":"FUN_1403db950","args":[0,216,31],"kind":"word","provenance":"SpawnInit.c:1416 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xd0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1417,"op":"FUN_140437780","args":[0,4,8],"kind":"word","provenance":"SpawnInit.c:1417 decompiler operands; builder/context pointer omitted"}
+{"line":1418,"op":"FUN_1403db950","args":[0,220,31],"kind":"word","provenance":"SpawnInit.c:1418 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xd0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1419,"op":"FUN_14030b430","args":["call"],"kind":"fixup","provenance":"SpawnInit.c:1419 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1421,"op":"label_mark","args":["rot_identity"],"kind":"label","provenance":"SpawnInit.c:1421 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1422,"op":"FUN_1403d9ca0","args":[0,40,31],"kind":"word","provenance":"SpawnInit.c:1422 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1423,"op":"FUN_1403db950","args":[0,208,31],"kind":"word","provenance":"SpawnInit.c:1423 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xd0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1424,"op":"FUN_1403db950","args":[0,212,31],"kind":"word","provenance":"SpawnInit.c:1424 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xd0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1426,"op":"FUN_1403db950","args":[0,216,31],"kind":"word","provenance":"SpawnInit.c:1426 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xd0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1427,"op":"FUN_1403d9ca0","args":[0,20,31],"kind":"word","provenance":"SpawnInit.c:1427 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1428,"op":"FUN_1403db950","args":[0,220,31],"kind":"word","provenance":"SpawnInit.c:1428 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xd0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1430,"op":"label_mark","args":["call"],"kind":"label","provenance":"SpawnInit.c:1430 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1431,"op":"FUN_1402d1ad0","args":[0,-1],"kind":"word","provenance":"SpawnInit.c:1431 decompiler operands; builder/context pointer omitted"}
+{"line":1432,"op":"FUN_1402d45d0","args":[0,320,31],"kind":"word","provenance":"SpawnInit.c:1432 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1434,"op":"FUN_1402d1ec0","args":[2,25761688],"kind":"words2","provenance":"SpawnInit.c:1434 decompiler operands; builder/context pointer omitted"}
+{"line":1435,"op":"FUN_1402cc150","args":[3,31,320],"kind":"word","provenance":"SpawnInit.c:1435 decompiler operands; builder/context pointer omitted"}
+{"line":1436,"op":"FUN_1402cc150","args":[4,31,192],"kind":"word","provenance":"SpawnInit.c:1436 decompiler operands; builder/context pointer omitted"}
+{"line":1437,"op":"FUN_14030b530","args":[1305912],"kind":"fixup","provenance":"SpawnInit.c:1437 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1438,"op":"FUN_1402d1f50","args":[5,320,31],"kind":"word","provenance":"SpawnInit.c:1438 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1439,"op":"FUN_1403855f0","args":[9,28,4],"kind":"word","provenance":"SpawnInit.c:1439 decompiler operands; builder/context pointer omitted"}
+{"line":1440,"op":"FUN_1403618d0","args":[9,9,30],"kind":"word","provenance":"SpawnInit.c:1440 decompiler operands; builder/context pointer omitted"}
+{"line":1441,"op":"FUN_1402d45d0","args":[5,368,9],"kind":"word","provenance":"SpawnInit.c:1441 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1442,"op":"FUN_1402d1ad0","args":[4,512],"kind":"word","provenance":"SpawnInit.c:1442 decompiler operands; builder/context pointer omitted"}
+{"line":1443,"op":"FUN_1402cfd50","args":[5,0],"kind":"word","provenance":"SpawnInit.c:1443 decompiler operands; builder/context pointer omitted"}
+{"line":1444,"op":"FUN_1402cdec0","args":["status"],"kind":"fixup","provenance":"SpawnInit.c:1444 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1445,"op":"FUN_1402cfd50","args":[5,-1],"kind":"word","provenance":"SpawnInit.c:1445 decompiler operands; builder/context pointer omitted"}
+{"line":1446,"op":"FUN_1402cdec0","args":["status"],"kind":"fixup","provenance":"SpawnInit.c:1446 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1447,"op":"FUN_1402d1ad0","args":[4,768],"kind":"word","provenance":"SpawnInit.c:1447 decompiler operands; builder/context pointer omitted"}
+{"line":1448,"op":"FUN_1403cb810","args":["sobj"],"kind":"fixup","provenance":"SpawnInit.c:1448 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1449,"op":"FUN_1402cdfc0","args":["status"],"kind":"fixup","provenance":"SpawnInit.c:1449 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1450,"op":"FUN_140383960","args":[0,8,12],"kind":"word","provenance":"SpawnInit.c:1450 decompiler operands; builder/context pointer omitted","encoder":"primary opcode 0x22"}
+{"line":1451,"op":"FUN_1402d1f50","args":[6,36,30],"kind":"word","provenance":"SpawnInit.c:1451 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1452,"op":"FUN_14035d820","args":[0,6],"kind":"word","provenance":"SpawnInit.c:1452 decompiler operands; builder/context pointer omitted"}
+{"line":1453,"op":"FUN_1402d2040","args":[4,0,1024],"kind":"word","provenance":"SpawnInit.c:1453 decompiler operands; builder/context pointer omitted"}
+{"line":1454,"op":"FUN_1402cdfc0","args":["status"],"kind":"fixup","provenance":"SpawnInit.c:1454 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1455,"op":"FUN_1402d2040","args":[4,0,256],"kind":"word","provenance":"SpawnInit.c:1455 decompiler operands; builder/context pointer omitted"}
+{"line":1456,"op":"FUN_1402d1f50","args":[6,24,30],"kind":"word","provenance":"SpawnInit.c:1456 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1457,"op":"FUN_1402cc150","args":[6,6,1],"kind":"word","provenance":"SpawnInit.c:1457 decompiler operands; builder/context pointer omitted"}
+{"line":1458,"op":"FUN_1402d45d0","args":[6,24,30],"kind":"word","provenance":"SpawnInit.c:1458 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1460,"op":"label_mark","args":["status"],"kind":"label","provenance":"SpawnInit.c:1460 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1461,"op":"FUN_1403855f0","args":[9,28,1],"kind":"word","provenance":"SpawnInit.c:1461 decompiler operands; builder/context pointer omitted"}
+{"line":1462,"op":"FUN_1403618d0","args":[9,9,30],"kind":"word","provenance":"SpawnInit.c:1462 decompiler operands; builder/context pointer omitted"}
+{"line":1463,"op":"FUN_140380030","args":[4,304,9],"kind":"word","provenance":"SpawnInit.c:1463 decompiler operands; builder/context pointer omitted","encoder":"D-form primary opcode 0x2c"}
+{"line":1465,"op":"FUN_1402cc150","args":[28,28,1],"kind":"word","provenance":"SpawnInit.c:1465 decompiler operands; builder/context pointer omitted"}
+{"line":1466,"op":"FUN_1402d45d0","args":[28,20,30],"kind":"word","provenance":"SpawnInit.c:1466 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1467,"op":"FUN_1402cc150","args":[25,25,-1],"kind":"word","provenance":"SpawnInit.c:1467 decompiler operands; builder/context pointer omitted"}
+{"line":1468,"op":"FUN_1402d1f50","args":[0,156,30],"kind":"word","provenance":"SpawnInit.c:1468 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1469,"op":"FUN_14035d820","args":[28,0],"kind":"word","provenance":"SpawnInit.c:1469 decompiler operands; builder/context pointer omitted"}
+{"line":1470,"op":"FUN_140382b00","args":["complete"],"kind":"fixup","provenance":"SpawnInit.c:1470 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1471,"op":"FUN_14030b430","args":["spawn_point"],"kind":"fixup","provenance":"SpawnInit.c:1471 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1473,"op":"label_mark","args":["loot_event"],"kind":"label","provenance":"SpawnInit.c:1473 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1475,"op":"FUN_140435750","args":[2],"kind":"word","provenance":"SpawnInit.c:1475 decompiler operands; builder/context pointer omitted"}
+{"line":1476,"op":"FUN_1402d1f50","args":[12,160,30],"kind":"word","provenance":"SpawnInit.c:1476 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1477,"op":"FUN_1402cc150","args":[12,12,-1],"kind":"word","provenance":"SpawnInit.c:1477 decompiler operands; builder/context pointer omitted"}
+{"line":1478,"op":"FUN_1403832b0","args":[12,9999],"kind":"word","provenance":"SpawnInit.c:1478 decompiler operands; builder/context pointer omitted"}
+{"line":1479,"op":"FUN_1403c4c90","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:1479 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1480,"op":"FUN_1402d1ec0","args":[2,25761688],"kind":"words2","provenance":"SpawnInit.c:1480 decompiler operands; builder/context pointer omitted"}
+{"line":1481,"op":"FUN_1402d1f50","args":[0,152,30],"kind":"word","provenance":"SpawnInit.c:1481 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1482,"op":"FUN_1402cfd50","args":[0,0],"kind":"word","provenance":"SpawnInit.c:1482 decompiler operands; builder/context pointer omitted"}
+{"line":1483,"op":"FUN_1402cdec0","args":["emit_basic"],"kind":"fixup","provenance":"SpawnInit.c:1483 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1484,"op":"FUN_1402d1f50","args":[7,156,30],"kind":"word","provenance":"SpawnInit.c:1484 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1485,"op":"FUN_1402cc150","args":[12,7,-24],"kind":"word","provenance":"SpawnInit.c:1485 decompiler operands; builder/context pointer omitted"}
+{"line":1486,"op":"FUN_1403832b0","args":[12,808],"kind":"word","provenance":"SpawnInit.c:1486 decompiler operands; builder/context pointer omitted"}
+{"line":1487,"op":"FUN_1403c4c90","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:1487 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1488,"op":"FUN_1402d1f50","args":[8,164,30],"kind":"word","provenance":"SpawnInit.c:1488 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1489,"op":"FUN_1403832b0","args":[8,16],"kind":"word","provenance":"SpawnInit.c:1489 decompiler operands; builder/context pointer omitted"}
+{"line":1490,"op":"FUN_1403c4c90","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:1490 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1491,"op":"FUN_1402d1f50","args":[3,148,30],"kind":"word","provenance":"SpawnInit.c:1491 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1492,"op":"FUN_1402cc150","args":[4,1,256],"kind":"word","provenance":"SpawnInit.c:1492 decompiler operands; builder/context pointer omitted"}
+{"line":1493,"op":"FUN_14030b530","args":[2536932],"kind":"fixup","provenance":"SpawnInit.c:1493 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1494,"op":"FUN_1402d1f50","args":[7,156,30],"kind":"word","provenance":"SpawnInit.c:1494 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1495,"op":"FUN_1402d1f50","args":[8,164,30],"kind":"word","provenance":"SpawnInit.c:1495 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1496,"op":"FUN_1402cc150","args":[9,30,168],"kind":"word","provenance":"SpawnInit.c:1496 decompiler operands; builder/context pointer omitted"}
+{"line":1497,"op":"FUN_140435750","args":[2],"kind":"word","provenance":"SpawnInit.c:1497 decompiler operands; builder/context pointer omitted"}
+{"line":1499,"op":"label_mark","args":["field"],"kind":"label","provenance":"SpawnInit.c:1499 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1500,"op":"FUN_1402cfd50","args":[8,0],"kind":"word","provenance":"SpawnInit.c:1500 decompiler operands; builder/context pointer omitted"}
+{"line":1501,"op":"FUN_1402cdec0","args":["emit_typed"],"kind":"fixup","provenance":"SpawnInit.c:1501 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1503,"op":"FUN_1403ba4a0","args":[10,0,9],"kind":"word","provenance":"SpawnInit.c:1503 decompiler operands; builder/context pointer omitted","encoder":"D-form primary opcode 0x28; validates signed16 displacement and inserts imm16 in low 16 bits"}
+{"line":1504,"op":"FUN_140383960","args":[6,2,9],"kind":"word","provenance":"SpawnInit.c:1504 decompiler operands; builder/context pointer omitted","encoder":"primary opcode 0x22"}
+{"line":1505,"op":"FUN_1402d1f50","args":[5,4,9],"kind":"word","provenance":"SpawnInit.c:1505 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1506,"op":"FUN_1403832b0","args":[10,24],"kind":"word","provenance":"SpawnInit.c:1506 decompiler operands; builder/context pointer omitted"}
+{"line":1507,"op":"FUN_1403c4e90","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:1507 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1508,"op":"FUN_1403618d0","args":[12,10,6],"kind":"word","provenance":"SpawnInit.c:1508 decompiler operands; builder/context pointer omitted"}
+{"line":1509,"op":"FUN_14035d820","args":[12,7],"kind":"word","provenance":"SpawnInit.c:1509 decompiler operands; builder/context pointer omitted"}
+{"line":1510,"op":"FUN_1403c4c90","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:1510 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1511,"op":"FUN_1402cc150","args":[12,6,-1],"kind":"word","provenance":"SpawnInit.c:1511 decompiler operands; builder/context pointer omitted"}
+{"line":1512,"op":"FUN_1403b84d0","args":[12,12,10],"kind":"word","provenance":"SpawnInit.c:1512 decompiler operands; builder/context pointer omitted","encoder":"XO-form base 0x7c000039"}
+{"line":1513,"op":"FUN_1402cdfc0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:1513 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1514,"op":"FUN_1402cc150","args":[12,1,256],"kind":"word","provenance":"SpawnInit.c:1514 decompiler operands; builder/context pointer omitted"}
+{"line":1515,"op":"FUN_1403618d0","args":[12,12,10],"kind":"word","provenance":"SpawnInit.c:1515 decompiler operands; builder/context pointer omitted"}
+{"line":1516,"op":"FUN_1402cfd50","args":[6,1],"kind":"word","provenance":"SpawnInit.c:1516 decompiler operands; builder/context pointer omitted"}
+{"line":1517,"op":"FUN_1402cdfc0","args":["f2"],"kind":"fixup","provenance":"SpawnInit.c:1517 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1518,"op":"FUN_14037ffb0","args":[5,0,12],"kind":"word","provenance":"SpawnInit.c:1518 decompiler operands; builder/context pointer omitted","encoder":"D-form primary opcode 0x98000000"}
+{"line":1519,"op":"FUN_14030b430","args":["fnext"],"kind":"fixup","provenance":"SpawnInit.c:1519 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1521,"op":"label_mark","args":["f2"],"kind":"label","provenance":"SpawnInit.c:1521 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1522,"op":"FUN_1402cfd50","args":[6,2],"kind":"word","provenance":"SpawnInit.c:1522 decompiler operands; builder/context pointer omitted"}
+{"line":1523,"op":"FUN_1402cdfc0","args":["f4"],"kind":"fixup","provenance":"SpawnInit.c:1523 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1524,"op":"FUN_140380030","args":[5,0,12],"kind":"word","provenance":"SpawnInit.c:1524 decompiler operands; builder/context pointer omitted","encoder":"D-form primary opcode 0x2c"}
+{"line":1525,"op":"FUN_14030b430","args":["fnext"],"kind":"fixup","provenance":"SpawnInit.c:1525 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1533,"op":"label_mark","args":["f4"],"kind":"label","provenance":"SpawnInit.c:1533 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1534,"op":"FUN_1402cfd50","args":[6,4],"kind":"word","provenance":"SpawnInit.c:1534 decompiler operands; builder/context pointer omitted"}
+{"line":1535,"op":"FUN_1402cdfc0","args":["refuse"],"kind":"fixup","provenance":"SpawnInit.c:1535 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1536,"op":"FUN_1402d45d0","args":[5,0,12],"kind":"word","provenance":"SpawnInit.c:1536 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1542,"op":"label_mark","args":["fnext"],"kind":"label","provenance":"SpawnInit.c:1542 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1543,"op":"FUN_1402cc150","args":[9,9,8],"kind":"word","provenance":"SpawnInit.c:1543 decompiler operands; builder/context pointer omitted"}
+{"line":1544,"op":"FUN_1402cc150","args":[8,8,-1],"kind":"word","provenance":"SpawnInit.c:1544 decompiler operands; builder/context pointer omitted"}
+{"line":1545,"op":"FUN_14030b430","args":["field"],"kind":"fixup","provenance":"SpawnInit.c:1545 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1558,"op":"label_mark","args":["emit_typed"],"kind":"label","provenance":"SpawnInit.c:1558 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1559,"op":"FUN_1402d1ec0","args":[2,25761688],"kind":"words2","provenance":"SpawnInit.c:1559 decompiler operands; builder/context pointer omitted"}
+{"line":1560,"op":"FUN_1402cc150","args":[3,30,144],"kind":"word","provenance":"SpawnInit.c:1560 decompiler operands; builder/context pointer omitted"}
+{"line":1561,"op":"FUN_1402d1f50","args":[4,148,30],"kind":"word","provenance":"SpawnInit.c:1561 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1562,"op":"FUN_1402cc150","args":[5,1,256],"kind":"word","provenance":"SpawnInit.c:1562 decompiler operands; builder/context pointer omitted"}
+{"line":1565,"op":"FUN_1402ce0c0","args":[1207959553,"0x26b398"],"kind":"fixup","provenance":"PE callsite 0x14043b281; third argument is target 0x26b398","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1566,"op":"FUN_14030b430","args":["emitted"],"kind":"fixup","provenance":"SpawnInit.c:1566 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1579,"op":"label_mark","args":["emit_basic"],"kind":"label","provenance":"SpawnInit.c:1579 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1580,"op":"FUN_1402cc150","args":[3,30,144],"kind":"word","provenance":"SpawnInit.c:1580 decompiler operands; builder/context pointer omitted"}
+{"line":1583,"op":"FUN_1402ce0c0","args":[1207959553,"0x26b448"],"kind":"fixup","provenance":"PE callsite 0x14043b30d; third argument is target 0x26b448","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1591,"op":"label_mark","args":["emitted"],"kind":"label","provenance":"SpawnInit.c:1591 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1592,"op":"FUN_1402d1f50","args":[12,20,30],"kind":"word","provenance":"SpawnInit.c:1592 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1593,"op":"FUN_1402cc150","args":[12,12,1],"kind":"word","provenance":"SpawnInit.c:1593 decompiler operands; builder/context pointer omitted"}
+{"line":1594,"op":"FUN_1402d45d0","args":[12,20,30],"kind":"word","provenance":"SpawnInit.c:1594 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x90000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1596,"op":"FUN_1402d1f50","args":[0,160,30],"kind":"word","provenance":"SpawnInit.c:1596 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1597,"op":"FUN_14035d820","args":[12,0],"kind":"word","provenance":"SpawnInit.c:1597 decompiler operands; builder/context pointer omitted"}
+{"line":1598,"op":"FUN_140382b00","args":["complete"],"kind":"fixup","provenance":"SpawnInit.c:1598 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1599,"op":"FUN_14030b430","args":["next"],"kind":"fixup","provenance":"SpawnInit.c:1599 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1604,"op":"label_mark","args":["sobj"],"kind":"label","provenance":"SpawnInit.c:1604 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1605,"op":"FUN_1402d1fb0","args":[10],"kind":"word","provenance":"SpawnInit.c:1605 decompiler operands; builder/context pointer omitted"}
+{"line":1607,"op":"FUN_1402cfd50","args":[5,0],"kind":"word","provenance":"SpawnInit.c:1607 decompiler operands; builder/context pointer omitted"}
+{"line":1608,"op":"FUN_1402cdec0","args":["sobj_bad"],"kind":"fixup","provenance":"SpawnInit.c:1608 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1609,"op":"FUN_1402cfd50","args":[5,-1],"kind":"word","provenance":"SpawnInit.c:1609 decompiler operands; builder/context pointer omitted"}
+{"line":1610,"op":"FUN_1402cdec0","args":["sobj_bad"],"kind":"fixup","provenance":"SpawnInit.c:1610 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1611,"op":"FUN_1402d1e70","args":[12,418],"kind":"word","provenance":"SpawnInit.c:1611 decompiler operands; builder/context pointer omitted"}
+{"line":1612,"op":"FUN_1402cc150","args":[12,12,-9760],"kind":"word","provenance":"SpawnInit.c:1612 decompiler operands; builder/context pointer omitted"}
+{"line":1613,"op":"FUN_1402d1f50","args":[6,12,12],"kind":"word","provenance":"PE callsite 0x14043b4c0: omitted fourth operand R9D=0xc","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1614,"op":"FUN_1403832b0","args":[6,192],"kind":"word","provenance":"SpawnInit.c:1614 decompiler operands; builder/context pointer omitted"}
+{"line":1615,"op":"FUN_1402cdfc0","args":["sobj_bad"],"kind":"fixup","provenance":"SpawnInit.c:1615 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1616,"op":"FUN_1402d1f50","args":[7,16,12],"kind":"word","provenance":"SpawnInit.c:1616 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1617,"op":"FUN_1402d1f50","args":[8,8,12],"kind":"word","provenance":"SpawnInit.c:1617 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1618,"op":"FUN_140362de0","args":[6,5,0,19,31],"kind":"word","provenance":"PE callsite 0x14043b539: hidden args 0x13 and stack arg 0x1f"}
+{"line":1619,"op":"FUN_14035d820","args":[6,7],"kind":"word","provenance":"SpawnInit.c:1619 decompiler operands; builder/context pointer omitted"}
+{"line":1620,"op":"FUN_140382b00","args":["sobj_bad"],"kind":"fixup","provenance":"SpawnInit.c:1620 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1621,"op":"FUN_1403c71a0","args":[6,6,192],"kind":"word","provenance":"SpawnInit.c:1621 decompiler operands; builder/context pointer omitted"}
+{"line":1622,"op":"FUN_1403618d0","args":[12,8,6],"kind":"word","provenance":"SpawnInit.c:1622 decompiler operands; builder/context pointer omitted"}
+{"line":1623,"op":"FUN_1403cb810","args":["chk3"],"kind":"fixup","provenance":"SpawnInit.c:1623 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1624,"op":"FUN_1402cdec0","args":["sobj_bad"],"kind":"fixup","provenance":"SpawnInit.c:1624 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1625,"op":"FUN_1402d1f50","args":[0,12,12],"kind":"word","provenance":"PE callsite 0x14043b5bf: omitted fourth operand R9D=0xc","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1626,"op":"FUN_14035d820","args":[0,5],"kind":"word","provenance":"SpawnInit.c:1626 decompiler operands; builder/context pointer omitted"}
+{"line":1627,"op":"FUN_1402cdfc0","args":["sobj_bad"],"kind":"fixup","provenance":"SpawnInit.c:1627 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1628,"op":"FUN_1402d1f50","args":[0,4,12],"kind":"word","provenance":"SpawnInit.c:1628 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0x80000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1630,"op":"FUN_1402d4c00","args":["0x70000004"],"kind":"word","provenance":"FUN_1402d47b0(4)=4; OR with 0x70000000"}
+{"line":1631,"op":"FUN_1402d2010","args":[10],"kind":"word","provenance":"SpawnInit.c:1631 decompiler operands; builder/context pointer omitted"}
+{"line":1632,"op":"FUN_1402fa0e0","args":[],"kind":"word","provenance":"SpawnInit.c:1632 decompiler operands; builder/context pointer omitted"}
+{"line":1637,"op":"label_mark","args":["sobj_bad"],"kind":"label","provenance":"SpawnInit.c:1637 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1638,"op":"FUN_1402d1ad0","args":[0,1],"kind":"word","provenance":"SpawnInit.c:1638 decompiler operands; builder/context pointer omitted"}
+{"line":1639,"op":"FUN_1402cfd50","args":[0,0],"kind":"word","provenance":"SpawnInit.c:1639 decompiler operands; builder/context pointer omitted"}
+{"line":1640,"op":"FUN_1402d2010","args":[10],"kind":"word","provenance":"SpawnInit.c:1640 decompiler operands; builder/context pointer omitted"}
+{"line":1641,"op":"FUN_1402fa0e0","args":[],"kind":"word","provenance":"SpawnInit.c:1641 decompiler operands; builder/context pointer omitted"}
+{"line":1649,"op":"label_mark","args":["bounded"],"kind":"label","provenance":"SpawnInit.c:1649 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1650,"op":"FUN_1403d9ca0","args":[13,36,31],"kind":"word","provenance":"SpawnInit.c:1650 decompiler operands; builder/context pointer omitted","encoder":"D-form opcode 0xc0000000; displacement validates signed16 then uses low 16 bits"}
+{"line":1657,"op":"raw_word","args":["0xfc000a10"],"kind":"word","provenance":"SpawnInit.c:1652 local_148 assignment; append at 1657","assignment_line":1652}
+{"line":1660,"op":"FUN_140437580","args":[0,0,13],"kind":"word","provenance":"SpawnInit.c:1660 decompiler operands; builder/context pointer omitted"}
+{"line":1661,"op":"FUN_1404357e0","args":[],"kind":"word","provenance":"SpawnInit.c:1661 decompiler operands; builder/context pointer omitted"}
+{"line":1662,"op":"FUN_140437480","args":[0,2],"kind":"word","provenance":"SpawnInit.c:1662 decompiler operands; builder/context pointer omitted"}
+{"line":1663,"op":"FUN_140437580","args":[0,0,13],"kind":"word","provenance":"SpawnInit.c:1663 decompiler operands; builder/context pointer omitted"}
+{"line":1664,"op":"FUN_1404357e0","args":[],"kind":"word","provenance":"SpawnInit.c:1664 decompiler operands; builder/context pointer omitted"}
+{"line":1665,"op":"FUN_140437480","args":[0,3],"kind":"word","provenance":"SpawnInit.c:1665 decompiler operands; builder/context pointer omitted"}
+{"line":1666,"op":"FUN_140437580","args":[0,0,13],"kind":"word","provenance":"SpawnInit.c:1666 decompiler operands; builder/context pointer omitted"}
+{"line":1667,"op":"FUN_1402fa0e0","args":[],"kind":"word","provenance":"SpawnInit.c:1667 decompiler operands; builder/context pointer omitted"}
+{"line":1672,"op":"label_mark","args":["half"],"kind":"label","provenance":"SpawnInit.c:1672 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1673,"op":"FUN_140437580","args":[0,8,12],"kind":"word","provenance":"SpawnInit.c:1673 decompiler operands; builder/context pointer omitted"}
+{"line":1674,"op":"FUN_1403c4e90","args":["half_neg"],"kind":"fixup","provenance":"SpawnInit.c:1674 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1681,"op":"raw_word","args":["0xec0b402a"],"kind":"word","provenance":"SpawnInit.c:1676 local_148 assignment; append at 1681","assignment_line":1676}
+{"line":1684,"op":"FUN_140437780","args":[0,0,10],"kind":"word","provenance":"SpawnInit.c:1684 decompiler operands; builder/context pointer omitted"}
+{"line":1685,"op":"FUN_140437880","args":[0,0],"kind":"word","provenance":"SpawnInit.c:1685 decompiler operands; builder/context pointer omitted"}
+{"line":1686,"op":"FUN_140437780","args":[9,9,10],"kind":"word","provenance":"SpawnInit.c:1686 decompiler operands; builder/context pointer omitted"}
+{"line":1687,"op":"FUN_1404375e0","args":[9,9,0],"kind":"word","provenance":"SpawnInit.c:1687 decompiler operands; builder/context pointer omitted"}
+{"line":1688,"op":"FUN_140437730","args":[8,0],"kind":"word","provenance":"SpawnInit.c:1688 decompiler operands; builder/context pointer omitted"}
+{"line":1689,"op":"FUN_1402fa0e0","args":[],"kind":"word","provenance":"SpawnInit.c:1689 decompiler operands; builder/context pointer omitted"}
+{"line":1694,"op":"label_mark","args":["half_neg"],"kind":"label","provenance":"SpawnInit.c:1694 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1695,"op":"FUN_1404378d0","args":[0,11,8],"kind":"word","provenance":"SpawnInit.c:1695 decompiler operands; builder/context pointer omitted"}
+{"line":1696,"op":"FUN_140437780","args":[0,0,10],"kind":"word","provenance":"SpawnInit.c:1696 decompiler operands; builder/context pointer omitted"}
+{"line":1697,"op":"FUN_140437880","args":[0,0],"kind":"word","provenance":"SpawnInit.c:1697 decompiler operands; builder/context pointer omitted"}
+{"line":1698,"op":"FUN_140437580","args":[0,9,12],"kind":"word","provenance":"SpawnInit.c:1698 decompiler operands; builder/context pointer omitted"}
+{"line":1699,"op":"FUN_140382b00","args":["half_pos"],"kind":"fixup","provenance":"SpawnInit.c:1699 decompiler operands; builder/context pointer omitted","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1700,"op":"FUN_1404377e0","args":[0,0],"kind":"word","provenance":"SpawnInit.c:1700 decompiler operands; builder/context pointer omitted"}
+{"line":1706,"op":"label_mark","args":["half_pos"],"kind":"label","provenance":"SpawnInit.c:1706 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1707,"op":"FUN_140437780","args":[9,9,10],"kind":"word","provenance":"SpawnInit.c:1707 decompiler operands; builder/context pointer omitted"}
+{"line":1708,"op":"FUN_1404375e0","args":[8,9,0],"kind":"word","provenance":"SpawnInit.c:1708 decompiler operands; builder/context pointer omitted"}
+{"line":1709,"op":"FUN_140437730","args":[9,0],"kind":"word","provenance":"SpawnInit.c:1709 decompiler operands; builder/context pointer omitted"}
+{"line":1710,"op":"FUN_1402fa0e0","args":[],"kind":"word","provenance":"SpawnInit.c:1710 decompiler operands; builder/context pointer omitted"}
+{"line":1716,"op":"label_mark","args":["chk3"],"kind":"label","provenance":"SpawnInit.c:1716 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1717,"op":"FUN_1402d1ad0","args":[11,3],"kind":"word","provenance":"SpawnInit.c:1717 decompiler operands; builder/context pointer omitted"}
+{"line":1723,"op":"label_mark","args":["chk"],"kind":"label","provenance":"SpawnInit.c:1723 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1724,"op":"FUN_1402d4c00","args":[2039218208],"kind":"word","provenance":"SpawnInit.c:1724 decompiler operands; builder/context pointer omitted"}
+{"line":1725,"op":"FUN_1403b84d0","args":[0,12,11],"kind":"word","provenance":"SpawnInit.c:1725 decompiler operands; builder/context pointer omitted","encoder":"XO-form base 0x7c000039"}
+{"line":1726,"op":"FUN_1402cdfc0","args":["chk_bad"],"kind":"fixup","provenance":"SpawnInit.c:1726 branch fixup target; DAT_14057fde8 resolves to local label chk_bad marked at line 1758","placeholder":"0x00000000","emits":["zero-placeholder-word","fixup-record"]}
+{"line":1734,"op":"raw_word","args":["0x3c0cd000"],"kind":"word","provenance":"SpawnInit.c:1728 local_148 assignment; append at 1734","assignment_line":1728}
+{"line":1737,"op":"FUN_1402d1e70","args":[11,20480],"kind":"word","provenance":"SpawnInit.c:1737 decompiler operands; builder/context pointer omitted"}
+{"line":1738,"op":"FUN_14035d820","args":[0,11],"kind":"word","provenance":"SpawnInit.c:1738 decompiler operands; builder/context pointer omitted"}
+{"line":1739,"op":"FUN_1403cb950","args":[],"kind":"word","provenance":"SpawnInit.c:1739 decompiler operands; builder/context pointer omitted"}
+{"line":1746,"op":"raw_word","args":["0x3c0cffff"],"kind":"word","provenance":"SpawnInit.c:1740 local_148 assignment; append at 1746","assignment_line":1740}
+{"line":1749,"op":"FUN_1402d1e70","args":[11,455],"kind":"word","provenance":"SpawnInit.c:1749 decompiler operands; builder/context pointer omitted"}
+{"line":1750,"op":"FUN_14035d820","args":[0,11],"kind":"word","provenance":"SpawnInit.c:1750 decompiler operands; builder/context pointer omitted"}
+{"line":1751,"op":"FUN_1403cb950","args":[],"kind":"word","provenance":"SpawnInit.c:1751 decompiler operands; builder/context pointer omitted"}
+{"line":1758,"op":"label_mark","args":["chk_bad"],"kind":"label","provenance":"SpawnInit.c:1758 current code position","ambiguity":"Label identity inferred from nearby local/static string; FUN_1402d19a0 export decompiles as a one-argument current-position marker.","label_source":"nearby local/static string"}
+{"line":1759,"op":"FUN_1402d4c00","args":[2080374784],"kind":"word","provenance":"SpawnInit.c:1759 decompiler operands; builder/context pointer omitted"}
+{"line":1760,"op":"FUN_1402fa0e0","args":[],"kind":"word","provenance":"SpawnInit.c:1760 decompiler operands; builder/context pointer omitted"}
+{"line":1762,"op":"FUN_1402d1b20","args":["finalize-and-resolve-builder"],"kind":"finalizer","provenance":"PE FUN_1402d1b20 at 0x1402d1b20: iterates 0x40-byte fixup records; resolves type-1 symbols/labels or direct targets; computes targetOffset - (codeBase + siteWordIndex*4); checks 4-byte alignment and signed width; patches template | (delta & ((1<<width)-4)); serializes each code word high-byte first","behavior":"Fixups are applied before serialization; output bytes are big-endian."}

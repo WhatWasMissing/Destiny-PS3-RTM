@@ -1135,10 +1135,14 @@
         <p class="compact-help-note">List occupied item-cache slots and raw indexes. Names, catalog buckets, and catalog types appear only when a user-imported catalog has a BLES itemIndex or blesItemIndex column.</p>
         <div class="live-inventory-pool-actions">
           <button class="cheat-btn" id="live-inventory-pool-btn" type="button" onclick="inspectLiveItemPool()">Read live item pool</button>
-          <button class="cheat-btn" id="live-inventory-pool-clear" type="button">Clear snapshot</button>
+          <button class="cheat-btn" id="live-inventory-pool-compare" type="button" disabled>Compare last two reads</button>
+          <button class="cheat-btn" id="live-inventory-pool-clear" type="button">Clear snapshots</button>
         </div>
         <p id="live-inventory-pool-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">No live item-pool snapshot taken.</p>
         <div id="live-inventory-pool-output" class="live-inventory-pool-output" aria-label="Live item pool slots, indexes, and optional catalog metadata" role="region" tabindex="0" hidden></div>
+        <p id="live-inventory-pool-diff-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">Capture two live samples to compare them.</p>
+        <div id="live-inventory-pool-diff-output" class="live-inventory-pool-output" aria-label="Changes between two live item-pool samples" role="region" tabindex="0" hidden></div>
+        <p class="compact-help-note">Comparison uses pool slot and item index only. It does not expose item instance IDs or owners, and it cannot establish a transfer or persistence path.</p>
       </div>
     </div>
     <div class="panel" id="spawn-path-check-panel">

@@ -451,3 +451,18 @@ reviewable in PR #8; it remains a draft pending live-console compatibility revie
   `ECD6F5E49A36209BC55873B2CFCF72A1194FCA341BC95168E188614BDAF29FD6`.
   Live spawning, placement and PS3 instruction-cache behavior remain
   unverified. `docs/SPAWNING-INSTRUCTIONS.txt` is synced to the Desktop folder.
+
+## Live inventory comparison
+
+- The live BLES 01.24 item-pool reader now retains the two latest complete
+  samples in page memory and offers a before/after comparison by pool slot and
+  item index. It enables comparison only while the RTM session, manager,
+  descriptor, pool address, and size match.
+- SOID and owner values remain hidden and are not included in comparison rows.
+  Same-index instance replacement, ownership, transfer, and persistence remain
+  indistinguishable; the sequential samples are non-atomic and read-only.
+- Failed captures keep the last complete sample. The user can clear both
+  samples explicitly. The local comparison tests cover additions, removals,
+  changes, unchanged rows, malformed input, and exclusion of extra row fields.
+- The build remains a local diagnostic only; inventory mutation transport and
+  live-console behavior are still unverified.

@@ -200,8 +200,8 @@ body.light-mode .cheat-btn.active-cheat { background:var(--success-soft) !import
 .spawn-path-check-result code { overflow-wrap:anywhere; color:var(--muted); font:10px/1.45 var(--mono); }
 .live-inventory-pool-body { display:flex; flex-direction:column; gap:8px; padding:0.9rem 1rem; }
 .live-inventory-pool-body .build-profile-status { margin:0 0 4px; }
-.live-inventory-pool-actions { display:flex; gap:8px; }
-.live-inventory-pool-actions > button { flex:1; }
+.live-inventory-pool-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.live-inventory-pool-actions > button { min-width:0; }
 .live-inventory-pool-output { max-height:26rem; overflow:auto; border:1px solid var(--border); border-radius:var(--radius-control); background:var(--surface); }
 .live-inventory-table { width:100%; border-collapse:collapse; font:11px/1.45 var(--sans); }
 .live-inventory-table th, .live-inventory-table td { padding:6px 9px; border-bottom:1px solid var(--border); text-align:left; }
@@ -362,6 +362,7 @@ input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, te
 .notification-automation-actions button:hover { border-color:var(--accent-line); background:var(--accent-soft); }
 @media (max-width:520px) { .notification-automation-template { grid-template-columns:1fr; } }
 @media (max-width:760px) { .local-data-live-grid { grid-template-columns:1fr; } }
+@media (max-width:600px) { .live-inventory-pool-actions { grid-template-columns:1fr; } }
 
 #settings-modal h2, #tool-setup-modal h2, .macro-modal-title,
 .activity-guide-head h2, .server-safety-head h2,

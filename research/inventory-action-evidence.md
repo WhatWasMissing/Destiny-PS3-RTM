@@ -88,12 +88,17 @@ boundary, or persistence behavior. The current Ghidra project has too little
 stored analysis for its missing xrefs to be meaningful.
 
 The RTM's verified BLES 01.24 item-pool reader extracts indexes from existing
-item objects, and its offline viewer decodes explicitly imported QZ payloads.
-Neither provides a safe live mutation route. No BLES 01.24 inventory action
-routine, request format, or active-character/vault ownership mapping has been
-verified. This does not prove such a routine is absent; it marks the current
-research boundary. Inventory writes remain unimplemented until the target-side
-operation and readback behavior are established.
+item objects. It can compare the latest two complete live samples by pool slot
+and item index when the same RTM session, manager descriptor, pool address, and
+size still match. The comparison retains no SOID or owner fields, and the reads
+are sequential/non-atomic. Same-index instance replacement, transfer,
+ownership, and persistence cannot be distinguished. The offline viewer also
+decodes explicitly imported QZ payloads and compares character payloads. None
+provides a safe live mutation route. No BLES 01.24 inventory action routine,
+request format, or active-character/vault ownership mapping has been verified.
+This does not prove such a routine is absent; it marks the current research
+boundary. Inventory writes remain unimplemented until the target-side operation
+and readback behavior are established.
 
 ## Bounded BLES 01.24 follow-up
 

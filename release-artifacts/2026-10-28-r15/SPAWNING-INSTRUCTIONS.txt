@@ -1,0 +1,17 @@
+DESTINY RTM — EXPERIMENTAL SPAWN GUIDE
+
+This build includes the reconstructed Blackrock operation-1 spawn workflow. Enemy spawning has NOT been validated on a live PS3. The hook/cache behavior, tag-to-enemy mapping, and placement remain unconfirmed. Use a development console, and never run Blackrock or another RTM spawn client at the same time. A successful memory write or worker result is not proof that the intended enemy spawned.
+
+An earlier prerelease contained an incorrect bootstrap context instruction. Use the updated EXE supplied with this guide. If you installed the earlier executor and its journal is still present, follow the same-console recovery instructions below before installing again.
+
+1. Start Destiny BLES01857 version 01.24 and enter a playable area where game frames are advancing. Menus, loading screens, and paused gameplay will not service spawn requests.
+2. Start DestinyRTM.exe and link to the PS3's private IPv4 address.
+3. Open and expand “Local Data & Diagnostics”, then find “Enemy Spawn · Blackrock operation 1”. The feature refuses unsupported build signatures or occupied executor scratch regions.
+4. Enter an entity tag in hexadecimal, or import a spawn/hop-on catalog in “Local catalog browser” and select a candidate. Selecting a row copies only its tag. A numeric catalog type can be applied to the expected-type guard using the separate button. The BLES type-name table has `biped` at ordinal 9, but a direct catalog-to-guard mapping is unverified; type 9 is a broad object kind, not an enemy flag.
+5. Keep “Expected-type guard” at -1 to disable it, or apply a catalog type only as an unverified candidate. A wrong value may prevent a valid spawn. Choose a placement mode. Defaults are 6 m aim distance, 2 m spacing, and 1× scale. Keep unused pose values at zero.
+6. Press “Install executor” once for the current Destiny session. Do not reinstall while it is active.
+7. Press “Spawn selected tag” (or Ctrl+Enter while focused in this panel) and wait for the status to finish. Read the returned rows as experimental diagnostics, not proof of successful enemy creation.
+8. Submit additional requests through the same installed executor. After the final request, press “Recover hook”. Restart Destiny before installing again: after hook activation the task, code and data remain resident because a callback may still be running. This applies even if no spawn request was submitted.
+9. If the RTM disconnects during a request, reconnect to the same console and use “Check pending request” before recovery. Wait for an active request; cancel only if needed, then reconcile again. Do not recover until the pending result is cleared.
+
+If the game or console freezes, stop sending RTM memory commands and note the last action. If PS3 storage repair is in progress, do not interrupt it.

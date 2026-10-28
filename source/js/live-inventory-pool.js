@@ -29,7 +29,9 @@
     })
   ]);
   let busy = false;
-  let lastSnapshotRows = null;
+  let previousSnapshot = null;
+  let currentSnapshot = null;
+  let lastDiff = null;
 
   function checkedRange(address, size) {
     if (!Number.isSafeInteger(address) || !Number.isSafeInteger(size) || size < 1 ||
@@ -137,6 +139,38 @@
       a.byteLength === b.byteLength;
   }
 
+  function comparePoolRows(beforeRows, afterRows) {
+    function indexRows(rows) {
+      if (!Array.isArray(rows)) throw new TypeError('Expected an array of item-pool rows.');
+      const indexed = new Map();
+      for (const row of rows) {
+        if (!row || !Number.isSafeInteger(row.slot) || row.slot < 0 || !Number.isSafeInteger(row.itemIndex)) {
+          throw new TypeError('Item-pool rows must contain a nonnegative slot and integer item index.');
+        }
+        if (indexed.has(row.slot)) throw new Error(`Duplicate item-pool slot ${row.slot}.`);
+        // Normalize to the two fields this diagnostic is allowed to compare.
+        indexed.set(row.slot, { slot: row.slot, itemIndex: row.itemIndex });
+      }
+      return indexed;
+    }
+
+    const before = indexRows(beforeRows);
+    const after = indexRows(afterRows);
+    const slots = [...new Set([...before.keys(), ...after.keys()])].sort((a, b) => a - b);
+    const changes = [];
+    let unchangedCount = 0;
+    for (const slot of slots) {
+      const beforeRow = before.get(slot) || null;
+      const afterRow = after.get(slot) || null;
+      if (!beforeRow) changes.push({ slot, change: 'Added', before: null, after: afterRow });
+      else if (!afterRow) changes.push({ slot, change: 'Removed', before: beforeRow, after: null });
+      else if (beforeRow.itemIndex !== afterRow.itemIndex) {
+        changes.push({ slot, change: 'Changed', before: beforeRow, after: afterRow });
+      } else unchangedCount++;
+    }
+    return { changes, unchangedCount };
+  }
+
   function appendOccupiedRows(rows, bytes, firstSlot, records) {
     for (let record = 0; record < records; record++) {
       const offset = record * ITEM_STRIDE;
@@ -190,6 +224,103 @@
     output.hidden = false;
   }
 
+  function describeItem(row) {
+    if (!row) return '—';
+    const metadata = window.localInventoryItemMetadata?.(row.itemIndex);
+    const name = metadata?.name || window.localInventoryItemName?.(row.itemIndex);
+    return name ? `${row.itemIndex} · ${name}` : String(row.itemIndex);
+  }
+
+  function renderDiff(output, diff) {
+    output.replaceChildren();
+    output.hidden = false;
+    if (!diff.changes.length) {
+      const empty = document.createElement('p');
+      empty.className = 'live-inventory-empty';
+      empty.textContent = 'No pool-slot or item-index differences were found.';
+      output.append(empty);
+      return;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'live-inventory-table';
+    const head = document.createElement('thead');
+    const heading = document.createElement('tr');
+    for (const label of ['Pool slot', 'Change', 'Before item', 'After item']) {
+      const cell = document.createElement('th');
+      cell.scope = 'col';
+      cell.textContent = label;
+      heading.append(cell);
+    }
+    head.append(heading);
+    const body = document.createElement('tbody');
+    for (const change of diff.changes) {
+      const tr = document.createElement('tr');
+      for (const value of [String(change.slot), change.change, describeItem(change.before), describeItem(change.after)]) {
+        const cell = document.createElement('td');
+        cell.textContent = value;
+        tr.append(cell);
+      }
+      body.append(tr);
+    }
+    table.append(head, body);
+    output.append(table);
+  }
+
+  function snapshotsAreComparable(before, after) {
+    return !!before && !!after && before.owner === after.owner && sameMetadata(before.metadata, after.metadata);
+  }
+
+  function updateComparisonControls() {
+    const compareButton = document.getElementById('live-inventory-pool-compare');
+    const diffStatus = document.getElementById('live-inventory-pool-diff-status');
+    const diffOutput = document.getElementById('live-inventory-pool-diff-output');
+    const canCompare = snapshotsAreComparable(previousSnapshot, currentSnapshot);
+    if (compareButton) compareButton.disabled = busy || !canCompare;
+    if (!diffStatus) return;
+
+    if (!previousSnapshot || !currentSnapshot) {
+      diffStatus.textContent = 'Capture two live samples to compare them.';
+      diffStatus.dataset.state = '';
+      if (diffOutput) { diffOutput.replaceChildren(); diffOutput.hidden = true; }
+      return;
+    }
+    if (!canCompare) {
+      lastDiff = null;
+      diffStatus.textContent = 'These samples use a different console session or item-pool allocation. Clear snapshots and capture both again in one stable session.';
+      diffStatus.dataset.state = 'error';
+      if (diffOutput) { diffOutput.replaceChildren(); diffOutput.hidden = true; }
+      return;
+    }
+    if (!lastDiff) {
+      diffStatus.textContent = 'Latest two samples are ready. Compare by pool slot and item index.';
+      diffStatus.dataset.state = '';
+    }
+  }
+
+  function compareLatestSnapshots() {
+    const diffStatus = document.getElementById('live-inventory-pool-diff-status');
+    const diffOutput = document.getElementById('live-inventory-pool-diff-output');
+    if (!snapshotsAreComparable(previousSnapshot, currentSnapshot)) {
+      updateComparisonControls();
+      return;
+    }
+    try {
+      lastDiff = comparePoolRows(previousSnapshot.rows, currentSnapshot.rows);
+      renderDiff(diffOutput, lastDiff);
+      const added = lastDiff.changes.filter(row => row.change === 'Added').length;
+      const removed = lastDiff.changes.filter(row => row.change === 'Removed').length;
+      const changed = lastDiff.changes.filter(row => row.change === 'Changed').length;
+      diffStatus.dataset.state = 'matched';
+      diffStatus.textContent = `Compared latest two sequential samples: ${added} added, ${removed} removed, ${changed} changed, ${lastDiff.unchangedCount} unchanged. Same-index item instances are indistinguishable; ownership and persistence are not checked.`;
+    } catch (error) {
+      lastDiff = null;
+      if (diffOutput) { diffOutput.replaceChildren(); diffOutput.hidden = true; }
+      diffStatus.dataset.state = 'error';
+      diffStatus.textContent = `Live item-pool comparison refused: ${String(error?.message || error).slice(0, 180)}`;
+    }
+  }
+
   async function inspectLiveItemPool() {
     const button = document.getElementById('live-inventory-pool-btn');
     const clearButton = document.getElementById('live-inventory-pool-clear');
@@ -201,11 +332,11 @@
     busy = true;
     button.disabled = true;
     if (clearButton) clearButton.disabled = true;
-    lastSnapshotRows = null;
-    output.replaceChildren();
-    output.hidden = true;
+    updateComparisonControls();
     status.dataset.state = 'pending';
-    status.textContent = 'Checking the BLES profile, inventory code, and self-family item descriptor…';
+    status.textContent = currentSnapshot
+      ? 'Reading a new sample; the last complete snapshot remains available until this read succeeds…'
+      : 'Checking the BLES profile, inventory code, and self-family item descriptor…';
 
     try {
       if (!api) throw new Error('The session-bound read-only memory API is unavailable.');
@@ -253,26 +384,31 @@
       }
 
       renderRows(output, rows);
-      lastSnapshotRows = rows;
+      previousSnapshot = currentSnapshot;
+      currentSnapshot = { rows, owner, metadata: initial };
+      lastDiff = null;
       status.dataset.state = 'matched';
       const labeledNames = rows.filter(row => window.localInventoryItemName?.(row.itemIndex)).length;
       status.textContent = `Read ${initial.count} validated pool slots; ${rows.length} contain an item object. ${labeledNames} names came from explicitly BLES-indexed catalogs. Sequential, non-atomic sample; item-pool pointers rechecked.`;
+      updateComparisonControls();
     } catch (error) {
-      output.replaceChildren();
-      output.hidden = true;
       status.dataset.state = 'error';
-      status.textContent = `Live item-pool snapshot refused: ${String(error?.message || error).slice(0, 220)}`;
+      status.textContent = `Live item-pool snapshot refused; any prior complete sample was kept: ${String(error?.message || error).slice(0, 220)}`;
     } finally {
       busy = false;
       button.disabled = false;
       if (clearButton) clearButton.disabled = false;
+      updateComparisonControls();
     }
   }
 
   function clearLiveItemPool() {
-    lastSnapshotRows = null;
+    previousSnapshot = null;
+    currentSnapshot = null;
+    lastDiff = null;
     const output = document.getElementById('live-inventory-pool-output');
     const status = document.getElementById('live-inventory-pool-status');
+    const diffOutput = document.getElementById('live-inventory-pool-diff-output');
     if (output) {
       output.replaceChildren();
       output.hidden = true;
@@ -281,14 +417,23 @@
       status.textContent = 'No live item-pool snapshot taken.';
       delete status.dataset.state;
     }
+    if (diffOutput) { diffOutput.replaceChildren(); diffOutput.hidden = true; }
+    updateComparisonControls();
   }
 
   root.inspectLiveItemPool = inspectLiveItemPool;
+  root.rtmLiveInventoryPool = Object.freeze({ compareRows: comparePoolRows });
   function initialize() {
     document.getElementById('live-inventory-pool-clear')?.addEventListener('click', clearLiveItemPool);
+    document.getElementById('live-inventory-pool-compare')?.addEventListener('click', compareLatestSnapshots);
     window.addEventListener('rtm-local-item-catalogs-changed', () => {
-      if (lastSnapshotRows) renderRows(document.getElementById('live-inventory-pool-output'), lastSnapshotRows);
+      if (currentSnapshot) renderRows(document.getElementById('live-inventory-pool-output'), currentSnapshot.rows);
+      if (lastDiff && previousSnapshot && currentSnapshot) {
+        lastDiff = comparePoolRows(previousSnapshot.rows, currentSnapshot.rows);
+        renderDiff(document.getElementById('live-inventory-pool-diff-output'), lastDiff);
+      }
     });
+    updateComparisonControls();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialize, { once: true });
   else initialize();
