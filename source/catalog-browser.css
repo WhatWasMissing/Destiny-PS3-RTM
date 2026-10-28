@@ -37,6 +37,7 @@
 .offline-inventory-table td { color: var(--muted); }
 .offline-inventory-table .inventory-slot-cell, .offline-inventory-table .inventory-item-index-cell { white-space: nowrap; font-family: var(--mono); font-size: 11px; }
 .offline-inventory-table .inventory-equipped-cell { color: var(--text); white-space: nowrap; }
+.offline-inventory-table .inventory-item-bucket-cell, .offline-inventory-table .inventory-item-type-cell { color: var(--muted); }
 .offline-inventory-table tr:last-child td { border-bottom: 0; }
 .offline-inventory-empty { margin: 0; padding: 9px; color: var(--muted); font: 11px/1.45 var(--sans); }
 .offline-inventory-import > .btn-connect, .offline-inventory-import > .cheat-btn { min-height: 36px; }

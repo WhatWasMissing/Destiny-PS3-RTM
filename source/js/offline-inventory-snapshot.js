@@ -92,7 +92,7 @@
     const headRow = document.createElement('tr');
     const columnLabels = ['Slot'];
     if (showEquippedPositions) columnLabels.push('Equipped position');
-    columnLabels.push('Item index', 'Catalog name');
+    columnLabels.push('Item index', 'Catalog name', 'Catalog bucket', 'Catalog type');
     for (const label of columnLabels) {
       const cell = document.createElement('th');
       cell.scope = 'col';
@@ -106,12 +106,19 @@
       const slotCell = document.createElement('td');
       const indexCell = document.createElement('td');
       const nameCell = document.createElement('td');
+      const bucketCell = document.createElement('td');
+      const typeCell = document.createElement('td');
+      const metadata = window.localInventoryItemMetadata?.(row.itemIndex);
       slotCell.className = 'inventory-slot-cell';
       indexCell.className = 'inventory-item-index-cell';
       nameCell.className = 'inventory-item-name-cell';
       slotCell.textContent = String(row.slot);
       indexCell.textContent = String(row.itemIndex);
-      nameCell.textContent = window.localInventoryItemName?.(row.itemIndex) || '—';
+      nameCell.textContent = metadata?.name || window.localInventoryItemName?.(row.itemIndex) || '—';
+      bucketCell.className = 'inventory-item-bucket-cell';
+      typeCell.className = 'inventory-item-type-cell';
+      bucketCell.textContent = metadata?.bucket || '—';
+      typeCell.textContent = metadata?.type || '—';
       tr.append(slotCell);
       if (showEquippedPositions) {
         const equippedCell = document.createElement('td');
@@ -119,7 +126,7 @@
         equippedCell.textContent = row.equippedLabel || '—';
         tr.append(equippedCell);
       }
-      tr.append(indexCell, nameCell);
+      tr.append(indexCell, nameCell, bucketCell, typeCell);
       body.append(tr);
     }
     table.append(head, body);

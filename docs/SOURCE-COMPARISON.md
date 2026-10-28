@@ -83,10 +83,11 @@ identity. Read-only memory tools remain usable on other builds.
   resolver trace is from the 01.00 ELF and is not reused for 01.24. A local
   package run produced 3,181 rows from patch-ID-0 base-disc packages; that is
   not validated as the 01.24 name table. User-imported catalogs are keyed by
-  `itemIndex` or `blesItemIndex`; live BLES 01.24 name lookup accepts only
+  `itemIndex` or `blesItemIndex`; live BLES 01.24 metadata lookup accepts only
   indexes `0`–`6556`, while larger numeric keys can remain visible in the
-  imported table. The app never joins Blackrock's `def`, `hash`, or `tag`
-  fields. Catalog data is not bundled.
+  imported table. Live and offline inventory views can show the explicitly
+  indexed catalog's name, bucket, and type fields. The app never joins
+  Blackrock's `def`, `hash`, or `tag` fields. Catalog data is not bundled.
 - The offline character viewer maps the 17 equipped-slot starts from the BLES
   01.24 bucket-range/equipped-slot tables to inventory positions. It names the
   subclass, five armour slots, and three weapons where supported; the other

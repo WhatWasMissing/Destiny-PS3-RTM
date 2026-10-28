@@ -87,10 +87,12 @@ derived directly from BLES 01.24 packages; Blackrock's `hash` and `tag` columns
 are not treated as BLES item indexes.
 
 The generic importer can display signed-16-bit item keys (`0`–`32767`) from a
-user-selected table. Its live BLES 01.24 name lookup accepts only the verified
-list range (`0`–`6556`); out-of-range rows remain visible in the imported
-table but cannot label a live inventory object. The table still needs an
-`itemIndex` or `blesItemIndex` column and a name column. Do not bundle
+user-selected table. Its live BLES 01.24 metadata lookup accepts only the
+verified list range (`0`–`6556`); out-of-range rows remain visible in the
+imported table but cannot label a live inventory object. The table still needs
+an `itemIndex` or `blesItemIndex` column and a name column; optional exact
+`bucket` and `type` columns are shown as catalog metadata in live and offline
+inventory views. The imported tag field is not joined to memory. Do not bundle
 game-derived names or infer an item index from a Blackrock hash/tag value.
 
 ## Remaining live validation

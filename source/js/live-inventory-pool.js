@@ -161,7 +161,7 @@
     table.className = 'live-inventory-table';
     const head = document.createElement('thead');
     const heading = document.createElement('tr');
-    for (const label of ['Pool slot', 'Item index', 'Catalog name']) {
+    for (const label of ['Pool slot', 'Item index', 'Catalog name', 'Catalog bucket', 'Catalog type']) {
       const cell = document.createElement('th');
       cell.scope = 'col';
       cell.textContent = label;
@@ -174,10 +174,15 @@
       const slot = document.createElement('td');
       const index = document.createElement('td');
       const name = document.createElement('td');
+      const bucket = document.createElement('td');
+      const type = document.createElement('td');
+      const metadata = window.localInventoryItemMetadata?.(row.itemIndex);
       slot.textContent = String(row.slot);
       index.textContent = String(row.itemIndex);
-      name.textContent = window.localInventoryItemName?.(row.itemIndex) || '—';
-      tr.append(slot, index, name);
+      name.textContent = metadata?.name || window.localInventoryItemName?.(row.itemIndex) || '—';
+      bucket.textContent = metadata?.bucket || '—';
+      type.textContent = metadata?.type || '—';
+      tr.append(slot, index, name, bucket, type);
       body.append(tr);
     }
     table.append(head, body);

@@ -1131,13 +1131,13 @@
     <div class="panel" id="live-inventory-pool-panel">
       <div class="panel-header">Live Item Cache · BLES 01.24</div>
       <div class="live-inventory-pool-body">
-        <p class="compact-help-note">List occupied item-cache slots and raw indexes. Names appear only when a user-imported catalog has a BLES itemIndex or blesItemIndex column.</p>
+        <p class="compact-help-note">List occupied item-cache slots and raw indexes. Names, catalog buckets, and catalog types appear only when a user-imported catalog has a BLES itemIndex or blesItemIndex column.</p>
         <div class="live-inventory-pool-actions">
           <button class="cheat-btn" id="live-inventory-pool-btn" type="button" onclick="inspectLiveItemPool()">Read live item pool</button>
           <button class="cheat-btn" id="live-inventory-pool-clear" type="button">Clear snapshot</button>
         </div>
         <p id="live-inventory-pool-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">No live item-pool snapshot taken.</p>
-        <div id="live-inventory-pool-output" class="live-inventory-pool-output" aria-label="Live item pool slots, indexes, and optional catalog names" role="region" tabindex="0" hidden></div>
+        <div id="live-inventory-pool-output" class="live-inventory-pool-output" aria-label="Live item pool slots, indexes, and optional catalog metadata" role="region" tabindex="0" hidden></div>
       </div>
     </div>
     <div class="panel" id="spawn-path-check-panel">
@@ -1336,7 +1336,7 @@
   <div class="panel" id="offline-inventory-snapshot">
     <div class="panel-header">Offline inventory snapshot · BLES 01.24</div>
     <div class="offline-inventory-body">
-      <p class="local-catalog-intro">Decode explicitly selected BLES 01.24 account and character wire payload files. This reads no console memory, performs no network requests or writes, and keeps the decoded rows only in this page. Instance and owner IDs are never displayed or saved. Equipped-position labels appear only at verified inventory starts. Catalog names appear only when an imported catalog is keyed by BLES itemIndex or blesItemIndex in the verified 0–6556 range. The account section is an unverified vault-like candidate, not a confirmed live vault.</p>
+      <p class="local-catalog-intro">Decode explicitly selected BLES 01.24 account and character wire payload files. This reads no console memory, performs no network requests or writes, and keeps the decoded rows only in this page. Instance and owner IDs are never displayed or saved. Equipped-position labels appear only at verified inventory starts. Catalog name, bucket, and type appear only when an imported catalog is keyed by BLES itemIndex or blesItemIndex in the verified 0–6556 range. The account section is an unverified vault-like candidate, not a confirmed live vault.</p>
       <div class="offline-inventory-import-grid">
         <div class="offline-inventory-import">
           <label class="local-catalog-control" for="offline-character-payload">

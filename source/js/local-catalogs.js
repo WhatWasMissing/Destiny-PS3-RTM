@@ -213,13 +213,15 @@
     return String(value || '').toLocaleLowerCase().replace(/[^a-z0-9]/g, '');
   }
 
-  function buildItemNameMap(category, columns, rows) {
+  function buildItemMetadataMap(category, columns, rows) {
     if (category !== 'item-loot') return null;
     const indexColumn = columns.find(column => ['itemindex', 'blesitemindex'].includes(normalizedHeader(column)));
     const nameColumn = columns.find(column => ['name', 'itemname', 'displayname'].includes(normalizedHeader(column)));
     if (!indexColumn || !nameColumn) return null;
+    const bucketColumn = columns.find(column => normalizedHeader(column) === 'bucket');
+    const typeColumn = columns.find(column => normalizedHeader(column) === 'type');
 
-    const names = new Map();
+    const metadata = new Map();
     for (const row of rows) {
       const rawIndex = (row.get(indexColumn) || '').trim();
       if (!/^\d{1,5}$/.test(rawIndex)) continue;
@@ -227,18 +229,33 @@
       if (!Number.isInteger(unsignedIndex) || unsignedIndex < 0 || unsignedIndex > MAX_BLES_0124_ITEM_INDEX) continue;
       const name = (row.get(nameColumn) || '').trim();
       if (!name) continue;
-      if (!names.has(unsignedIndex)) names.set(unsignedIndex, name);
+      if (metadata.has(unsignedIndex)) continue;
+      const item = { name: name.slice(0, 160) };
+      const bucket = bucketColumn ? String(row.get(bucketColumn) || '').trim().slice(0, 120) : '';
+      const type = typeColumn ? String(row.get(typeColumn) || '').trim().slice(0, 120) : '';
+      if (bucket) item.bucket = bucket;
+      if (type) item.type = type;
+      metadata.set(unsignedIndex, Object.freeze(item));
     }
-    return names;
+    return metadata;
+  }
+
+  function buildItemNameMap(category, columns, rows) {
+    const metadata = buildItemMetadataMap(category, columns, rows);
+    return metadata ? new Map(Array.from(metadata, ([index, item]) => [index, item.name])) : null;
+  }
+
+  function localItemMetadata(itemIndex) {
+    if (!Number.isInteger(itemIndex)) return null;
+    for (let index = catalogs.length - 1; index >= 0; index--) {
+      const metadata = catalogs[index].itemMetadata;
+      if (metadata && metadata.has(itemIndex)) return metadata.get(itemIndex);
+    }
+    return null;
   }
 
   function localItemName(itemIndex) {
-    if (!Number.isInteger(itemIndex)) return '';
-    for (let index = catalogs.length - 1; index >= 0; index--) {
-      const names = catalogs[index].itemNames;
-      if (names && names.has(itemIndex)) return names.get(itemIndex);
-    }
-    return '';
+    return localItemMetadata(itemIndex)?.name || '';
   }
 
   function extractSpawnCandidates(sourceCatalogs) {
@@ -420,7 +437,7 @@
         bytes: file.size,
         columns: parsed.columns,
         rows: parsed.rows,
-        itemNames: buildItemNameMap(category, parsed.columns, parsed.rows),
+        itemMetadata: buildItemMetadataMap(category, parsed.columns, parsed.rows),
         truncated: parsed.truncated
       };
     });
@@ -531,6 +548,7 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialize, { once: true });
   else initialize();
   window.localInventoryItemName = localItemName;
+  window.localInventoryItemMetadata = localItemMetadata;
   window.rtmLocalSpawnCatalogs = Object.freeze({
     extractCandidates: extractSpawnCandidates,
     listCandidates: () => extractSpawnCandidates(catalogs)
