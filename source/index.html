@@ -21,8 +21,14 @@
 <script src="js/appearance-init.js"></script>
 <div id="welcome-screen" role="dialog" aria-label="Welcome to Destiny RTM">
   <div class="welcome-card">
-    <div class="welcome-mark">RTM</div>
-    <h2>Destiny Legacy 	RTM</h2>
+    <div class="welcome-mark" aria-hidden="true">
+      <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="18,2 34,10 34,26 18,34 2,26 2,10" stroke="currentColor" stroke-width="1.5"></polygon>
+        <polygon points="18,8 28,13 28,23 18,28 8,23 8,13" stroke="currentColor" stroke-width="1" opacity="0.5"></polygon>
+        <circle cx="18" cy="18" r="4" fill="currentColor"></circle>
+      </svg>
+    </div>
+    <h2>Destiny RTM</h2>
     <div class="welcome-subtitle">Created by MVQ1303</div>
     <button class="welcome-btn" id="enter-rtm-btn" type="button">Enter RTM</button>
     <div class="debug-login-box">
@@ -36,7 +42,7 @@
       <div class="debug-login-status" id="debug-login-status"></div>
       <div class="debug-mode-badge" id="debug-mode-badge">DEBUG MODE ACTIVE · WARNING GUIDES BYPASSED</div>
     </div>
-    <div class="welcome-note">Work in progress. Some features may be incomplete.</div>
+    <div class="welcome-note">Some features still need live-console validation.</div>
   </div>
 </div>
 
@@ -1329,7 +1335,7 @@
   <div class="panel" id="offline-inventory-snapshot">
     <div class="panel-header">Offline inventory snapshot · BLES 01.24</div>
     <div class="offline-inventory-body">
-      <p class="local-catalog-intro">Decode explicitly selected BLES 01.24 account and character wire payload files. This reads no console memory, performs no network requests or writes, and keeps the decoded rows only in this page. Instance and owner IDs are never displayed or saved. Equipped-position labels appear only at verified inventory starts. Catalog names appear only when an imported catalog is explicitly keyed by BLES itemIndex or blesItemIndex using a nonnegative signed 16-bit index. The account section is an unverified vault-like candidate, not a confirmed live vault.</p>
+      <p class="local-catalog-intro">Decode explicitly selected BLES 01.24 account and character wire payload files. This reads no console memory, performs no network requests or writes, and keeps the decoded rows only in this page. Instance and owner IDs are never displayed or saved. Equipped-position labels appear only at verified inventory starts. Catalog names appear only when an imported catalog is keyed by BLES itemIndex or blesItemIndex in the verified 0–6556 range. The account section is an unverified vault-like candidate, not a confirmed live vault.</p>
       <div class="offline-inventory-import-grid">
         <div class="offline-inventory-import">
           <label class="local-catalog-control" for="offline-character-payload">
@@ -1704,7 +1710,6 @@
 <script src="js/onboarding-guides.js"></script>
 
 
-<script src="js/welcome-art.js"></script>
 <script src="js/scenario-library.js"></script>
 <script src="js/overwalls-tools.js"></script>
 <script src="js/local-catalogs.js"></script>

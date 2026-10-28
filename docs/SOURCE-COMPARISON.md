@@ -82,9 +82,10 @@ identity. Read-only memory tools remain usable on other builds.
   index-to-name resolver. The `0x0041436C` / `0x0028A304` / `0x00288278`
   resolver trace is from the 01.00 ELF and is not reused for 01.24. A local
   package run produced 3,181 rows from patch-ID-0 base-disc packages; that is
-  not validated as the 01.24 name table. The app accepts only user-imported
-  catalogs keyed by `itemIndex` or `blesItemIndex`, supports the nonnegative
-  signed-16-bit field range, and never joins Blackrock's `def`, `hash`, or `tag`
+  not validated as the 01.24 name table. User-imported catalogs are keyed by
+  `itemIndex` or `blesItemIndex`; live BLES 01.24 name lookup accepts only
+  indexes `0`–`6556`, while larger numeric keys can remain visible in the
+  imported table. The app never joins Blackrock's `def`, `hash`, or `tag`
   fields. Catalog data is not bundled.
 - The offline character viewer maps the 17 equipped-slot starts from the BLES
   01.24 bucket-range/equipped-slot tables to inventory positions. It names the

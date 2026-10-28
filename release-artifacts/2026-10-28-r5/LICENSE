@@ -1,0 +1,43 @@
+Destiny RTM Proprietary License — No Redistribution
+
+Copyright (c) 2026 WhatWasMissing. All rights reserved.
+
+1. Ownership and scope
+This notice applies to the original Destiny RTM source code, documentation,
+and other material in this repository to the extent owned by WhatWasMissing
+(the "Material"). This is proprietary, source-available material, not open
+source software. Publication does not place the Material in the public domain.
+
+2. No redistribution or other license
+Except for rights that cannot lawfully be restricted and the platform rights
+expressly addressed below, no permission or license is granted to copy, use,
+modify, distribute, publish, upload, mirror, rehost, sublicense, sell, or otherwise
+make the Material or any substantial portion of it available to another person.
+These restrictions apply to source code, compiled builds, modified versions,
+derivative works, bundles, and both commercial and noncommercial distribution.
+Written permission from WhatWasMissing is required before any such activity.
+No patent, trademark, or other intellectual property license is granted.
+
+3. GitHub platform rights
+Nothing in this notice limits rights granted to GitHub or its users under the
+applicable GitHub Terms of Service, including viewing and forking a public
+repository through GitHub's functionality. No additional permission for
+redistribution outside those platform rights is granted by this notice.
+
+4. Third-party material and prior permissions
+Third-party code, libraries, game names, artwork, trademarks, and other assets
+remain the property of their respective owners and are governed by their own
+applicable terms. This notice does not claim ownership of those materials,
+relicense them, or override their licenses. Permissions previously validly
+granted under another license are not retroactively withdrawn by this notice.
+
+5. Permission requests
+Contact WhatWasMissing through the contact information in this repository's
+README to request written permission. Silence is not permission.
+
+6. Disclaimer
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE MATERIAL IS PROVIDED
+"AS IS", WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+THE COPYRIGHT HOLDERS SHALL NOT BE LIABLE FOR CLAIMS, DAMAGES, OR OTHER
+LIABILITY ARISING FROM THE MATERIAL OR ITS USE.

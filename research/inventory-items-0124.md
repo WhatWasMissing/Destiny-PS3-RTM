@@ -86,12 +86,12 @@ the BLES definition tag at the same position. The RTM catalog therefore remains
 derived directly from BLES 01.24 packages; Blackrock's `hash` and `tag` columns
 are not treated as BLES item indexes.
 
-The RTM's item-catalog importer therefore accepts nonnegative signed-16-bit
-indexes (`0`–`32767`), which matches the index field's numeric representation
-and now covers the verified 01.24 item-list range. A user-selected catalog
-still needs to be keyed by `itemIndex` or `blesItemIndex` and contain a name
-column. Do not bundle game-derived names or infer an item index from a
-Blackrock hash/tag value.
+The generic importer can display signed-16-bit item keys (`0`–`32767`) from a
+user-selected table. Its live BLES 01.24 name lookup accepts only the verified
+list range (`0`–`6556`); out-of-range rows remain visible in the imported
+table but cannot label a live inventory object. The table still needs an
+`itemIndex` or `blesItemIndex` column and a name column. Do not bundle
+game-derived names or infer an item index from a Blackrock hash/tag value.
 
 ## Remaining live validation
 
