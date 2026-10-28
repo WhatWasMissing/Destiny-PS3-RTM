@@ -49,6 +49,17 @@ func run(args []string, stdout, stderr io.Writer) error {
 	if strings.TrimSpace(*ip) == "" {
 		return errors.New("--ip is required")
 	}
+	if command == "actor-pool" {
+		var unsupportedFlag string
+		flags.Visit(func(option *flag.Flag) {
+			if option.Name != "ip" && option.Name != "json" {
+				unsupportedFlag = option.Name
+			}
+		})
+		if unsupportedFlag != "" {
+			return fmt.Errorf("actor-pool accepts only --ip and --json; --%s is not supported", unsupportedFlag)
+		}
+	}
 
 	client := rtmclient.New()
 	commandTimeout := 12 * time.Second
@@ -107,6 +118,20 @@ func run(args []string, stdout, stderr io.Writer) error {
 			return json.NewEncoder(stdout).Encode(map[string]any{"ok": true, "request_dispatched": true, "delivery_confirmed": false})
 		}
 		fmt.Fprintln(stdout, "Notification request dispatched; delivery is not confirmed.")
+	case "actor-pool":
+		snapshot, err := client.ReadActorPoolDescriptor(ctx, *ip)
+		if err != nil {
+			return err
+		}
+		if *jsonOutput {
+			return json.NewEncoder(stdout).Encode(map[string]any{
+				"ok": true, "read_only": true, "target": strings.TrimSpace(*ip),
+				"snapshot": snapshot, "loaded_enemy_list_confirmed": false, "spawnability_confirmed": false,
+			})
+		}
+		fmt.Fprintf(stdout, "BLES 01.24 actor-pool descriptor: %s (non-atomic read-only sample)\n", snapshot.DescriptorAddress)
+		fmt.Fprintf(stdout, "Storage: %s\nStride: 0x%X\nCapacity: %d\nBacking span: 0x%X bytes\nInitialized: %t\nRecords read: %d\n%s\n",
+			snapshot.StoragePointer, snapshot.Stride, snapshot.Capacity, snapshot.BackingBytes, snapshot.Initialized, snapshot.RecordsRead, snapshot.Note)
 	case "inventory-pool":
 		snapshot, err := client.ReadLiveItemPool(ctx, *ip)
 		if err != nil {
@@ -150,12 +175,15 @@ Usage:
   rtmctl status --ip 192.168.0.62
   rtmctl read --ip 192.168.0.62 --address 0030D230 --length 4
   rtmctl inventory-pool --ip 192.168.0.62
+  rtmctl actor-pool --ip 192.168.0.62 --json
   rtmctl write --ip 192.168.0.62 --address 0030D230 --hex 3DCCCCCD
   rtmctl notify --ip 192.168.0.62 --message "Hello from RTM"
   rtmctl read --ip 192.168.0.62 --address 0030D230 --length 4 --json
 
 Writes are limited to 1-8 bytes and only report success after matching memory readback.
 The client targets private IPv4 addresses on port 80 and uses Destiny PID 0x1010200.
+actor-pool verifies the BLES profile and actor-path code, reads only the 20-byte
+descriptor twice, and never follows its storage pointer or enumerates actors.
 inventory-pool is read-only, verifies the BLES 01.24 profile plus item-pool code and
 descriptor signatures, and never returns instance or owner IDs. It does not call
 undocumented PS3 function-call endpoints.`)

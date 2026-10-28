@@ -39,6 +39,7 @@ function harness(overrides = {}) {
     localStorage: { getItem: () => null, setItem() {}, removeItem() {} },
     ip: '192.168.0.62',
     connectionGeneration: 1,
+    quietLinkEnabled: false,
     autoReconnectEnabled: true,
     _autoReconnectActive: false,
     _autoReconnectAttempts: 0,
@@ -100,6 +101,24 @@ test('late reconnect probe cannot restore a disconnected or replacement session'
     await flush();
     assert.equal(finished, 0);
   }
+});
+
+test('Quiet connection suppresses background reconnect and health probes', async () => {
+  let probes = 0;
+  let intervals = 0;
+  const h = harness({
+    quietLinkEnabled: true,
+    probePs3mapiAvailable: async () => { probes++; return true; },
+    setInterval: fn => { intervals++; return ++intervals; }
+  });
+  vm.runInContext(extractBetween('  function beginSafeAutoReconnect(', '\n  // ── Connection health-check'), h.context);
+  vm.runInContext(extractBetween('  function startHealthCheck(', '\n\n  function stopHealthCheck'), h.context);
+  h.context.beginSafeAutoReconnect();
+  h.context.startHealthCheck();
+  await flush();
+  assert.equal(probes, 0);
+  assert.equal(intervals, 0);
+  assert.equal(h.context._autoReconnectAttempts, 0);
 });
 
 test('reconnect interval does not overlap a pending probe and restores the current session', async () => {

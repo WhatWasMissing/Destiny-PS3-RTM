@@ -146,6 +146,17 @@
           <button class="appearance-btn" id="auto-reconnect-on" type="button" onclick="setAutoReconnect(true)">On</button>
         </div>
       </div>
+
+      <div class="settings-row" style="margin-top:8px;">
+        <div>
+          <div class="settings-label">Quiet connection</div>
+          <div class="settings-help">For idle diagnosis: keeps the single read-only PS3MAPI version check used to link, then skips beeps, the XMB popup, background checks and auto reconnect. An explicit Restart still performs its requested relink.</div>
+        </div>
+        <div class="appearance-toggle">
+          <button class="appearance-btn" id="quiet-link-off" type="button" onclick="setQuietLink(false)">Off</button>
+          <button class="appearance-btn" id="quiet-link-on" type="button" onclick="setQuietLink(true)">On</button>
+        </div>
+      </div>
     </div>
 
     <div class="settings-group">
@@ -349,7 +360,7 @@
 <div class="build-profile-check">
   <div class="build-profile-copy">
     <strong>Destiny build profile</strong>
-    <span>Read-only check of three code anchors from BLES01857 01.24. It does not verify the full EBOOT hash or region.</span>
+    <span>Read-only check of five code anchors from BLES01857 01.24. It does not verify the full EBOOT hash or region.</span>
   </div>
   <button class="btn-connect" id="build-profile-check-btn" type="button" onclick="checkDestinyBuildProfile()">Check build</button>
 </div>
@@ -749,6 +760,18 @@
   <strong>Load Zone Warning:</strong>
   Modified game speed can interfere with activity/load zones. Reset Game Speed to the normal value before moving through a load zone, then re-apply your preferred speed after the area has finished loading.
 </div>
+<div class="player-hook-card">
+  <div class="player-hook-copy">
+    <strong>Player / physics hook · optional</strong>
+    <span>Link no longer installs this code automatically. The Game Speed writer targets <code>0x30586864</code>, while the old hook note names <code>0x030606E4</code>; whether this hook is needed for the slider is unverified.</span>
+    <span>It shares <code>0x001C4110</code> and <code>0x010D8EC0</code> with Server Cheats and Overwalls physics. Close other RTMs before enabling a hook; do not combine hook modes.</span>
+  </div>
+  <div class="player-hook-actions">
+    <button class="cheat-btn" type="button" onclick="installPlayerHookAction()">Install player hook</button>
+    <button class="cheat-btn" type="button" onclick="restorePlayerHookAction()">Restore recognized hook</button>
+  </div>
+  <p id="player-hook-status" role="status" aria-live="polite">Not inspected. Linking does not install this hook.</p>
+</div>
 <div class="slider-body">
 <div class="slider-row">
 <span class="slider-label">Speed</span>
@@ -1144,7 +1167,17 @@
     <div class="panel" id="spawn-executor-panel">
       <div class="panel-header">Enemy Spawn · Blackrock operation 1</div>
       <div class="spawn-executor-body">
-        <p class="compact-help-note">Recovered from Blackrock's emitted BLES 01.24 executor. The hook write, instruction-cache behavior, tag-to-class mapping, and placement have not been validated on a live console. The catalog's type 9 is not proven to be the expected-type guard value; the field defaults to -1, which disables that guard. Do not run Blackrock's spawn tool or another RTM instance at the same time: their shared queue has no cross-client reservation. Install and spawn are explicit actions; test on a development PS3.</p>
+        <div class="spawn-executor-warning" role="note">
+          <strong>Experimental · not validated on a live console</strong>
+          <span>Use a development PS3. Hook/cache behavior, enemy tag and class mapping, and placement remain unverified. Run one spawn client at a time.</span>
+          <details class="spawn-executor-disclosure">
+            <summary>Why this is experimental</summary>
+            <div class="spawn-executor-disclosure-body">
+              <p>The operation-1 executor and queue layout were reconstructed from Blackrock's BLES 01.24 program. A matching live run has not confirmed instruction-cache behavior, tag resolution, runtime class, or spawn placement.</p>
+              <p>The expected-type field defaults to -1, which disables that guard. Catalog type 9 has not been shown to match the BLES runtime class. The shared queue has no cross-client reservation, so another Blackrock or RTM spawn client can collide with this one.</p>
+            </div>
+          </details>
+        </div>
         <ol class="compact-help-note spawn-workflow-steps">
           <li>Link the same BLES01857 01.24 console and put Destiny in a playable area where game frames are advancing. A loading screen, menu, or paused game will not service the command. Avoid running another Blackrock/RTM spawn client at the same time.</li>
           <li>Import/select a tag, leave the expected-type guard at -1 unless its BLES 01.24 class byte is known, and set count, raw mode words, and pose values. The tag must resolve in the running game; the optional tag lookup only checks a pointer candidate and does not prove it is an enemy.</li>
@@ -1200,26 +1233,27 @@
           </div>
         </details>
         <div class="resource-bootflow-actions spawn-executor-actions">
-          <button class="cheat-btn" id="spawn-executor-install-btn" type="button" onclick="installSpawnExecutor()">Install executor</button>
-          <button class="cheat-btn" id="spawn-executor-submit-btn" type="button" onclick="submitSpawnRequest()">Spawn selected tag</button>
-          <button class="cheat-btn" id="spawn-executor-cancel-btn" type="button" onclick="cancelSpawnRequest()">Cancel active request</button>
-          <button class="cheat-btn" id="spawn-executor-reconcile-btn" type="button" onclick="reconcileSpawnRequest()" disabled>Check pending request</button>
-          <button class="cheat-btn" id="spawn-executor-recover-btn" type="button" onclick="recoverSpawnExecutor()">Recover hook</button>
+          <button class="cheat-btn spawn-action-secondary" id="spawn-executor-install-btn" type="button" onclick="installSpawnExecutor()">Install executor</button>
+          <button class="cheat-btn spawn-action-primary" id="spawn-executor-submit-btn" type="button" onclick="submitSpawnRequest()" aria-keyshortcuts="Control+Enter">Spawn selected tag</button>
+          <button class="cheat-btn spawn-action-danger" id="spawn-executor-cancel-btn" type="button" onclick="cancelSpawnRequest()">Cancel active request</button>
+          <button class="cheat-btn spawn-action-secondary" id="spawn-executor-reconcile-btn" type="button" onclick="reconcileSpawnRequest()" disabled>Check pending request</button>
+          <button class="cheat-btn spawn-action-secondary" id="spawn-executor-recover-btn" type="button" onclick="recoverSpawnExecutor()">Recover hook</button>
         </div>
+        <p class="spawn-shortcut-hint">Shortcut: <kbd>Ctrl</kbd> + <kbd>Enter</kbd> while focused in this panel.</p>
         <p id="spawn-executor-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">No spawn executor action taken.</p>
         <pre id="spawn-executor-output" class="appearance-probe-output" aria-label="Enemy spawn executor result" role="region" tabindex="0" hidden></pre>
       </div>
     </div>
     <div class="panel" id="actor-lookup-descriptor-panel">
-      <div class="panel-header">Actor Lookup Descriptor · BLES 01.24</div>
+      <div class="panel-header">AI Actor Pool Descriptor · BLES 01.24</div>
       <div class="appearance-probe-body">
-        <p class="compact-help-note">Inspect the actor-lookup descriptor only. Its relation to the AI pool and capacity are unresolved; records are not read.</p>
+        <p class="compact-help-note">Inspect the AI actor-pool descriptor and its 40-slot dimensions. Backing records are not read.</p>
         <div class="resource-bootflow-actions">
-          <button class="cheat-btn" id="actor-lookup-descriptor-read-btn" type="button" onclick="inspectActorLookupDescriptor()">Read lookup descriptor</button>
+          <button class="cheat-btn" id="actor-lookup-descriptor-read-btn" type="button" onclick="inspectActorLookupDescriptor()">Read pool descriptor</button>
           <button class="cheat-btn" id="actor-lookup-descriptor-clear-btn" type="button">Clear snapshot</button>
         </div>
-        <p id="actor-lookup-descriptor-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">No actor-lookup descriptor sample taken.</p>
-        <pre id="actor-lookup-descriptor-output" class="appearance-probe-output" aria-label="BLES actor-lookup descriptor fields" role="region" tabindex="0" hidden></pre>
+        <p id="actor-lookup-descriptor-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">No actor-pool descriptor sample taken.</p>
+        <pre id="actor-lookup-descriptor-output" class="appearance-probe-output" aria-label="BLES AI actor-pool descriptor fields" role="region" tabindex="0" hidden></pre>
       </div>
     </div>
     <div class="panel" id="resource-bootflow-panel">

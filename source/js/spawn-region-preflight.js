@@ -58,8 +58,8 @@
       if (!owner) throw new Error('Link the console and start Destiny before checking executor regions');
 
       let profile = await api.verify(owner);
-      if (profile.profile !== PROFILE_NAME || profile.anchors !== 3) {
-        throw new Error('The three-anchor BLES01857 01.24 profile did not verify');
+      if (profile.profile !== PROFILE_NAME || profile.anchors !== root.RtmBuildCompatibility.anchorCount) {
+        throw new Error('The five-anchor BLES01857 01.24 profile did not verify');
       }
 
       let capability = profile.capability;
@@ -78,7 +78,7 @@
         while (offset < region.size) {
           if (capabilityReads >= CAPABILITY_READS || capabilityBytes >= CAPABILITY_BYTES) {
             profile = await api.verify(owner);
-            if (profile.profile !== PROFILE_NAME || profile.anchors !== 3) {
+            if (profile.profile !== PROFILE_NAME || profile.anchors !== root.RtmBuildCompatibility.anchorCount) {
               throw new Error('BLES 01.24 profile failed during the region scan');
             }
             capability = profile.capability;
@@ -121,7 +121,7 @@
       }
 
       const finalProfile = await api.verify(owner);
-      if (api.session() !== owner || finalProfile.profile !== PROFILE_NAME || finalProfile.anchors !== 3) {
+      if (api.session() !== owner || finalProfile.profile !== PROFILE_NAME || finalProfile.anchors !== root.RtmBuildCompatibility.anchorCount) {
         throw new Error('The final BLES build/session recheck failed; discard this sample');
       }
 

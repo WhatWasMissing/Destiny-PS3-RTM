@@ -8,28 +8,46 @@ function load(context,name) {
   const end=source.indexOf('\n  }',start)+4;
   vm.runInContext(source.slice(start,end),context);
 }
+function loadPlayerHook(context) {
+  const start=source.indexOf('  // ── Explicit player/physics hook control');
+  const end=source.indexOf('\n  async function uninstallPlayerHook',start);
+  assert.ok(start >= 0 && end > start, 'expected the production player-hook block');
+  vm.runInContext(source.slice(start,end),context);
+}
+function hookContext({branch='30640140', onWrite=()=>{}}={}) {
+  const status={textContent:'',style:{}};
+  const context=vm.createContext({ip:'console',connectionGeneration:1,srvBusy:false,log(){},
+    document:{getElementById:id=>id==='player-hook-status'?status:null},
+    ps3getmem:async(address,length)=>address===0x001C4110?branch:'00'.repeat(length),
+    verifiedMemoryValue:onWrite});
+  loadPlayerHook(context);
+  return {context,status};
+}
 test('player hook activation is last and is skipped on an unverified payload',async()=>{
   for (const failAt of [0,2]) {
     const writes=[];
-    const context=vm.createContext({ip:'console',connectionGeneration:1,hookInstalling:false,ps3getmem:async()=> '30640140',
-      verifiedMemoryValue:async(a,v)=>{writes.push([a,v]);if(failAt&&writes.length===failAt)throw new Error('readback mismatch');},log(){}});
-    load(context,'installPlayerHook');
-    if(failAt){await assert.rejects(context.installPlayerHook(),/readback mismatch/);assert.equal(writes.some(([a,v])=>a==='1C4110'&&v==='48F14DB0'),false);}
-    else {await context.installPlayerHook();assert.deepEqual(writes.at(-1),['1C4110','48F14DB0']);}
-    assert.equal(context.hookInstalling,false);
+    const {context}=hookContext({onWrite:async(a,v)=>{writes.push([a,v]);if(failAt&&writes.length===failAt)throw new Error('readback mismatch');}});
+    if(failAt){
+      await assert.rejects(context.installPlayerHook(),/readback mismatch/);
+      assert.equal(writes.some(([a])=>a===0x001C4110),false);
+    } else {
+      await context.installPlayerHook();
+      assert.deepEqual(writes.at(-1),[0x001C4110,'48F14DB0']);
+      assert.equal(writes.length,81);
+    }
+    assert.equal(vm.runInContext('hookInstalling',context),false);
   }
 });
 test('hook installation cannot continue writing in a replacement session',async()=>{
   let context,writes=0;
-  context=vm.createContext({ip:'console',connectionGeneration:1,hookInstalling:false,ps3getmem:async()=> '30640140',
-    verifiedMemoryValue:async()=>{writes++;context.connectionGeneration++;},log(){}});
-  load(context,'installPlayerHook');await assert.rejects(context.installPlayerHook(),/session changed/);assert.equal(writes,1);
+  const hook=hookContext({onWrite:async()=>{writes++;context.connectionGeneration++;}});
+  context=hook.context;
+  await assert.rejects(context.installPlayerHook(),/session changed/);assert.equal(writes,1);
 });
 test('hook install rejects unsupported instructions without mutating memory',async()=>{
   let writes=0;
-  const context=vm.createContext({ip:'console',connectionGeneration:1,hookInstalling:false,
-    ps3getmem:async()=> 'DEADBEEF',verifiedMemoryValue:async()=>writes++,log(){}});
-  load(context,'installPlayerHook');await assert.rejects(context.installPlayerHook(),/supported game build/);assert.equal(writes,0);
+  const {context}=hookContext({branch:'DEADBEEF',onWrite:async()=>writes++});
+  await assert.rejects(context.installPlayerHook(),/supported BLES 01.24/);assert.equal(writes,0);
 });
 test('custom writes honor selected widths and reject overflow without sending',async()=>{
   const calls=[],nodes={'c-addr':{value:'1234'},'c-val':{value:'12'}};

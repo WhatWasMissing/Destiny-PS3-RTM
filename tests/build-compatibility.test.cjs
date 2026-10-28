@@ -1,6 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { create, signatures } = require('../source/js/build-compatibility.js');
+assert.equal(signatures.length, 5, 'profile must include all audited code anchors');
 
 function toBytes(hex) {
   return Uint8Array.from(hex.match(/../g), pair => parseInt(pair, 16));

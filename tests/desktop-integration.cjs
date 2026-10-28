@@ -8,6 +8,7 @@ if (!origin) throw new Error('Run this script through go test');
 function element(id = '') {
   const node = {id,value:'',className:'',style:{setProperty(){}},dataset:{},children:[],textContent:'',innerHTML:'',
     appendChild(child){this.children.push(child);},append(...children){this.children.push(...children);},
+    replaceChildren(...children){this.children=children;this.innerHTML='';},
     addEventListener(){},setAttribute(){},querySelector(){return null;},remove(){},focus(){}};
   node.classList = {
     contains: name => node.className.split(/\s+/).includes(name),
@@ -65,7 +66,11 @@ for(const file of ['desktop-host','transport','operations','backups','connection
   for (const [address,value] of ammoOff) assert.equal(await context.ps3getmem(parseInt(address,16),value.length/2),value);
   await context.toggleUnlimitedAmmo(ammo);
   const reset = await context.resetAllCheats();
-  assert.equal(reset.failed,0);
+  // The fresh session has no verified Server Cheats mode. Reset All must keep
+  // that state unknown when the shared hook branch does not match a known site.
+  assert.equal(reset.verified,1,`unexpected reset result; ${get('log').children.map(node=>node.innerHTML).join(' | ')}`);
+  assert.equal(reset.failed,1,`unexpected reset result; ${get('log').children.map(node=>node.innerHTML).join(' | ')}`);
+  assert.match(get('log').children.at(-2).innerHTML,/Shared hook site has an unexpected instruction/);
   for (const [address,value] of ammoOff) assert.equal(await context.ps3getmem(parseInt(address,16),value.length/2),value);
   assert.equal(await context.ps3getmem(0x00310F94,4),'00000000','the stale single-site ammo address must not be touched');
   const mismatch=get('integration-mismatch');

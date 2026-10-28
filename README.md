@@ -75,6 +75,7 @@ process ID `0x1010200`; it does not expose undocumented function-call routes.
 ```powershell
 .\dist\rtmctl.exe read --ip 192.168.0.62 --address 0030D230 --length 4
 .\dist\rtmctl.exe inventory-pool --ip 192.168.0.62 --json
+.\dist\rtmctl.exe actor-pool --ip 192.168.0.62 --json
 .\dist\rtmctl.exe write --ip 192.168.0.62 --address 0030D230 --hex 3DCCCCCD
 ```
 

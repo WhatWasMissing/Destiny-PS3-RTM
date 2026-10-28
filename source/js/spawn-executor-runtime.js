@@ -40,6 +40,7 @@
     }
     controller = api.create({
       memory,
+      profileAnchorCount: root.RtmBuildCompatibility.anchorCount,
       writeIfEqual: writeApi.writeIfEqual,
       signatures: root.rtmSpawnPathSignatures,
       regions: root.rtmSpawnExecutorRegions,
@@ -174,6 +175,7 @@
       output.textContent = JSON.stringify(result, null, 2);
       output.hidden = false;
       if (result?.pending) setStatus('Request is still active in Destiny. Wait, or request cancellation before recovery.', 'pending');
+      else if (result?.state === 'recovered-resident') setStatus(result.message || 'Hook restored; restart Destiny before another install.', 'warning');
       else if (result?.terminalStatus === 4) setStatus(`${label} ended with worker failure status 4; inspect the raw rows and retry only after recovery if needed.`, 'error');
       else if (result?.terminalStatus === 0) setStatus('The slot is idle and no worker completion was recorded. The pending state was cleared.', 'pending');
       else setStatus(`${label} finished.`, 'matched');
@@ -230,6 +232,15 @@
     if (!element('spawn-executor-panel')) return;
     element('spawn-catalog-search')?.addEventListener('input', refreshSpawnCatalog);
     element('spawn-catalog-entry')?.addEventListener('change', chooseSpawnCatalogEntry);
+    document.addEventListener('keydown', event => {
+      if (!event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || event.key !== 'Enter' || event.isComposing) return;
+      const panel = element('spawn-executor-panel');
+      const submit = element('spawn-executor-submit-btn');
+      if (!panel?.contains(event.target) || !submit || submit.disabled) return;
+      if (event.target?.closest?.('pre,[contenteditable="true"]')) return;
+      event.preventDefault();
+      submitSpawnRequest();
+    });
     root.addEventListener('rtm-local-item-catalogs-changed', refreshSpawnCatalog);
     refreshSpawnCatalog();
     updateJournalState();

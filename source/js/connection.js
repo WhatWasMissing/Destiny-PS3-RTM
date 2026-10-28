@@ -1,6 +1,8 @@
 let ps3mapiHealthProbeSupported = true;
 const CONNECTION_EVENT_LIMIT = 100;
 const connectionEvents = [];
+const QUIET_LINK_KEY = 'rtm_quiet_link_v1';
+let quietLinkEnabled = localStorage.getItem(QUIET_LINK_KEY) === '1';
 
 function recordConnectionEvent(event) {
   connectionEvents.push({ time: new Date().toISOString(), event });
@@ -33,7 +35,7 @@ window.rtmConnectionDiagnostics = () => connectionEvents.map(event => ({ ...even
       if (generation !== connectionGeneration) return;
       if (isDefiniteCommandRejection(e)) {
         recordConnectionEvent('shutdown-rejected');
-        setBadge('connected', ps3mapiHealthProbeSupported ? 'ONLINE' : 'WEBMAN ONLINE');
+        setBadge('connected', connectedBadgeLabel());
         log(`Shutdown request was rejected; console remains linked: ${e.message}`, 'err');
         toast('Shutdown request was rejected', 'err');
         if (ps3mapiHealthProbeSupported) startHealthCheck();
@@ -70,7 +72,7 @@ window.rtmConnectionDiagnostics = () => connectionEvents.map(event => ({ ...even
       if (generation !== connectionGeneration) return;
       if (isDefiniteCommandRejection(error)) {
         recordConnectionEvent('restart-rejected');
-        setBadge('connected', ps3mapiHealthProbeSupported ? 'ONLINE' : 'WEBMAN ONLINE');
+        setBadge('connected', connectedBadgeLabel());
         log(`Restart request was rejected; console remains linked: ${error.message}`, 'err');
         toast('Restart request was rejected', 'err');
         if (ps3mapiHealthProbeSupported) startHealthCheck();
@@ -116,9 +118,13 @@ window.rtmConnectionDiagnostics = () => connectionEvents.map(event => ({ ...even
     b.tabIndex = canRelink ? 0 : -1;
     b.title = state === 'connected'
       ? (ps3mapiHealthProbeSupported
-        ? 'The PS3MAPI HTTP version command responded. Destiny process and build are checked separately by memory tools.'
-        : 'webMAN responded, but its PS3MAPI HTTP version command is unsupported. Memory tools check their own requests and build profile.')
+        ? `The PS3MAPI HTTP version command responded. Destiny process and build are checked separately by memory tools.${quietLinkEnabled ? ' Quiet connection is on; background status checks and automatic relinking are stopped.' : ''}`
+        : `webMAN responded, but its PS3MAPI HTTP version command is unsupported. Memory tools check their own requests and build profile.${quietLinkEnabled ? ' Quiet connection is on; background status checks and automatic relinking are stopped.' : ''}`)
       : canRelink ? 'Click to relink to the current or saved PS3 IP' : '';
+  }
+
+  function connectedBadgeLabel() {
+    return quietLinkEnabled ? 'QUIET' : ps3mapiHealthProbeSupported ? 'ONLINE' : 'WEBMAN ONLINE';
   }
 
   function isDefiniteCommandRejection(error) {
@@ -189,17 +195,18 @@ window.rtmConnectionDiagnostics = () => connectionEvents.map(event => ({ ...even
     log(`Attempting connection → ${ip}`, '');
 
     try {
-      // mode: no-cors means we can't read the response, but the request
-      // reaches the PS3. If it aborts (timeout) the PS3 isn't reachable.
-      await ps3fetch(`http://${ip}/beep.ps3?1`);
-      await new Promise(r => setTimeout(r, 400));
-      if (generation !== connectionGeneration) return;
-      await doubleBeep();
-      if (generation !== connectionGeneration) return;
+      if (!quietLinkEnabled) {
+        // Audible confirmation uses webMAN commands; quiet link skips them.
+        await ps3fetch(`http://${ip}/beep.ps3?1`);
+        await new Promise(r => setTimeout(r, 400));
+        if (generation !== connectionGeneration) return;
+        if (!quietLinkEnabled) await doubleBeep();
+        if (generation !== connectionGeneration) return;
+      }
       const mapiProbeSupported = await probePs3mapiAvailable(ip, 8000);
       if (generation !== connectionGeneration) return;
       ps3mapiHealthProbeSupported = mapiProbeSupported;
-      setBadge('connected', ps3mapiHealthProbeSupported ? 'ONLINE' : 'WEBMAN ONLINE');
+      setBadge('connected', connectedBadgeLabel());
       document.getElementById('btn-connect').style.display = 'none';
       document.getElementById('btn-disconnect').style.display = '';
       document.getElementById('btn-shutdown').classList.add('enabled');
@@ -207,21 +214,21 @@ window.rtmConnectionDiagnostics = () => connectionEvents.map(event => ({ ...even
       log(ps3mapiHealthProbeSupported
         ? `PS3MAPI server ready → ${ip}`
         : `webMAN responded → ${ip}; PS3MAPI HTTP version probing is unsupported`, ps3mapiHealthProbeSupported ? 'ok' : '');
-      if (typeof automationNotify === 'function') automationNotify('Connected', 'connect', {ip});
+      if (!quietLinkEnabled && typeof automationNotify === 'function') automationNotify('Connected', 'connect', {ip});
       recordConnectionEvent('connect-restored');
       toast(ps3mapiHealthProbeSupported
         ? 'Connected to PS3MAPI at ' + ip
         : 'webMAN is reachable; PS3MAPI status is unverified', ps3mapiHealthProbeSupported ? 'ok' : '');
-      // Confirm a successful PS3 link with the webMAN HTTP popup.
-      // This is a PS3/XMB notification, separate from the Destiny-internal RTM toast.
-      ps3fetch(`http://${ip}/popup.ps3/${encodeURIComponent('Destiny RTM - By MVQ1303')}`)
-        .then(() => log('Success popup sent → Destiny RTM - By MVQ1303', 'ok'))
-        .catch(() => log('Success popup could not be sent', 'err'));
-      // Start 30-second connection health-check pings.
-      if (ps3mapiHealthProbeSupported) startHealthCheck();
-      // Install player hook — required for gamespeed writes to persist.
-      // Mirrors writePlayerHook() from AFKCrucible/Form1.cs (soulsAPI/C#).
-      setTimeout(() => { if (generation === connectionGeneration) installPlayerHook().catch(error => log(`Player hook failed: ${error.message}`, 'err')); }, 800);
+      if (!quietLinkEnabled) {
+        // This webMAN XMB notification is separate from the RTM's local toast.
+        ps3fetch(`http://${ip}/popup.ps3/${encodeURIComponent('Destiny RTM - By MVQ1303')}`)
+          .then(() => log('Success popup sent → Destiny RTM - By MVQ1303', 'ok'))
+          .catch(() => log('Success popup could not be sent', 'err'));
+      }
+      // Quiet link suppresses periodic background probes for idle comparisons.
+      if (!quietLinkEnabled && ps3mapiHealthProbeSupported) startHealthCheck();
+      // Linking is transport-only. Game hooks are explicit user actions so a
+      // connection check cannot silently patch Destiny's executable memory.
 
     } catch (e) {
       if (generation !== connectionGeneration) return;
@@ -266,8 +273,10 @@ window.rtmConnectionDiagnostics = () => connectionEvents.map(event => ({ ...even
 
   // ── Reachability probe / safe Auto Reconnect ─────────────────────────────
   const AUTO_RECONNECT_KEY = 'rtm_auto_reconnect_safe_v1';
-  let autoReconnectEnabled = localStorage.getItem(AUTO_RECONNECT_KEY) === '1';
+  let autoReconnectEnabled = !quietLinkEnabled && localStorage.getItem(AUTO_RECONNECT_KEY) === '1';
+  if (quietLinkEnabled) localStorage.setItem(AUTO_RECONNECT_KEY, '0');
   recordConnectionEvent(autoReconnectEnabled ? 'auto-reconnect-pref-enabled' : 'auto-reconnect-pref-disabled');
+  recordConnectionEvent(quietLinkEnabled ? 'quiet-link-pref-enabled' : 'quiet-link-pref-disabled');
   let _autoReconnectTimer = null;
   let _autoReconnectActive = false;
   let _autoReconnectAttempts = 0;
@@ -279,9 +288,15 @@ window.rtmConnectionDiagnostics = () => connectionEvents.map(event => ({ ...even
   function applyAutoReconnectSettingUI() {
     document.getElementById('auto-reconnect-on')?.classList.toggle('active', autoReconnectEnabled);
     document.getElementById('auto-reconnect-off')?.classList.toggle('active', !autoReconnectEnabled);
+    const enableButton = document.getElementById('auto-reconnect-on');
+    if (enableButton) enableButton.disabled = quietLinkEnabled;
   }
 
   function setAutoReconnect(enabled) {
+    if (enabled && quietLinkEnabled) {
+      toast('Turn Quiet connection off before enabling auto reconnect', 'err');
+      return;
+    }
     autoReconnectEnabled = !!enabled;
     recordConnectionEvent(autoReconnectEnabled ? 'auto-reconnect-enabled' : 'auto-reconnect-disabled');
     localStorage.setItem(AUTO_RECONNECT_KEY, autoReconnectEnabled ? '1' : '0');
@@ -305,7 +320,55 @@ window.rtmConnectionDiagnostics = () => connectionEvents.map(event => ({ ...even
   }
 
   window.setAutoReconnect = setAutoReconnect;
-  document.addEventListener('DOMContentLoaded', applyAutoReconnectSettingUI);
+
+  function applyQuietLinkSettingUI() {
+    document.getElementById('quiet-link-on')?.classList.toggle('active', quietLinkEnabled);
+    document.getElementById('quiet-link-off')?.classList.toggle('active', !quietLinkEnabled);
+  }
+
+  function setQuietLink(enabled) {
+    quietLinkEnabled = !!enabled;
+    localStorage.setItem(QUIET_LINK_KEY, quietLinkEnabled ? '1' : '0');
+    recordConnectionEvent(quietLinkEnabled ? 'quiet-link-enabled' : 'quiet-link-disabled');
+    applyQuietLinkSettingUI();
+    applyAutoReconnectSettingUI();
+
+    if (quietLinkEnabled) {
+      stopHealthCheck();
+      if (autoReconnectEnabled) {
+        autoReconnectEnabled = false;
+        localStorage.setItem(AUTO_RECONNECT_KEY, '0');
+        recordConnectionEvent('auto-reconnect-disabled-by-quiet-link');
+        applyAutoReconnectSettingUI();
+      }
+      const wasRelinking = _autoReconnectActive;
+      stopAutoReconnect(false);
+      if (wasRelinking) {
+        setBadge('failed', 'NO SIGNAL');
+        document.getElementById('btn-connect').style.display = '';
+        document.getElementById('btn-connect').disabled = false;
+        document.getElementById('btn-disconnect').style.display = 'none';
+        document.getElementById('btn-shutdown').classList.remove('enabled');
+        document.getElementById('btn-restart').classList.remove('enabled');
+      }
+      if (document.getElementById('status-badge')?.classList.contains('connected')) {
+        setBadge('connected', connectedBadgeLabel());
+      }
+      toast('Quiet connection ON · background checks stopped', '');
+    } else {
+      if (ip && ps3mapiHealthProbeSupported) startHealthCheck();
+      if (document.getElementById('status-badge')?.classList.contains('connected')) {
+        setBadge('connected', connectedBadgeLabel());
+      }
+      toast('Quiet connection OFF', '');
+    }
+  }
+
+  window.setQuietLink = setQuietLink;
+  document.addEventListener('DOMContentLoaded', () => {
+    applyAutoReconnectSettingUI();
+    applyQuietLinkSettingUI();
+  });
 
   async function probePs3mapiAvailable(targetIp, timeoutMs = 8000, requestOptions = {}) {
     let response;
@@ -346,7 +409,7 @@ window.rtmConnectionDiagnostics = () => connectionEvents.map(event => ({ ...even
     if (input) input.value = targetIp;
     saveIp(targetIp);
 
-    setBadge('connected', ps3mapiHealthProbeSupported ? 'ONLINE' : 'WEBMAN ONLINE');
+    setBadge('connected', connectedBadgeLabel());
     document.getElementById('btn-connect').style.display = 'none';
     document.getElementById('btn-connect').disabled = false;
     document.getElementById('btn-disconnect').style.display = '';
@@ -358,13 +421,14 @@ window.rtmConnectionDiagnostics = () => connectionEvents.map(event => ({ ...even
     log(ps3mapiHealthProbeSupported
       ? `PS3MAPI server restored → ${targetIp}`
       : `webMAN responded → ${targetIp}; PS3MAPI HTTP version probing is unsupported`, ps3mapiHealthProbeSupported ? 'ok' : '');
-    if (typeof automationNotify === 'function') automationNotify('Connection restored', 'restore', {ip:targetIp});
+    if (!quietLinkEnabled && typeof automationNotify === 'function') automationNotify('Connection restored', 'restore', {ip:targetIp});
     toast(ps3mapiHealthProbeSupported ? 'PS3MAPI connection restored' : 'webMAN is reachable; PS3MAPI status is unverified', ps3mapiHealthProbeSupported ? 'ok' : '');
     if (ps3mapiHealthProbeSupported) startHealthCheck();
   }
 
   function beginSafeAutoReconnect(targetIp = ip, force = false) {
     if (window.rtmFramebufferBusy && String(window.rtmFramebufferRecoveryIp || '') !== String(targetIp || '')) return;
+    if (quietLinkEnabled && !force) return;
     if ((!autoReconnectEnabled && !force) || _autoReconnectActive || !targetIp) return;
 
     const generation = ++connectionGeneration;
@@ -426,6 +490,7 @@ window.rtmConnectionDiagnostics = () => connectionEvents.map(event => ({ ...even
   const HEALTH_QUIET_WINDOW = 5000;
 
   function startHealthCheck() {
+    if (quietLinkEnabled) return;
     const generation = connectionGeneration;
     stopHealthCheck();
     _healthMissed = 0;

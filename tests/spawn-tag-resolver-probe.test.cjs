@@ -29,11 +29,12 @@ function makeHarness({ badResolver = false } = {}) {
   ]);
   const document = { getElementById: id => elements.get(id) || null };
   const window = {
+    RtmBuildCompatibility: { anchorCount: 5 },
     rtmActivitySessionMemory: {
       session: () => owner,
       async verify(session) {
         assert.equal(session, owner);
-        return { profile, anchors: 3, capability: { session } };
+        return { profile, anchors: 5, capability: { session } };
       },
       async read(address, length, session, capability) {
         assert.equal(session, owner);

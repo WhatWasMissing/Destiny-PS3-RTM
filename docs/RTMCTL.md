@@ -10,6 +10,7 @@ webMAN MOD on port 80. Destiny's process ID defaults to `0x1010200`.
 .\dist\rtmctl.exe write --ip 192.168.0.62 --address 0030D230 --hex 3DCCCCCD
 .\dist\rtmctl.exe notify --ip 192.168.0.62 --message "Hello from RTM"
 .\dist\rtmctl.exe read --ip 192.168.0.62 --address 0030D230 --length 4 --json
+.\dist\rtmctl.exe actor-pool --ip 192.168.0.62 --json
 ```
 
 Addresses and values use hexadecimal. Reads are limited to 64 KiB per request;
@@ -20,7 +21,16 @@ confirms the request was dispatched, not that the PS3 displayed it.
 Add `--json` to a command for one JSON result object. Errors return a nonzero
 exit code and a JSON error object.
 
-Every memory write first checks the three-site BLES01857 01.24 runtime
+`actor-pool` reads only the 20-byte BLES 01.24 actor-pool descriptor at
+`0x01A1E160`. It verifies the five-anchor build profile and full 64-byte actor
+path before and after the sample, then discards a changed descriptor. An
+initialized descriptor must have capacity 40, stride `0x28D0`, an aligned
+storage pointer and a bounded backing span. A null pointer with zero or expected
+dimensions is reported as uninitialized; unexpected dimensions are refused.
+No backing records are read; this is not a loaded-enemy list or
+proof that a tag can spawn. The command accepts no custom read address or size.
+
+Every memory write first checks the five-anchor BLES01857 01.24 runtime
 signature profile documented in `ADDRESS-AUDIT.md`. A mismatch or unreadable
 signature blocks the write. The profile is not a full EBOOT hash or title-region
 check; read commands continue to work on builds that do not match.

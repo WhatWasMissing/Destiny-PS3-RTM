@@ -110,7 +110,7 @@ var toolList = []tool{
 	{
 		Name:        "rtm_verify_build",
 		Title:       "Check Destiny build profile",
-		Description: "Read three code signatures and compare them with the audited BLES01857 01.24 profile. This is a read-only compatibility check, not a full EBOOT hash or region identification; a mismatch blocks memory writes but does not block reads.",
+		Description: "Read five code signatures and compare them with the audited BLES01857 01.24 profile. This is a read-only compatibility check, not a full EBOOT hash or region identification; a mismatch blocks memory writes but does not block reads.",
 		InputSchema: objectSchema(map[string]any{
 			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
 		}, "target_ipv4"),
@@ -128,9 +128,18 @@ var toolList = []tool{
 		Annotations: map[string]any{"readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true},
 	},
 	{
+		Name:        "rtm_read_actor_pool_descriptor",
+		Title:       "Inspect Destiny actor-pool descriptor",
+		Description: "Verify the BLES01857 01.24 five-anchor profile and full actor-path signature, then read and recheck only the 20-byte actor-pool descriptor at 0x01A1E160. Validates the bounded storage pointer, capacity 40 and stride 0x28D0 when initialized. Never follows storage or reads actor records; does not identify loaded enemies or validate spawning.",
+		InputSchema: objectSchema(map[string]any{
+			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
+		}, "target_ipv4"),
+		Annotations: map[string]any{"readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true},
+	},
+	{
 		Name:        "rtm_read_live_inventory_pool",
 		Title:       "Read live Destiny item-pool slots",
-		Description: "Read the BLES01857 01.24 self-family item-object pool after verifying the three-site build profile, exact getter/lookup code signatures, and live descriptor. The bounded sequential snapshot returns only pool slot and signed item index (at most 646 rows); instance and owner IDs are suppressed. Read-only and non-atomic; does not map items to an active character or vault.",
+		Description: "Read the BLES01857 01.24 self-family item-object pool after verifying the five-anchor build profile, exact getter/lookup code signatures, and live descriptor. The bounded sequential snapshot returns only pool slot and signed item index (at most 646 rows); instance and owner IDs are suppressed. Read-only and non-atomic; does not map items to an active character or vault.",
 		InputSchema: objectSchema(map[string]any{
 			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
 		}, "target_ipv4"),
@@ -166,7 +175,7 @@ var toolList = []tool{
 	{
 		Name:        "rtm_set_player_scale",
 		Title:       "Set Destiny player scale",
-		Description: "Set the current local player scale to a finite source-range multiplier from 0.3 through 20 (the source UI offers 0.3, 1, 2 and 20; use 1 to reset). Requires the three-site BLES01857 01.24 runtime signature profile plus a stable player-name/object-handle chain. The tool rechecks the destination before a verified four-byte Float32 write; it emulates the source resolver rather than executing a game function. Game visual effect and server persistence are not confirmed.",
+		Description: "Set the current local player scale to a finite source-range multiplier from 0.3 through 20 (the source UI offers 0.3, 1, 2 and 20; use 1 to reset). Requires the five-anchor BLES01857 01.24 runtime signature profile plus a stable player-name/object-handle chain. The tool rechecks the destination before a verified four-byte Float32 write; it emulates the source resolver rather than executing a game function. Game visual effect and server persistence are not confirmed.",
 		InputSchema: objectSchema(map[string]any{
 			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
 			"scale":       map[string]any{"type": "number", "minimum": 0.3, "maximum": 20, "description": "Float32 player scale multiplier; source buttons include 0.3, 1, 2 and 20; 1 resets the source value."},
@@ -176,7 +185,7 @@ var toolList = []tool{
 	{
 		Name:        "rtm_write_memory",
 		Title:       "Write Destiny memory",
-		Description: "Require the three-site BLES01857 01.24 runtime signature profile, then write 1–8 bytes to the Destiny process and report success only after exact fresh readback. The address is hexadecimal; this does not call game functions.",
+		Description: "Require the five-anchor BLES01857 01.24 runtime signature profile, then write 1–8 bytes to the Destiny process and report success only after exact fresh readback. The address is hexadecimal; this does not call game functions.",
 		InputSchema: objectSchema(map[string]any{
 			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
 			"address":     map[string]any{"type": "string", "description": "32-bit hexadecimal memory address, optionally prefixed with 0x."},
@@ -187,7 +196,7 @@ var toolList = []tool{
 	{
 		Name:        "rtm_set_brightness",
 		Title:       "Set a source-backed brightness preset",
-		Description: "Require the three-site BLES01857 01.24 runtime signature profile, then write Bright (50), Normal (1), or Inverted (-20) from the local 1.24 C# source to 0x006101C0 and verify the bytes. Readback confirms bytes only; the in-game visual effect has not been observed.",
+		Description: "Require the five-anchor BLES01857 01.24 runtime signature profile, then write Bright (50), Normal (1), or Inverted (-20) from the local 1.24 C# source to 0x006101C0 and verify the bytes. Readback confirms bytes only; the in-game visual effect has not been observed.",
 		InputSchema: objectSchema(map[string]any{
 			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
 			"preset":      map[string]any{"type": "string", "enum": []string{"bright", "normal", "inverted"}},
@@ -197,7 +206,7 @@ var toolList = []tool{
 	{
 		Name:        "rtm_set_legacy_scalar_preset",
 		Title:       "Set an experimental RTM scalar preset",
-		Description: "Select Normal (Float32 1), or a recovered RTM-labeled Max Damage (0x3FFFFFFF, about 2) / 1 Hit Kill 2 (Float32 100) preset at 0x004449EC. These gameplay labels are unverified: 01.24 code uses the word as a fallback coefficient in an unidentified ratio calculation. Requires the three-site 01.24 signature profile, the exact consumer-code signature at 0x00444B64, and a known current preset before writing; verifies exact readback.",
+		Description: "Select Normal (Float32 1), or a recovered RTM-labeled Max Damage (0x3FFFFFFF, about 2) / 1 Hit Kill 2 (Float32 100) preset at 0x004449EC. These gameplay labels are unverified: 01.24 code uses the word as a fallback coefficient in an unidentified ratio calculation. Requires the five-anchor 01.24 signature profile, the exact consumer-code signature at 0x00444B64, and a known current preset before writing; verifies exact readback.",
 		InputSchema: objectSchema(map[string]any{
 			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD."},
 			"mode":        map[string]any{"type": "string", "enum": []string{"normal", "max_damage", "one_hit_kill_2"}},
@@ -465,6 +474,29 @@ func (s *Server) callTool(ctx context.Context, raw json.RawMessage) map[string]a
 			return errorResult(err)
 		}
 		return successResult(map[string]any{"ok": true, "address": fmt.Sprintf("0x%08X", address), "length": len(data), "hex": strings.ToUpper(hex.EncodeToString(data))})
+	case "rtm_read_actor_pool_descriptor":
+		var args targetArgs
+		if err := decodeStrict(call.Arguments, &args); err != nil {
+			return errorResult(err)
+		}
+		if err := validateTarget(args.Target); err != nil {
+			return errorResult(err)
+		}
+		reader, ok := s.client.(interface {
+			ReadActorPoolDescriptor(context.Context, string) (rtmclient.ActorPoolDescriptorSnapshot, error)
+		})
+		if !ok {
+			return errorResult(errors.New("RTM client does not support the BLES 01.24 actor-pool descriptor reader"))
+		}
+		snapshot, err := reader.ReadActorPoolDescriptor(ctx, args.Target)
+		if err != nil {
+			return errorResult(err)
+		}
+		return successResult(map[string]any{
+			"ok": true, "read_only": true, "snapshot_atomic": false,
+			"target_ipv4": args.Target, "snapshot": snapshot,
+			"loaded_enemy_list_confirmed": false, "spawnability_confirmed": false,
+		})
 	case "rtm_read_live_inventory_pool":
 		var args targetArgs
 		if err := decodeStrict(call.Arguments, &args); err != nil {

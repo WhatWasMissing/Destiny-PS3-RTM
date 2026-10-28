@@ -18,7 +18,7 @@ SPECS = (
         ROOT / "research" / "bootstrap-executor.bin",
         0x0183E000,
         292,
-        "19168afea738565520cb7a803354398ff76222d91fad1a6ce7e8700ab4d10dea",
+        "616e8294b969ad36fdb78844a0bafb7dcc9b11a25384c7288201c6aed6d24d1f",
     ),
 )
 

@@ -87,6 +87,10 @@ func fake0124Signature(address string, length int) []byte {
 		signature = "8084001C908300004E800020"
 	case "002FF2D0":
 		signature = "7C0802A648A99751F821FF81F8010090"
+	case "0013ED38":
+		signature = "7C0802A648C59CC9F821FE21F80101F0"
+	case "00255FA8":
+		signature = "7C0802A648B42A5DF821FF21F80100F0"
 	}
 	data, err := hex.DecodeString(signature)
 	if err != nil || len(data) != length {
@@ -217,8 +221,8 @@ func TestToolsListAdvertisesBoundedRTMTools(t *testing.T) {
 	}
 	list := resultObject(t, responseByID(t, responses, 2))
 	tools, ok := list["tools"].([]any)
-	if !ok || len(tools) != 14 {
-		t.Fatalf("expected fourteen tools, got %#v", list["tools"])
+	if !ok || len(tools) != 15 {
+		t.Fatalf("expected fifteen tools, got %#v", list["tools"])
 	}
 	var sawEntityInspector bool
 	var sawScaleInspector, sawScaleSetter bool
@@ -261,8 +265,8 @@ func TestBuildVerifierIsReadOnlyAndReportsPerSignatureMismatch(t *testing.T) {
 		t.Fatalf("build check overstated its result: %#v", result)
 	}
 	signatures, ok := result["signatures"].([]any)
-	if !ok || len(signatures) != 3 || client.reads != 3 || len(client.writes) != 0 {
-		t.Fatalf("build check did not return three read-only signature results: %#v reads=%d writes=%#v", result, client.reads, client.writes)
+	if !ok || len(signatures) != 5 || client.reads != 5 || len(client.writes) != 0 {
+		t.Fatalf("build check did not return five read-only signature results: %#v reads=%d writes=%#v", result, client.reads, client.writes)
 	}
 	if signatures[2].(map[string]any)["matches"] != false {
 		t.Fatalf("mismatched signature was reported as matching: %#v", signatures[2])

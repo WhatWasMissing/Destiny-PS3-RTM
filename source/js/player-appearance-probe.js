@@ -301,7 +301,7 @@
       await api.verify(owner);
       if (api.session() !== owner) throw new Error('Console session changed during inspection; discard this sample');
       result.build_profile = 'BLES01857 01.24';
-      result.build_signature = `${build.anchors}/3 anchors matched; this is not a full EBOOT hash or region check`;
+      result.build_signature = `${build.anchors}/${root.RtmBuildCompatibility.anchorCount} anchors matched; this is not a full EBOOT hash or region check`;
       result.sampled_utc = new Date().toISOString();
       output.textContent = JSON.stringify(result, null, 2);
       output.hidden = false;
