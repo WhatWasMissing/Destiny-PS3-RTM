@@ -355,10 +355,12 @@ reviewable in PR #8; it remains a draft pending live-console compatibility revie
   while resolving masked handles. A helper-mediated initializer now confirms
   it is the AI Actor Manager's `actors` pool, capacity 40, PS3 stride `0x28D0`.
   The earlier direct-store/literal scan missed the indirect initialization.
-  A separate allocator bitmap and full-datum reconstruction are now traced;
-  the app does not yet sample them. Live-enemy correlation and the `+0x226C`
-  packed handle's target remain unresolved, so actor enumeration remains
-  unimplemented. See `research/actor-pool-descriptor.md`.
+  A separate allocator bitmap and full-datum reconstruction are traced and a
+  bounded CLI/MCP reader now reports allocated-slot candidates. Static caller
+  and resolver signatures identify record `+0x226C` as a second packed handle;
+  its decoded bucket/slot are reported but its target class remains unknown.
+  Live-enemy correlation and spawnability remain unresolved. See
+  `research/actor-pool-descriptor.md`.
 - The Safe Mode source audit found that the previous connection flow installed
   a shared Destiny hook using about 81 sequential memory writes. The current
   flow requires an explicit hook action. Current idle Link performs no Destiny
@@ -414,8 +416,10 @@ reviewable in PR #8; it remains a draft pending live-console compatibility revie
   cannot be ruled out; output remains explicitly non-atomic.
 - The returned row is an allocated slot candidate. The full actor datum is
   retained; +0x24/+0x28 are raw, +0x30 is a unit-datum candidate, and
-  +0x40/+0x44 are raw member-owner fields. The reader does not follow +0x226C,
-  resolve sobjects, classify enemies, select spawn tags, or write memory.
+  +0x40/+0x44 are raw member-owner fields. The reader samples and rechecks
+  +0x226C and reports its packed handle and decoded bucket/slot, but does not
+  follow it, resolve sobjects, classify enemies, select spawn tags, or write
+  memory.
 - Address checks now match Blackrock's recovered spans:
   [0x00010000, 0x01C80000] and [0x30000000, 0x80000000], using end-exclusive
   lengths and permitting the computed end to equal the upper bound. This is

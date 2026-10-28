@@ -35,9 +35,11 @@ proof that a tag can spawn. The command accepts no custom read address or size.
 than 40 allocated slots. It verifies the actor allocation and datum code, the
 active-player pointer, and the descriptor/header/bitmap/identity values before
 returning a sequential snapshot. Each row includes the full actor datum and
-selected fields from the record's first `0x48` bytes. The unit datum and member
-owner fields are candidates/raw values; this command does not classify enemies,
-follow `+0x226C`, choose a spawn tag, or write memory. It accepts only `--ip`
+selected fields from the record's first `0x48` bytes. It verifies the static
+caller/resolver signatures for `+0x226C`, samples/rechecks that packed handle,
+and reports its raw value plus decoded bucket/slot. The unit datum and member
+owner fields remain candidates/raw values; this command does not follow the
+handle, classify enemies, choose a spawn tag, or write memory. It accepts only `--ip`
 and `--json`; one request is bounded to 64 KiB and the overall scan to 40 slots.
 The command can take up to 45 seconds on a slow PS3MAPI link.
 

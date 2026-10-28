@@ -146,9 +146,15 @@ func run(args []string, stdout, stderr io.Writer) error {
 			})
 		}
 		fmt.Fprintf(stdout, "BLES 01.24 allocated actor candidates: %d / %d (non-atomic, read-only sample)\n", snapshot.AllocatedCount, snapshot.Capacity)
-		fmt.Fprintln(stdout, "Slot\tActor datum\tUnit datum candidate\tMember owner")
+		fmt.Fprintln(stdout, "Slot\tActor datum\tUnit datum candidate\tNested handle\tBucket/slot\tMember owner")
 		for _, candidate := range snapshot.Candidates {
-			fmt.Fprintf(stdout, "%d\t%s\t%s\t%s\n", candidate.Slot, candidate.ActorDatum, candidate.RecordPreview.UnitDatumCandidate, candidate.RecordPreview.MemberOwnerHandle)
+			location := "-"
+			if candidate.NestedHandleDecoded {
+				location = fmt.Sprintf("0x%04X/0x%04X", candidate.NestedHandleBucket, candidate.NestedHandleSlot)
+			} else if !candidate.NestedHandleIsSentinel {
+				location = "unrecognized"
+			}
+			fmt.Fprintf(stdout, "%d\t%s\t%s\t%s\t%s\t%s\n", candidate.Slot, candidate.ActorDatum, candidate.RecordPreview.UnitDatumCandidate, candidate.NestedPackedHandle, location, candidate.RecordPreview.MemberOwnerHandle)
 		}
 		fmt.Fprintln(stdout, snapshot.Note)
 	case "inventory-pool":
@@ -205,8 +211,10 @@ The client targets private IPv4 addresses on port 80 and uses Destiny PID 0x1010
 actor-pool verifies the BLES profile and actor-path code, reads only the 20-byte
 descriptor twice, and never follows its storage pointer or enumerates actors.
 actor-candidates verifies the allocator and datum code, then reads the bounded
-allocation bitmap and first 0x48 bytes of allocated records (at most 40); it
-does not identify enemies or prove that any candidate is spawnable.
+allocation bitmap, first 0x48 bytes, and the signature-verified +0x226C nested
+packed handle for allocated records (at most 40). It reports only decoded
+handle bucket/slot arithmetic; it does not follow the handle, identify enemies,
+or prove that any candidate is spawnable.
 inventory-pool is read-only, verifies the BLES 01.24 profile plus item-pool code and
 descriptor signatures, and never returns instance or owner IDs. It does not call
 undocumented PS3 function-call endpoints.`)

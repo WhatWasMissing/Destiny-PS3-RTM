@@ -67,7 +67,7 @@ Grab the latest build from the [Releases](../../releases) page.
 ### Command-line tools
 
 The current build record and verification status are in
-[`docs/RELEASE-2026-10-28-r3.md`](docs/RELEASE-2026-10-28-r3.md). Earlier
+[`docs/RELEASE-2026-10-28-r4.md`](docs/RELEASE-2026-10-28-r4.md). Earlier
 same-day prerelease records remain in the adjacent `RELEASE-2026-10-28*.md`
 files.
 

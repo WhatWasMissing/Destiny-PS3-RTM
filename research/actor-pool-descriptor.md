@@ -84,7 +84,11 @@ release clears it. The full datum also incorporates identity and namespace
 fields; a slot number alone cannot establish identity across reuse. The
 address trace, Blackrock iterator and full-datum reconstruction are documented
 in [actor-pool-allocation-evidence.md](actor-pool-allocation-evidence.md).
-The current descriptor probe does not read this bitmap or enumerate records.
+The descriptor-only UI probe does not read this bitmap or enumerate records.
+The separate bounded CLI/MCP candidate reader follows the allocator bitmap,
+reconstructs datums, and reports the raw `+0x226C` packed handle plus its
+decoded bucket/slot arithmetic after signature and value rechecks. It does not
+resolve that handle or classify its target.
 
 Consequently, a reader must at minimum reject indices `>=40` and preserve the
 distinction between the descriptor record, the `+0x226C` packed handle, and any

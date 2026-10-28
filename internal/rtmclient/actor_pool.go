@@ -12,25 +12,30 @@ import (
 )
 
 const (
-	actorPoolDescriptorAddress     uint32 = 0x01A1E160
-	actorPoolDescriptorBytes              = 20
-	actorPoolFullDescriptorBytes          = 0x34
-	actorPoolExpectedStride        uint32 = 0x28D0
-	actorPoolExpectedCapacity      uint32 = 40
-	actorPoolCodeAddress           uint32 = 0x00255FA8
-	actorPoolCodeSignature                = "7C0802A648B42A5DF821FF21F80100F0607E00003C6001A23FE001A23063E16033FF1138809E01743BA00001548404FE80A3000C7C8429D6806300087F432014"
-	actorDatumCodeAddress          uint32 = 0x00108960
-	actorDatumCodeSignature               = "54A704FE80A4001C7CA539D681040018812400083CC040007D08281480A40030"
-	actorAllocateCodeAddress       uint32 = 0x00108A50
-	actorAllocateCodeSignature            = "57A3E8FA8108000857A406FE392000017D2420307D28182E7D2423787C88192E"
-	actorAllocatorHeaderBytes             = 0x20
-	actorBitmapDescriptorBytes            = 0x0C
-	actorRecordPreviewBytes               = 0x48
-	actorMaxPoolSlots                     = 8192
-	actorMaxBitmapBytes                   = 0x1000
-	actorMaxReadBytes                     = 0x10000
-	actorMaxTargetReadBytes               = int(actorPoolExpectedCapacity) * actorRecordPreviewBytes
-	actorMaxCandidateCallReadBytes        = 0x10000
+	actorPoolDescriptorAddress         uint32 = 0x01A1E160
+	actorPoolDescriptorBytes                  = 20
+	actorPoolFullDescriptorBytes              = 0x34
+	actorPoolExpectedStride            uint32 = 0x28D0
+	actorPoolExpectedCapacity          uint32 = 40
+	actorPoolCodeAddress               uint32 = 0x00255FA8
+	actorPoolCodeSignature                    = "7C0802A648B42A5DF821FF21F80100F0607E00003C6001A23FE001A23063E16033FF1138809E01743BA00001548404FE80A3000C7C8429D6806300087F432014"
+	actorDatumCodeAddress              uint32 = 0x00108960
+	actorDatumCodeSignature                   = "54A704FE80A4001C7CA539D681040018812400083CC040007D08281480A40030"
+	actorAllocateCodeAddress           uint32 = 0x00108A50
+	actorAllocateCodeSignature                = "57A3E8FA8108000857A406FE392000017D2420307D28182E7D2423787C88192E"
+	actorNestedHandleOffset                   = 0x226C
+	actorNestedHandleCallerAddress     uint32 = 0x00193B14
+	actorNestedHandleCallerSignature          = "3C6001A2808400043063E160548404FE80A3000C7C8429D6806300087C6320143880FFFF786300208063226C90810070906100749B6100789361007C306100704BFFCFDD"
+	actorNestedHandleResolverAddress   uint32 = 0x00190B4C
+	actorNestedHandleResolverSignature        = "83FE0004907E00002C1FFFFF418201283C8001897FE36E70546574BE80846D5060A503FF7CA3183857E504FE54633032808400007C641814"
+	actorAllocatorHeaderBytes                 = 0x20
+	actorBitmapDescriptorBytes                = 0x0C
+	actorRecordPreviewBytes                   = 0x48
+	actorMaxPoolSlots                         = 8192
+	actorMaxBitmapBytes                       = 0x1000
+	actorMaxReadBytes                         = 0x10000
+	actorMaxTargetReadBytes                   = int(actorPoolExpectedCapacity) * actorRecordPreviewBytes
+	actorMaxCandidateCallReadBytes            = 0x10000
 )
 
 // ActorPoolDescriptorSnapshot describes only the fixed-address pool descriptor.
@@ -71,6 +76,11 @@ type AllocatedActorCandidate struct {
 	ActorDatumAcceptedByHost bool                        `json:"actor_datum_accepted_by_blackrock"`
 	RecordAddress            string                      `json:"record_address"`
 	RecordPreview            AllocatedActorRecordPreview `json:"record_preview"`
+	NestedPackedHandle       string                      `json:"nested_packed_handle"`
+	NestedHandleIsSentinel   bool                        `json:"nested_packed_handle_is_sentinel"`
+	NestedHandleDecoded      bool                        `json:"nested_packed_handle_decoded"`
+	NestedHandleBucket       uint32                      `json:"nested_handle_bucket"`
+	NestedHandleSlot         uint32                      `json:"nested_handle_slot"`
 }
 
 // ActorPoolCandidatesSnapshot reports allocated pool candidates only. Reads
@@ -190,7 +200,7 @@ func (c *Client) ReadAllocatedActorCandidates(ctx context.Context, ip string) (A
 		PlayerPointer:     fmt.Sprintf("0x%08X", playerPointer),
 		Atomic:            false,
 		Candidates:        make([]AllocatedActorCandidate, 0, actorPoolExpectedCapacity),
-		Note:              "Sequential read-only allocated-slot snapshot. Allocation is not live-enemy status or spawnability. Actor data may change between reads; PID/profile checks cannot identify a process restart at the same addresses or defeat ABA reuse.",
+		Note:              "Sequential read-only allocated-slot snapshot. Allocation is not live-enemy status or spawnability. The raw +0x226C packed handle and decoded bucket/slot do not identify the target class. Actor data may change between reads; PID/profile checks cannot identify a process restart at the same addresses or defeat ABA reuse.",
 	}
 	storage := binary.BigEndian.Uint32(descriptorBefore[8:12])
 	stride := binary.BigEndian.Uint32(descriptorBefore[12:16])
@@ -202,7 +212,7 @@ func (c *Client) ReadAllocatedActorCandidates(ctx context.Context, ip string) (A
 		if (stride != 0 && stride != actorPoolExpectedStride) || (capacity != 0 && capacity != actorPoolExpectedCapacity) {
 			return empty, errors.New("uninitialized actor-pool descriptor has unexpected BLES 01.24 dimensions")
 		}
-		if err := c.recheckActorPoolCandidateSample(ctx, ip, playerPointer, descriptorBefore, nil, nil, nil, nil, nil); err != nil {
+		if err := c.recheckActorPoolCandidateSample(ctx, ip, playerPointer, descriptorBefore, nil, nil, nil, nil, nil, nil, nil); err != nil {
 			return empty, err
 		}
 		result.Note = "The BLES actor pool is not initialized in this sample. No allocator, bitmap, identity, or actor-record data was read."
@@ -279,6 +289,7 @@ func (c *Client) ReadAllocatedActorCandidates(ctx context.Context, ip string) (A
 	}
 	identityTargets := make([]actorPoolReadTarget, 0, len(slots))
 	recordTargets := make([]actorPoolReadTarget, 0, len(slots))
+	nestedHandleTargets := make([]actorPoolReadTarget, 0, len(slots))
 	for _, slot := range slots {
 		identityAddress := uint64(storage) + uint64(slot)*uint64(identityStride) + uint64(identityOffset)
 		if identityAddress > uint64(^uint32(0)) || identityAddress&3 != 0 || !actorPoolMemorySpanAllowed(uint32(identityAddress), 4) {
@@ -290,6 +301,11 @@ func (c *Client) ReadAllocatedActorCandidates(ctx context.Context, ip string) (A
 			return empty, fmt.Errorf("actor record preview for slot %d is outside Blackrock's bounded memory spans", slot)
 		}
 		recordTargets = append(recordTargets, actorPoolReadTarget{slot: slot, address: uint32(recordAddress), length: actorRecordPreviewBytes})
+		nestedHandleAddress := recordAddress + actorNestedHandleOffset
+		if uint64(actorNestedHandleOffset)+4 > uint64(stride) || nestedHandleAddress > uint64(^uint32(0)) || nestedHandleAddress&3 != 0 || !actorPoolMemorySpanAllowed(uint32(nestedHandleAddress), 4) {
+			return empty, fmt.Errorf("actor nested-handle field for slot %d is unaligned or outside its verified record span", slot)
+		}
+		nestedHandleTargets = append(nestedHandleTargets, actorPoolReadTarget{slot: slot, address: uint32(nestedHandleAddress), length: 4})
 	}
 	identityBefore, err := c.readActorPoolTargets(ctx, ip, identityTargets)
 	if err != nil {
@@ -299,12 +315,23 @@ func (c *Client) ReadAllocatedActorCandidates(ctx context.Context, ip string) (A
 	if err != nil {
 		return empty, fmt.Errorf("read allocated actor record previews: %w", err)
 	}
+	nestedHandlesBefore, err := c.readActorPoolTargets(ctx, ip, nestedHandleTargets)
+	if err != nil {
+		return empty, fmt.Errorf("read nested actor handles: %w", err)
+	}
 	identityAfter, err := c.readActorPoolTargets(ctx, ip, identityTargets)
 	if err != nil {
 		return empty, fmt.Errorf("recheck actor identity words: %w", err)
 	}
 	if err := compareActorPoolTargets(identityBefore, identityAfter, slots); err != nil {
 		return empty, err
+	}
+	nestedHandlesAfter, err := c.readActorPoolTargets(ctx, ip, nestedHandleTargets)
+	if err != nil {
+		return empty, fmt.Errorf("recheck nested actor handles: %w", err)
+	}
+	if err := compareActorPoolTargets(nestedHandlesBefore, nestedHandlesAfter, slots); err != nil {
+		return empty, fmt.Errorf("nested packed handle changed during the sample: %w", err)
 	}
 	for _, slot := range slots {
 		identityWord := binary.BigEndian.Uint32(identityAfter[slot])
@@ -316,6 +343,8 @@ func (c *Client) ReadAllocatedActorCandidates(ctx context.Context, ip string) (A
 			datum = 0x80000000 | ((identity & 7) << 27) | ((namespace & 0x3FFF) << 13) | slot
 		}
 		preview := recordPreviews[slot]
+		nestedHandle := binary.BigEndian.Uint32(nestedHandlesAfter[slot])
+		handleBucket, handleSlot, handleDecoded := decodeActorNestedHandle(nestedHandle)
 		recordAddress := uint32(uint64(storage) + uint64(slot)*uint64(stride))
 		result.Candidates = append(result.Candidates, AllocatedActorCandidate{
 			Slot:                     slot,
@@ -331,11 +360,16 @@ func (c *Client) ReadAllocatedActorCandidates(ctx context.Context, ip string) (A
 				MemberOwnerHandle:  fmt.Sprintf("0x%08X", binary.BigEndian.Uint32(preview[0x40:0x44])),
 				MemberOwnerOffset:  fmt.Sprintf("0x%08X", binary.BigEndian.Uint32(preview[0x44:0x48])),
 			},
+			NestedPackedHandle:     fmt.Sprintf("0x%08X", nestedHandle),
+			NestedHandleIsSentinel: nestedHandle == ^uint32(0),
+			NestedHandleDecoded:    handleDecoded,
+			NestedHandleBucket:     handleBucket,
+			NestedHandleSlot:       handleSlot,
 		})
 	}
 	result.IdentityWordsRead = len(slots) * 3
-	result.ActorRecordFieldBytes = len(slots) * actorRecordPreviewBytes
-	if err := c.recheckActorPoolCandidateSample(ctx, ip, playerPointer, descriptorBefore, headerBefore, bitmapDescriptorBefore, bitmapWordsBefore, identityTargets, identityAfter); err != nil {
+	result.ActorRecordFieldBytes = len(slots) * (actorRecordPreviewBytes + 4)
+	if err := c.recheckActorPoolCandidateSample(ctx, ip, playerPointer, descriptorBefore, headerBefore, bitmapDescriptorBefore, bitmapWordsBefore, identityTargets, identityAfter, nestedHandleTargets, nestedHandlesAfter); err != nil {
 		return empty, err
 	}
 	return result, nil
@@ -379,7 +413,7 @@ func (c *Client) readActorPoolPlayerAnchor(ctx context.Context, ip string) (uint
 	return pointer, nil
 }
 
-func (c *Client) recheckActorPoolCandidateSample(ctx context.Context, ip string, playerPointer uint32, descriptor, header, bitmapDescriptor, bitmapWords []byte, identityTargets []actorPoolReadTarget, identitySnapshot map[uint32][]byte) error {
+func (c *Client) recheckActorPoolCandidateSample(ctx context.Context, ip string, playerPointer uint32, descriptor, header, bitmapDescriptor, bitmapWords []byte, identityTargets []actorPoolReadTarget, identitySnapshot map[uint32][]byte, nestedHandleTargets []actorPoolReadTarget, nestedHandleSnapshot map[uint32][]byte) error {
 	if err := c.inspectActorPoolAllocationProfile(ctx, ip); err != nil {
 		return fmt.Errorf("final actor-pool code/profile check failed: %w", err)
 	}
@@ -435,7 +469,30 @@ func (c *Client) recheckActorPoolCandidateSample(ctx context.Context, ip string,
 			return err
 		}
 	}
+	if len(nestedHandleTargets) != 0 {
+		handlesAfter, err := c.readActorPoolTargets(ctx, ip, nestedHandleTargets)
+		if err != nil {
+			return fmt.Errorf("final nested packed-handle recheck failed: %w", err)
+		}
+		if err := compareActorPoolTargets(nestedHandleSnapshot, handlesAfter, targetSlots(nestedHandleTargets)); err != nil {
+			return fmt.Errorf("nested packed handle changed during the sample: %w", err)
+		}
+	}
 	return nil
+}
+
+func decodeActorNestedHandle(handle uint32) (bucket, slot uint32, decoded bool) {
+	if handle == ^uint32(0) {
+		return 0, 0, false
+	}
+	signedShift := int32(handle) >> 13
+	bucketMask := (uint32(signedShift) >> 18) | 0x3FF
+	bucket = uint32(signedShift) & bucketMask
+	slot = handle & 0x1FFF
+	if bucket > 0x3FFF {
+		return 0, 0, false
+	}
+	return bucket, slot, true
 }
 
 func (c *Client) readActorPoolTargets(ctx context.Context, ip string, targets []actorPoolReadTarget) (map[uint32][]byte, error) {
@@ -529,6 +586,8 @@ func (c *Client) inspectActorPoolAllocationProfile(ctx context.Context, ip strin
 	for _, signature := range []memorySignature{
 		{address: actorDatumCodeAddress, hex: actorDatumCodeSignature},
 		{address: actorAllocateCodeAddress, hex: actorAllocateCodeSignature},
+		{address: actorNestedHandleCallerAddress, hex: actorNestedHandleCallerSignature},
+		{address: actorNestedHandleResolverAddress, hex: actorNestedHandleResolverSignature},
 	} {
 		code, err := c.ReadMemory(ctx, ip, fmt.Sprintf("%08X", signature.address), len(signature.hex)/2)
 		if err != nil {

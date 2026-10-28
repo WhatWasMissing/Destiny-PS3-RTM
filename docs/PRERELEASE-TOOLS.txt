@@ -18,11 +18,13 @@ identify loaded enemies or confirm spawning.
 Read allocated actor-slot candidates from a loaded BLES 01.24 activity:
   .\rtmctl.exe actor-candidates --ip 192.168.1.100 --json
 
-This read-only scan verifies the allocator/datum code and active-player anchor,
-then follows the bounded allocator bitmap and reads at most 40 allocated slots.
-It returns the full actor datum and selected words from each first 0x48 bytes.
-Allocated does not mean enemy or spawnable. The result is non-atomic and cannot
-rule out a process restart or ABA reuse during the sample.
+This read-only scan verifies allocator/datum code, the +0x226C packed-handle
+caller/resolver, and the active-player anchor, then follows the bounded
+allocator bitmap and reads at most 40 allocated slots. It returns each full
+actor datum, selected fields from the first 0x48 bytes, and the raw +0x226C
+handle with decoded bucket/slot arithmetic. It does not follow the handle or
+identify its target. Allocated does not mean enemy or spawnable. The result is
+non-atomic and cannot rule out a process restart or ABA reuse during the sample.
 
 Read the bounded BLES 01.24 item-object pool:
   .\rtmctl.exe inventory-pool --ip 192.168.1.100 --json

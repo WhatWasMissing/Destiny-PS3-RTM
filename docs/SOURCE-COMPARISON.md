@@ -212,7 +212,11 @@ but no spawn routine. The older local HTML RTMs contain Instant Respawn and
 Static Actors controls that are already represented in this app; their copied
 addresses provide no new 01.24 spawn implementation. Blackrock remains the
 only inspected local source for a general entity-spawn action, and its queued
-`sobject_new` consumer is still unmapped to BLES 01.24. See
+`sobject_new` consumer's object-type and descriptor semantics remain unmapped
+to BLES 01.24. The BLES 01.24 ELF does statically confirm the object-creation
+entry at `0x0013ED38` and its manager-registration continuation at
+`0x0013ED90`; that correspondence alone does not establish Blackrock's expected
+type, tag/class mapping, or live spawn behavior. See
 [BLACKROCK-FEATURE-PORT.md](BLACKROCK-FEATURE-PORT.md).
 
 - [webMAN MOD web commands](https://github.com/aldostools/webMAN-MOD/wiki/Web-Commands)

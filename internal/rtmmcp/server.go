@@ -139,7 +139,7 @@ var toolList = []tool{
 	{
 		Name:        "rtm_read_allocated_actor_candidates",
 		Title:       "Read allocated Destiny actor candidates",
-		Description: "Read-only BLES01857 01.24 snapshot of at most 40 allocator-marked actor slots. Verifies the five-anchor profile, actor/datum/allocator code, active-player pointer, descriptor, allocator header, bitmap and full actor datums; returns only the first 0x48 bytes' selected fields. Allocated does not mean live enemy or spawnable. Sequential reads cannot prove process-instance continuity or defeat ABA reuse.",
+		Description: "Read-only BLES01857 01.24 snapshot of at most 40 allocator-marked actor slots. Verifies the five-anchor profile, actor/datum/allocator code, the +0x226C packed-handle caller/resolver, active-player pointer, descriptor, allocator header, bitmap and full actor datums. Returns selected fields from the first 0x48 bytes plus the raw nested handle and decoded bucket/slot. It does not follow the handle or classify the target; allocated does not mean live enemy or spawnable. Sequential reads cannot prove process-instance continuity or defeat ABA reuse.",
 		InputSchema: objectSchema(map[string]any{
 			"target_ipv4": map[string]any{"type": "string", "description": "Private IPv4 address of the PS3 running webMAN MOD with Destiny in a loaded activity."},
 		}, "target_ipv4"),

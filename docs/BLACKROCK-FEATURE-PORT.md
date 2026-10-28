@@ -22,7 +22,7 @@ memory features still use BLES evidence and the RTM's verified runtime profile.
 | Experimental operation-1 spawn controller | `source/js/spawn-executor-controller.js`, `source/js/spawn-executor-runtime.js` | User-triggered install, queue-slot selection, submit/poll/cancel, and compare-before-restore recovery. Requires a fresh BLES 01.24 profile, all three scratch ranges zero, and a persistent recovery journal; hook activation occurs last. Queue reads and writes are not atomic reservations, so another Blackrock or RTM spawn client must not run concurrently. If hook activation may have happened, recovery restores the hook but leaves the task entry, dispatcher header, code and data resident until Destiny restarts, even if no spawn request was sent. Confirmed pre-activation failures can clean exact owned bytes. PPC cache behavior, tag/class matching, actual creation, and placement remain unverified on a live console. |
 | Spawn-tag resolver probe | `source/js/spawn-tag-resolver-probe.js` | Requires the 5-anchor profile plus an address-specific 100-byte match at the BLES 01.24 packed-handle helper `0x0013B7E8`, then reads and rechecks the runtime table descriptor and record word using Blackrock op-1's zero suboffset. The function returns a pointer candidate only; it does not test tag validity, residency, enemy class, or spawn success. See [ADDRESS-AUDIT.md](ADDRESS-AUDIT.md#bles-0124-packed-handle-resolver-used-by-spawn) and [spawn-candidate-audit.md](../research/spawn-candidate-audit.md). |
 | Actor lookup descriptor probe | `source/js/actor-lookup-descriptor-probe.js` | Verifies the five-anchor BLES profile and an exact 64-byte actor-path signature at `0x00255FA8`, then reads/rechecks only the 20-byte descriptor at `0x01A1E160`. Shows its raw leading words, storage pointer, stride, and capacity; checks active dimensions against capacity 40 and stride `0x28D0`; never follows storage. It accepts only the address spans used by Blackrock's recovered host reader. See [ADDRESS-AUDIT.md](ADDRESS-AUDIT.md#bles-0124-actor-lookup-descriptor-path) and [the reproducible PPC evidence](../research/actor-pool-descriptor.md). |
-| Allocated actor-candidate snapshot | `internal/rtmclient/actor_pool.go`, CLI `rtmctl actor-candidates`, MCP `rtm_read_allocated_actor_candidates` | Verifies the five-anchor BLES profile plus exact datum/allocator signatures, requires a stable non-null player pointer, follows the `0x34`-byte descriptor → allocator header → bitmap descriptor → bitmap words, and reads at most 40 allocated slots. Preserves the full reconstructed datum and selected raw fields from each first `0x48` bytes. Rechecks bitmap and identity words, but remains sequential/non-atomic; it identifies allocated candidates, not enemies or spawnable tags. The `+0x30` word is a unit-datum candidate; `+0x24/+0x28` are opaque, and `+0x40/+0x44` are raw member-owner fields. It does not follow `+0x226C` or the separate cleanup bitmap. |
+| Allocated actor-candidate snapshot | `internal/rtmclient/actor_pool.go`, CLI `rtmctl actor-candidates`, MCP `rtm_read_allocated_actor_candidates` | Verifies the five-anchor BLES profile plus exact datum/allocator and `+0x226C` caller/resolver signatures, requires a stable non-null player pointer, follows the `0x34`-byte descriptor → allocator header → bitmap descriptor → bitmap words, and reads at most 40 allocated slots. Preserves the full reconstructed datum and selected raw fields from each first `0x48` bytes. Samples/rechecks the raw nested handle and reports decoded bucket/slot arithmetic but never follows it. Remains sequential/non-atomic; it identifies allocated candidates, not enemies or spawnable tags. The `+0x30` word is a unit-datum candidate; `+0x24/+0x28` are opaque, and `+0x40/+0x44` are raw member-owner fields. It does not inspect the separate cleanup bitmap. |
 | Offline inventory snapshot viewer | `source/js/offline-inventory-snapshot.js` | Reads explicitly selected BLES 01.24 QZ payload files (28,104-byte character or 28,768-byte account). It validates the big-endian type hash (`EB4B8439` character; `B5DF2907` account) and body size, then shows character slot and item index, with an optional name from a matching user-imported BLES-indexed catalog. Header SOID bytes are skipped; row instance IDs are reduced to a transient empty/nonempty check and never surfaced or persisted. Account +0x4C0 appears only as an unverified vault-like candidate. No live memory, writes, actions, network, or persistence. |
 | Verified equipped-position labels | `source/js/offline-inventory-snapshot.js` | Labels only the 17 BLES 01.24 equipped inventory starts proven by the bucket-range and equipped-slot tables. Nine have known subclass/armour/weapon names; the other eight remain numbered. Every non-start row keeps its numeric inventory slot. |
 | Local catalog browser | `source/js/local-catalogs.js` | Imports user-selected CSV, TSV, JSON, and text catalogs in page memory, with per-file, total-size, and row caps. Supports activity, spawn/hop-on, item/loot, and world-data categories. Spawn catalog rows can copy a syntactically valid 32-bit tag into the experimental executor; catalog type is not copied into the expected runtime-class field. Inventory labels use an explicitly BLES-indexed `itemIndex` or `blesItemIndex` column only. The Blackrock `def` ordinal and unverified `hash`/`tag` joins are ignored. No catalog data or executable code is bundled. |
@@ -34,9 +34,12 @@ without the desktop UI through `rtmctl actor-pool` / `rtmctl actor-candidates`
 and MCP tools `rtm_read_actor_pool_descriptor` /
 `rtm_read_allocated_actor_candidates`. The descriptor tool reads only the
 20-byte descriptor. Candidate enumeration follows the BLES allocator bitmap,
-preserves full datums, and reads only selected words from the first `0x48`
-bytes of each allocated record. Both are read-only; candidate rows do not
-confirm enemy status, spawn tags, or process-instance continuity.
+preserves full datums, reads selected words from the first `0x48` bytes, and
+reports the raw `+0x226C` packed handle with its decoded bucket/slot. Static
+analysis shows that helper resolves the handle through a second manager, but
+the reader does not follow it or identify its target class. Both tools are
+read-only; candidate rows do not confirm enemy status, spawn tags, or
+process-instance continuity.
 
 The current app already has activity loading, teleport and scenario routines,
 character name/emblem/scale utilities, ammo and cheat controls, Overwalls
@@ -60,9 +63,10 @@ initializer supplies `0x28D0`. The
 descriptor's backing pointer is allocated dynamically through a shared helper.
 This resolves the pool identity and dimensions, but not whether records are
 loaded enemies. A separate allocator bitmap and full-datum reconstruction have
-now been traced in the BLES EBOOT and Blackrock; the `+0x30` unit-cleanup bitmap
-and `+0x226C` packed-handle target remain unresolved, and the app does not yet
-read the allocator bitmap or classify live actors. See
+now been traced in the BLES EBOOT and Blackrock. The candidate reader uses the
+allocator bitmap and reports the nested handle at `+0x226C`; its target class
+and the separate `+0x30` cleanup-bitmap semantics remain unresolved, as does
+live actor classification. See
 [actor-pool allocation evidence](../research/actor-pool-allocation-evidence.md).
 This static
 result still does not establish a generic BLES spawn entry point or safe spawn

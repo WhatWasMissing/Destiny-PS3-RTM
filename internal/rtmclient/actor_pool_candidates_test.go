@@ -31,6 +31,9 @@ type actorPoolCandidatesConsole struct {
 	changeIdentity       uint32
 	identityReadsByBlock map[uint32]int
 	mutateIdentityAfter  int
+	changeNestedHandle   uint32
+	nestedHandleReads    map[uint32]int
+	mutateNestedAfter    int
 	requestedBytes       int
 	maxRequestLength     int
 	unexpectedRequests   int
@@ -47,6 +50,9 @@ func newActorPoolCandidatesConsole(allSlots bool) *actorPoolCandidatesConsole {
 		identityReadsByBlock: make(map[uint32]int),
 		changeIdentity:       ^uint32(0),
 		mutateIdentityAfter:  1,
+		changeNestedHandle:   ^uint32(0),
+		nestedHandleReads:    make(map[uint32]int),
+		mutateNestedAfter:    1,
 	}
 	descriptor := make([]byte, actorPoolFullDescriptorBytes)
 	putActorWord(descriptor, 0x00, testActorAllocator)
@@ -93,7 +99,10 @@ func newActorPoolCandidatesConsole(allSlots bool) *actorPoolCandidatesConsole {
 		}
 		putActorWord(backing, offset+0x40, owner)
 		putActorWord(backing, offset+0x44, 0x44000000|slot)
+		putActorWord(backing, offset+actorNestedHandleOffset, ^uint32(0))
 	}
+	putActorWord(backing, int(3*actorPoolExpectedStride)+actorNestedHandleOffset, 0x815BA133)
+	putActorWord(backing, int(32*actorPoolExpectedStride)+actorNestedHandleOffset, 0x8087600F)
 	console.memory[testActorStorage] = backing
 	console.memory[PlayerPointerAddress] = actorBytes(testActorActivePlayer)
 
@@ -103,6 +112,8 @@ func newActorPoolCandidatesConsole(allSlots bool) *actorPoolCandidatesConsole {
 	console.memory[actorPoolCodeAddress] = mustHexBytes(actorPoolCodeSignature)
 	console.memory[actorDatumCodeAddress] = mustHexBytes(actorDatumCodeSignature)
 	console.memory[actorAllocateCodeAddress] = mustHexBytes(actorAllocateCodeSignature)
+	console.memory[actorNestedHandleCallerAddress] = mustHexBytes(actorNestedHandleCallerSignature)
+	console.memory[actorNestedHandleResolverAddress] = mustHexBytes(actorNestedHandleResolverSignature)
 	return console
 }
 
@@ -157,6 +168,13 @@ func (console *actorPoolCandidatesConsole) serveHTTP(w http.ResponseWriter, r *h
 					data[identityOffset+3] ^= 0x01
 				}
 			}
+			if console.changeNestedHandle != ^uint32(0) && address64 <= uint64(console.changeNestedHandle) && uint64(console.changeNestedHandle)+4 <= requestedEnd {
+				console.nestedHandleReads[address]++
+				if console.nestedHandleReads[address] > console.mutateNestedAfter {
+					handleOffset := int(uint64(console.changeNestedHandle) - address64)
+					data[handleOffset+3] ^= 0x01
+				}
+			}
 			break
 		}
 	}
@@ -193,11 +211,17 @@ func TestReadAllocatedActorCandidatesUsesAllocatorBitmapAndFullDatum(t *testing.
 		if candidate.RecordPreview.UnitDatumCandidate != fmt.Sprintf("0x%08X", 0x80000000|slot) {
 			t.Fatalf("unit-datum candidate mismatch: %#v", candidate.RecordPreview)
 		}
+		if slot == 3 && (candidate.NestedPackedHandle != "0x815BA133" || candidate.NestedHandleIsSentinel || !candidate.NestedHandleDecoded || candidate.NestedHandleBucket != 0x0ADD || candidate.NestedHandleSlot != 0x0133) {
+			t.Fatalf("nested packed handle decode mismatch: %#v", candidate)
+		}
+		if slot == 31 && (candidate.NestedPackedHandle != "0xFFFFFFFF" || !candidate.NestedHandleIsSentinel || candidate.NestedHandleDecoded) {
+			t.Fatalf("nested packed-handle sentinel mismatch: %#v", candidate)
+		}
 		if candidate.RecordPreview.MemberOwnerHandle != "0xFFFFFFFF" && slot != 32 {
 			t.Fatalf("unexpected member-owner preview for slot %d: %#v", slot, candidate.RecordPreview)
 		}
 	}
-	if snapshot.Atomic || snapshot.ActorRecordFieldBytes != len(wantSlots)*actorRecordPreviewBytes {
+	if snapshot.Atomic || snapshot.ActorRecordFieldBytes != len(wantSlots)*(actorRecordPreviewBytes+4) {
 		t.Fatalf("snapshot consistency or read counts wrong: %#v", snapshot)
 	}
 	allocated := make(map[uint32]bool, len(wantSlots))
@@ -284,6 +308,9 @@ func TestReadAllocatedActorCandidatesDiscardsChangingBitmapIdentityOrPlayer(t *t
 		{"identity changed", func(c *actorPoolCandidatesConsole) {
 			c.changeIdentity = testActorStorage + 3*actorPoolExpectedStride + 0x10
 		}, "identity for allocated slot 3 changed"},
+		{"nested handle changed", func(c *actorPoolCandidatesConsole) {
+			c.changeNestedHandle = testActorStorage + 3*actorPoolExpectedStride + actorNestedHandleOffset
+		}, "nested packed handle changed"},
 		{"player session anchor changed", func(c *actorPoolCandidatesConsole) { c.changePlayerOnRead = 2 }, "active-player pointer changed"},
 	}
 	for _, test := range tests {
@@ -316,6 +343,8 @@ func TestReadAllocatedActorCandidatesRejectsInvalidMetadata(t *testing.T) {
 		{"identity stride", func(c *actorPoolCandidatesConsole) { putActorWord(c.memory[actorPoolDescriptorAddress], 0x1C, 0x10001) }},
 		{"bitmap pointer", func(c *actorPoolCandidatesConsole) { putActorWord(c.memory[testActorBitmapDesc], 8, 0x80000000) }},
 		{"allocator signature", func(c *actorPoolCandidatesConsole) { c.memory[actorAllocateCodeAddress][0] ^= 0x01 }},
+		{"nested handle caller signature", func(c *actorPoolCandidatesConsole) { c.memory[actorNestedHandleCallerAddress][0] ^= 0x01 }},
+		{"nested handle resolver signature", func(c *actorPoolCandidatesConsole) { c.memory[actorNestedHandleResolverAddress][0] ^= 0x01 }},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

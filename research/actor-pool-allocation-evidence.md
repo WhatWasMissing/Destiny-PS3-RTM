@@ -172,9 +172,15 @@ no scan can return more than 40 rows.
 
 Rows are allocated-slot candidates only. `+0x30` is shown as a unit-datum
 candidate, `+0x24/+0x28` as raw words, and `+0x40/+0x44` as a raw member-owner
-pair. The reader does not inspect the separate cleanup bitmap at `0x01A21138`,
-follow `+0x226C`, resolve the sobjects pool, classify enemy types, or prove a
-spawn tag. Reads are sequential; the client has no process-generation token,
+pair. A separate hash-checked caller at `0x00193B14` reads `record+0x226C`
+and passes it to the helper at `0x00190B30`. The helper treats it as a second
+packed handle and resolves it through manager root `0x01896D50`; this does not
+show the target's class or make it safe to expose as a pointer. The candidate
+reader verifies both signatures, samples and rechecks the four-byte handle,
+and reports its raw value plus decoded bucket/slot arithmetic. It does not
+follow that handle, inspect the separate cleanup bitmap at `0x01A21138`,
+resolve the sobjects pool, classify enemy types, or prove a spawn tag. Reads
+are sequential; the client has no process-generation token,
 and a restart at reused addresses or an ABA mutation can evade rechecks. No
 live BLES console sample has confirmed the dynamic pointers or correlated
 these rows with enemies.

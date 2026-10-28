@@ -482,9 +482,12 @@ described below. Static initializer code at `0x0015B22C` sets
 capacity 40 and stride `0x28D0`, then calls the shared initializer at
 `0x000BE148`; that helper allocates `40 × 0x28D0` bytes and stores the dynamic
 backing pointer in descriptor `+8`. Thus the earlier direct-store scan and
-literal scan missed a helper-mediated initialization path. Runtime actor
-correlation, record occupancy semantics, the meaning of record `+0x226C`, and
-any spawn action remain unverified. See the detailed, hash-checked trace in
+literal scan missed a helper-mediated initialization path. Static caller and
+resolver traces now show that record `+0x226C` contains a second packed handle;
+the candidate reader samples and rechecks that word and reports its raw value
+and decoded bucket/slot without following it. The target object/class, runtime
+actor correlation, record occupancy semantics, and any spawn action remain
+unverified. See the detailed, hash-checked trace in
 [actor-pool-descriptor.md](../research/actor-pool-descriptor.md). The earlier
 candidate-scan method and its limits remain in
 [actor-lookup-descriptor-evidence.md](../research/actor-lookup-descriptor-evidence.md);
