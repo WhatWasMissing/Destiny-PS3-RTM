@@ -111,13 +111,15 @@ is not established.
 The optional expected-type guard defaults to `-1`, which the Blackrock packet
 builder encodes as `0xffffffff`. The BLES 01.24 constructor copies definition
 byte `+0x4E` to created sObject byte `+0x08`; Blackrock's emitted guard compares
-the returned object's `+0x08` byte with packet `+0x24`. The BLES EBOOT also
-contains the ordered object-type names, and its sequence agrees with the local
-D1 Reimagined type list (`9 = biped`). Blackrock's `spawnable.tsv` and
+the returned object's `+0x08` byte with packet `+0x24`. The BLES EBOOT also has
+a 25-record object-type name table at `0x0189A0CC` with `0x1C`-byte records;
+record 9 points to `biped`, and the sequence agrees with the local D1
+Reimagined type list (`9 = biped`). Blackrock's `spawnable.tsv` and
 `entities.tsv` use catalog type `9` for biped-like objects, including both Vex
 archetypes and player Guardians. This is strong static evidence for a shared
 object-kind enum, but no direct BLES dataflow proves the catalog `type` column
-is the expected guard value. The RTM preserves the byte and offers an explicit
+indexes the BLES name table or is the expected guard value. The RTM labels this
+as a possible name-table match, preserves the byte, and offers an explicit
 **Use catalog type as expected-type guard** action marked unverified; selecting
 a catalog row does not apply it automatically. A wrong value can reject an
 otherwise valid spawn. This value describes an object kind, not whether the

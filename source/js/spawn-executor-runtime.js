@@ -5,8 +5,28 @@
   let controller = null;
   let busy = false;
   const MAX_SPAWN_OPTIONS = 1500;
+  const BLES_OBJECT_TYPE_NAME_CANDIDATES = Object.freeze([
+    'inherited', 'static_mesh', 'prop_simple', 'prop_cinematic', 'prop_simulated',
+    'prop_expensive', 'prop_garbage', 'speedtree', 'interactive', 'biped',
+    'creature', 'weapon', 'vehicle', 'turret', 'emitter', 'projectile', 'item',
+    'item_ammo', 'item_loot', 'gear', 'hop_on', 'hop_on_gear_biped',
+    'hop_on_gear_weapon', 'hop_on_gear_ship', 'system'
+  ]);
 
   function element(id) { return document.getElementById(id); }
+
+  function catalogTypeNameCandidate(value) {
+    return Number.isInteger(value) && value >= 0 && value < BLES_OBJECT_TYPE_NAME_CANDIDATES.length
+      ? BLES_OBJECT_TYPE_NAME_CANDIDATES[value]
+      : null;
+  }
+
+  function catalogTypeLabel(value) {
+    const candidate = catalogTypeNameCandidate(value);
+    return candidate
+      ? `catalog type ${value} · possible BLES name-table label “${candidate}”`
+      : `catalog type ${value}`;
+  }
 
   function setStatus(message, state = '') {
     const status = element('spawn-executor-status');
@@ -142,12 +162,15 @@
     matches.slice(0, MAX_SPAWN_OPTIONS).forEach(({ entry, index }) => {
       const option = document.createElement('option');
       option.value = String(index);
-      const typeLabel = Number.isInteger(entry.catalogType) ? ` · catalog type ${entry.catalogType} (unverified)` : '';
+      const typeLabel = Number.isInteger(entry.catalogType) ? ` · ${catalogTypeLabel(entry.catalogType)} (mapping unverified)` : '';
       option.textContent = `${entry.label} · ${entry.tag}${typeLabel} · ${entry.source}`;
       select.append(option);
     });
     select.disabled = matches.length === 0;
-    if (useTypeButton) useTypeButton.disabled = true;
+    if (useTypeButton) {
+      useTypeButton.disabled = true;
+      useTypeButton.textContent = 'Use catalog type as expected-type guard · unverified';
+    }
     const capNote = matches.length > MAX_SPAWN_OPTIONS ? ` · showing first ${MAX_SPAWN_OPTIONS}` : '';
     status.textContent = matches.length
       ? `${matches.length} matching tag${matches.length === 1 ? '' : 's'} from imported catalogs${capNote}. Selecting one copies its tag; applying its numeric type to the guard is a separate, unverified action.`
@@ -166,8 +189,14 @@
     tagInput.value = entry.tag;
     const useTypeButton = element('spawn-catalog-use-type-btn');
     if (useTypeButton) useTypeButton.disabled = !Number.isInteger(entry.catalogType);
+    const typeName = catalogTypeNameCandidate(entry.catalogType);
+    if (useTypeButton) {
+      useTypeButton.textContent = Number.isInteger(entry.catalogType)
+        ? `Use catalog type ${entry.catalogType}${typeName ? ` · ${typeName} candidate` : ''} as guard · unverified`
+        : 'Use catalog type as expected-type guard · unverified';
+    }
     const typeNote = Number.isInteger(entry.catalogType)
-      ? ` Catalog type ${entry.catalogType} can be applied to the expected-type guard as an unverified candidate.`
+      ? ` ${catalogTypeLabel(entry.catalogType)}. The table-to-guard link is unverified.`
       : ' This row has no numeric type value.';
     status.textContent = `Copied tag ${entry.tag} (${entry.label}) from ${entry.source}.${typeNote} Live BLES resolution and enemy identity remain unconfirmed.`;
   }
@@ -185,7 +214,11 @@
       return;
     }
     expectedTypeInput.value = String(entry.catalogType);
-    status.textContent = `Set expected-type guard to ${entry.catalogType} from the imported catalog. Static evidence suggests an object-kind value, but its link to this BLES 01.24 guard is unverified; this does not prove the tag is an enemy or will spawn.`;
+    const typeName = catalogTypeNameCandidate(entry.catalogType);
+    const typeNote = typeName
+      ? ` The BLES 01.24 name table has “${typeName}” at ordinal ${entry.catalogType}; the direct mapping to this guard remains unverified.`
+      : ' No BLES name-table label is available for this value; the mapping remains unverified.';
+    status.textContent = `Set expected-type guard to ${entry.catalogType} from the imported catalog.${typeNote} This does not prove the tag is hostile or will spawn.`;
   }
 
   async function runAction(label, action) {

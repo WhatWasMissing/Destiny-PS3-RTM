@@ -1225,7 +1225,7 @@
         <button class="cheat-btn" id="spawn-catalog-use-type-btn" type="button" disabled>Use catalog type as expected-type guard · unverified</button>
         <details class="spawn-executor-pose">
           <summary>Placement values · nine Float32 fields</summary>
-        <p id="spawn-type-help" class="compact-help-note">Use -1 to disable the expected-type guard. The BLES 01.24 object type byte is at sObject +0x08, but the imported catalog type’s direct mapping to this guard remains unverified. Applying it can filter for the wrong type or prevent a spawn.</p>
+        <p id="spawn-type-help" class="compact-help-note">Use -1 to disable this guard. The hash-matched BLES 01.24 EBOOT has “biped” at ordinal 9 in an ordered object-type name table, and its constructor copies definition +0x4E to sObject +0x08. We have not proven that a catalog type indexes this byte. A wrong value can reject a valid spawn.</p>
           <p class="compact-help-note">Blackrock's recovered defaults are 6 m distance, 2 m spacing, and 1× scale. Its packet builder maps pose[2] to scale and rejects values at or below zero. Pose[0] is aim distance, pose[1] is grid spacing, pose[3..5] are world offsets, and pose[6..8] supply coordinates in Coordinates mode. Keep unused fields at zero.</p>
           <div class="spawn-executor-grid spawn-pose-grid">
             <label for="spawn-pose-0">Distance · pose[0], +0xA4<input class="hex-input" id="spawn-pose-0" type="number" step="any" value="6"></label>
