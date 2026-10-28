@@ -1,21 +1,5 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --bg:       #0a0c10;
-      --surface:  #111520;
-      --card:     #161b28;
-      --border:   #1f2a3f;
-      --accent:   #4fa3e0;
-      --accent2:  #e05c4f;
-      --gold:     #c9a84c;
-      --text:     #d4dbe8;
-      --muted:    #5a6880;
-      --success:  #3ecf74;
-      --danger:   #e05c4f;
-      --mono:     'Share Tech Mono', monospace;
-      --sans:     'Exo 2', sans-serif;
-    }
-
     body {
       background: var(--bg);
       color: var(--text);
@@ -2263,18 +2247,7 @@
     }
 
 
-    /* ── Light / Dark appearance ─────────────────────────────────────── */
-    body.light-mode {
-      --bg:       #eef2f7;
-      --surface:  #ffffff;
-      --card:     #f7f9fc;
-      --border:   #cfd7e3;
-      --text:     #1d2734;
-      --muted:    #647386;
-      --success:  #168a49;
-      --danger:   #c5473d;
-    }
-
+    /* Palette tokens for dark and light modes live in design.css. */
     body.light-mode {
       background: var(--bg);
       color: var(--text);
@@ -2302,7 +2275,7 @@
     body.light-mode .ip-input::placeholder,
     body.light-mode input::placeholder,
     body.light-mode textarea::placeholder {
-      color: #8b97a7;
+      color: var(--muted);
     }
 
     body.light-mode .cheat-btn,
@@ -2314,11 +2287,11 @@
     }
 
     body.light-mode .cheat-btn.active-cheat {
-      background: rgba(22,138,73,0.09) !important;
+      background: var(--success-soft) !important;
     }
 
     body.light-mode .status-badge.connected {
-      background: rgba(22,138,73,0.07);
+      background: var(--success-soft);
     }
 
     body.light-mode #toast {
