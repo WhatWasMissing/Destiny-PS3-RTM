@@ -526,9 +526,12 @@ The exact bytes were checked at this address in the hash-matched BLES 01.24
 ELF. They also occur at `0x0020B4D8` and `0x004AF160`, so this is an
 address-specific check, not a globally unique signature. The function returns
 an adjusted pointer candidate; it contains no tag validity, table-occupancy,
-resource-residency, enemy-class, or spawn-success check. The RTM now checks the
-100 bytes at `0x0013B7E8` before and after the descriptor sample, but still
-does not dereference or classify the candidate pointer.
+resource-residency, enemy-class, or spawn-success check. The RTM checks the
+100 bytes at `0x0013B7E8` before and after the descriptor sample. It also checks
+the constructor's exact 16-byte type-copy sequence at `0x0013EE1C`, reads the
+candidate definition byte at `+0x4E` twice, and reports whether it matches the
+optional guard. This byte read does not establish the catalog mapping, enemy
+identity, hostility, or successful creation.
 
 Matching static code/data bytes do not prove server persistence. Controlled
 observation in the matching 01.24 runtime is needed to confirm dynamic mappings

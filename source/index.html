@@ -1157,13 +1157,13 @@
     <div class="panel" id="spawn-tag-resolver-panel">
       <div class="panel-header">Spawn Tag · handle lookup</div>
       <div class="spawn-tag-resolver-body">
-        <p class="compact-help-note">Check one content tag against the live packed-handle table. Lookup does not prove the resolved object class.</p>
+        <p class="compact-help-note">Reads one tag and samples its definition +0x4E byte. BLES copies it to object +0x08, which Blackrock's optional guard checks. This does not prove the tag is an enemy or will spawn.</p>
         <label class="field-label" for="spawn-tag-resolver-input">32-bit tag · Vex Minotaur candidate
           <input class="hex-input" id="spawn-tag-resolver-input" type="text" value="815BA133" maxlength="10" autocomplete="off" spellcheck="false" />
         </label>
         <button class="cheat-btn" id="spawn-tag-resolver-btn" type="button" onclick="inspectSpawnTagResolver()">Check tag lookup</button>
         <p id="spawn-tag-resolver-status" class="build-profile-status" role="status" aria-live="polite" aria-atomic="true">No tag lookup taken.</p>
-        <pre id="spawn-tag-resolver-output" class="appearance-probe-output" aria-label="Packed-handle resolution candidate" role="region" tabindex="0" hidden></pre>
+        <pre id="spawn-tag-resolver-output" class="appearance-probe-output" aria-label="Packed-handle and constructor type candidate" role="region" tabindex="0" hidden></pre>
       </div>
     </div>
     <div class="panel" id="spawn-region-preflight-panel">
@@ -1180,7 +1180,7 @@
       <div class="spawn-executor-body">
         <div class="spawn-executor-warning" role="note">
           <strong>Experimental · not validated on a live console</strong>
-          <span>Use a development PS3. Hook/cache behavior, enemy tag and class mapping, and placement remain unverified. Run one spawn client at a time.</span>
+          <span>Use a development PS3. Hook/cache behavior, hostile enemy identity, successful creation, and placement remain unverified. Run one spawn client at a time.</span>
           <details class="spawn-executor-disclosure">
             <summary>Why this is experimental</summary>
             <div class="spawn-executor-disclosure-body">

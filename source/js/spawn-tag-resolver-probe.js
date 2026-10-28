@@ -6,6 +6,8 @@
   const HANDLE_TABLE_ROOT = 0x01896D50;
   const HANDLE_RESOLVER_ADDRESS = 0x0013B7E8;
   const HANDLE_RESOLVER_SIGNATURE = '3C80018980A300007CA66E7054A504FE54C774BE80846D5060E703FF7CE630388084000054C63032806300047C8430147884002080C400307CA531D680C40010808400347CA6281478A6002080C600087CC420387C8428107C641814786300204E800020';
+  const CONSTRUCTOR_TYPE_COPY_ADDRESS = 0x0013EE1C;
+  const CONSTRUCTOR_TYPE_COPY_SIGNATURE = '8879004E92F80060987800089AF8000B';
   const PROFILE_NAME = 'BLES01857 01.24 signature profile';
   const MEMORY_START = 0x10000;
   const MEMORY_END = 0x40000000;
@@ -27,8 +29,12 @@
   }
 
   function bytesFromHex(hex) {
-    const bytes = new Uint8Array(hex.length / 2);
-    for (let i = 0; i < bytes.length; i++) bytes[i] = Number.parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+    const normalized = String(hex || '').replace(/\s/g, '').toUpperCase();
+    if (!normalized || normalized.length % 2 || !/^[0-9A-F]+$/.test(normalized)) {
+      throw new Error('A BLES memory read returned malformed hexadecimal data');
+    }
+    const bytes = new Uint8Array(normalized.length / 2);
+    for (let i = 0; i < bytes.length; i++) bytes[i] = Number.parseInt(normalized.slice(i * 2, i * 2 + 2), 16);
     return bytes;
   }
 
@@ -75,6 +81,11 @@
       if (resolverCodeBefore !== HANDLE_RESOLVER_SIGNATURE) {
         throw new Error(`The BLES packed-handle resolver signature did not match at ${hex32(HANDLE_RESOLVER_ADDRESS)}`);
       }
+      const typeCopyCodeBefore = String(await api.read(CONSTRUCTOR_TYPE_COPY_ADDRESS, CONSTRUCTOR_TYPE_COPY_SIGNATURE.length / 2, owner, before.capability) || '')
+        .replace(/\s/g, '').toUpperCase();
+      if (typeCopyCodeBefore !== CONSTRUCTOR_TYPE_COPY_SIGNATURE) {
+        throw new Error(`The BLES constructor type-copy signature did not match at ${hex32(CONSTRUCTOR_TYPE_COPY_ADDRESS)}`);
+      }
 
       async function read(address, length) {
         checkedAddress(address, length);
@@ -106,10 +117,20 @@
       if (pointerAdjustment > recordAddress) throw new Error('Decoded object pointer underflows user memory');
       const descriptorOffset = 0; // Blackrock op=1 does not emit a write to descriptor +4.
       const resolvedPointer = checkedAddress(recordAddress - pointerAdjustment + descriptorOffset, 1);
+      const definitionTypeAddress = checkedAddress(resolvedPointer + 0x4E, 1);
+      const definitionTypeBytes = bytesFromHex(await api.read(definitionTypeAddress, 1, owner, before.capability));
+      if (definitionTypeBytes.length !== 1) throw new Error('The resolved definition type byte was not readable');
+      const definitionType = definitionTypeBytes[0];
+
+      const expectedTypeInput = document.getElementById('spawn-expected-type');
+      const expectedTypeText = String(expectedTypeInput?.value ?? '').trim();
+      const expectedTypeValue = expectedTypeText ? Number(expectedTypeText) : null;
+      const expectedTypeValid = Number.isInteger(expectedTypeValue) && expectedTypeValue >= -1 && expectedTypeValue <= 255;
 
       const rootAgain = await readWord(HANDLE_TABLE_ROOT);
       const descriptorAgain = await read(descriptorAddress, 0x38);
       const recordWordAgain = await readWord(recordAddress + 8);
+      const definitionTypeAgain = bytesFromHex(await api.read(definitionTypeAddress, 1, owner, before.capability));
       const after = await api.verify(owner);
       if (api.session() !== owner || after.profile !== PROFILE_NAME || after.anchors !== root.RtmBuildCompatibility.anchorCount) {
         throw new Error('The final build/session recheck failed; discard this sample');
@@ -119,8 +140,16 @@
       if (resolverCodeAfter !== HANDLE_RESOLVER_SIGNATURE) {
         throw new Error('The BLES packed-handle resolver code changed during the sample; discard this result');
       }
+      const typeCopyCodeAfter = String(await api.read(CONSTRUCTOR_TYPE_COPY_ADDRESS, CONSTRUCTOR_TYPE_COPY_SIGNATURE.length / 2, owner, after.capability) || '')
+        .replace(/\s/g, '').toUpperCase();
+      if (typeCopyCodeAfter !== CONSTRUCTOR_TYPE_COPY_SIGNATURE) {
+        throw new Error('The BLES constructor type-copy code changed during the sample; discard this result');
+      }
       if (rootAgain !== tableRoot || hexFromBytes(descriptorAgain) !== hexFromBytes(descriptor) || recordWordAgain !== recordWord) {
         throw new Error('The handle table changed during this sequential sample; discard this result');
+      }
+      if (definitionTypeAgain.length !== 1 || definitionTypeAgain[0] !== definitionType) {
+        throw new Error('The resolved definition type byte changed during this sequential sample; discard this result');
       }
 
       const result = {
@@ -149,13 +178,27 @@
         record_word_plus_8: hex32(recordWord),
         descriptor_offset_assumed: hex32(descriptorOffset),
         resolved_pointer_candidate: hex32(resolvedPointer),
+        constructor_definition_type: {
+          address: hex32(definitionTypeAddress),
+          field_offset: '0x4E',
+          value: definitionType,
+          signature_address: hex32(CONSTRUCTOR_TYPE_COPY_ADDRESS),
+          signature_bytes: CONSTRUCTOR_TYPE_COPY_SIGNATURE.length / 2,
+          signature_matches_before_and_after: true,
+          copied_to_created_object_offset: '0x08',
+          expected_type_guard: {
+            value: expectedTypeValid ? expectedTypeValue : null,
+            enabled: expectedTypeValid && expectedTypeValue !== -1,
+            matches: expectedTypeValid && expectedTypeValue !== -1 ? expectedTypeValue === definitionType : null
+          }
+        },
         resolution_rechecks_match: true,
-        note: 'This reproduces the observed packed-handle pointer arithmetic only. It does not validate object class, content-tag meaning, expected type, or successful spawning.'
+        note: 'The BLES constructor copies definition +0x4E to created object +0x08, which Blackrock operation 1 checks against its optional expected-type guard. This sampled byte does not establish enemy identity, hostility, placement, or successful creation.'
       };
       output.textContent = JSON.stringify(result, null, 2);
       output.hidden = false;
       status.dataset.state = 'matched';
-      status.textContent = 'Lookup arithmetic completed and runtime table fields were stable. This is a handle-resolution candidate, not proof of a spawnable object.';
+      status.textContent = 'Handle lookup and constructor type-byte sample completed. The value can inform the optional type guard; it does not prove this is a hostile or spawnable enemy.';
     } catch (error) {
       status.dataset.state = 'error';
       status.textContent = `Tag lookup refused or incomplete: ${String(error?.message || error)}`;

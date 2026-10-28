@@ -21,6 +21,14 @@ The hash-verified BLES01857 01.24 EBOOT is
 `E7F100B38BBAF6C23F71B390FDB103D31B427187C38DCFBD47E09C94C4A44206`. Its
 constructor at `0x0013ED38` loads a byte from definition `+0x4E` at
 `0x0013EE1C` and stores it at created sObject `+0x08` at `0x0013EE24`.
+The exact 16-byte instruction sequence at `0x0013EE1C` is
+`8879004E92F80060987800089AF8000B`; it contains both the definition-byte load
+and the created-object byte store. In a second caller, `0x0013F0F8` passes
+`r27` as the constructor's request pointer and `r1+0x70` as the
+output-handle slot. The constructor passes its request pointer through the
+packed-handle resolver at `0x0013B7E8` (`0x0013EDC0..0x0013EDC8`). These are
+static call/data-flow observations; they do not establish that an arbitrary
+resolved tag is a valid enemy definition.
 
 The EBOOT also has a 25-record object-type name table at runtime VA
 `0x0189A0CC` (file offset `0x0188A0CC`), with `0x1C`-byte records. Each
@@ -52,3 +60,11 @@ and UI label it unverified; selecting a catalog row copies only the tag. A
 wrong guard value may reject a spawn. This evidence does not establish that a
 tag resolves on a live BLES console, that it creates an object, or that the
 result is hostile.
+
+The read-only tag-resolver probe now also checks the exact constructor
+type-copy signature and samples the resolved definition's byte at `+0x4E`
+twice, alongside the handle-table rechecks. It reports whether a user-selected
+expected-type guard equals this sampled byte. This checks consistency between
+the candidate definition byte and Blackrock's guard input; it still does not
+verify that the tag is loaded, that the candidate is hostile, or that object
+creation succeeds.

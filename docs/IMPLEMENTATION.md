@@ -466,3 +466,17 @@ reviewable in PR #8; it remains a draft pending live-console compatibility revie
   changes, unchanged rows, malformed input, and exclusion of extra row fields.
 - The build remains a local diagnostic only; inventory mutation transport and
   live-console behavior are still unverified.
+
+## Spawn definition type preflight
+
+- The BLES 01.24 constructor reads definition byte `+0x4E` and stores it at
+  created object `+0x08`; Blackrock operation 1 compares that object byte with
+  its optional expected-type guard. The constructor's 16-byte copy sequence is
+  now an exact before/after signature in the read-only tag resolver probe.
+- After packed-handle resolution, the probe reads the candidate definition byte
+  twice and compares it with the current optional guard value. It discards the
+  result if code, table metadata, record state, or the byte changes during the
+  sequential sample.
+- This improves guard checking for a candidate tag; it does not prove the tag
+  is loaded, hostile, spawnable, or correctly placed. The development PS3 was
+  unreachable, so live behavior remains unverified.
