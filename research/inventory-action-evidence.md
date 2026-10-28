@@ -19,14 +19,23 @@ selected-item location and transfer/equip constraints, and its transfer route
 builds item-specific request state through `FUN_140353b60`. The host callback
 in `FUN_1400e5190` is identified as
 `brps3::invui::...::runRequest(Ctx&, inventory::ActionRequest const&)`; the
-function at `0x1400E5190` writes a `[inventory]` status/log line, calls request
-interface virtual methods, and uses `Inventory confirm` before a fresh
+function at `0x1400E5190` writes a `[inventory]` status/log line, dispatches
+through `Ctx` virtual methods, and uses `Inventory confirm` before a fresh
 inventory read. The higher-level action entry `FUN_1400F61A0` builds an
 `ActionRequest` with an action enum and selected-item metadata, then calls
 `FUN_1400F4D90`. That function obtains the inventory I/O context, performs
 local state/snapshot work, and schedules a delayed confirmation callback via
-a context virtual method. The callback implementation behind the request
-interface remains unresolved.
+`Ctx` vtable slot `+0x38`. The indirect call is at `0x1400F5FE1`; its arguments
+include the `Inventory confirm` label, a 300 ms delay, and a stack
+`std::function` wrapping the `runRequest` lambda. `FUN_1400E5190` reads its
+vptr from the `Ctx` argument, not from `ActionRequest`. The concrete host Ctx
+vtable implementation remains unresolved.
+
+`FUN_1400BF180` resolves the `inventory.io` context state through Ctx slot
+`+0x60`, allocating and zero-initializing a plain state record when absent.
+Its shared-pointer deleter is created in `FUN_1400BEA90`; no separate
+polymorphic `Io` vtable or constructor was found. This state lookup does not
+identify the action transport.
 
 On the observed `FUN_1400E5190` branch, `FUN_1400191E0` copies closures into a
 local ring-buffer task queue and signals the queue. This establishes deferred
