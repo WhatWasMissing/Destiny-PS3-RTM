@@ -1125,7 +1125,7 @@
     <div class="panel" id="live-inventory-pool-panel">
       <div class="panel-header">Live Item Cache · BLES 01.24</div>
       <div class="live-inventory-pool-body">
-        <p class="compact-help-note">List occupied item-cache slots and indexes. Labels use an exact hash/tag match from the validated BLES 01.24 definition table, or an explicitly BLES-indexed catalog.</p>
+        <p class="compact-help-note">List occupied item-cache slots and raw indexes. Names appear only when a user-imported catalog has a BLES itemIndex or blesItemIndex column.</p>
         <div class="live-inventory-pool-actions">
           <button class="cheat-btn" id="live-inventory-pool-btn" type="button" onclick="inspectLiveItemPool()">Read live item pool</button>
           <button class="cheat-btn" id="live-inventory-pool-clear" type="button">Clear snapshot</button>
@@ -1273,7 +1273,7 @@
   <div class="panel" id="local-catalog-browser">
     <div class="panel-header">Local catalog browser</div>
     <div class="local-catalog-body">
-      <p class="local-catalog-intro">Browse your own activity, spawn, hop-on, item or loot catalogs. Live inventory can use either a BLES itemIndex or blesItemIndex column, or an exact hash and tag pair from the validated BLES 01.24 definition table. Generic IDs and the other build's def ordinal are never joined. Files stay in this page's memory; this panel does not contact the network or read game memory.</p>
+      <p class="local-catalog-intro">Browse your own activity, spawn, hop-on, item or loot catalogs. Inventory names require a BLES itemIndex or blesItemIndex column. Generic IDs and the other build's def ordinal are never joined. Files stay in this page's memory; this panel does not contact the network or read game memory.</p>
       <div class="local-catalog-import-grid">
         <label class="local-catalog-control local-catalog-file-control" for="local-catalog-files">
           Catalog files

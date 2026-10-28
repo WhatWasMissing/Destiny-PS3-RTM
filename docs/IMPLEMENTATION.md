@@ -271,12 +271,12 @@ reviewable in PR #8; it remains a draft pending live-console compatibility revie
   starts proven by the BLES 01.24 bucket-range and equipped-slot tables; the
   eight unnamed positions stay numeric.
 - User-imported item/loot catalogs with an explicit BLES `itemIndex` or
-  `blesItemIndex` field can label live and offline inventory rows. Live rows
-  can also use an exact unique unsigned `hash` + `tag` match against the BLES
-  01.24 runtime definition table; the table is fully snapshotted twice before
-  and once after the pool read under fresh capabilities, and any mismatch
-  suppresses those labels. The 8,000-row cap supports browsing the 6,557-row
-  Blackrock table as user-selected local data. Its `def` ordinal is never used.
+  `blesItemIndex` field can label live and offline inventory rows. The live
+  item-object reader extracts the raw index from object `+0x24`; it does not
+  resolve the investment definition or join Blackrock's `def`, `hash`, or
+  `tag` fields. The current local package copies are BLES 01.00 base-disc data,
+  so their names are not treated as a verified 01.24 catalog. See
+  `research/inventory-items-0124.md`.
 - Added `rtmctl inventory-pool` and the MCP tool
   `rtm_read_live_inventory_pool`; both return pool slots and item indexes only.
   The MCP call has a two-minute deadline for the capped sequential scan.
