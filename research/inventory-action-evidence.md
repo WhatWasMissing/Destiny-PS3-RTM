@@ -50,10 +50,10 @@ operation and readback behavior are established.
 The hash-matched EBOOT was checked for references to the equip-component string
 at `0x0133A474` and account-transfer string at `0x012F7C30`. Rizin emitted no
 xrefs, but it warned about malformed program headers and skipped string search
-in oversized regions; these empty results are inconclusive. The nearby
-investment BAP-handler string `c_investment_bap_message_push_handler::handle_message`
-was also found at VA `0x01319B96` (file offset `0x01309B96`), without a proven
-code reference.
+in oversized regions; these empty results are inconclusive. The investment
+BAP-handler string
+`c_investment_bap_message_push_handler::handle_message` starts at VA
+`0x01319B94` (file offset `0x01309B94`), without a proven code reference.
 
 A bounded PowerPC scan found three switch-like groups that compare numeric
 values 402–404:
@@ -72,6 +72,16 @@ coincide with Blackrock's host-side labels 402–404, but the current evidence
 does not connect the two meanings. No equip, transfer, dismantle, use, or item
 create/update call path, request arguments, or persistence behavior is proven.
 
-Next research is a narrow reference trace around the BAP handler and its TOC or
-dispatch tables. Until a caller and action-specific state changes are tied to
-the BLES code, this switch is not treated as an inventory mutation path.
+A follow-up checked the BAP handler, equip component, item-lock handler, and
+item-widget strings for exact 32/64-bit pointers in either byte order and PPC
+`addis` plus low-immediate address pairs. It found no reliable code reference.
+An isolated low-immediate match uses an unrelated high half. A class-adjacent
+table after the item-lock string contains values such as `0x7C5D8400` and
+`0x7C5D8800`; removing their final byte produces code-looking addresses, but
+the encoding and relationship to the class are unknown. Repeated BAP metadata
+value `0x0001DFF0` also recurs in unrelated data and lands inside an epilogue,
+so it is not treated as a handler pointer. The stripped ELF has no symbol or
+relocation sections, and Rizin reported invalid program-header metadata. These
+bounded scans cannot establish a caller chain. Further progress requires a
+reliable function-reference view or a runtime trace; until then, 402–404 are
+not treated as inventory mutation operations.
