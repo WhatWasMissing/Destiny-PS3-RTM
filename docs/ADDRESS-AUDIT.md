@@ -408,21 +408,29 @@ occupied pool slot and item index;
 it does not expose SOIDs, map records to an active character, or write memory.
 The sequential sample remains non-atomic.
 
-The BLES 01.24 investment item list has 3,181 entries, indexed 0–3180. The
-resolver at `0x0041436C` accepts an i16 item index (`-1` is the empty/sentinel
-value) and resolves its hash/tag entry through `0x0028A304` and `0x00288278`.
-The absolute cached list-pointer cell is unresolved for BLES 01.24. The local
-`0x018E9578` derivation comes from BLES 01.00 notes; the 01.24 notes confirm a
-changed content-list root offset but do not re-derive that cell. Therefore the
-RTM does not read this table or join its hash/tag pairs. Live inventory labels
-remain available only from explicitly BLES-indexed `itemIndex` or
-`blesItemIndex` catalogs.
+The live item-object pool path is verified in the hash-matched BLES 01.24 ELF:
+type `0x80801732`, stride `0xA8`, and item index at object `+0x24`. The getter
+at `0x0047C1A0` and family/instance-ID lookup at `0x0047E3CC` support this
+read-only snapshot; the latter is not an index-to-name resolver. The prior
+`0x0041436C` → `0x0028A304` / `0x00288278` resolver trace and its cached-cell
+addresses came from the 01.00 ELF and do not establish 01.24 lookup addresses.
+No 01.24 item-list pointer has been independently located in this RTM work.
+
+The local package parser produced 3,181 item rows from BLES base-disc packages
+whose headers report patch ID 0. That count is not independently verified for
+01.24; although D1 Reimagined notes report the same count from investment
+packages, the 01.24 package set used for those notes is not present here. The
+RTM does not bundle or infer names from the base-disc mapping. It accepts
+explicitly selected `itemIndex` or `blesItemIndex` catalogs and allows
+nonnegative signed-16-bit indexes without asserting an exact 01.24 list length.
+See `research/inventory-items-0124.md` for package identity and remaining
+verification steps.
 
 Blackrock's user-local `data/inventory/items.tsv` has 6,557 rows and fields
 `def`, `hash`, and `tag`. Its `def` ordinal range (0–6556) is not the BLES
-investment index; the app never joins that ordinal or the hash/tag tuple until
-the matching 01.24 list-pointer cell is established. The catalog remains
-user-selected and is not bundled.
+investment index. The app never joins that ordinal or the hash/tag tuple;
+labels are supplied only by a user-selected catalog explicitly keyed by BLES
+item index. Catalog data is not bundled.
 
 The offline character-payload viewer labels equipped positions only at the
 17 starts resolved by the BLES 01.24 bucket-range and equipped-slot tables:
@@ -430,7 +438,9 @@ The offline character-payload viewer labels equipped positions only at the
 and 268. The first nine have source names (subclass, five armour slots, and
 three weapons); the remaining eight are shown only as numbered equipped slots
 because no semantic names are established here. Other inventory rows retain
-their numeric slot. Source evidence is `inventory-items-0124.md:64-90`.
+their numeric slot. See `research/inventory-items-0124.md` for the local ELF
+identity and the static item-resolver limits; equipped-slot source addresses
+still require live or independent raw-disassembly confirmation.
 
 ## BLES 01.24 actor-lookup descriptor path
 

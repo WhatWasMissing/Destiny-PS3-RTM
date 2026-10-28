@@ -76,15 +76,16 @@ identity. Read-only memory tools remain usable on other builds.
   emblem write validation rejects emote and other non-emblem IDs, while an
   unlisted current value can still be shown for inspection.
 - Blackrock's `data/inventory/items.tsv` has a `def` ordinal from 0 through
-  6556 across 6,557 rows, plus separate `hash` and `tag` fields. BLES 01.24
-  uses signed 16-bit investment item indexes into a 3,181-entry list (valid
-  indexes 0–3180), with `0x0041436C` resolving the table entry through
-  `0x0028A304` / `0x00288278`. The absolute cached list-pointer cell remains
-  unresolved for 01.24; its only local address derivation is from a BLES 01.00
-  note and is not reused. The live and offline inventory views therefore label
-  items only when the user imports an explicitly BLES-indexed `itemIndex` or
-  `blesItemIndex` column. The `def` ordinal and unverified hash/tag join are
-  never used; no catalog data is bundled.
+  6556 across 6,557 rows, plus separate `hash` and `tag` fields. The live BLES
+  01.24 pool reader extracts raw indexes from verified `0x80801732` item
+  objects at `+0x24`; `0x0047E3CC` is an instance-ID lookup, not an
+  index-to-name resolver. The `0x0041436C` / `0x0028A304` / `0x00288278`
+  resolver trace is from the 01.00 ELF and is not reused for 01.24. A local
+  package run produced 3,181 rows from patch-ID-0 base-disc packages; that is
+  not validated as the 01.24 name table. The app accepts only user-imported
+  catalogs keyed by `itemIndex` or `blesItemIndex`, supports the nonnegative
+  signed-16-bit field range, and never joins Blackrock's `def`, `hash`, or `tag`
+  fields. Catalog data is not bundled.
 - The offline character viewer maps the 17 equipped-slot starts from the BLES
   01.24 bucket-range/equipped-slot tables to inventory positions. It names the
   subclass, five armour slots, and three weapons where supported; the other

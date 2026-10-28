@@ -67,7 +67,8 @@ Grab the latest build from the [Releases](../../releases) page.
 ### Command-line tools
 
 The current build record and verification status are in
-[`docs/RELEASE-2026-10-28.md`](docs/RELEASE-2026-10-28.md).
+[`docs/RELEASE-2026-10-28-r2.md`](docs/RELEASE-2026-10-28-r2.md). The previous
+same-day prerelease record remains in `docs/RELEASE-2026-10-28.md`.
 
 The Windows build also produces `dist/rtmctl.exe` for scripted use without
 opening the RTM interface. It supports private-network status checks, bounded

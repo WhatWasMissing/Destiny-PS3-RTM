@@ -10,7 +10,9 @@
   const MAX_CELL_CHARS = 200;
   const MAX_RENDER_ROWS = 100;
   const MAX_RENDER_COLUMNS = 10;
-  const MAX_BLES_ITEM_INDEX = 3180;
+  // Investment item indexes are signed 16-bit values; the exact 01.24 list
+  // length is not established by the local package files.
+  const MAX_SIGNED_ITEM_INDEX = 0x7fff;
 
   const catalogs = [];
   let loadedBytes = 0;
@@ -223,7 +225,7 @@
       const rawIndex = (row.get(indexColumn) || '').trim();
       if (!/^\d{1,5}$/.test(rawIndex)) continue;
       const unsignedIndex = Number(rawIndex);
-      if (!Number.isInteger(unsignedIndex) || unsignedIndex < 0 || unsignedIndex > MAX_BLES_ITEM_INDEX) continue;
+      if (!Number.isInteger(unsignedIndex) || unsignedIndex < 0 || unsignedIndex > MAX_SIGNED_ITEM_INDEX) continue;
       const name = (row.get(nameColumn) || '').trim();
       if (!name) continue;
       if (!names.has(unsignedIndex)) names.set(unsignedIndex, name);

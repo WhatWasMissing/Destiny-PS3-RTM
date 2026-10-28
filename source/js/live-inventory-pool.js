@@ -12,8 +12,8 @@
   const ITEM_TYPE_HASH = 0x80801732;
   const ITEM_STRIDE = 0xA8;
   const ITEM_CAPACITY_LIMIT = 646;
-  // The inventory resolver's cached item-list pointer (research: 0x18E9514 + 0x64).
-  // Runtime reads validate this pointer, then the full 3,181-entry table contents.
+  // This reader only exposes raw +0x24 indexes from occupied item-object rows.
+  // Names come from a separately selected, explicitly BLES-indexed local catalog.
   const READ_CHUNK_BYTES = Math.floor(0x600 / ITEM_STRIDE) * ITEM_STRIDE;
   const READ_CHUNK_RECORDS = READ_CHUNK_BYTES / ITEM_STRIDE;
   const READ_GROUP_CHUNKS = 18;
