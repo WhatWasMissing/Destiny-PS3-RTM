@@ -4,6 +4,9 @@ This port compares the current web app with the newer local 1.24-style HTML
 builds (`D:\DestinyRTM\index.html` and `D:\DestimyRTM\index.html`) and the
 matching local C# RTM sources under `D:\Soul rtm`. The older 1.08 and phone
 builds use different offsets and were not used as address references.
+The targeted review of Detertrots Destiny RTM 1.08 found no spawn or inventory
+implementation to port; its unverified direct-write offsets and console-ID
+control are excluded. See [the source audit](../research/detertrots-108-source-audit.md).
 
 ## Ported or completed
 
