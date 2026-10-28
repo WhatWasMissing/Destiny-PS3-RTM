@@ -23,6 +23,7 @@ const (
 
 type actorPoolCandidatesConsole struct {
 	memory               map[uint32][]byte
+	reads                []actorPoolTestRead
 	bitmapWordReads      int
 	activePlayerReads    int
 	changeBitmapOnRead   int
@@ -33,6 +34,11 @@ type actorPoolCandidatesConsole struct {
 	requestedBytes       int
 	maxRequestLength     int
 	unexpectedRequests   int
+}
+
+type actorPoolTestRead struct {
+	address uint32
+	length  int
 }
 
 func newActorPoolCandidatesConsole(allSlots bool) *actorPoolCandidatesConsole {
@@ -114,6 +120,7 @@ func (console *actorPoolCandidatesConsole) serveHTTP(w http.ResponseWriter, r *h
 		return
 	}
 	address := uint32(address64)
+	console.reads = append(console.reads, actorPoolTestRead{address: address, length: length})
 	console.requestedBytes += length
 	if length > console.maxRequestLength {
 		console.maxRequestLength = length
@@ -193,6 +200,24 @@ func TestReadAllocatedActorCandidatesUsesAllocatorBitmapAndFullDatum(t *testing.
 	if snapshot.Atomic || snapshot.ActorRecordFieldBytes != len(wantSlots)*actorRecordPreviewBytes {
 		t.Fatalf("snapshot consistency or read counts wrong: %#v", snapshot)
 	}
+	allocated := make(map[uint32]bool, len(wantSlots))
+	for _, slot := range wantSlots {
+		allocated[slot] = true
+	}
+	for _, read := range console.reads {
+		readStart := uint64(read.address)
+		readEnd := readStart + uint64(read.length)
+		for slot := uint32(0); slot < actorPoolExpectedCapacity; slot++ {
+			if allocated[slot] {
+				continue
+			}
+			recordStart := uint64(testActorStorage) + uint64(slot)*uint64(actorPoolExpectedStride)
+			recordEnd := recordStart + uint64(actorPoolExpectedStride)
+			if readStart < recordEnd && readEnd > recordStart {
+				t.Fatalf("read at 0x%08X+0x%X entered unallocated actor slot %d", read.address, read.length, slot)
+			}
+		}
+	}
 	if console.unexpectedRequests != 0 || console.maxRequestLength > actorMaxReadBytes {
 		t.Fatalf("reader escaped its bounded read profile: %#v", console)
 	}
@@ -209,7 +234,7 @@ func TestReadAllocatedActorCandidatesCapsAtFortyAndBoundsReadBudget(t *testing.T
 	if snapshot.AllocatedCount != 40 || len(snapshot.Candidates) != 40 || snapshot.Candidates[39].Slot != 39 {
 		t.Fatalf("candidate walk did not stop at descriptor capacity: count=%d rows=%d last=%#v", snapshot.AllocatedCount, len(snapshot.Candidates), snapshot.Candidates[len(snapshot.Candidates)-1])
 	}
-	if console.requestedBytes > 2*1024*1024 || console.maxRequestLength > actorMaxReadBytes || console.unexpectedRequests != 0 {
+	if console.requestedBytes > actorMaxCandidateCallReadBytes || console.maxRequestLength > actorMaxReadBytes || console.unexpectedRequests != 0 {
 		t.Fatalf("actor-candidate read budget exceeded: requested=%d max-read=%d unexpected=%d", console.requestedBytes, console.maxRequestLength, console.unexpectedRequests)
 	}
 }

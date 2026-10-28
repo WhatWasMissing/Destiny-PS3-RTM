@@ -12,23 +12,25 @@ import (
 )
 
 const (
-	actorPoolDescriptorAddress   uint32 = 0x01A1E160
-	actorPoolDescriptorBytes            = 20
-	actorPoolFullDescriptorBytes        = 0x34
-	actorPoolExpectedStride      uint32 = 0x28D0
-	actorPoolExpectedCapacity    uint32 = 40
-	actorPoolCodeAddress         uint32 = 0x00255FA8
-	actorPoolCodeSignature              = "7C0802A648B42A5DF821FF21F80100F0607E00003C6001A23FE001A23063E16033FF1138809E01743BA00001548404FE80A3000C7C8429D6806300087F432014"
-	actorDatumCodeAddress        uint32 = 0x00108960
-	actorDatumCodeSignature             = "54A704FE80A4001C7CA539D681040018812400083CC040007D08281480A40030"
-	actorAllocateCodeAddress     uint32 = 0x00108A50
-	actorAllocateCodeSignature          = "57A3E8FA8108000857A406FE392000017D2420307D28182E7D2423787C88192E"
-	actorAllocatorHeaderBytes           = 0x20
-	actorBitmapDescriptorBytes          = 0x0C
-	actorRecordPreviewBytes             = 0x48
-	actorMaxPoolSlots                   = 8192
-	actorMaxBitmapBytes                 = 0x1000
-	actorMaxReadBytes                   = 0x10000
+	actorPoolDescriptorAddress     uint32 = 0x01A1E160
+	actorPoolDescriptorBytes              = 20
+	actorPoolFullDescriptorBytes          = 0x34
+	actorPoolExpectedStride        uint32 = 0x28D0
+	actorPoolExpectedCapacity      uint32 = 40
+	actorPoolCodeAddress           uint32 = 0x00255FA8
+	actorPoolCodeSignature                = "7C0802A648B42A5DF821FF21F80100F0607E00003C6001A23FE001A23063E16033FF1138809E01743BA00001548404FE80A3000C7C8429D6806300087F432014"
+	actorDatumCodeAddress          uint32 = 0x00108960
+	actorDatumCodeSignature               = "54A704FE80A4001C7CA539D681040018812400083CC040007D08281480A40030"
+	actorAllocateCodeAddress       uint32 = 0x00108A50
+	actorAllocateCodeSignature            = "57A3E8FA8108000857A406FE392000017D2420307D28182E7D2423787C88192E"
+	actorAllocatorHeaderBytes             = 0x20
+	actorBitmapDescriptorBytes            = 0x0C
+	actorRecordPreviewBytes               = 0x48
+	actorMaxPoolSlots                     = 8192
+	actorMaxBitmapBytes                   = 0x1000
+	actorMaxReadBytes                     = 0x10000
+	actorMaxTargetReadBytes               = int(actorPoolExpectedCapacity) * actorRecordPreviewBytes
+	actorMaxCandidateCallReadBytes        = 0x10000
 )
 
 // ActorPoolDescriptorSnapshot describes only the fixed-address pool descriptor.
@@ -441,15 +443,27 @@ func (c *Client) readActorPoolTargets(ctx context.Context, ip string, targets []
 	if len(targets) == 0 {
 		return result, nil
 	}
+	if len(targets) > int(actorPoolExpectedCapacity) {
+		return nil, errors.New("actor-pool target count exceeds the BLES descriptor capacity")
+	}
 	ordered := append([]actorPoolReadTarget(nil), targets...)
 	sort.Slice(ordered, func(i, j int) bool { return ordered[i].address < ordered[j].address })
+	for _, target := range ordered {
+		if target.length < 1 || target.length > actorRecordPreviewBytes || !actorPoolMemorySpanAllowed(target.address, uint64(target.length)) {
+			return nil, errors.New("actor-pool target is outside its bounded read span")
+		}
+	}
+	var totalReadBytes uint64
 	for first := 0; first < len(ordered); {
 		start := uint64(ordered[first].address)
 		end := start + uint64(ordered[first].length)
 		last := first + 1
 		for last < len(ordered) {
+			nextStart := uint64(ordered[last].address)
 			nextEnd := uint64(ordered[last].address) + uint64(ordered[last].length)
-			if nextEnd-start > actorMaxReadBytes {
+			// Coalesce only overlapping or adjacent targets. Bridging a gap can
+			// read unallocated actor slots or arbitrary memory between identities.
+			if nextStart > end || nextEnd-start > actorMaxReadBytes {
 				break
 			}
 			if nextEnd > end {
@@ -460,15 +474,23 @@ func (c *Client) readActorPoolTargets(ctx context.Context, ip string, targets []
 		if end <= start || end-start > actorMaxReadBytes || end > 0x100000000 || !actorPoolMemorySpanAllowed(uint32(start), end-start) {
 			return nil, errors.New("actor-pool grouped read exceeds its bounded span")
 		}
+		requestBytes := end - start
+		if requestBytes > uint64(actorMaxTargetReadBytes) || totalReadBytes > uint64(actorMaxTargetReadBytes)-requestBytes {
+			return nil, errors.New("actor-pool target reads exceed the aggregate candidate-byte limit")
+		}
 		block, err := c.ReadMemory(ctx, ip, fmt.Sprintf("%08X", uint32(start)), int(end-start))
 		if err != nil {
 			return nil, err
+		}
+		if len(block) != int(requestBytes) {
+			return nil, errors.New("short actor-pool target read")
 		}
 		for _, target := range ordered[first:last] {
 			offset := uint64(target.address) - start
 			chunk := append([]byte(nil), block[offset:offset+uint64(target.length)]...)
 			result[target.slot] = chunk
 		}
+		totalReadBytes += requestBytes
 		first = last
 	}
 	return result, nil
