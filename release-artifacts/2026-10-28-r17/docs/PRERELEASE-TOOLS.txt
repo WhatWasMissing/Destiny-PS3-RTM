@@ -1,0 +1,39 @@
+DESTINY RTM — DIRECT TOOLS
+
+Run these commands in PowerShell from this prerelease folder. Replace the
+example address with the PS3's current private IPv4 address. The desktop app
+does not need to be running.
+
+Check webMAN reachability:
+  .\rtmctl.exe status --ip 192.168.1.100 --json
+
+Inspect the BLES 01.24 actor-pool descriptor:
+  .\rtmctl.exe actor-pool --ip 192.168.1.100 --json
+
+The actor-pool command verifies the five-anchor build profile and full actor
+code signature, reads/rechecks the 20-byte descriptor, and validates capacity
+40 and stride 0x28D0 when initialized. It reads zero actor records and does not
+identify loaded enemies or confirm spawning.
+
+Read allocated actor-slot candidates from a loaded BLES 01.24 activity:
+  .\rtmctl.exe actor-candidates --ip 192.168.1.100 --json
+
+This read-only scan verifies allocator/datum code, the +0x226C packed-handle
+caller/resolver, and the active-player anchor, then follows the bounded
+allocator bitmap and reads at most 40 allocated slots. It returns each full
+actor datum, selected fields from the first 0x48 bytes, and the raw +0x226C
+handle with decoded bucket/slot arithmetic. It does not follow the handle or
+identify its target. Allocated does not mean enemy or spawnable. The result is
+non-atomic and cannot rule out a process restart or ABA reuse during the sample.
+
+Read the bounded BLES 01.24 item-object pool:
+  .\rtmctl.exe inventory-pool --ip 192.168.1.100 --json
+
+List all CLI commands:
+  .\rtmctl.exe help
+
+rtm-mcp.exe is a stdio MCP server for agent clients. Its named read-only tools
+include rtm_verify_build, rtm_read_actor_pool_descriptor and
+rtm_read_live_inventory_pool. It is not a graphical app; an MCP client launches
+it and sends JSON-RPC requests. Setup is documented in the source repository's
+docs/RTM-MCP.md. All commands communicate directly with the specified PS3.

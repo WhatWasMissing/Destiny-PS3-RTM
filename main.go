@@ -275,7 +275,15 @@ func main() {
 	}
 	listener, err := net.Listen("tcp", *listen)
 	if err != nil {
-		log.Fatal(err)
+		message := fmt.Sprintf(
+			"Destiny RTM could not start its local server at %s.\n\n%s\n\nClose the other application using this address, then try again. To run both instances, start this one with:\n\nDestinyRTM.exe -listen 127.0.0.1:8768\n\nA different port uses separate browser storage.",
+			*listen, err,
+		)
+		log.Print(message)
+		if !*noOpen {
+			showStartupError("Destiny RTM could not start", message)
+		}
+		os.Exit(1)
 	}
 	token := make([]byte, 32)
 	if _, err := rand.Read(token); err != nil {

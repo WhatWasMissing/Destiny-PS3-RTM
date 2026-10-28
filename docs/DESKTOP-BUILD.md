@@ -15,9 +15,12 @@ Run the executable to open an Edge app window. If Edge cannot be located, the
 default browser opens instead. The host runs until its console is closed.
 Use `DestinyRTM.exe -no-open` for a host-only run. Its default address is
 `http://127.0.0.1:8767`. Keep that origin stable to retain browser storage.
-If the port is occupied, close the existing host or specify a different loopback
-address with `-listen`. Changing the port creates a different browser storage
-origin; export settings before moving between origins.
+If the port is occupied, a double-click launch now shows a Windows error dialog
+with the address and a command for using another loopback port. From a console,
+`-no-open` keeps the error in the terminal output. Close the existing host or
+specify a different loopback address with `-listen`; changing ports creates a
+different browser storage origin, so the existing settings remain on the old
+origin.
 
 This is a replacement host, not recovered original Go code. It serves local
 assets and proxies supported webMAN endpoints to private IPv4 addresses on
