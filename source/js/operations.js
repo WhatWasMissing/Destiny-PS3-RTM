@@ -5,10 +5,14 @@
     function apply(pairs, options = {}) {
       const owner = session();
       const normalize = (entries, label) => entries.map(([address, value]) => {
-        const addr = String(address).replace(/^0x/i, '');
+        const rawAddr = typeof address === 'number' ? null : String(address).replace(/^0x/i, '');
+        const numericAddr = typeof address === 'number' ? address : parseInt(rawAddr, 16);
         const hex = String(value).replace(/\s/g, '').toUpperCase();
-        if (!/^[0-9a-f]{1,8}$/i.test(addr) || parseInt(addr,16) === 0 || !/^(?:[0-9A-F]{2})+$/.test(hex)) throw new Error(`Invalid memory ${label}`);
-        return [parseInt(addr, 16), hex];
+        const validAddress = Number.isInteger(numericAddr) && numericAddr > 0 && numericAddr <= 0xFFFFFFFF &&
+          (typeof address === 'number' || /^[0-9a-f]{1,8}$/i.test(rawAddr));
+        const validBytes = /^(?:[0-9A-F]{2})+$/.test(hex);
+        if (!validAddress || !validBytes || numericAddr + hex.length / 2 - 1 > 0xFFFFFFFF) throw new Error(`Invalid memory ${label}`);
+        return [numericAddr, hex];
       });
       if (!Array.isArray(pairs)) throw new TypeError('Memory patches must be an array');
       const normalized = normalize(pairs, 'patch');

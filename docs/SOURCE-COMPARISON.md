@@ -15,6 +15,7 @@ control are excluded. See [the source audit](../research/detertrots-108-source-a
 | Brightness presets | Added the local 1.24 C# Bright `50`, Normal `1`, and Inverted `-20` values at `0x006101C0`. Writes require exact readback; the matched ELF default is `1.0`, but the in-game effect remains unobserved. |
 | No Spread, Bouncy Items, 4× Jump Boost, Rock Jump | Added from the local 1.24 C# source. Overlapping patches disable the other active option before a write. |
 | Unlimited Ammo | Corrected the main toggle to the local 1.24 C# three-site patch at `0x003108EC`, `0x00310554`, and `0x00CF95AC`. Enable and reset both verify every patched byte. The former `0x00310F94` target did not contain the UI's claimed OFF instruction in the matching ELF. |
+| Shared Server Cheats hook | The `Void Enemies`, `Relative OPK`, and `Off` PPC payloads byte-match the decoded values in `D:\DestinyRTM\index.html`. The verified BLES 01.24 EBOOT has the expected `30640140` hook instruction at `0x001C4110` and at least 384 file-backed zero bytes from `0x010D8EC0`. The runtime writer verifies the BLES profile, accepts only a blank or recognized shared cave, and activates the branch last. The cave is now checked and cleared through 332 bytes, the largest known payload. The source file has no build identity, and its gameplay labels/effects remain unconfirmed. See [the hook source audit](../research/server-hook-source-audit.md). |
 | Memory Scanner | The scan/diff code already existed; its missing controls are now available in Tools. Reads remain bounded and writes require readback. |
 | PS3 notification | Manual PS3 system notifications use webMAN MOD's documented notification route. Optional event notifications are ported from `C:\Users\novel\Downloads\Destiny_RTM_Welcome_Page.html`; automation is disabled by default and supports connection, activity-write, cheat-state, error, and reconnect events with saved templates and cooldowns. These requests are best effort and do not confirm PS3 delivery. |
 | PS3 Jukebox | Ported all six tone sequences from `C:\Users\novel\Downloads\DestinyRTM1.0.html` (tone IDs and pauses preserved). The source UI exposed only Imperial March and SOS; this app exposes the other four source-defined sequences too, prevents overlapping playback, tracks progress, and stops between system-beep requests. It only calls `/beep.ps3` and does not write Destiny memory. |
@@ -172,8 +173,9 @@ identity. Read-only memory tools remain usable on other builds.
   operation's in-game result has been observed. The PDR **Player Hook** is a
   separate variant: it redirects `0x001C4110` to a 46-word code block at
   `0x010D8EE8`; the existing Overwalls physics hook and Server Cheats use that
-  same branch site and a 116-byte block beginning at `0x010D8EC0`. Those cave
-  ranges overlap from `0x010D8EE8` through `0x010D8F33`, so PDR's hook cannot be
+  same branch site and a shared Server Cheats region beginning at `0x010D8EC0`
+  with variants up to 332 bytes. The PDR block overlaps the shared region from
+  `0x010D8EE8` through `0x010D8F9F`, so PDR's hook cannot be
   added as an independent toggle. It also writes `3F99999A` at `0x0190EBAC`,
   a field used by the existing hook, and performs no readback or restoration.
   This alternate hook remains unavailable until its interaction with the

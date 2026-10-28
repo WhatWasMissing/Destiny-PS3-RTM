@@ -14,6 +14,20 @@ test('verified requires matching readback, not only an acknowledged write', asyn
   const mismatch = createRunner({ session: () => 'console1', write: async () => {}, read: async () => '0000' });
   await assert.rejects(mismatch.apply([['1234','AABB']]), /Readback mismatch/);
 });
+test('numeric memory addresses retain their numeric value', async () => {
+  const memory = new Map();
+  const runner = createRunner({ session: () => 'console1', write: async (a,v) => memory.set(a,v), read: async a => memory.get(a) });
+  const address = 0x001C4110;
+  assert.equal((await runner.apply([[address,'30640140']])).status, 'verified');
+  assert.equal(memory.get(address), '30640140');
+  assert.equal(memory.has(parseInt(String(address), 16)), false);
+});
+test('memory ranges cannot wrap past the 32-bit address space', () => {
+  let writes = 0;
+  const runner = createRunner({ session: () => 'console1', write: async () => writes++, read: async () => 'AABB' });
+  assert.throws(() => runner.apply([[0xFFFFFFFF,'AABB']]), /Invalid memory patch/);
+  assert.equal(writes, 0);
+});
 test('unreadable response is explicitly unverified', async () => {
   const runner = createRunner({ session: () => 'console1', write: async () => {}, read: async () => { throw new Error('not readable'); } });
   assert.equal((await runner.apply([['1234','AA']])).status, 'unverified');
