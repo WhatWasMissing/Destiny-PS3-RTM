@@ -415,13 +415,16 @@ also identify account/character profiles and SOIDs. The traced inventory
 snapshot path sends PS3MAPI `MEMORY GET` commands containing address/length;
 the returned profile bytes are received into a separate local buffer and
 formatted for the UI. No SOID bytes were found in that path's send payload.
-Blackrock also contains a generic PS3MAPI `MEMORY SET` writer, but the current
-static trace has not connected the inventory request callback or its native
-route record to that writer. The action's final transport and request bytes
-remain unresolved. A 1,706-function direct-call sweep from the Vault callbacks
-and action backend found no direct path to the BAP endpoint initializer or
-SOID diagnostics UI. Indirect dispatch is not fully resolved, so this is not a
-binary-wide network audit. The account/vault editor is still unported. The live item-pool snapshot reports only cached item indexes;
+Blackrock's action UI resolves a selected item into a native `ActionRequest`,
+then queues a delayed confirmation callback. It also contains a generic
+PS3MAPI `MEMORY SET` writer, but the current static trace has not connected
+that callback or its native route record to the writer. No direct Bungie
+HTTP/OAuth call was found in the action path. Its final transport and request
+bytes remain unresolved. A 1,706-function direct-call sweep from the Vault
+callbacks and action backend found no direct path to the BAP endpoint
+initializer or SOID diagnostics UI. Indirect dispatch is not fully resolved,
+so this is not a binary-wide network audit. The account/vault editor is still
+unported. The live item-pool snapshot reports only cached item indexes;
 it does not map records to the active character, modify items, or prove vault
 ownership. The offline viewer handles explicit serialized 01.24 wire payloads
 and labels the account vault-like block as unverified. Blackrock's host-side

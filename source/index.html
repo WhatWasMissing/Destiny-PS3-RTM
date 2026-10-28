@@ -1085,6 +1085,7 @@
       <button class="cheat-btn" type="button" onclick="owRandomizeConsumables()">Randomize consumables</button>
       <button class="cheat-btn" type="button" onclick="owRestoreConsumables()">Restore saved bytes</button>
     </div>
+    <div class="ow-muted-note">Consumable randomization uses the Overwalls-derived 20-row region beginning at <code>0x600EAE60</code>. A BLES 01.24 code-profile check runs before touching it, but the region's address and row meaning are not independently validated on a live console. Original bytes are journaled; restore leaves changed bytes untouched.</div>
     <div class="ow-inline-controls">
       <label>Activity sweep start<input id="ow-sweep-start" type="number" min="1" max="65535" value="1" step="1"></label>
       <label>Delay · ms<input id="ow-sweep-delay" type="number" min="100" max="10000" value="750" step="50"></label>

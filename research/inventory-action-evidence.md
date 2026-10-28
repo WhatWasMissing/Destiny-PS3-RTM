@@ -21,10 +21,16 @@ in `FUN_1400e5190` is identified as
 `brps3::invui::...::runRequest(Ctx&, inventory::ActionRequest const&)`; the
 function at `0x1400E5190` writes a `[inventory]` status/log line, calls request
 interface virtual methods, and uses `Inventory confirm` before a fresh
-inventory read. Its false-predicate branch schedules a closure through
-`FUN_1400191E0`, which copies closures into a local ring-buffer task queue and
-signals the queue. This establishes local deferred work, not the final action
-transport.
+inventory read. The higher-level action entry `FUN_1400F61A0` builds an
+`ActionRequest` with an action enum and selected-item metadata, then calls
+`FUN_1400F4D90`. That function obtains the inventory I/O context, performs
+local state/snapshot work, and schedules a delayed confirmation callback via
+a context virtual method. The callback implementation behind the request
+interface remains unresolved.
+
+On the observed `FUN_1400E5190` branch, `FUN_1400191E0` copies closures into a
+local ring-buffer task queue and signals the queue. This establishes deferred
+local work, not the final action transport.
 
 `FUN_140353B60` constructs a native route/restriction record of about `0x34`
 bytes. Its two direct callers use the fields for local route/UI validation;
@@ -33,9 +39,11 @@ the record is not serialized by this helper. A separate generic PS3MAPI
 writer `FUN_140449280` (`0x140449280`–`0x14044990D`), which calls transport
 helper `FUN_140448D80` at `0x140449500`. The writer's two direct callers are
 `FUN_1402C9740` and `FUN_1402C9B80`. Static tracing has not linked
-`runRequest`, its queued callback, or the `0x34` route record to those write
-wrappers. The inventory action's ultimate transport and action bytes therefore
-remain unresolved.
+`FUN_1400F61A0`, `FUN_1400F4D90`, `runRequest`, its queued callback, or the
+`0x34` route record to those write wrappers. No direct Bungie HTTP/OAuth call
+or URL was found in this action path. Its ultimate transport and action bytes
+therefore remain unresolved; an indirect writer behind the virtual callback
+has not been ruled out.
 
 ## Separate documented Bungie API route
 
@@ -104,6 +112,26 @@ or serialization than an established inventory action dispatcher. The IDs
 coincide with Blackrock's host-side labels 402–404, but the current evidence
 does not connect the two meanings. No equip, transfer, dismantle, use, or item
 create/update call path, request arguments, or persistence behavior is proven.
+
+A follow-up Capstone decode found the same `r5=0x190..0x197` compare ladder in
+all three groups. Cases 402/403 branch to one byte-parser block; 404/405 branch
+to another. The decoded blocks advance a cursor, sign-extend bytes, store
+values into indexed records, and loop back (the first group returns to
+`0x00D5E268`). The enclosing parser-like function starts are
+`0x00D5E04C`, `0x00D6459C`, and `0x00D6AABC`. A direct `bl` scan found no call
+to these entries, so an indirect/table dispatch cannot be ruled out. No direct
+relation to the `c_investment_bap_message_push_handler::handle_message` string
+at `0x01319B94` was found. This strengthens the parser/decoder interpretation
+but still does not identify the decoded record type.
+
+A local `d1reimagined-source` protocol note for PS4 CUSA00219 01.33/build
+56578 classifies investment message IDs 402–406 as inventory operations and
+specifically maps 403 to `inventory_equip_item`. This is a different platform
+and build; it is only a lead for checking whether the BLES switch groups sit
+inside a BAP codec. It does not map the PS3 cases or validate any PS3 memory
+action. The referenced source is at
+`E:\DestinyResearch\d1reimagined-source\ps4\design\architecture.md` and
+`ps4\design\character-and-investment.md`.
 
 A follow-up checked the BAP handler, equip component, item-lock handler, and
 item-widget strings for exact 32/64-bit pointers in either byte order and PPC

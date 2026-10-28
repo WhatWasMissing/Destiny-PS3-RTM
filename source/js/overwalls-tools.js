@@ -725,10 +725,18 @@
     } catch (error) { report(`Split-rep restore failed: ${error.message}`, 'err'); }
   }
   function random16() { return Math.floor(Math.random() * 65535); }
+  async function requireBlesWriteProfile(context) {
+    if (typeof root.ensureDestinyWriteProfile !== 'function') {
+      throw new Error('BLES 01.24 build verification is unavailable; consumable memory access refused');
+    }
+    await root.ensureDestinyWriteProfile();
+    checkContext(context);
+  }
   async function randomizeConsumables() {
     try {
       const context = newContext();
       requireConnected();
+      await requireBlesWriteProfile(context);
       if (readBackup(CONSUMABLE_BACKUP_KEY)) throw new Error('A consumable snapshot already exists. Restore it before randomizing again.');
       const original = [], changed = [];
       for (let index = 0; index < 20; index++) {
@@ -754,6 +762,7 @@
       const context = newContext();
       const snapshot = readBackup(CONSUMABLE_BACKUP_KEY);
       if (!snapshot || snapshot.ip !== ip) throw new Error('No consumable snapshot exists for this console');
+      await requireBlesWriteProfile(context);
       const originalsByAddress = new Map(snapshot.original);
       const restore = [];
       for (const [address, expected] of snapshot.changed) {
