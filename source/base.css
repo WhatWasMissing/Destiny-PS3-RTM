@@ -589,10 +589,10 @@
 
     #server-safety-ack {
       width: 100%;
-      border: 1px solid var(--success);
+      border: 1px solid var(--success-line);
       border-radius: 8px;
       padding: 11px 12px;
-      background: rgba(62,207,116,0.10);
+      background: var(--success-soft);
       color: var(--success);
       font-family: var(--sans);
       font-weight: 700;
@@ -1725,7 +1725,7 @@
       min-width:190px;
       background:var(--accent);
       border:1px solid var(--accent);
-      color:#fff;
+      color:var(--accent-ink);
     }
     .tool-setup-save:disabled {
       opacity: 0.4;

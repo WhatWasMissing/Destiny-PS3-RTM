@@ -27,6 +27,12 @@ memory features still use BLES evidence and the RTM's verified runtime profile.
 | Verified equipped-position labels | `source/js/offline-inventory-snapshot.js` | Labels only the 17 BLES 01.24 equipped inventory starts proven by the bucket-range and equipped-slot tables. Nine have known subclass/armour/weapon names; the other eight remain numbered. Every non-start row keeps its numeric inventory slot. |
 | Local catalog browser | `source/js/local-catalogs.js` | Imports user-selected CSV, TSV, JSON, and text catalogs in page memory, with per-file, total-size, and row caps. Supports activity, spawn/hop-on, item/loot, and world-data categories. Spawn rows preserve a bounded numeric `type` as unverified metadata; selecting a row copies its tag, and a separate explicit action can copy that number to the experimental expected-type guard. The catalog-to-BLES guard mapping remains unverified. Inventory labels use an explicitly BLES-indexed `itemIndex` or `blesItemIndex` column only. The Blackrock `def` ordinal and unverified `hash`/`tag` joins are ignored. No catalog data or executable code is bundled. |
 
+The extracted BLES 01.24 item catalog was imported through the production
+catalog parser: all 6,389 named rows loaded without truncation and supplied
+6,389 in-range item-index labels. The file remains outside the repository and
+release packages; this verifies item-name display for the read-only snapshot
+tools, not inventory mutation. See the [catalog import audit](../research/item-catalog-load-audit.md).
+
 ## Already present in the RTM
 
 The actor-pool descriptor and allocated-candidate snapshots are also available
