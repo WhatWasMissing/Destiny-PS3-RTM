@@ -412,7 +412,9 @@ resolved, so this is not a binary-wide network audit. The account/vault editor
 is still unported. The live item-pool snapshot reports only cached item indexes;
 it does not map records to the active character, modify items, or prove vault
 ownership. The offline viewer handles explicit serialized 01.24 wire payloads
-and labels the account vault-like block as unverified.
+and labels the account vault-like block as unverified. Blackrock's host-side
+action IDs and the missing BLES target-side boundary are summarized in
+[inventory action evidence](../research/inventory-action-evidence.md).
 
 ## License boundary
 
