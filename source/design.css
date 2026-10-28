@@ -10,6 +10,7 @@
   --warning: #bd925e; --gold: var(--warning);
   --warning-soft: rgba(189,146,94,.09); --warning-line: rgba(189,146,94,.28);
   --info: #aab6b6; --info-soft: rgba(170,182,182,.06); --info-line: rgba(170,182,182,.22);
+  --shadow-dialog: 0 12px 36px rgba(0,0,0,.24);
   --radius-panel: 4px; --radius-control: 4px; --radius-dialog: 5px;
   --sans: 'Segoe UI', system-ui, sans-serif;
   --mono: 'Cascadia Code', Consolas, monospace;
@@ -384,13 +385,21 @@ input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, te
 .tool-setup-kicker { font: 12px/1.4 var(--sans); letter-spacing: .04em; text-transform: none; }
 .activity-guide-body h3, .server-safety-body h3 { font-size: 14px; font-weight: 600; }
 
-#settings-modal, #tool-setup-modal, .macro-modal,
+#settings-modal, #tool-setup-modal, .rtm-dialog, .macro-modal,
 .activity-guide-modal, .server-safety-modal {
   border-radius: var(--radius-dialog) !important;
   border-color: var(--border) !important;
   background: var(--card) !important;
   color: var(--text);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, .24);
+  box-shadow: var(--shadow-dialog);
+}
+body.light-mode #settings-modal,
+body.light-mode #tool-setup-modal,
+body.light-mode .rtm-dialog,
+body.light-mode .macro-modal,
+body.light-mode .activity-guide-modal,
+body.light-mode .server-safety-modal {
+  box-shadow: var(--shadow-dialog);
 }
 
 #toast { border-radius: var(--radius-control) !important; }
@@ -621,6 +630,7 @@ body.light-mode {
   --warning: #805c31; --gold: var(--warning);
   --warning-soft: rgba(128,92,49,.08); --warning-line: rgba(128,92,49,.26);
   --info: #59666c; --info-soft: rgba(89,102,108,.05); --info-line: rgba(89,102,108,.22);
+  --shadow-dialog: 0 12px 36px rgba(30,45,55,.12);
   color-scheme: light;
 }
 body.light-mode header {
@@ -628,8 +638,8 @@ body.light-mode header {
   background-image:none;
 }
 
-.macro-overlay { display:none; position:fixed; inset:0; z-index:200; align-items:center; justify-content:center; padding:16px; background:rgba(0,0,0,.72); backdrop-filter:blur(3px); }
-.macro-modal { display:flex; width:min(480px,100%); max-height:min(80vh,720px); flex-direction:column; gap:12px; overflow:auto; padding:20px; border:1px solid var(--border); border-radius:var(--radius-dialog); background:var(--card); color:var(--text); box-shadow:0 18px 55px rgba(0,0,0,.24); }
+.macro-overlay { display:none; position:fixed; inset:0; z-index:200; align-items:center; justify-content:center; padding:16px; background:rgba(0,0,0,.72); }
+.macro-modal { display:flex; width:min(480px,100%); max-height:min(80vh,720px); flex-direction:column; gap:12px; overflow:auto; padding:20px; border:1px solid var(--border); border-radius:var(--radius-dialog); background:var(--card); color:var(--text); }
 .macro-modal-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .macro-modal-title { margin:0; color:var(--text); font:600 18px/1.35 var(--sans); letter-spacing:.01em; text-transform:none; }
 .macro-modal-close { width:36px; min-height:36px; padding:0; border:1px solid var(--border); border-radius:var(--radius-control); background:var(--surface); color:var(--muted); font:20px/1 var(--sans); cursor:pointer; }
@@ -644,7 +654,6 @@ body.light-mode header {
 .macro-modal-cancel { background:var(--surface); color:var(--text); }
 .macro-modal-save { border-color:var(--accent) !important; background:var(--accent); color:var(--accent-ink); }
 .macro-create-button { grid-column:span 2; }
-body.light-mode .macro-modal { box-shadow:0 12px 36px rgba(30,45,55,.12); }
 @media (max-width:420px) { .macro-modal { padding:16px; } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }

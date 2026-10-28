@@ -2279,10 +2279,7 @@
     }
 
     body.light-mode .cheat-btn,
-    body.light-mode .panel,
-    body.light-mode .settings-modal,
-    body.light-mode .activity-guide-modal,
-    body.light-mode .server-safety-modal {
+    body.light-mode .panel {
       box-shadow: none;
     }
 
