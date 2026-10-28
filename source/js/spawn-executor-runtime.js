@@ -127,12 +127,13 @@
     const select = element('spawn-catalog-entry');
     const search = element('spawn-catalog-search');
     const status = element('spawn-catalog-status');
+    const useTypeButton = element('spawn-catalog-use-type-btn');
     if (!select || !status) return;
     const api = root.rtmLocalSpawnCatalogs;
     const entries = api && typeof api.listCandidates === 'function' ? api.listCandidates() : [];
     const query = (search?.value || '').trim().toLocaleLowerCase();
     const matches = entries.map((entry, index) => ({ entry, index })).filter(({ entry }) =>
-      !query || `${entry.tag} ${entry.label} ${entry.source}`.toLocaleLowerCase().includes(query));
+      !query || `${entry.tag} ${entry.label} ${entry.source} ${entry.catalogType ?? ''}`.toLocaleLowerCase().includes(query));
     select.replaceChildren();
     const placeholder = document.createElement('option');
     placeholder.value = '';
@@ -141,13 +142,15 @@
     matches.slice(0, MAX_SPAWN_OPTIONS).forEach(({ entry, index }) => {
       const option = document.createElement('option');
       option.value = String(index);
-      option.textContent = `${entry.label} · ${entry.tag} · ${entry.source}`;
+      const typeLabel = Number.isInteger(entry.catalogType) ? ` · catalog type ${entry.catalogType} (unverified)` : '';
+      option.textContent = `${entry.label} · ${entry.tag}${typeLabel} · ${entry.source}`;
       select.append(option);
     });
     select.disabled = matches.length === 0;
+    if (useTypeButton) useTypeButton.disabled = true;
     const capNote = matches.length > MAX_SPAWN_OPTIONS ? ` · showing first ${MAX_SPAWN_OPTIONS}` : '';
     status.textContent = matches.length
-      ? `${matches.length} matching tag${matches.length === 1 ? '' : 's'} from imported catalogs${capNote}. Selecting one copies only its tag.`
+      ? `${matches.length} matching tag${matches.length === 1 ? '' : 's'} from imported catalogs${capNote}. Selecting one copies its tag; applying its numeric type to the guard is a separate, unverified action.`
       : 'Import a Spawn / hop-on catalog with a tag column, then filter to find a candidate.';
   }
 
@@ -161,8 +164,28 @@
     if (!Number.isInteger(index) || index < 0 || !entries[index] || !tagInput || !status) return;
     const entry = entries[index];
     tagInput.value = entry.tag;
-    const expectedType = element('spawn-expected-type')?.value || 'unset';
-    status.textContent = `Copied ${entry.tag} (${entry.label}) from ${entry.source}. Expected runtime class stays ${expectedType}; catalog type is not mapped. Live BLES resolution and enemy class remain unconfirmed.`;
+    const useTypeButton = element('spawn-catalog-use-type-btn');
+    if (useTypeButton) useTypeButton.disabled = !Number.isInteger(entry.catalogType);
+    const typeNote = Number.isInteger(entry.catalogType)
+      ? ` Catalog type ${entry.catalogType} can be applied to the expected-type guard as an unverified candidate.`
+      : ' This row has no numeric type value.';
+    status.textContent = `Copied tag ${entry.tag} (${entry.label}) from ${entry.source}.${typeNote} Live BLES resolution and enemy identity remain unconfirmed.`;
+  }
+
+  function useSpawnCatalogTypeAsGuard() {
+    const select = element('spawn-catalog-entry');
+    const status = element('spawn-catalog-status');
+    const expectedTypeInput = element('spawn-expected-type');
+    if (!select?.value || !status || !expectedTypeInput) return;
+    const index = Number(select.value);
+    const entries = root.rtmLocalSpawnCatalogs?.listCandidates?.() || [];
+    const entry = Number.isInteger(index) && index >= 0 ? entries[index] : null;
+    if (!entry || !Number.isInteger(entry.catalogType) || entry.catalogType < 0 || entry.catalogType > 255) {
+      status.textContent = 'The selected catalog row has no valid numeric type to apply.';
+      return;
+    }
+    expectedTypeInput.value = String(entry.catalogType);
+    status.textContent = `Set expected-type guard to ${entry.catalogType} from the imported catalog. Static evidence suggests an object-kind value, but its link to this BLES 01.24 guard is unverified; this does not prove the tag is an enemy or will spawn.`;
   }
 
   async function runAction(label, action) {
@@ -232,6 +255,7 @@
     if (!element('spawn-executor-panel')) return;
     element('spawn-catalog-search')?.addEventListener('input', refreshSpawnCatalog);
     element('spawn-catalog-entry')?.addEventListener('change', chooseSpawnCatalogEntry);
+    element('spawn-catalog-use-type-btn')?.addEventListener('click', useSpawnCatalogTypeAsGuard);
     document.addEventListener('keydown', event => {
       if (!event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || event.key !== 'Enter' || event.isComposing) return;
       const panel = element('spawn-executor-panel');
@@ -252,6 +276,7 @@
   root.cancelSpawnRequest = cancelSpawnRequest;
   root.reconcileSpawnRequest = reconcileSpawnRequest;
   root.recoverSpawnExecutor = recoverSpawnExecutor;
+  root.useSpawnCatalogTypeAsGuard = useSpawnCatalogTypeAsGuard;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialize, { once: true });
   else initialize();
 })(window);

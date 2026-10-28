@@ -12,7 +12,7 @@ function loadCatalogApi() {
   return window.rtmLocalSpawnCatalogs;
 }
 
-test('spawn catalog extraction accepts recognized tag columns and copies labels only', () => {
+test('spawn catalog extraction accepts recognized tag columns and preserves bounded numeric types as unverified metadata', () => {
   const api = loadCatalogApi();
   const candidates = api.extractCandidates([{
     fileName: 'spawnable.tsv',
@@ -26,10 +26,25 @@ test('spawn catalog extraction accepts recognized tag columns and copies labels 
   }]);
 
   assert.equal(JSON.stringify(candidates), JSON.stringify([
-    { tag: '815BA133', label: 'Vex Minotaur', source: 'spawnable.tsv', row: 1 },
-    { tag: '8087600F', label: 'Catalog row 2', source: 'spawnable.tsv', row: 2 }
+    { tag: '815BA133', label: 'Vex Minotaur', source: 'spawnable.tsv', row: 1, catalogType: 9 },
+    { tag: '8087600F', label: 'Catalog row 2', source: 'spawnable.tsv', row: 2, catalogType: 24 }
   ]));
-  assert.equal(Object.hasOwn(candidates[0], 'type'), false);
+  assert.equal(candidates[0].catalogType, 9);
+});
+
+test('spawn catalog extraction omits malformed and out-of-byte-range types', () => {
+  const api = loadCatalogApi();
+  const candidates = api.extractCandidates([{
+    category: 'spawn-hopon',
+    columns: ['tag', 'type'],
+    rows: [
+      new Map([['tag', '815BA133'], ['type', '-1']]),
+      new Map([['tag', '815BA134'], ['type', '256']]),
+      new Map([['tag', '815BA135'], ['type', 'biped']])
+    ]
+  }]);
+
+  assert.equal(candidates.every(candidate => !Object.hasOwn(candidate, 'catalogType')), true);
 });
 
 test('spawn catalog extraction ignores other categories and catalogs without a tag field', () => {

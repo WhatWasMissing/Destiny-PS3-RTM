@@ -249,18 +249,25 @@
       if (!catalog || catalog.category !== 'spawn-hopon' || !Array.isArray(catalog.columns) || !Array.isArray(catalog.rows)) continue;
       const tagColumn = catalog.columns.find(column => tagNames.has(normalizedHeader(column)));
       if (!tagColumn) continue;
+      const typeColumn = catalog.columns.find(column => normalizedHeader(column) === 'type');
       const labelColumns = labelNames.map(name => catalog.columns.find(column => normalizedHeader(column) === name)).filter(Boolean);
       catalog.rows.forEach((row, rowIndex) => {
         if (!row || typeof row.get !== 'function') return;
         const rawTag = String(row.get(tagColumn) || '').trim().replace(/^0x/i, '');
         if (!/^[0-9a-f]{1,8}$/i.test(rawTag)) return;
         const label = labelColumns.map(column => String(row.get(column) || '').trim()).find(Boolean) || `Catalog row ${rowIndex + 1}`;
-        result.push({
+        const candidate = {
           tag: rawTag.toUpperCase().padStart(8, '0'),
           label: label.slice(0, 120),
           source: String(catalog.fileName || 'Imported catalog').slice(0, 120),
           row: rowIndex + 1
-        });
+        };
+        const rawType = typeColumn ? String(row.get(typeColumn) || '').trim() : '';
+        if (/^\d{1,3}$/.test(rawType)) {
+          const catalogType = Number(rawType);
+          if (Number.isInteger(catalogType) && catalogType >= 0 && catalogType <= 255) candidate.catalogType = catalogType;
+        }
+        result.push(candidate);
       });
     }
     return result;

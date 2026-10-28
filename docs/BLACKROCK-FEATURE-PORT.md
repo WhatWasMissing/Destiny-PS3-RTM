@@ -25,7 +25,7 @@ memory features still use BLES evidence and the RTM's verified runtime profile.
 | Allocated actor-candidate snapshot | `internal/rtmclient/actor_pool.go`, CLI `rtmctl actor-candidates`, MCP `rtm_read_allocated_actor_candidates` | Verifies the five-anchor BLES profile plus exact datum/allocator and `+0x226C` caller/resolver signatures, requires a stable non-null player pointer, follows the `0x34`-byte descriptor → allocator header → bitmap descriptor → bitmap words, and reads at most 40 allocated slots. Preserves the full reconstructed datum and selected raw fields from each first `0x48` bytes. Samples/rechecks the raw nested handle and reports decoded bucket/slot arithmetic but never follows it. Remains sequential/non-atomic; it identifies allocated candidates, not enemies or spawnable tags. The `+0x30` word is a unit-datum candidate; `+0x24/+0x28` are opaque, and `+0x40/+0x44` are raw member-owner fields. It does not inspect the separate cleanup bitmap. |
 | Offline inventory snapshot viewer | `source/js/offline-inventory-snapshot.js` | Reads explicitly selected BLES 01.24 QZ payload files (28,104-byte character or 28,768-byte account). It validates the big-endian type hash (`EB4B8439` character; `B5DF2907` account) and body size, then shows character slot and item index, with an optional name from a matching user-imported BLES-indexed catalog. Header SOID bytes are skipped; row instance IDs are reduced to a transient empty/nonempty check and never surfaced or persisted. Account +0x4C0 appears only as an unverified vault-like candidate. No live memory, writes, actions, network, or persistence. |
 | Verified equipped-position labels | `source/js/offline-inventory-snapshot.js` | Labels only the 17 BLES 01.24 equipped inventory starts proven by the bucket-range and equipped-slot tables. Nine have known subclass/armour/weapon names; the other eight remain numbered. Every non-start row keeps its numeric inventory slot. |
-| Local catalog browser | `source/js/local-catalogs.js` | Imports user-selected CSV, TSV, JSON, and text catalogs in page memory, with per-file, total-size, and row caps. Supports activity, spawn/hop-on, item/loot, and world-data categories. Spawn catalog rows can copy a syntactically valid 32-bit tag into the experimental executor; catalog type is not copied into the expected runtime-class field. Inventory labels use an explicitly BLES-indexed `itemIndex` or `blesItemIndex` column only. The Blackrock `def` ordinal and unverified `hash`/`tag` joins are ignored. No catalog data or executable code is bundled. |
+| Local catalog browser | `source/js/local-catalogs.js` | Imports user-selected CSV, TSV, JSON, and text catalogs in page memory, with per-file, total-size, and row caps. Supports activity, spawn/hop-on, item/loot, and world-data categories. Spawn rows preserve a bounded numeric `type` as unverified metadata; selecting a row copies its tag, and a separate explicit action can copy that number to the experimental expected-type guard. The catalog-to-BLES guard mapping remains unverified. Inventory labels use an explicitly BLES-indexed `itemIndex` or `blesItemIndex` column only. The Blackrock `def` ordinal and unverified `hash`/`tag` joins are ignored. No catalog data or executable code is bundled. |
 
 ## Already present in the RTM
 
@@ -109,9 +109,19 @@ remain unverified. The RTM now exposes the executor path, but runtime success
 is not established.
 
 The optional expected-type guard defaults to `-1`, which the Blackrock packet
-builder encodes as `0xffffffff`. The catalog's `type=9` metadata is not
-established as the BLES runtime-class value for this field, so the RTM does not
-preselect it.
+builder encodes as `0xffffffff`. The BLES 01.24 constructor copies definition
+byte `+0x4E` to created sObject byte `+0x08`; Blackrock's emitted guard compares
+the returned object's `+0x08` byte with packet `+0x24`. The BLES EBOOT also
+contains the ordered object-type names, and its sequence agrees with the local
+D1 Reimagined type list (`9 = biped`). Blackrock's `spawnable.tsv` and
+`entities.tsv` use catalog type `9` for biped-like objects, including both Vex
+archetypes and player Guardians. This is strong static evidence for a shared
+object-kind enum, but no direct BLES dataflow proves the catalog `type` column
+is the expected guard value. The RTM preserves the byte and offers an explicit
+**Use catalog type as expected-type guard** action marked unverified; selecting
+a catalog row does not apply it automatically. A wrong value can reject an
+otherwise valid spawn. This value describes an object kind, not whether the
+object is hostile. See [spawn type evidence](../research/spawn-type-evidence.md).
 
 This spawn flow does not send Blackrock a list of addresses for already-loaded
 enemies. The request carries a content tag; the in-process executor resolves
@@ -272,8 +282,10 @@ into `desc+0`, `desc+4`, and `desc+8`. The second 16-byte pose vector at
 copies a zero block as-is and does not reject it. This confirms the field can
 flow through the copy path but does not establish the resulting pose semantics.
 The exact meaning of `+0x34` and the precise created object class remain
-unresolved. Blackrock's expected-type packet field is used after creation to
-check the returned object's runtime type; the numeric mapping is not yet known.
+unresolved. The constructor copies definition byte `+0x4E` to created sObject
+byte `+0x08`, which Blackrock's emitted expected-type guard reads after
+creation. The catalog-to-guard numeric mapping remains unverified; see
+[spawn type evidence](../research/spawn-type-evidence.md).
 
 Blackrock's generated `spawn` branch copies the packet's 32-bit tag directly
 into descriptor `+0`, computes four descriptor words at `+0x10..+0x1C`, and
@@ -320,9 +332,11 @@ non-spawning placement preview. This mapping comes from static source
 analysis and has not been checked against a live BLES 01.24 spawn.
 
 The release `spawnable.tsv` catalog has a `type` column, and its `815BA133`
-Vex Minotaur row has `type=9`. The static UI/submit trace has not established
-that catalog type is the packet's separate expected-type guard at `+0x24`;
-the RTM copies only the tag and defaults this optional guard to `-1` (disabled).
+Vex Minotaur row has `type=9`. Other type-9 entries include player Guardians,
+so this is an object-kind value rather than an enemy flag. The UI copies the
+tag on selection and leaves the guard unchanged; the user can explicitly apply
+the catalog type as an unverified candidate. The guard still defaults to `-1`
+(disabled).
 
 The signature source is the hash-verified BLES01857 01.24 EBOOT
 `E7F100B38BBAF6C23F71B390FDB103D31B427187C38DCFBD47E09C94C4A44206`. The

@@ -1180,13 +1180,13 @@
             <summary>Why this is experimental</summary>
             <div class="spawn-executor-disclosure-body">
               <p>The operation-1 executor and queue layout were reconstructed from Blackrock's BLES 01.24 program. A matching live run has not confirmed instruction-cache behavior, tag resolution, runtime class, or spawn placement.</p>
-              <p>The expected-type field defaults to -1, which disables that guard. Catalog type 9 has not been shown to match the BLES runtime class. The shared queue has no cross-client reservation, so another Blackrock or RTM spawn client can collide with this one.</p>
+              <p>The expected-type field defaults to -1, which disables that guard. Catalog type values look like object-kind ordinals, but their direct link to the BLES runtime class byte has not been proven. The shared queue has no cross-client reservation, so another Blackrock or RTM spawn client can collide with this one.</p>
             </div>
           </details>
         </div>
         <ol class="compact-help-note spawn-workflow-steps">
           <li>Link the same BLES01857 01.24 console and put Destiny in a playable area where game frames are advancing. A loading screen, menu, or paused game will not service the command. Avoid running another Blackrock/RTM spawn client at the same time.</li>
-          <li>Import/select a tag, leave the expected-type guard at -1 unless its BLES 01.24 class byte is known, and set count, raw mode words, and pose values. The tag must resolve in the running game; the optional tag lookup only checks a pointer candidate and does not prove it is an enemy.</li>
+          <li>Import/select a tag. Its catalog type may be copied into the expected-type guard as an unverified candidate; leaving the guard at -1 disables it. Set count, raw mode words, and pose values. The tag must resolve in the running game; the optional tag lookup only checks a pointer candidate and does not prove it is an enemy.</li>
           <li>If no executor is already active for this Destiny session, press <strong>Install executor</strong>. It repeats the build/signature and zero-region checks before writing. Blackrock installs its base bootstrap during runtime setup and lazily ensures the spawn handler on dispatch; this RTM combines both setup stages in this one button. If Destiny restarted since an earlier install, recover its stale journal before installing again.</li>
           <li>Press <strong>Spawn selected tag</strong> and wait for a terminal result. While the executor remains installed, further requests can be submitted without reinstalling.</li>
           <li>After the final request, press <strong>Recover hook</strong>. If recovery leaves executor images resident, restart Destiny before installing again.</li>
@@ -1221,10 +1221,11 @@
           <label for="spawn-catalog-search">Filter imported spawn tags<input class="hex-input" id="spawn-catalog-search" type="search" autocomplete="off" placeholder="Search labels, tags or catalog files…"></label>
           <label for="spawn-catalog-entry">Copy a tag from an imported catalog<select class="hex-input" id="spawn-catalog-entry"><option value="">No matching imported tags</option></select></label>
         </div>
-        <p id="spawn-catalog-status" class="compact-help-note" role="status" aria-live="polite">Import a Spawn / hop-on catalog with a tag column, then filter to find a candidate. Catalog type is not known to match the runtime class byte.</p>
+        <p id="spawn-catalog-status" class="compact-help-note" role="status" aria-live="polite">Import a Spawn / hop-on catalog with a tag column, then filter to find a candidate. Catalog type can be copied to the expected-type guard only as an unverified candidate.</p>
+        <button class="cheat-btn" id="spawn-catalog-use-type-btn" type="button" disabled>Use catalog type as expected-type guard · unverified</button>
         <details class="spawn-executor-pose">
           <summary>Placement values · nine Float32 fields</summary>
-        <p id="spawn-type-help" class="compact-help-note">Use -1 to disable the expected-type guard. Only enter a class byte after it has been verified for BLES 01.24; the catalog's type 9 has not been shown to match this field.</p>
+        <p id="spawn-type-help" class="compact-help-note">Use -1 to disable the expected-type guard. The BLES 01.24 object type byte is at sObject +0x08, but the imported catalog type’s direct mapping to this guard remains unverified. Applying it can filter for the wrong type or prevent a spawn.</p>
           <p class="compact-help-note">Blackrock's recovered defaults are 6 m distance, 2 m spacing, and 1× scale. Its packet builder maps pose[2] to scale and rejects values at or below zero. Pose[0] is aim distance, pose[1] is grid spacing, pose[3..5] are world offsets, and pose[6..8] supply coordinates in Coordinates mode. Keep unused fields at zero.</p>
           <div class="spawn-executor-grid spawn-pose-grid">
             <label for="spawn-pose-0">Distance · pose[0], +0xA4<input class="hex-input" id="spawn-pose-0" type="number" step="any" value="6"></label>
