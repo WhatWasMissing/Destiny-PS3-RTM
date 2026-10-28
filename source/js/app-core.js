@@ -1082,26 +1082,60 @@
     ps3fetch(`http://${ip}/notify.ps3mapi?msg=${encoded}`).catch(() => {});
   }
 
-  // ── Player hook install / uninstall ───────────────────────────────────────
-  // Mirrors writePlayerHook() / unHookPlayer() from AFKCrucible/Form1.cs.
-  // The hook patches a branch at 0x1C4110 to redirect execution into a small
-  // PPC stub at 0x10D8EC0. Without the hook active, writes to the gamespeed
-  // address (0x30606E4) are overwritten by the game every frame.
-  //
-  // Step 1 — write the 116-byte PPC stub (same bytes as OFF_HEX used by
-  //           Server Cheats; that constant already holds the base hook).
-  // Step 2 — write hook data values into the hook's data region.
-  // Step 3 — write the branch patch at 0x1C4110 → 0x48F14DB0 to activate.
-  //
-  // On disconnect the branch is restored to the original instruction (0x30640140).
-
-  // Lock flag: true while installPlayerHook is in progress.
-  // Prevents srvSetMode from touching 0x10D8EC0 mid-write.
+  // ── Explicit player/physics hook control ─────────────────────────────────
+  // This is the old AFKCrucible writePhysHook payload. Its branch site and code
+  // cave overlap the Server Cheats and Overwalls physics hooks, so Link must
+  // never install it implicitly. The Game Speed control writes 0x30586864,
+  // while the old hook comment names 0x030606E4; the claimed dependency is not
+  // established. Only switch the hook when its current bytes are recognized.
+  const PLAYER_HOOK_SITE = 0x001C4110;
+  const PLAYER_HOOK_CAVE = 0x010D8EC0;
+  const PLAYER_HOOK_ORIGINAL = '30640140';
+  const PLAYER_HOOK_BRANCH = '48F14DB0';
+  const PLAYER_HOOK_STUB_HEX = '3C6001906063EBB0F9C3FFD8F9E3FFD0DA03FFE0DA23FFE87DE0002681C30014C2040140C22E0000FC10884040820028C2040144C22E0004FC10884040820018C2040148C22E0008FC10884040820008908300007DEFF120E9C3FFD8E9E3FFD0CA03FFE0CA23FFE8306401403C80010A4B0EB1E4';
+  const PLAYER_HOOK_TAIL = 0x010D8F34;
+  const PLAYER_HOOK_TAIL_LENGTH = 152;
+  const PLAYER_HOOK_DATA = [
+    ['0190EBC4','306E8D58'], ['0190EBAC','3F99999A'], ['0190EBD0','C499DA3F'],
+    ['0190EBD4','C41B299C'], ['0190EBD8','4230BCFE'], ['0190EBE0','C49979E6'],
+    ['0190EBE4','C42005F0'], ['0190EBE8','41F563DA'], ['0190EBF0','C499A918'],
+    ['0190EBF4','C425A282'], ['0190EBF8','420AF6F6'], ['0190EBFC','00000001'],
+    ['0190EC00','00000002'],
+  ];
   let hookInstalling = false;
   let playerHookTarget = null;
+  let playerHookPayload = '';
+
+  function setPlayerHookStatus(message, isError = false) {
+    const status = document.getElementById('player-hook-status');
+    if (!status) return;
+    status.textContent = message;
+    status.style.color = isError ? 'var(--danger)' : 'var(--muted)';
+  }
+
+  async function readHookRange(address, length) {
+    let output = '';
+    for (let offset = 0; offset < length; offset += 0x100) {
+      const chunkLength = Math.min(0x100, length - offset);
+      const chunk = String(await ps3getmem(address + offset, chunkLength) || '').replace(/\s/g, '').toUpperCase();
+      if (chunk.length !== chunkLength * 2) throw new Error(`Short hook read at 0x${(address + offset).toString(16).toUpperCase()}`);
+      output += chunk;
+    }
+    return output;
+  }
+
+  function recognizedHookPayloads() {
+    return [
+      PLAYER_HOOK_STUB_HEX,
+      typeof OFF_HEX === 'string' ? OFF_HEX : '',
+      typeof VOID_ON_HEX === 'string' ? VOID_ON_HEX : '',
+      typeof ROPK_ON_HEX === 'string' ? ROPK_ON_HEX : '',
+    ].filter((payload, index, all) => payload && all.indexOf(payload) === index);
+  }
 
   async function installPlayerHook() {
-    if (!ip) return;
+    if (!ip) throw new Error('Link the console before installing the player hook');
+    if (hookInstalling || srvBusy) throw new Error('Another hook write is already active');
     const generation = connectionGeneration;
     const target = ip;
     hookInstalling = true;
@@ -1111,49 +1145,46 @@
       if (generation !== connectionGeneration) throw new Error('Hook session changed');
     };
     try {
-      const current = await ps3getmem(0x1C4110,4);
+      const current = String(await ps3getmem(PLAYER_HOOK_SITE,4) || '').toUpperCase();
       if (generation !== connectionGeneration) throw new Error('Hook session changed');
-      if (!['30640140','48F14DB0'].includes(current)) throw new Error('Hook site does not match the supported game build');
-      if (current === '48F14DB0') await write('1C4110','30640140');
-      // Step 1: write the 116-byte PPC stub to 0x10D8EC0.
-      // Branch is NOT yet active, so no need to deactivate first.
-      // henDelay() guards against HEN's slower write handler being overwhelmed.
-      const stubHex = '3C6001906063EBB0F9C3FFD8F9E3FFD0DA03FFE0DA23FFE87DE0002681C30014C2040140C22E0000FC10884040820028C2040144C22E0004FC10884040820018C2040148C22E0008FC10884040820008908300007DEFF120E9C3FFD8E9E3FFD0CA03FFE0CA23FFE8306401403C80010A4B0EB1E4';
-      const stubChunks = stubHex.match(/.{8}/g);
+      if (current === PLAYER_HOOK_BRANCH) {
+        const activeStub = await readHookRange(PLAYER_HOOK_CAVE, PLAYER_HOOK_STUB_HEX.length / 2);
+        const activeTail = await readHookRange(PLAYER_HOOK_TAIL, PLAYER_HOOK_TAIL_LENGTH);
+        if (activeStub !== PLAYER_HOOK_STUB_HEX || /[^0]/.test(activeTail)) {
+          throw new Error('Another hook is active at the shared 0x001C4110 / 0x010D8EC0 site; restore it before switching');
+        }
+        playerHookTarget = target;
+        playerHookPayload = PLAYER_HOOK_STUB_HEX;
+        setPlayerHookStatus('Base player hook is already active; no code was rewritten.');
+        return;
+      }
+      if (current !== PLAYER_HOOK_ORIGINAL) throw new Error('Hook site does not match the supported BLES 01.24 instruction');
+
+      const oldStub = await readHookRange(PLAYER_HOOK_CAVE, PLAYER_HOOK_STUB_HEX.length / 2);
+      const oldTail = await readHookRange(PLAYER_HOOK_TAIL, PLAYER_HOOK_TAIL_LENGTH);
+      if ((oldStub !== '0'.repeat(PLAYER_HOOK_STUB_HEX.length) && oldStub !== PLAYER_HOOK_STUB_HEX) || /[^0]/.test(oldTail)) {
+        throw new Error('The inactive hook cave contains unrecognized data; it was left untouched');
+      }
+
+      // Write the PPC stub and empty tail first; activate the branch last.
+      const stubChunks = PLAYER_HOOK_STUB_HEX.match(/.{8}/g) || [];
       for (let i = 0; i < stubChunks.length; i++) {
-        const addr = (0x10D8EC0 + i * 4).toString(16).toUpperCase();
-        await write(`${addr}`,`${stubChunks[i]}`);
-        
+        await write(PLAYER_HOOK_CAVE + i * 4, stubChunks[i]);
       }
-      // Zero the 152-byte tail region at 0x10D8F34
-      for (let i = 0; i < 38; i++) {
-        const addr = (0x10D8F34 + i * 4).toString(16).toUpperCase();
-        await write(`${addr}`,`00000000`);
-        
+      for (let i = 0; i < PLAYER_HOOK_TAIL_LENGTH / 4; i++) {
+        await write(PLAYER_HOOK_TAIL + i * 4, '00000000');
       }
+      for (const [address,value] of PLAYER_HOOK_DATA) await write(address,value);
 
-      // Step 2: write hook data values
-      await write(`190EBC4`,`306E8D58`); 
-      await write(`190EBAC`,`3F99999A`);  // 1.2f
-      await write(`190EBD0`,`C499DA3F`); 
-      await write(`190EBD4`,`C41B299C`); 
-      await write(`190EBD8`,`4230BCFE`); 
-      await write(`190EBE0`,`C49979E6`); 
-      await write(`190EBE4`,`C42005F0`); 
-      await write(`190EBE8`,`41F563DA`); 
-      await write(`190EBF0`,`C499A918`); 
-      await write(`190EBF4`,`C425A282`); 
-      await write(`190EBF8`,`420AF6F6`); 
-      await write(`190EBFC`,`00000001`); 
-      await write(`190EC00`,`00000002`); 
-
-      // Step 3: activate — branch patch at 0x1C4110 → jumps to stub.
-      // Stub is fully written before this, so the CPU will never hit a partial stub.
-      await write(`1C4110`,`48F14DB0`);
-
+      // Track ownership before the final write in case the response is lost
+      // after the console has already activated the branch.
       playerHookTarget = target;
-      log('Player hook bytes and activation branch verified by readback', 'ok');
+      playerHookPayload = PLAYER_HOOK_STUB_HEX;
+      await write(PLAYER_HOOK_SITE, PLAYER_HOOK_BRANCH);
+      setPlayerHookStatus('Player hook installed. Link alone does not install it.');
+      log('Player hook installed and activation branch verified', 'ok');
     } catch(e) {
+      setPlayerHookStatus(`Hook not confirmed: ${e.message}`, true);
       log(`Player hook not confirmed: ${e.message}`, 'err');
       throw e;
     } finally {
@@ -1161,16 +1192,54 @@
     }
   }
 
-  async function uninstallPlayerHook() {
-    if (!ip || playerHookTarget !== ip) return;
-    const target = ip, generation = connectionGeneration;
-    const current = await ps3getmem(0x1C4110,4);
+  async function uninstallPlayerHook({ allowRecognized = false } = {}) {
+    if (!ip) throw new Error('Link the console before restoring a hook');
+    const target = ip;
+    if (!allowRecognized && playerHookTarget !== target) return;
+    const generation = connectionGeneration;
+    const current = String(await ps3getmem(PLAYER_HOOK_SITE,4) || '').toUpperCase();
     ensureOperationSession(generation);
-    if (!['30640140','48F14DB0'].includes(current)) throw new Error('Hook site changed; restoration was not attempted');
-    if (current !== '30640140') await verifiedMemoryValue('1C4110','30640140');
-    if (playerHookTarget === target) playerHookTarget = null;
-    log('Player hook branch restoration verified', 'ok');
+    if (current === PLAYER_HOOK_ORIGINAL) {
+      if (playerHookTarget === target) { playerHookTarget = null; playerHookPayload = ''; }
+      setPlayerHookStatus('Hook branch is already at its original instruction.');
+      return;
+    }
+    if (current !== PLAYER_HOOK_BRANCH) throw new Error('Hook site changed; restoration was not attempted');
+
+    let expectedPayload = playerHookTarget === target ? playerHookPayload : '';
+    if (!expectedPayload && allowRecognized) {
+      for (const candidate of recognizedHookPayloads()) {
+        const candidateBytes = await readHookRange(PLAYER_HOOK_CAVE, candidate.length / 2);
+        ensureOperationSession(generation);
+        if (candidateBytes === candidate) { expectedPayload = candidate; break; }
+      }
+    }
+    if (!expectedPayload) throw new Error('This page did not install the active hook; use the explicit recovery action to inspect known payloads');
+    const actualPayload = await readHookRange(PLAYER_HOOK_CAVE, expectedPayload.length / 2);
+    ensureOperationSession(generation);
+    if (actualPayload !== expectedPayload) throw new Error('The code cave no longer matches this hook; another feature owns it, so it was left active');
+
+    await verifiedConditionalMemoryValue(
+      PLAYER_HOOK_SITE.toString(16), PLAYER_HOOK_BRANCH, PLAYER_HOOK_ORIGINAL
+    );
+    if (playerHookTarget === target) { playerHookTarget = null; playerHookPayload = ''; }
+    setPlayerHookStatus('Hook branch restored. Its code and data bytes remain inert in Destiny memory.');
+    log('Owned player/server hook branch restored', 'ok');
   }
+
+  window.installPlayerHookAction = async () => {
+    if (!ip) { setPlayerHookStatus('Link the console first.', true); return; }
+    if (!await RtmDialogs.confirm('Install the experimental player/physics hook? This writes PPC code and redirects Destiny at 0x001C4110. It shares the code cave used by Server Cheats and Overwalls.')) return;
+    try { await installPlayerHook(); }
+    catch (error) { toast(`Hook not installed: ${error.message}`, 'err'); }
+  };
+
+  window.restorePlayerHookAction = async () => {
+    if (!ip) { setPlayerHookStatus('Link the console first.', true); return; }
+    if (!await RtmDialogs.confirm('Restore Destiny’s original instruction at 0x001C4110 if the active hook matches a known RTM payload?')) return;
+    try { await uninstallPlayerHook({ allowRecognized: true }); }
+    catch (error) { setPlayerHookStatus(`Hook left unchanged: ${error.message}`, true); toast(`Hook not restored: ${error.message}`, 'err'); }
+  };
 
   const toggleState = {};
 
@@ -2882,7 +2951,8 @@
     const generation = connectionGeneration;
     button.disabled = true;
     clearDestinyBuildProfileResults();
-    setDestinyBuildProfileStatus('Checking three code anchors…', 'pending');
+    const anchorCount = RtmBuildCompatibility.anchorCount;
+    setDestinyBuildProfileStatus(`Checking ${anchorCount} code anchors…`, 'pending');
     try {
       const result = await buildCompatibilityGuard.inspect();
       if (generation !== connectionGeneration || targetIp !== ip || !badge.classList.contains('connected')) {
@@ -2894,12 +2964,12 @@
       const mismatches = result.anchors.filter(anchor => anchor.status === 'mismatch');
       const unreadable = result.anchors.filter(anchor => anchor.status === 'unreadable');
       if (result.status === 'verified') {
-        setDestinyBuildProfileStatus('Last check matched the BLES01857 01.24 signature profile · 3/3 anchors.', 'matched');
+        setDestinyBuildProfileStatus(`Last check matched the BLES01857 01.24 signature profile · ${matched}/${anchorCount} anchors.`, 'matched');
       } else {
         const issues = [];
         if (mismatches.length) issues.push(`mismatch at ${mismatches.map(anchor => `0x${anchor.address}`).join(', ')}`);
         if (unreadable.length) issues.push(`unreadable at ${unreadable.map(anchor => `0x${anchor.address}`).join(', ')}`);
-        setDestinyBuildProfileStatus(`No verified build match · ${matched}/3 anchors match; ${issues.join('; ')}. Memory writes remain locked.`, 'error');
+        setDestinyBuildProfileStatus(`No verified build match · ${matched}/${anchorCount} anchors match; ${issues.join('; ')}. Memory writes remain locked.`, 'error');
       }
     } catch (error) {
       if (generation !== connectionGeneration || targetIp !== ip || !badge.classList.contains('connected')) {
@@ -3376,8 +3446,24 @@
       await verifiedMemoryValue(address,value);
       if (generation !== connectionGeneration) throw new Error('Console session changed');
     };
-    // Deactivate the branch BEFORE rewriting the stub to prevent crashes.
-    await verifiedWrite(`1C4110`,`30640140`);
+    const currentBranch = String(await ps3getmem(PLAYER_HOOK_SITE,4) || '').toUpperCase();
+    if (generation !== connectionGeneration) throw new Error('Console session changed');
+    if (currentBranch !== PLAYER_HOOK_ORIGINAL && currentBranch !== PLAYER_HOOK_BRANCH) {
+      throw new Error('Shared hook site has an unexpected instruction; no code was written');
+    }
+    const currentRegion = await readHookRange(PLAYER_HOOK_CAVE, PLAYER_HOOK_STUB_HEX.length / 2 + PLAYER_HOOK_TAIL_LENGTH);
+    if (generation !== connectionGeneration) throw new Error('Console session changed');
+    const blankRegion = !/[^0]/.test(currentRegion);
+    const knownRegion = recognizedHookPayloads().some(payload =>
+      currentRegion === payload.padEnd((PLAYER_HOOK_STUB_HEX.length / 2 + PLAYER_HOOK_TAIL_LENGTH) * 2, '0')
+    );
+    if (!blankRegion && !knownRegion) {
+      throw new Error('The shared code cave contains an unrecognized hook; it was left untouched');
+    }
+    // Deactivate a recognized owned branch BEFORE rewriting its payload.
+    if (currentBranch === PLAYER_HOOK_BRANCH) {
+      await verifiedConditionalMemoryValue(PLAYER_HOOK_SITE.toString(16), PLAYER_HOOK_BRANCH, PLAYER_HOOK_ORIGINAL);
+    }
     await henDelay();
 
     const chunks = hexStr.match(/.{8}/g) || [];
@@ -3390,17 +3476,22 @@
       await henDelay();
     }
 
-    // 2. Zero out the REMAINING tail region to clean up old payloads.
-    // ROPK is our largest payload at 228 bytes (57 chunks of 4 bytes).
-    const MAX_CHUNKS = 57;
+    // 2. Zero out the remainder of the shared 268-byte hook region. This also
+    // clears bytes left by older RTMs that used a shorter payload.
+    const MAX_CHUNKS = (PLAYER_HOOK_STUB_HEX.length / 2 + PLAYER_HOOK_TAIL_LENGTH) / 4;
     for (let i = chunks.length; i < MAX_CHUNKS; i++) {
       const addr = (base + i * 4).toString(16).toUpperCase();
       await verifiedWrite(`${addr}`,`00000000`);
       await henDelay();
     }
 
+    // Track the exact known payload before activation so cleanup can avoid
+    // restoring a branch after another feature has replaced this code cave.
+    playerHookTarget = ip;
+    playerHookPayload = hexStr;
     // 3. Reactivate the branch
     await verifiedWrite(`1C4110`,`48F14DB0`);
+    setPlayerHookStatus('Server hook active. Link cleanup restores it only while its payload still matches.');
   }
 
   // ── Custom Damage Multiplier ─────────────────────────────────────────────

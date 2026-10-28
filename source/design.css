@@ -145,21 +145,49 @@ body.light-mode .cheat-btn.active-cheat { background:var(--success-soft) !import
 .spawn-tag-resolver-body .build-profile-status { margin:0 0 4px; }
 .spawn-executor-body { display:flex; flex-direction:column; gap:10px; padding:0.9rem 1rem; }
 .spawn-executor-body .build-profile-status { margin:0 0 4px; }
-.spawn-workflow-steps { margin:0; padding:10px 12px 10px 32px; border:1px solid var(--border,#29354a); border-radius:6px; background:var(--surface,#111722); }
+#spawn-executor-panel .compact-help-note { display:block; }
+.spawn-executor-warning { display:grid; gap:5px; margin:0; padding:10px 12px; border:1px solid var(--warning-line); border-left:3px solid var(--warning); border-radius:var(--radius-control); background:var(--warning-soft); color:var(--text); font:12px/1.5 var(--sans); }
+.spawn-executor-warning > strong { color:var(--warning); font-size:12px; font-weight:650; }
+.spawn-executor-disclosure { margin-top:2px; }
+.spawn-executor-disclosure summary { width:fit-content; cursor:pointer; color:var(--muted); font:12px/1.5 var(--sans); }
+.spawn-executor-disclosure summary:hover { color:var(--text); }
+.spawn-executor-disclosure-body { display:grid; gap:6px; margin-top:7px; padding-top:7px; border-top:1px solid var(--warning-line); color:var(--muted); font:12px/1.5 var(--sans); }
+.spawn-executor-disclosure-body p { margin:0; }
+.spawn-workflow-steps { display:block; margin:0; padding:10px 12px 10px 32px; border:1px solid var(--border); border-radius:var(--radius-control); background:var(--surface); color:var(--muted); font:12px/1.5 var(--sans); }
 .spawn-workflow-steps li + li { margin-top:4px; }
-.spawn-executor-meta { display:flex; flex-wrap:wrap; justify-content:space-between; gap:6px 16px; color:var(--muted,#8290a5); font:11px/1.5 ui-monospace,Consolas,monospace; }
+.spawn-executor-meta { display:flex; flex-wrap:wrap; justify-content:space-between; gap:6px 16px; color:var(--muted); font:11px/1.5 var(--mono); }
 .spawn-executor-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; }
-.spawn-executor-grid label { display:flex; flex-direction:column; gap:5px; color:var(--muted,#8290a5); font-size:11px; }
+.spawn-executor-grid label { display:flex; flex-direction:column; gap:5px; color:var(--muted); font-size:11px; }
 .spawn-placement-shortcuts { display:flex; flex-wrap:wrap; gap:8px; }
 .spawn-placement-shortcuts button { margin:0; }
-.spawn-executor-pose { border:1px solid var(--border,#29354a); border-radius:6px; padding:9px 11px; }
-.spawn-executor-pose summary { cursor:pointer; color:var(--text,#dce7f5); font-size:12px; }
+.spawn-executor-pose { border:1px solid var(--border); border-radius:var(--radius-control); padding:9px 11px; background:var(--surface); }
+.spawn-executor-pose summary { cursor:pointer; color:var(--text); font:600 12px/1.5 var(--sans); }
 .spawn-executor-pose .compact-help-note { margin:8px 0; }
-.spawn-executor-actions { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); }
-.spawn-executor-actions button { margin:0; }
+.resource-bootflow-actions.spawn-executor-actions { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); grid-template-areas:"install spawn spawn cancel" "check check recover recover"; gap:8px; }
+.resource-bootflow-actions.spawn-executor-actions > button { flex:none; min-width:0; min-height:40px; margin:0; padding:8px 10px; align-items:center; justify-content:center; text-align:center; font:600 12px/1.35 var(--sans); }
+#spawn-executor-install-btn { grid-area:install; }
+#spawn-executor-submit-btn { grid-area:spawn; border-color:var(--accent); background:var(--accent); color:var(--accent-ink); }
+#spawn-executor-submit-btn:hover:not(:disabled) { border-color:var(--accent); background:var(--accent); filter:brightness(1.04); }
+#spawn-executor-cancel-btn { grid-area:cancel; border-color:var(--danger-line); background:var(--danger-soft); color:var(--danger); }
+#spawn-executor-cancel-btn:hover:not(:disabled) { border-color:var(--danger); background:var(--danger-soft); }
+#spawn-executor-reconcile-btn { grid-area:check; }
+#spawn-executor-recover-btn { grid-area:recover; }
+.spawn-action-secondary { border-color:var(--border); background:var(--surface); color:var(--text); }
+.spawn-shortcut-hint { margin:0; color:var(--muted); font:11px/1.5 var(--sans); text-align:right; }
+.spawn-shortcut-hint kbd { padding:1px 5px; border:1px solid var(--border); border-radius:3px; background:var(--surface); color:var(--text); font:10px var(--mono); }
 .spawn-executor-body pre { max-height:280px; overflow:auto; white-space:pre-wrap; }
 @media(max-width:600px) { .spawn-executor-meta { display:block; } .spawn-executor-meta span { display:block; } }
-.build-profile-status[data-state="mismatch"] { color:var(--warning); }
+@media(max-width:760px) { .resource-bootflow-actions.spawn-executor-actions { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-areas:"install install" "spawn spawn" "cancel cancel" "check check" "recover recover"; } }
+
+.player-hook-card { display:grid; gap:9px; margin:0 1rem 1rem; padding:12px 14px; border:1px solid var(--border); border-radius:var(--radius-control); background:var(--surface); }
+.player-hook-copy { display:grid; gap:4px; color:var(--muted); font-size:11px; line-height:1.5; }
+.player-hook-copy strong { color:var(--text); font-size:12px; }
+.player-hook-copy code { color:var(--text); font:11px var(--mono); }
+.player-hook-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.player-hook-actions button { margin:0; }
+#player-hook-status { margin:0; color:var(--muted); font:11px/1.5 var(--mono); }
+@media(max-width:600px) { .player-hook-actions button { flex:1 1 150px; } }
+.build-profile-status[data-state="mismatch"], .build-profile-status[data-state="warning"] { color:var(--warning); }
 .build-profile-status[data-state="unreadable"] { color:var(--danger); }
 .spawn-path-check-results { display:grid; gap:6px; }
 .spawn-path-check-result { display:grid; gap:3px; padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius-control); background:var(--surface); }

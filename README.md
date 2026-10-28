@@ -66,6 +66,9 @@ Grab the latest build from the [Releases](../../releases) page.
 
 ### Command-line tools
 
+The current build record and verification status are in
+[`docs/RELEASE-2026-10-28.md`](docs/RELEASE-2026-10-28.md).
+
 The Windows build also produces `dist/rtmctl.exe` for scripted use without
 opening the RTM interface. It supports private-network status checks, bounded
 memory reads, a read-only BLES 01.24 item-pool snapshot, 1–8 byte writes with
@@ -73,9 +76,11 @@ exact readback verification, and PS3 system notifications. It uses Destiny
 process ID `0x1010200`; it does not expose undocumented function-call routes.
 
 ```powershell
-.\dist\rtmctl.exe read --ip 192.168.0.62 --address 0030D230 --length 4
-.\dist\rtmctl.exe inventory-pool --ip 192.168.0.62 --json
-.\dist\rtmctl.exe write --ip 192.168.0.62 --address 0030D230 --hex 3DCCCCCD
+.\dist\rtmctl.exe read --ip 192.168.1.100 --address 0030D230 --length 4
+.\dist\rtmctl.exe inventory-pool --ip 192.168.1.100 --json
+.\dist\rtmctl.exe actor-pool --ip 192.168.1.100 --json
+.\dist\rtmctl.exe actor-candidates --ip 192.168.1.100 --json
+.\dist\rtmctl.exe write --ip 192.168.1.100 --address 0030D230 --hex 3DCCCCCD
 ```
 
 ### Android (.apk)

@@ -6,7 +6,7 @@ const vm = require('node:vm');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'source', 'js', 'spawn-tag-resolver-probe.js'), 'utf8');
 const resolverSignature = source.match(/const HANDLE_RESOLVER_SIGNATURE = '([0-9A-F]+)'/)[1];
-const owner = '1:192.168.0.62';
+const owner = '1:192.168.1.100';
 const profile = 'BLES01857 01.24 signature profile';
 
 function writeU32(memory, address, value) {
@@ -29,11 +29,12 @@ function makeHarness({ badResolver = false } = {}) {
   ]);
   const document = { getElementById: id => elements.get(id) || null };
   const window = {
+    RtmBuildCompatibility: { anchorCount: 5 },
     rtmActivitySessionMemory: {
       session: () => owner,
       async verify(session) {
         assert.equal(session, owner);
-        return { profile, anchors: 3, capability: { session } };
+        return { profile, anchors: 5, capability: { session } };
       },
       async read(address, length, session, capability) {
         assert.equal(session, owner);

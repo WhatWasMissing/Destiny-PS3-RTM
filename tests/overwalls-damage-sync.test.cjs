@@ -4,7 +4,18 @@ const assert = require('node:assert/strict');
 function loadOverwallsTools({ writeSequence, syncDamage, readMemory, writeMemory }) {
   const reports = [];
   const status = { textContent: '' };
-  global.localStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} };
+  const storage = new Map();
+  const memory = new Map([
+    [0x00444CA4, 'C04100F0'],
+    [0x01891AE0, '37343036'],
+    [0x0190EBB0, '01A00000']
+  ]);
+  const conditionalWrites = [];
+  global.localStorage = {
+    getItem: key => storage.get(key) ?? null,
+    setItem: (key, value) => storage.set(key, value),
+    removeItem: key => storage.delete(key)
+  };
   global.document = {
     addEventListener: () => {},
     getElementById: id => id === 'ow-job-status' ? status : null
@@ -20,7 +31,16 @@ function loadOverwallsTools({ writeSequence, syncDamage, readMemory, writeMemory
     return [...new Uint8Array(buffer)].map(byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
   };
   global.verifiedMemorySequence = writeSequence;
-  global.ps3getmem = readMemory || (async () => { throw new Error('Unexpected memory read'); });
+  global.verifiedConditionalMemorySequence = async (pairs, preconditions) => {
+    for (const [address, expected] of preconditions) {
+      const current = memory.get(parseInt(address, 16));
+      if (current !== expected) throw new Error(`Conditional memory changed at ${address}`);
+    }
+    conditionalWrites.push(pairs);
+    for (const [address, value] of pairs) memory.set(parseInt(address, 16), value);
+    return { status: 'verified' };
+  };
+  global.ps3getmem = readMemory || (async (address, length) => memory.get(Number(address)) || '00'.repeat(length));
   global.verifiedMemoryValue = writeMemory || (async () => { throw new Error('Unexpected memory write'); });
   global.syncDamagePatchState = (...args) => syncDamage(...args);
   global.toast = (message, type) => reports.push([message, type]);
@@ -29,7 +49,7 @@ function loadOverwallsTools({ writeSequence, syncDamage, readMemory, writeMemory
   const path = require.resolve('../source/js/overwalls-tools.js');
   delete require.cache[path];
   require(path);
-  return { reports, status };
+  return { reports, status, memory, conditionalWrites, storage };
 }
 
 test('Overwalls One-Hit toggle syncs the shared panel after verified writes', async () => {
@@ -76,17 +96,20 @@ test('failed Overwalls readback does not replace the displayed damage state', as
 });
 
 test('Overwalls Warpriest variant restores its source-matched primary instruction', async () => {
-  const writes = [];
-  loadOverwallsTools({
-    writeSequence: async pairs => { writes.push(pairs); },
+  const { conditionalWrites, memory } = loadOverwallsTools({
+    writeSequence: async () => {},
     syncDamage: () => {}
   });
 
   await global.owApplyCheatToggle(4, true);
-  assert.deepEqual(writes[0], [['00444CA4', 'C0420348'], ['01891AE0', '3F800000']]);
+  assert.deepEqual(conditionalWrites[0], [['00444CA4', 'C0420348'], ['01891AE0', '3F800000']]);
+  assert.equal(memory.get(0x00444CA4), 'C0420348');
+  assert.equal(memory.get(0x01891AE0), '3F800000');
 
   await global.owApplyCheatToggle(4, false);
-  assert.deepEqual(writes[1], [['00444CA4', 'C04100F0']]);
+  assert.deepEqual(conditionalWrites[1], [['00444CA4', 'C04100F0'], ['01891AE0', '37343036']]);
+  assert.equal(memory.get(0x00444CA4), 'C04100F0');
+  assert.equal(memory.get(0x01891AE0), '37343036');
 });
 
 test('Overwalls plate hook refuses an unknown branch site before writing', async () => {

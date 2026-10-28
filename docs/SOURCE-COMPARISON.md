@@ -107,8 +107,9 @@ identity. Read-only memory tools remain usable on other builds.
   decimal `811954340` (`0x306570A4`) and writes that value plus three other
   sites. The app's write list already matched all four source sites, but its
   Read Current action incorrectly read the first write site (`0x30656E6E`);
-  it now reads the source's second site. This is source parity only—the
-  activity field has not been observed in a live matching build.
+  it now reads the source's second site. The Overwalls tab's Read Current
+  action now uses that same address. This is source parity only—the activity
+  field has not been observed in a live matching build.
 - The existing **Super Speed** toggle uses the C# source patch at `0x001A96C0`
   (`00` off, `04` on). Its paired EBOOT is the base BLES01857 01.00 build;
   there the address contains `10` (word `1086292F`), so the source's OFF write
@@ -119,7 +120,7 @@ identity. Read-only memory tools remain usable on other builds.
   vector-adjustment loops; the C# UI writes only its first byte, which would
   yield `04000000` (about `1.5e-36`) if the remaining bytes stay zero. This
   still does not identify the loop's gameplay role or a valid ON value. The
-  toggle is disabled pending semantic confirmation. Its recovery action first checks all three 01.24 build
+  toggle is disabled pending semantic confirmation. Its recovery action first checks all five 01.24 build
   signatures and requires the complete patch-site word to equal `04000000`;
   it then restores `00000000` with a full-word write, the same precondition,
   and readback verification. An already-baseline or unexpected value is not

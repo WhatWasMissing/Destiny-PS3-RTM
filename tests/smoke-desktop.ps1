@@ -21,7 +21,7 @@ try {
         if ($response.StatusCode -ne 200 -or !$response.Content) { throw "Missing embedded asset: $asset" }
     }
     $status = 0
-    try { Invoke-WebRequest -Uri ($origin + '/console?url=http%3A%2F%2F192.168.0.62%2Findex.ps3') -TimeoutSec 5 -UseBasicParsing | Out-Null }
+    try { Invoke-WebRequest -Uri ($origin + '/console?url=http%3A%2F%2F192.168.1.100%2Findex.ps3') -TimeoutSec 5 -UseBasicParsing | Out-Null }
     catch { $status = [int]$_.Exception.Response.StatusCode }
     if ($status -ne 403) { throw 'Unauthenticated console request was not rejected' }
     $status = 0

@@ -18,7 +18,7 @@ func TestInspectAndSetPlayerScaleResolvesSourcePointerChainWithoutRPC(t *testing
 	defer server.Close()
 	client := testClient(server)
 
-	state, err := client.InspectPlayerScale(context.Background(), "192.168.0.62")
+	state, err := client.InspectPlayerScale(context.Background(), "192.168.1.100")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -32,7 +32,7 @@ func TestInspectAndSetPlayerScaleResolvesSourcePointerChainWithoutRPC(t *testing
 		t.Fatalf("inspection flags or side effects are wrong: %#v; writes=%d", state, memory.writeRequests)
 	}
 
-	updated, err := client.SetPlayerScale(context.Background(), "192.168.0.62", 5)
+	updated, err := client.SetPlayerScale(context.Background(), "192.168.1.100", 5)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func TestInspectAndSetPlayerScaleResolvesSourcePointerChainWithoutRPC(t *testing
 		t.Fatalf("memory scale = %s, want 40a00000", got)
 	}
 
-	minimumScale, err := client.SetPlayerScale(context.Background(), "192.168.0.62", 0.3)
+	minimumScale, err := client.SetPlayerScale(context.Background(), "192.168.1.100", 0.3)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +58,7 @@ func TestSetPlayerScaleRejectsUnsupportedCodeAndOutOfRangeValuesBeforeWriting(t 
 			memory := newPlayerScaleTestMemory()
 			server := httptest.NewServer(http.HandlerFunc(memory.serveHTTP))
 			defer server.Close()
-			if _, err := testClient(server).SetPlayerScale(context.Background(), "192.168.0.62", scale); err == nil {
+			if _, err := testClient(server).SetPlayerScale(context.Background(), "192.168.1.100", scale); err == nil {
 				t.Fatalf("scale %v outside the source range was accepted", scale)
 			}
 			if memory.writeRequests != 0 || memory.readRequests != 0 {
@@ -72,7 +72,7 @@ func TestSetPlayerScaleRejectsUnsupportedCodeAndOutOfRangeValuesBeforeWriting(t 
 		memory.set(PlayerScaleResolverAddress, make([]byte, len(playerScaleResolverSignature)/2))
 		server := httptest.NewServer(http.HandlerFunc(memory.serveHTTP))
 		defer server.Close()
-		_, err := testClient(server).SetPlayerScale(context.Background(), "192.168.0.62", 2)
+		_, err := testClient(server).SetPlayerScale(context.Background(), "192.168.1.100", 2)
 		if err == nil || !strings.Contains(err.Error(), "resolver bytes do not match") {
 			t.Fatalf("expected source-code mismatch, got %v", err)
 		}
@@ -85,7 +85,7 @@ func TestSetPlayerScaleRejectsUnsupportedCodeAndOutOfRangeValuesBeforeWriting(t 
 		memory.set(PlayerScaleLookupGetterAddress, make([]byte, len(playerScaleLookupGetterSignature)/2))
 		server := httptest.NewServer(http.HandlerFunc(memory.serveHTTP))
 		defer server.Close()
-		_, err := testClient(server).SetPlayerScale(context.Background(), "192.168.0.62", 2)
+		_, err := testClient(server).SetPlayerScale(context.Background(), "192.168.1.100", 2)
 		if err == nil || !strings.Contains(err.Error(), "lookup helper bytes do not match") {
 			t.Fatalf("expected helper-code mismatch, got %v", err)
 		}
@@ -109,8 +109,12 @@ func newPlayerScaleTestMemory() *playerScaleTestMemory {
 	memory.set(PlayerScaleLookupGetterAddress, getter)
 	consumer, _ := hex.DecodeString("3C600044C03601283CC03F803B4349EC3061034462C4000063850000C05A0000")
 	plateHook, _ := hex.DecodeString("3063FFF44BFFFB15")
+	objectCreationAnchor, _ := hex.DecodeString("7C0802A648C59CC9F821FE21F80101F0")
+	actorLookupAnchor, _ := hex.DecodeString("7C0802A648B42A5DF821FF21F80100F0")
 	memory.set(0x00444B64, consumer)
 	memory.set(0x00A015AC, plateHook)
+	memory.set(0x0013ED38, objectCreationAnchor)
+	memory.set(0x00255FA8, actorLookupAnchor)
 	memory.u32(PlayerNamePointerAddress, 0x10000000)
 	memory.u32(0x10000000+0x90, 0)
 	memory.ascii(0x10000000+0x90, 32, "TestGuardian")

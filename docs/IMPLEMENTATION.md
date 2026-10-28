@@ -131,11 +131,13 @@ Do not mark the complete objective achieved based on the transport tests alone.
 
 - Quick relink and restart now invalidate prior sessions and use read-only,
   generation-aware availability probing. Restart no longer leaves a private
-  interval able to reconnect after a later disconnect.
+  interval able to reconnect after a later disconnect. Linking is transport-only;
+  the player/physics hook is an explicit action in the Gamespeed panel.
 - Custom writes validate width/overflow and require readback. Legacy fire/multi
   helpers and typed character writes use verified memory writes.
 - Player/server hook payload writes are verified before branch activation;
-  player hook writes also reject session changes. Failures propagate instead
+  player hook writes also reject session changes and refuse to replace an
+  unrecognized active hook at the shared code cave. Failures propagate instead
   of silently logging installation success. Reset-all reports verified and
   unconfirmed results independently and retains Deathsinger/server reset paths.
 - Production-function tests cover hook activation order/failure/session change,
@@ -148,6 +150,34 @@ Do not mark the complete objective achieved based on the transport tests alone.
   visual inspection so far is from the browser rendering of the same frontend.
 - Remaining: full mock-console desktop integration, verify final built artifact,
   finish operation/status audit and record final requirement-by-requirement proof.
+
+## Spawn workflow and visual consistency
+
+- Matched Blackrock's documented Ctrl+Enter submit shortcut in the spawn panel;
+  the key binding is scoped to that panel and respects the submit button's
+  disabled state.
+- Reworked the experimental spawn panel to use the shared surface, typography,
+  border-radius, and semantic color tokens. Kept the essential unverified/live
+  console and single-client warning visible, with the longer technical rationale
+  in a disclosure. Spawn is the primary action, setup/recovery are secondary,
+  and cancellation is visually marked as a danger action.
+- The action layout adapts at tablet and phone widths. The ordered use steps stay
+  visible in both compact and detailed UI modes.
+- No test suites or live-console actions were run for the visual changes.
+
+## Five-anchor build profile
+
+- Expanded the BLES01857 01.24 runtime profile from three to five code anchors.
+  Both added signatures were verified as unique aligned matches in executable
+  segments of the hash-matched ELF. Browser, Go desktop, MCP, write-protection,
+  probe checks, fixtures, and documentation now use the same five-anchor list.
+- JavaScript syntax checks passed. No test suites or live-console actions were
+  run for this change.
+- Corrected the Overwalls Read Current control to read `0x306570A4`, matching
+  the local Activity Loader C# source and the main RTM reader.
+- Rebuilt `dist/DestinyRTM.exe` and copied it to
+  `C:/Users/novel/Desktop/DestinyRTM-Prerelease/DestinyRTM.exe`. Both files have
+  SHA-256 `49FFBC6BB467571FFB56C2103A9964DC8C904BD78E6015B27CC20F18BFA86FF3`.
 
 ## Desktop integration and final-build tooling
 
@@ -280,9 +310,8 @@ reviewable in PR #8; it remains a draft pending live-console compatibility revie
   the player pointer before filling fields. The Local Data & Diagnostics grid
   now uses one shared read-only/snapshot note and shorter purpose-led card copy.
 - All source JavaScript passed `node --check`, and a structural HTML check
-  confirmed the new section is a sibling of Overwalls. The desktop executable
-  was not rebuilt after this navigation fix because the current shell has no
-  Go compiler on `PATH`.
+  confirmed the new section is a sibling of Overwalls. The original build
+  deferral in that pass was superseded by the later local desktop build.
 - Node syntax checks passed for the changed and newly added JavaScript modules.
   Go builds of the desktop host, `cmd/rtmctl`, and `cmd/rtm-mcp` passed with the
   local Go 1.27.1 toolchain. The separate desktop build is
@@ -312,3 +341,109 @@ reviewable in PR #8; it remains a draft pending live-console compatibility revie
   command responses now disable health-driven relinking and keep a separate
   `WEBMAN ONLINE` state. A local diagnostics export is still needed to identify
   a specific console-side drop.
+
+## Actor lookup and Safe Mode follow-up
+
+- A BLES 01.24 PPC trace confirms that the actor-handle record's `+0x30` word
+  indexes a bitset at `0x01A21138`; the selected bit gates a further status
+  check. A related same-build RPCS3 research note associates `+0x30` with a
+  unit datum in two sampled runs, and the EBOOT accessor at `0x00191960` returns
+  that field. This is not a physical-PS3 sample; the bitmap bit's allocation,
+  liveness, or residency meaning remains unknown. The `0x00255FA8` path uses it
+  to gate cleanup, not to prove an occupied enemy slot.
+- Two additional paths consume the `0x01A1E160` descriptor's storage and stride
+  while resolving masked handles. A helper-mediated initializer now confirms
+  it is the AI Actor Manager's `actors` pool, capacity 40, PS3 stride `0x28D0`.
+  The earlier direct-store/literal scan missed the indirect initialization.
+  A separate allocator bitmap and full-datum reconstruction are now traced;
+  the app does not yet sample them. Live-enemy correlation and the `+0x226C`
+  packed handle's target remain unresolved, so actor enumeration remains
+  unimplemented. See `research/actor-pool-descriptor.md`.
+- The Safe Mode source audit found that the previous connection flow installed
+  a shared Destiny hook using about 81 sequential memory writes. The current
+  flow requires an explicit hook action. Current idle Link performs no Destiny
+  memory writes. Normal Link sends beeps, an XMB popup, and read-only
+  `SERVER GETVERSION` requests. Quiet connection suppresses the beeps, popup,
+  recurring probes, and auto reconnect after its one initial version check.
+  This supports a prior-build game-patch risk but does not establish that an
+  RTM caused the reported Safe Mode boots. See `SAFE-MODE-INVESTIGATION.md`
+  and `ADDRESS-AUDIT.md`.
+- Added hash-checked initializer and consumer traces in
+  `research/actor-pool-descriptor.md`, cross-checked against the local
+  D1 Reimagined RPCS3 research notes. The earlier scan findings in
+  `research/actor-lookup-descriptor-evidence.md` remain heuristic counts, not
+  complete xrefs. No loaded-enemy list was added because live slot correlation
+  and record semantics remain unresolved.
+- The actor-probe desktop build passed Go, 97 Node tests, and
+  packaged desktop smoke checks. `dist/DestinyRTM.exe` and
+  `C:\Users\novel\Desktop\DestinyRTM-Prerelease\DestinyRTM.exe` match at
+  SHA-256 `12D0676F5E032F391CDA993B8A8237A499575256BD47FF7E8B48A0F22CB15783`.
+
+## Direct actor-pool descriptor tools
+
+- Added the shared Go `ReadActorPoolDescriptor` reader, the CLI command
+  `rtmctl actor-pool`, and MCP tool `rtm_read_actor_pool_descriptor`. They
+  verify the five-anchor BLES 01.24 profile plus the full 64-byte actor-path
+  signature before and after reading only the 20-byte descriptor. They refuse
+  changed descriptors, unexpected dimensions and invalid storage spans; no
+  backing pointer is followed and zero actor records are read.
+- CLI flags are limited to `--ip` and `--json` for this command. The MCP tool
+  accepts only `target_ipv4`, returns explicit read-only/non-atomic metadata,
+  and does not claim a loaded-enemy list or confirmed spawning.
+- Fake-console Go tests cover initialization, descriptor changes, initial/final
+  signature mismatches, pointer/span bounds, strict target/argument handling,
+  unsupported clients and refusal without partial results. The full build
+  passed Go tests, all 97 Node tests and packaged desktop/protocol smoke checks.
+  No live-console request was made in this tool-extension pass.
+- The direct-tool build refreshed the Desktop prerelease folder with the
+  manifest and `PRERELEASE-TOOLS.txt` instructions. Its desktop app SHA-256 was
+  `60F488FA1D32797463189F39E2055EA11BF340BD622311DB9B07DA4FD5EE0F1D`.
+
+## Allocated actor-candidate reader
+
+- Added `ReadAllocatedActorCandidates`, CLI `rtmctl actor-candidates`, and MCP
+  tool `rtm_read_allocated_actor_candidates`. The read chain is the full
+  0x34-byte BLES descriptor, 32-byte allocator header, 12-byte bitmap
+  descriptor, bounded bitmap words for 40 slots, full identity/datum words,
+  and only the selected fields from each allocated record's first 0x48 bytes.
+- The reader requires the five-anchor profile plus exact 32-byte signatures
+  from the BLES datum reconstruction and allocator bit-set paths. It also
+  requires an aligned non-null active-player pointer and rechecks it with the
+  descriptor, header, bitmap, identities, and code. The client has no process
+  generation token, so process restart at reused addresses and ABA mutation
+  cannot be ruled out; output remains explicitly non-atomic.
+- The returned row is an allocated slot candidate. The full actor datum is
+  retained; +0x24/+0x28 are raw, +0x30 is a unit-datum candidate, and
+  +0x40/+0x44 are raw member-owner fields. The reader does not follow +0x226C,
+  resolve sobjects, classify enemies, select spawn tags, or write memory.
+- Address checks now match Blackrock's recovered spans:
+  [0x00010000, 0x01C80000] and [0x30000000, 0x80000000], using end-exclusive
+  lengths and permitting the computed end to equal the upper bound. This is
+  compatibility with the host reader's bounds, not proof that every range is
+  mapped in the BLES process. No live console sample has been made yet.
+
+## Spawn bootstrap correction
+
+- Compared the original Blackrock emitter trace against the generated PowerPC
+  bootstrap and corrected two mistranscribed loads. The task callback now
+  receives the context from the task table at `+4`, and the generic command
+  queue loads its 32-bit TOC field. The previous bootstrap incorrectly used
+  the callback code address as the context base and loaded eight TOC bytes.
+- The independent `research/verify_bootstrap_dispatch.py` check executes the
+  32-bit-compatible task and command-header fragments in Unicorn. It reproduces
+  the prior bad context and verifies the corrected context, callback, TOC and
+  status transition. It does not execute the PPC64 worker or Destiny code.
+- A saved journal for the prior exact bootstrap image is recognized during
+  confirmed pre-activation recovery. Cleanup compares owned bytes; unknown
+  bootstrap or program hashes keep all scratch resident. Altered chunks remain
+  untouched. If hook activation may have
+  occurred, recovery restores the hook but retains the task entry, dispatcher
+  header, code and data until Destiny restarts; a callback may still be in
+  flight even when no spawn request was submitted.
+- Rebuilt the current Desktop prerelease after the correction and recovery
+  changes. Go checks, all 104 Node tests, protocol and packaged-desktop smoke
+  checks passed; no live
+  PS3 request was made. Desktop and `dist` executables match at SHA-256
+  `ECD6F5E49A36209BC55873B2CFCF72A1194FCA341BC95168E188614BDAF29FD6`.
+  Live spawning, placement and PS3 instruction-cache behavior remain
+  unverified. `docs/SPAWNING-INSTRUCTIONS.txt` is synced to the Desktop folder.

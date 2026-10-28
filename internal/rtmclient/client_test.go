@@ -40,7 +40,7 @@ func TestReadMemoryScopesProcessAndParsesHexOutput(t *testing.T) {
 	}))
 	defer server.Close()
 
-	data, err := testClient(server).ReadMemory(context.Background(), "192.168.0.62", "0x0030D230", 4)
+	data, err := testClient(server).ReadMemory(context.Background(), "192.168.1.100", "0x0030D230", 4)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,7 +74,7 @@ func TestReadPlayerPositionFollowsOverwallsPointerAndDecodesBigEndianFloats(t *t
 	}))
 	defer server.Close()
 
-	position, err := testClient(server).ReadPlayerPosition(context.Background(), "192.168.0.62")
+	position, err := testClient(server).ReadPlayerPosition(context.Background(), "192.168.1.100")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +98,7 @@ func TestReadPlayerPositionRejectsInvalidPointersAndNonFiniteCoordinates(t *test
 				fmt.Fprintf(w, `<textarea id="output">%s</textarea>`, pointer)
 			}))
 			defer server.Close()
-			if _, err := testClient(server).ReadPlayerPosition(context.Background(), "192.168.0.62"); err == nil {
+			if _, err := testClient(server).ReadPlayerPosition(context.Background(), "192.168.1.100"); err == nil {
 				t.Fatal("invalid player pointer accepted")
 			}
 			if calls != 1 {
@@ -115,7 +115,7 @@ func TestReadPlayerPositionRejectsInvalidPointersAndNonFiniteCoordinates(t *test
 		fmt.Fprint(w, `<textarea id="output">7FC000003F8000003F800000</textarea>`)
 	}))
 	defer server.Close()
-	if _, err := testClient(server).ReadPlayerPosition(context.Background(), "192.168.0.62"); err == nil || !strings.Contains(err.Error(), "non-finite") {
+	if _, err := testClient(server).ReadPlayerPosition(context.Background(), "192.168.1.100"); err == nil || !strings.Contains(err.Error(), "non-finite") {
 		t.Fatalf("expected non-finite coordinate rejection, got %v", err)
 	}
 }
@@ -144,7 +144,7 @@ func TestInspectEntityPointersReadsPlayerTargetCoordinatesAndActivation(t *testi
 	}))
 	defer server.Close()
 
-	inspection, err := testClient(server).InspectEntityPointers(context.Background(), "192.168.0.62")
+	inspection, err := testClient(server).InspectEntityPointers(context.Background(), "192.168.1.100")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -184,7 +184,7 @@ func TestInspectEntityPointersRepresentsNullInvalidSelfAndNonFiniteFields(t *tes
 			fmt.Fprintf(w, `<textarea id="output">%s</textarea>`, value)
 		}))
 		defer server.Close()
-		inspection, err := testClient(server).InspectEntityPointers(context.Background(), "192.168.0.62")
+		inspection, err := testClient(server).InspectEntityPointers(context.Background(), "192.168.1.100")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -208,7 +208,7 @@ func TestInspectEntityPointersRepresentsNullInvalidSelfAndNonFiniteFields(t *tes
 			fmt.Fprintf(w, `<textarea id="output">%s</textarea>`, value)
 		}))
 		defer server.Close()
-		inspection, err := testClient(server).InspectEntityPointers(context.Background(), "192.168.0.62")
+		inspection, err := testClient(server).InspectEntityPointers(context.Background(), "192.168.1.100")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -231,7 +231,7 @@ func TestInspectEntityPointersRepresentsNullInvalidSelfAndNonFiniteFields(t *tes
 			fmt.Fprintf(w, `<textarea id="output">%s</textarea>`, value)
 		}))
 		defer server.Close()
-		inspection, err := testClient(server).InspectEntityPointers(context.Background(), "192.168.0.62")
+		inspection, err := testClient(server).InspectEntityPointers(context.Background(), "192.168.1.100")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -264,6 +264,8 @@ func TestWriteMemoryRequiresMatchingReadback(t *testing.T) {
 				"00444B64": "3C600044C03601283CC03F803B4349EC3061034462C4000063850000C05A0000",
 				"001FB3C8": "8084001C908300004E800020",
 				"002FF2D0": "7C0802A648A99751F821FF81F8010090",
+				"0013ED38": "7C0802A648C59CC9F821FE21F80101F0",
+				"00255FA8": "7C0802A648B42A5DF821FF21F80100F0",
 			}
 			result, ok := reads[r.URL.Query().Get("addr")]
 			if !ok {
@@ -277,11 +279,11 @@ func TestWriteMemoryRequiresMatchingReadback(t *testing.T) {
 	defer server.Close()
 
 	client := testClient(server)
-	if err := client.WriteMemory(context.Background(), "192.168.0.62", "0030D230", []byte{0x3F, 0x80, 0, 0}); err != nil {
+	if err := client.WriteMemory(context.Background(), "192.168.1.100", "0030D230", []byte{0x3F, 0x80, 0, 0}); err != nil {
 		t.Fatal(err)
 	}
 	value[3] = 0x01
-	if err := client.WriteMemory(context.Background(), "192.168.0.62", "0030D230", []byte{0x3F, 0x80, 0, 0}); err == nil || !strings.Contains(err.Error(), "not verified") {
+	if err := client.WriteMemory(context.Background(), "192.168.1.100", "0030D230", []byte{0x3F, 0x80, 0, 0}); err == nil || !strings.Contains(err.Error(), "not verified") {
 		t.Fatalf("expected a readback mismatch, got %v", err)
 	}
 }
@@ -298,7 +300,7 @@ func TestWriteMemoryRefusesUnknownBuildBeforeSendingWrite(t *testing.T) {
 	}))
 	defer server.Close()
 	client := testClient(server)
-	err := client.WriteMemory(context.Background(), "192.168.0.62", "0030D230", []byte{0x3F, 0x80, 0, 0})
+	err := client.WriteMemory(context.Background(), "192.168.1.100", "0030D230", []byte{0x3F, 0x80, 0, 0})
 	if err == nil || !strings.Contains(err.Error(), "signature mismatch") {
 		t.Fatalf("expected build mismatch, got %v", err)
 	}
@@ -309,7 +311,7 @@ func TestWriteMemoryRefusesUnknownBuildBeforeSendingWrite(t *testing.T) {
 
 func TestWriteMemoryCannotOverwriteBuildSignatures(t *testing.T) {
 	client := New()
-	err := client.WriteMemory(context.Background(), "192.168.0.62", "002FF2CF", []byte{0, 0, 0})
+	err := client.WriteMemory(context.Background(), "192.168.1.100", "002FF2CF", []byte{0, 0, 0})
 	if err == nil || !strings.Contains(err.Error(), "overlaps protected 01.24 code signature") {
 		t.Fatalf("expected protected signature range refusal, got %v", err)
 	}
@@ -323,7 +325,7 @@ func TestRejectsPublicTargetsAndInvalidWriteWidths(t *testing.T) {
 	if _, err := ParseAddress("100000000"); err == nil {
 		t.Fatal("overflow address accepted")
 	}
-	if err := client.WriteMemory(context.Background(), "192.168.0.62", "0030D230", make([]byte, 9)); err == nil {
+	if err := client.WriteMemory(context.Background(), "192.168.1.100", "0030D230", make([]byte, 9)); err == nil {
 		t.Fatal("oversized write accepted")
 	}
 }
@@ -340,10 +342,10 @@ func TestNotifyEncodesMessageAndRejectsOverlongInput(t *testing.T) {
 	}))
 	defer server.Close()
 	client := testClient(server)
-	if err := client.Notify(context.Background(), "192.168.0.62", "hello & guardian"); err != nil {
+	if err := client.Notify(context.Background(), "192.168.1.100", "hello & guardian"); err != nil {
 		t.Fatal(err)
 	}
-	if err := client.Notify(context.Background(), "192.168.0.62", strings.Repeat("x", 129)); err == nil {
+	if err := client.Notify(context.Background(), "192.168.1.100", strings.Repeat("x", 129)); err == nil {
 		t.Fatal("overlong notification accepted")
 	}
 }
@@ -362,7 +364,7 @@ func TestLaunchGameUsesRecoveredStageOrderAndReportsOnlyHTTPAcknowledgement(t *t
 		return nil
 	}
 
-	result, err := client.LaunchGame(context.Background(), "192.168.0.62", DefaultDestinyISOPath)
+	result, err := client.LaunchGame(context.Background(), "192.168.1.100", DefaultDestinyISOPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -402,7 +404,7 @@ func TestLaunchGameValidatesPathAndPreservesPartialProgressOnCancellation(t *tes
 	defer server.Close()
 	client := testClient(server)
 	client.sleep = func(context.Context, time.Duration) error { return context.Canceled }
-	result, err := client.LaunchGame(context.Background(), "192.168.0.62", DefaultDestinyISOPath)
+	result, err := client.LaunchGame(context.Background(), "192.168.1.100", DefaultDestinyISOPath)
 	if err == nil || !strings.Contains(err.Error(), "waiting before return_to_xmb") {
 		t.Fatalf("expected cancellation after mount, got %v", err)
 	}

@@ -1,12 +1,13 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
 const packet = require('../source/js/spawn-packet.js');
 const dataBlock = require('../source/js/spawn-data-block.js');
 const images = require('../source/js/spawn-executor-images.js');
 const controllerApi = require('../source/js/spawn-executor-controller.js');
 
 const PROFILE = controllerApi.PROFILE_NAME;
-const OWNER = '1:192.168.0.62';
+const OWNER = '1:192.168.1.100';
 
 const signatures = [
   { name: 'a', address: 0x00100000, expected: 'AABBCCDD' },
@@ -24,10 +25,23 @@ const regions = [
   { name: 'reserved gap', address: 0x0183d200, size: 0x0e00 }
 ];
 
-function makeHarness({ emulateWorker = false, workerSlot = 0 } = {}) {
+function makeHarness({
+  emulateWorker = false,
+  workerSlot = 0,
+  workerTerminalStatus = 3,
+  workerResultCode = 0x0300,
+  workerSuccessCount = 1,
+  failAfterAddress = null,
+  failBeforeAddress = null,
+  syntheticClock = false,
+  initialImages = images
+} = {}) {
   const memory = new Map();
   const storageMap = new Map();
   let activeOwner = OWNER;
+  let injectedFailureAddress = failAfterAddress;
+  let injectedBeforeAddress = failBeforeAddress;
+  let clock = 1000;
   const storage = {
     getItem: key => storageMap.get(key) ?? null,
     setItem: (key, value) => storageMap.set(key, value)
@@ -52,7 +66,7 @@ function makeHarness({ emulateWorker = false, workerSlot = 0 } = {}) {
     session: () => activeOwner,
     async verify(owner) {
       assert.equal(owner, activeOwner);
-      return { profile: PROFILE, anchors: 3, capability: {} };
+      return { profile: PROFILE, anchors: 5, capability: {} };
     },
     async read(address, length, owner) {
       assert.equal(owner, activeOwner);
@@ -61,12 +75,11 @@ function makeHarness({ emulateWorker = false, workerSlot = 0 } = {}) {
         const slot = workerAddress;
         const count = readWord(slot + 0x9c);
         const results = new Uint8Array(0x40 + count * 0x10);
-        results[0] = 3;
-        results[1] = 0;
+        new DataView(results.buffer).setUint16(0, workerResultCode, false);
         new DataView(results.buffer).setUint32(0x40, 0x80abcdef, false);
         writeBytes(slot + controllerApi.RESULT_OFFSET, results);
-        writeWord(slot + 0x18, 1);
-        writeWord(slot, 3);
+        writeWord(slot + 0x18, workerSuccessCount);
+        writeWord(slot, workerTerminalStatus);
       }
       return controllerApi.bytesToHex(readBytes(address, length));
     }
@@ -77,23 +90,41 @@ function makeHarness({ emulateWorker = false, workerSlot = 0 } = {}) {
     const before = Buffer.from(expected, 'hex');
     const after = Buffer.from(replacement, 'hex');
     assert.deepEqual(Buffer.from(readBytes(address, before.length)), before, `precondition at ${address.toString(16)}`);
+    if (injectedBeforeAddress === address) {
+      injectedBeforeAddress = null;
+      throw new Error(`injected pre-write failure at 0x${address.toString(16)}`);
+    }
     writeBytes(address, after);
     assert.deepEqual(Buffer.from(readBytes(address, after.length)), after, `readback at ${address.toString(16)}`);
+    if (injectedFailureAddress === address) {
+      injectedFailureAddress = null;
+      throw new Error(`injected post-write failure at 0x${address.toString(16)}`);
+    }
   };
 
-  const controller = controllerApi.create({
+  const createController = (imageSet = initialImages) => controllerApi.create({
     memory: memoryApi,
+    profileAnchorCount: 5,
     writeIfEqual: writer,
     signatures,
     regions,
     packet,
     dataBlock,
-    images,
+    images: imageSet,
     storage,
-    now: Date.now,
-    sleep: async () => {}
+    now: syntheticClock ? () => clock : Date.now,
+    sleep: async milliseconds => { if (syntheticClock) clock += Math.max(1, milliseconds || 1); }
   });
-  return { controller, memory, readBytes, readWord, writeWord, storageMap, setSession: value => { activeOwner = value; } };
+  return {
+    controller: createController(),
+    restart: createController,
+    memory,
+    readBytes,
+    readWord,
+    writeWord,
+    storageMap,
+    setSession: value => { activeOwner = value; }
+  };
 }
 
 const spawnFields = {
@@ -106,21 +137,155 @@ const spawnFields = {
   pose: [5, 1, 1, 0, 0, 0, 0, 0, 0]
 };
 
-test('installer persists a journal before writes and recovery restores/clears exact owned bytes', async () => {
+test('recovery retains all executor memory after hook activation, even without a spawn', async () => {
   const h = makeHarness();
   const installed = await h.controller.install();
   assert.equal(installed.state, 'installed');
   assert.deepEqual(Buffer.from(h.readBytes(controllerApi.HOOK_ADDRESS, 4)), Buffer.from(controllerApi.HOOK_INSTALLED, 'hex'));
   assert.deepEqual(Buffer.from(h.readBytes(controllerApi.TASK_TABLE, 8)), Buffer.from('0183E40001C75000', 'hex'));
   assert.equal(h.storageMap.get(controllerApi.JOURNAL_KEY).includes('"state":"installed"'), true);
+  const bootstrap = Buffer.from(h.readBytes(controllerApi.BOOTSTRAP_BASE, 292));
+  const program = Buffer.from(h.readBytes(controllerApi.PROGRAM_BASE, 2908));
+  const data = Buffer.from(h.readBytes(controllerApi.DATA_BASE, 0x1cd0));
+  const task = Buffer.from(h.readBytes(controllerApi.TASK_TABLE, 8));
+  const header = Buffer.from(h.readBytes(controllerApi.DISPATCHER_HEADER, 8));
 
   const recovered = await h.controller.recover();
+  assert.equal(recovered.state, 'recovered-resident');
+  assert.deepEqual(Buffer.from(h.readBytes(controllerApi.HOOK_ADDRESS, 4)), Buffer.from(controllerApi.HOOK_ORIGINAL, 'hex'));
+  assert.deepEqual(Buffer.from(h.readBytes(controllerApi.TASK_TABLE, 8)), task);
+  assert.deepEqual(Buffer.from(h.readBytes(controllerApi.DISPATCHER_HEADER, 8)), header);
+  assert.deepEqual(Buffer.from(h.readBytes(controllerApi.BOOTSTRAP_BASE, 292)), bootstrap);
+  assert.deepEqual(Buffer.from(h.readBytes(controllerApi.PROGRAM_BASE, 2908)), program);
+  assert.deepEqual(Buffer.from(h.readBytes(controllerApi.DATA_BASE, 0x1cd0)), data);
+});
+
+test('post-write failures in every install phase survive restart and recover owned bytes', async () => {
+  const phases = [
+    { phase: 'bootstrap', address: controllerApi.BOOTSTRAP_BASE },
+    { phase: 'spawn-program', address: controllerApi.PROGRAM_BASE },
+    { phase: 'data-block', address: controllerApi.DATA_BASE },
+    { phase: 'dispatcher-header', address: controllerApi.DISPATCHER_HEADER },
+    { phase: 'task-registration', address: controllerApi.TASK_TABLE },
+    { phase: 'hook-activation', address: controllerApi.HOOK_ADDRESS }
+  ];
+
+  for (const { phase, address } of phases) {
+    const h = makeHarness({ failAfterAddress: address });
+    await assert.rejects(h.controller.install(), new RegExp(`stopped during ${phase}`));
+    assert.equal(JSON.parse(h.storageMap.get(controllerApi.JOURNAL_KEY)).state, 'recovery-required', phase);
+    const beforeRecovery = {
+      bootstrap: Buffer.from(h.readBytes(controllerApi.BOOTSTRAP_BASE, 292)),
+      program: Buffer.from(h.readBytes(controllerApi.PROGRAM_BASE, 2908)),
+      data: Buffer.from(h.readBytes(controllerApi.DATA_BASE, 0x1cd0)),
+      task: Buffer.from(h.readBytes(controllerApi.TASK_TABLE, 8)),
+      header: Buffer.from(h.readBytes(controllerApi.DISPATCHER_HEADER, 8))
+    };
+
+    const restartedController = h.restart();
+    assert.equal(restartedController.state().journal.state, 'recovery-required', phase);
+    const recovered = await restartedController.recover();
+    const activationAttempted = phase === 'hook-activation';
+    assert.equal(recovered.state, activationAttempted ? 'recovered-resident' : 'recovered-clean', phase);
+    assert.deepEqual(Buffer.from(h.readBytes(controllerApi.HOOK_ADDRESS, 4)), Buffer.from(controllerApi.HOOK_ORIGINAL, 'hex'), phase);
+    assert.deepEqual(Buffer.from(h.readBytes(controllerApi.BOOTSTRAP_BASE, 292)), activationAttempted ? beforeRecovery.bootstrap : Buffer.alloc(292), phase);
+    assert.deepEqual(Buffer.from(h.readBytes(controllerApi.PROGRAM_BASE, 2908)), activationAttempted ? beforeRecovery.program : Buffer.alloc(2908), phase);
+    assert.deepEqual(Buffer.from(h.readBytes(controllerApi.DATA_BASE, 0x1cd0)), activationAttempted ? beforeRecovery.data : Buffer.alloc(0x1cd0), phase);
+    assert.deepEqual(Buffer.from(h.readBytes(controllerApi.TASK_TABLE, 8)), activationAttempted ? beforeRecovery.task : Buffer.alloc(8), phase);
+    assert.deepEqual(Buffer.from(h.readBytes(controllerApi.DISPATCHER_HEADER, 8)), activationAttempted ? beforeRecovery.header : Buffer.alloc(8), phase);
+  }
+});
+
+test('recovery recognizes the exact previous bootstrap image from its saved journal', async () => {
+  const oldHash = '19168afea738565520cb7a803354398ff76222d91fad1a6ce7e8700ab4d10dea';
+  const legacyBootstrap = images.createBootstrapExecutor();
+  legacyBootstrap.set(Buffer.from('806C0004', 'hex'), 0x60);
+  legacyBootstrap.set(Buffer.from('E85E0008', 'hex'), 0x98);
+  assert.equal(crypto.createHash('sha256').update(legacyBootstrap).digest('hex'), oldHash);
+  const legacyImages = {
+    ...images,
+    createBootstrapExecutor: () => legacyBootstrap.slice(),
+    metadata: { ...images.metadata, bootstrap_executor: { ...images.metadata.bootstrap_executor, sha256: oldHash } }
+  };
+
+  const h = makeHarness({ initialImages: legacyImages, failAfterAddress: controllerApi.TASK_TABLE });
+  await assert.rejects(h.controller.install(), /stopped during task-registration/);
+  assert.equal(JSON.parse(h.storageMap.get(controllerApi.JOURNAL_KEY)).bootstrapSha256, oldHash);
+  const recovered = await h.restart(images).recover();
   assert.equal(recovered.state, 'recovered-clean');
   assert.deepEqual(Buffer.from(h.readBytes(controllerApi.HOOK_ADDRESS, 4)), Buffer.from(controllerApi.HOOK_ORIGINAL, 'hex'));
-  assert.deepEqual(Buffer.from(h.readBytes(controllerApi.TASK_TABLE, 8)), Buffer.alloc(8));
   assert.deepEqual(Buffer.from(h.readBytes(controllerApi.BOOTSTRAP_BASE, 292)), Buffer.alloc(292));
-  assert.deepEqual(Buffer.from(h.readBytes(controllerApi.PROGRAM_BASE, 2908)), Buffer.alloc(2908));
-  assert.deepEqual(Buffer.from(h.readBytes(controllerApi.DATA_BASE, 0x1cd0)), Buffer.alloc(0x1cd0));
+});
+
+test('legacy recovery leaves a changed bootstrap chunk untouched and requests restart', async () => {
+  const oldHash = '19168afea738565520cb7a803354398ff76222d91fad1a6ce7e8700ab4d10dea';
+  const legacyBootstrap = images.createBootstrapExecutor();
+  legacyBootstrap.set(Buffer.from('806C0004', 'hex'), 0x60);
+  legacyBootstrap.set(Buffer.from('E85E0008', 'hex'), 0x98);
+  const legacyImages = {
+    ...images,
+    createBootstrapExecutor: () => legacyBootstrap.slice(),
+    metadata: { ...images.metadata, bootstrap_executor: { ...images.metadata.bootstrap_executor, sha256: oldHash } }
+  };
+  const h = makeHarness({ initialImages: legacyImages, failAfterAddress: controllerApi.TASK_TABLE });
+  await assert.rejects(h.controller.install(), /stopped during task-registration/);
+  h.memory.set(controllerApi.BOOTSTRAP_BASE + 0x44, 0xff);
+  const recovered = await h.restart(images).recover();
+  assert.equal(recovered.state, 'recovered-resident');
+  assert.equal(h.readBytes(controllerApi.BOOTSTRAP_BASE + 0x44, 1)[0], 0xff);
+  assert.deepEqual(Buffer.from(h.readBytes(controllerApi.HOOK_ADDRESS, 4)), Buffer.from(controllerApi.HOOK_ORIGINAL, 'hex'));
+});
+
+test('unknown or missing image hashes keep the entire pre-activation allocation resident', async () => {
+  for (const [field, hash] of [
+    ['bootstrapSha256', 'unknown-image'], ['bootstrapSha256', null],
+    ['programSha256', 'unknown-image'], ['programSha256', null]
+  ]) {
+    const h = makeHarness({ failAfterAddress: controllerApi.TASK_TABLE });
+    await assert.rejects(h.controller.install(), /stopped during task-registration/);
+    const before = {
+      bootstrap: Buffer.from(h.readBytes(controllerApi.BOOTSTRAP_BASE, 292)),
+      program: Buffer.from(h.readBytes(controllerApi.PROGRAM_BASE, 2908)),
+      data: Buffer.from(h.readBytes(controllerApi.DATA_BASE, 0x1cd0)),
+      task: Buffer.from(h.readBytes(controllerApi.TASK_TABLE, 8)),
+      header: Buffer.from(h.readBytes(controllerApi.DISPATCHER_HEADER, 8))
+    };
+    const journal = JSON.parse(h.storageMap.get(controllerApi.JOURNAL_KEY));
+    if (hash === null) delete journal[field];
+    else journal[field] = hash;
+    h.storageMap.set(controllerApi.JOURNAL_KEY, JSON.stringify(journal));
+    const recovered = await h.restart().recover();
+    assert.equal(recovered.state, 'recovered-resident');
+    assert.deepEqual(Buffer.from(h.readBytes(controllerApi.BOOTSTRAP_BASE, 292)), before.bootstrap);
+    assert.deepEqual(Buffer.from(h.readBytes(controllerApi.PROGRAM_BASE, 2908)), before.program);
+    assert.deepEqual(Buffer.from(h.readBytes(controllerApi.DATA_BASE, 0x1cd0)), before.data);
+    assert.deepEqual(Buffer.from(h.readBytes(controllerApi.TASK_TABLE, 8)), before.task);
+    assert.deepEqual(Buffer.from(h.readBytes(controllerApi.DISPATCHER_HEADER, 8)), before.header);
+  }
+});
+
+test('a hook activation attempt preserves task and images even when the hook write failed', async () => {
+  const h = makeHarness({ failBeforeAddress: controllerApi.HOOK_ADDRESS });
+  await assert.rejects(h.controller.install(), /stopped during hook-activation/);
+  const beforeTask = Buffer.from(h.readBytes(controllerApi.TASK_TABLE, 8));
+  const beforeBootstrap = Buffer.from(h.readBytes(controllerApi.BOOTSTRAP_BASE, 292));
+  const recovered = await h.restart().recover();
+  assert.equal(recovered.state, 'recovered-resident');
+  assert.deepEqual(Buffer.from(h.readBytes(controllerApi.TASK_TABLE, 8)), beforeTask);
+  assert.deepEqual(Buffer.from(h.readBytes(controllerApi.BOOTSTRAP_BASE, 292)), beforeBootstrap);
+});
+
+test('an observed installed hook keeps task and images resident despite a pre-activation journal', async () => {
+  const h = makeHarness({ failAfterAddress: controllerApi.TASK_TABLE });
+  await assert.rejects(h.controller.install(), /stopped during task-registration/);
+  h.writeWord(controllerApi.HOOK_ADDRESS, Number.parseInt(controllerApi.HOOK_INSTALLED, 16));
+  const beforeTask = Buffer.from(h.readBytes(controllerApi.TASK_TABLE, 8));
+  const beforeBootstrap = Buffer.from(h.readBytes(controllerApi.BOOTSTRAP_BASE, 292));
+  const recovered = await h.restart().recover();
+  assert.equal(recovered.state, 'recovered-resident');
+  assert.deepEqual(Buffer.from(h.readBytes(controllerApi.HOOK_ADDRESS, 4)), Buffer.from(controllerApi.HOOK_ORIGINAL, 'hex'));
+  assert.deepEqual(Buffer.from(h.readBytes(controllerApi.TASK_TABLE, 8)), beforeTask);
+  assert.deepEqual(Buffer.from(h.readBytes(controllerApi.BOOTSTRAP_BASE, 292)), beforeBootstrap);
 });
 
 test('installer refuses an occupied executor range before writing or journaling', async () => {
@@ -177,6 +342,33 @@ test('spawn submits the native packet, parses result rows, and leaves executed i
   assert.deepEqual(Buffer.from(h.readBytes(controllerApi.HOOK_ADDRESS, 4)), Buffer.from(controllerApi.HOOK_ORIGINAL, 'hex'));
   assert.notDeepEqual(Buffer.from(h.readBytes(controllerApi.PROGRAM_BASE, 16)), Buffer.alloc(16));
   assert.equal(recovered.message.includes('restart Destiny'), true);
+});
+
+test('terminal worker failure is reported and journaled as completed without a success claim', async () => {
+  const h = makeHarness({ emulateWorker: true, workerTerminalStatus: 4, workerResultCode: 0, workerSuccessCount: 0 });
+  await h.controller.install();
+  const result = await h.controller.spawn(spawnFields, { timeoutMs: 100, pollMs: 1 });
+  assert.equal(result.terminalStatus, 4);
+  assert.equal(result.terminalMessage, 'Worker reported command failure');
+  assert.equal(result.successCount, 0);
+  assert.equal(result.rows[0].resultCode, 0);
+  const journal = JSON.parse(h.storageMap.get(controllerApi.JOURNAL_KEY));
+  assert.equal(journal.pendingCommand, null);
+  assert.equal(journal.lastTerminalStatus, 4);
+  assert.equal((await h.controller.recover()).state, 'recovered-resident');
+});
+
+test('timeout requests cancellation, keeps the pending journal, and refuses premature recovery', async () => {
+  const h = makeHarness({ syntheticClock: true });
+  await h.controller.install();
+  await assert.rejects(h.controller.spawn(spawnFields, { timeoutMs: 1, pollMs: 1 }), /worker did not finish/);
+
+  const slot = controllerApi.DATA_BASE + controllerApi.COMMAND_OFFSET;
+  const journal = JSON.parse(h.storageMap.get(controllerApi.JOURNAL_KEY));
+  assert.equal(journal.pendingCommand.sequence, 1);
+  assert.equal(h.readWord(slot), 1);
+  assert.equal(h.readWord(slot + 0x10), 1);
+  await assert.rejects(h.restart().recover(), /still journaled/);
 });
 
 test('spawn skips a busy first slot and submits through the next reusable slot', async () => {
@@ -236,7 +428,7 @@ test('same-console reconnect can reconcile a pending spawn then recover its hook
   new DataView(result.buffer).setUint32(0x40, 0x80abcdef, false);
   for (let index = 0; index < result.length; index++) h.memory.set(slot + controllerApi.RESULT_OFFSET + index, result[index]);
 
-  h.setSession('2:192.168.0.62');
+  h.setSession('2:192.168.1.100');
   const reconciled = await h.controller.reconcilePending();
   assert.equal(reconciled.pending, false);
   assert.equal(reconciled.rows[0].handle, 0x80abcdef);

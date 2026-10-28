@@ -273,7 +273,9 @@
   async function readActivity() {
     try {
       const context = newContext();
-      const value = parseInt(await readHex(0x30656E6E, 2, context), 16);
+      // Match the local Activity Loader's ReadUInt16 site, also used by the
+      // main RTM's Read Current action. The first site is a write destination.
+      const value = parseInt(await readHex(ACT_ADDRS[1], 2, context), 16);
       const name = ALL_ACTIVITIES[value - 1] || `Unknown activity ${value}`;
       const input = document.getElementById('ow-activity-index');
       if (input) input.value = value;

@@ -66,8 +66,8 @@
       if (!owner) throw new Error('Link the console and start Destiny before checking a tag');
 
       const before = await api.verify(owner);
-      if (before.profile !== PROFILE_NAME || before.anchors !== 3) {
-        throw new Error('The three-anchor BLES01857 01.24 profile did not verify');
+      if (before.profile !== PROFILE_NAME || before.anchors !== root.RtmBuildCompatibility.anchorCount) {
+        throw new Error('The five-anchor BLES01857 01.24 profile did not verify');
       }
 
       const resolverCodeBefore = String(await api.read(HANDLE_RESOLVER_ADDRESS, HANDLE_RESOLVER_SIGNATURE.length / 2, owner, before.capability) || '')
@@ -89,9 +89,9 @@
       const slot = handle & 0x1FFF;
       if (bucket > 0x3FFF || slot > 0x1FFF) throw new Error('Decoded handle bucket or slot is out of range');
 
-      const root = await readWord(HANDLE_TABLE_ROOT);
-      if (!root) throw new Error('The BLES handle-table root is not initialized in this session');
-      const descriptorAddress = checkedAddress(root + bucket * 0x40, 0x38);
+      const tableRoot = await readWord(HANDLE_TABLE_ROOT);
+      if (!tableRoot) throw new Error('The BLES handle-table root is not initialized in this session');
+      const descriptorAddress = checkedAddress(tableRoot + bucket * 0x40, 0x38);
       const descriptor = await read(descriptorAddress, 0x38);
       const storage = readU32(descriptor, 0x10);
       const stride = readU32(descriptor, 0x30);
@@ -111,7 +111,7 @@
       const descriptorAgain = await read(descriptorAddress, 0x38);
       const recordWordAgain = await readWord(recordAddress + 8);
       const after = await api.verify(owner);
-      if (api.session() !== owner || after.profile !== PROFILE_NAME || after.anchors !== 3) {
+      if (api.session() !== owner || after.profile !== PROFILE_NAME || after.anchors !== root.RtmBuildCompatibility.anchorCount) {
         throw new Error('The final build/session recheck failed; discard this sample');
       }
       const resolverCodeAfter = String(await api.read(HANDLE_RESOLVER_ADDRESS, HANDLE_RESOLVER_SIGNATURE.length / 2, owner, after.capability) || '')
@@ -119,7 +119,7 @@
       if (resolverCodeAfter !== HANDLE_RESOLVER_SIGNATURE) {
         throw new Error('The BLES packed-handle resolver code changed during the sample; discard this result');
       }
-      if (rootAgain !== root || hexFromBytes(descriptorAgain) !== hexFromBytes(descriptor) || recordWordAgain !== recordWord) {
+      if (rootAgain !== tableRoot || hexFromBytes(descriptorAgain) !== hexFromBytes(descriptor) || recordWordAgain !== recordWord) {
         throw new Error('The handle table changed during this sequential sample; discard this result');
       }
 
@@ -139,7 +139,7 @@
         },
         runtime_table: {
           root_pointer_address: hex32(HANDLE_TABLE_ROOT),
-          root: hex32(root),
+          root: hex32(tableRoot),
           bucket_descriptor: hex32(descriptorAddress),
           storage: hex32(storage),
           stride: hex32(stride),

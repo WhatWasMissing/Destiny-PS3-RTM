@@ -18,7 +18,7 @@ try {
     & $Go build -trimpath -ldflags '-s -w' -o dist/rtm-mcp.exe ./cmd/rtm-mcp
     if ($LASTEXITCODE -ne 0) { throw 'RTM MCP server build failed' }
     $cliHelp = & ./dist/rtmctl.exe help | Out-String
-    if ($LASTEXITCODE -ne 0 -or $cliHelp -notmatch 'rtmctl status' -or $cliHelp -notmatch 'rtmctl write' -or $cliHelp -notmatch '--json') {
+    if ($LASTEXITCODE -ne 0 -or $cliHelp -notmatch 'rtmctl status' -or $cliHelp -notmatch 'rtmctl write' -or $cliHelp -notmatch 'rtmctl actor-pool' -or $cliHelp -notmatch 'rtmctl actor-candidates' -or $cliHelp -notmatch '--json') {
         throw 'RTM CLI smoke check failed'
     }
     $mcpInput = @(
@@ -28,7 +28,10 @@ try {
     $mcpOutput = $mcpInput | & ./dist/rtm-mcp.exe
     if ($LASTEXITCODE -ne 0 -or $mcpOutput.Count -lt 2) { throw 'RTM MCP protocol smoke check failed' }
     $mcpResponses = @($mcpOutput | ForEach-Object { $_ | ConvertFrom-Json })
-    if ($mcpResponses[0].result.protocolVersion -ne '2025-11-25' -or $mcpResponses[1].result.tools.Count -ne 13) {
+    $toolNames = @($mcpResponses[1].result.tools | ForEach-Object { $_.name })
+    $requiredTools = @('rtm_status', 'rtm_verify_build', 'rtm_read_actor_pool_descriptor', 'rtm_read_allocated_actor_candidates', 'rtm_read_live_inventory_pool', 'rtm_read_player_position', 'rtm_set_player_scale')
+    $missingTools = @($requiredTools | Where-Object { $_ -notin $toolNames })
+    if ($mcpResponses[0].result.protocolVersion -ne '2025-11-25' -or $mcpResponses[1].result.tools.Count -lt $requiredTools.Count -or $missingTools.Count -gt 0) {
         throw 'RTM MCP tool-list smoke check failed'
     }
     & ./tests/smoke-desktop.ps1 -Executable ./dist/DestinyRTM.exe

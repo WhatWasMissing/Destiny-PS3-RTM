@@ -104,8 +104,8 @@
       if (!owner) throw new Error('Link the console and start Destiny before checking the spawn-path code');
 
       const before = await api.verify(owner);
-      if (before.profile !== 'BLES01857 01.24 signature profile' || before.anchors !== 3) {
-        throw new Error('The three-anchor BLES01857 01.24 profile did not verify');
+      if (before.profile !== 'BLES01857 01.24 signature profile' || before.anchors !== root.RtmBuildCompatibility.anchorCount) {
+        throw new Error('The five-anchor BLES01857 01.24 profile did not verify');
       }
 
       rows = [];
@@ -127,8 +127,8 @@
       let finalProfileError = '';
       try {
         const after = await api.verify(owner);
-        if (after.profile !== 'BLES01857 01.24 signature profile' || after.anchors !== 3) {
-          throw new Error('The final three-anchor BLES01857 01.24 profile did not verify');
+        if (after.profile !== 'BLES01857 01.24 signature profile' || after.anchors !== root.RtmBuildCompatibility.anchorCount) {
+          throw new Error('The final five-anchor BLES01857 01.24 profile did not verify');
         }
         if (api.session() !== owner) throw new Error('Console session changed during the code check');
       } catch (error) {

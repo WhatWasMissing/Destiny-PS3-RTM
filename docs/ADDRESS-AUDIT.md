@@ -201,7 +201,7 @@ evidence about update 01.24.
 ## Runtime write compatibility gate
 
 The app, local desktop proxy, MCP server, and Go memory client now refuse
-memory writes unless three live code reads match the audited 01.24 signature
+memory writes unless five live code reads match the audited 01.24 signature
 profile:
 
 | Address | Expected bytes | Role in the source audit |
@@ -209,6 +209,12 @@ profile:
 | `0x00444B64` | `3C600044C03601283CC03F803B4349EC3061034462C4000063850000C05A0000` | Scalar consumer code |
 | `0x001FB3C8` | `8084001C908300004E800020` | Player-scale lookup helper |
 | `0x002FF2D0` | `7C0802A648A99751F821FF81F8010090` | Player object-handle resolver prologue |
+| `0x0013ED38` | `7C0802A648C59CC9F821FE21F80101F0` | Object-creation routine |
+| `0x00255FA8` | `7C0802A648B42A5DF821FF21F80100F0` | Actor-lookup routine |
+
+The two added signatures were each found once at an aligned address in an
+executable PT_LOAD segment of the hash-matched BLES01857 01.24 ELF. They are
+code anchors, not proof of the whole executable image or region.
 
 The app checks before each serialized patch operation; desktop and Go clients
 cache a successful result for up to five seconds per console. Failed or
@@ -224,7 +230,7 @@ re-reads each anchor without using the write gate's short cache and shows the
 observed bytes and match state individually. This display is diagnostic only;
 each write operation still performs its own compatibility check.
 
-The three signature byte ranges are protected from the app's generic write
+The five signature byte ranges are protected from the app's generic write
 tools, so a mistaken raw write cannot erase the evidence needed for later
 checks. The Overwalls plate hook uses a different code site and does not
 overlap this fingerprint.
@@ -431,30 +437,60 @@ their numeric slot. Source evidence is `inventory-items-0124.md:64-90`.
 The function at `0x00255FA8` references descriptor `0x01A1E160`. Its code
 loads the descriptor's storage pointer at `+8` and stride at `+0xC`, then reads
 a packed handle at actor `+0x174`, masks it to a 13-bit index, and computes
-`storage + index*stride`. The record word at `+0x30` is consumed as a packed
-status/table key before helper `0x00255E4C`; it is not established as a record
-pointer or spawn argument. The exact 64-byte BLES 01.24 function signature is
-checked by the actor-lookup descriptor probe. The code does not bound the
-13-bit handle against a 40-record capacity.
+`storage + index*stride`. The selected record's word at `+0x30` is split into a
+bitmap word offset and bit mask: the code tests `((key >> 5) & 0xFF) * 4` from
+bitmap base `0x01A21138` against `1 << (key & 31)`. A set bit enters a further
+status check; a clear bit skips it. This proves a bitset membership test, but
+not whether the bit represents allocation, liveness, residency, or another
+state. A related same-build RPCS3 research note reports that actor `+0x30`
+matches a unit datum in two sampled runs; the EBOOT accessor at `0x00191960`
+returns that field. This supports a unit-datum interpretation, not an
+occupied-slot or loaded-enemy flag. The word is not established as a record
+pointer or spawn argument. The
+exact 64-byte BLES 01.24 function signature is checked by the actor-lookup
+descriptor probe. The code does not bound the 13-bit handle against a 40-record
+capacity.
 The current hash-verified BLES 01.24 ELF also shows direct callers at
 `0x00256130`, `0x00256F08`, and `0x002570C8`. The first caller checks that the
 actor handle is not `0xFFFFFFFF` before calling the helper; another checks the
 same handle sentinel, and the third checks an actor state byte before calling
 the helper. In the helper, the selected slot's `+0x40` and `+0x44` fields are
-cleared and the actor's `+0x174` handle is reset to `0xFFFFFFFF`. This is stronger
-evidence for a packed-handle slot lookup/cleanup path, but it still does not
-identify the descriptor as the separate 40-entry AI pool or establish that
-its slot records are loaded-enemy addresses.
+cleared and the actor's `+0x174` handle is reset to `0xFFFFFFFF`. Two other
+consumer paths around `0x0015CD04` and `0x00193B14` also load the descriptor's
+stride and storage fields before resolving a masked handle; they are not direct
+callers of `0x00255FA8`. A separate initializer trace now confirms that this
+descriptor is the `actors` pool inside the AI Actor Manager: the manager base is
+`0x01A1E150`, and its `+0x10` descriptor is initialized for 40 records with
+stride `0x28D0`. This identifies the pool structure, but does not establish
+that every record is a currently loaded enemy.
 
-The probe reads only the 16-byte descriptor after the three-site build check,
+The UI probe reads only the 20-byte descriptor after the five-anchor build check,
 rechecks the code and descriptor, and displays the two unknown leading words,
-storage pointer, and stride. It never follows storage or enumerates records.
-This does not validate capacity, live record meaning, or a spawn action. No
-static cross-reference found in this audit links this actor-handle lookup
-descriptor to the separately documented AI pool (`40 × 0x28D0`); that pool's
-stride does not establish this descriptor's identity. The probe therefore
-remains descriptor-only until a runtime sample establishes the pointer,
-capacity, stride, record layout, and relation to live actors.
+storage pointer, stride, and capacity. It never follows storage. The direct
+CLI/MCP candidate reader separately follows only the bounded allocator chain
+described below. Static initializer code at `0x0015B22C` sets
+capacity 40 and stride `0x28D0`, then calls the shared initializer at
+`0x000BE148`; that helper allocates `40 × 0x28D0` bytes and stores the dynamic
+backing pointer in descriptor `+8`. Thus the earlier direct-store scan and
+literal scan missed a helper-mediated initialization path. Runtime actor
+correlation, record occupancy semantics, the meaning of record `+0x226C`, and
+any spawn action remain unverified. See the detailed, hash-checked trace in
+[actor-pool-descriptor.md](../research/actor-pool-descriptor.md). The earlier
+candidate-scan method and its limits remain in
+[actor-lookup-descriptor-evidence.md](../research/actor-lookup-descriptor-evidence.md);
+the companion `actor-lookup-descriptor-scan.py` verifies the ELF hash before
+printing byte windows and heuristic counts.
+
+Separate BLES allocation and release paths set and clear a different bitmap
+through descriptor `+0`, and reconstruct full datums using descriptor identity
+and namespace fields. The CLI/MCP reader follows this allocator bitmap and
+returns allocated-slot candidates, not an enemy-type predicate. The descriptor
+probe itself remains descriptor-only. Both readers now apply Blackrock's two
+recovered bounded spans (`0x00010000–0x01C80000` and
+`0x30000000–0x80000000`, allowing the computed end at the upper bound). These
+are host-reader bounds, not proof every address is mapped on BLES. No live BLES
+actor-pool sample has confirmed which range this console uses; see
+[actor-pool-allocation-evidence.md](../research/actor-pool-allocation-evidence.md).
 
 ### BLES 01.24 packed-handle resolver used by Spawn
 

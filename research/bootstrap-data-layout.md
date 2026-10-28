@@ -53,6 +53,36 @@ site `0x354074` is journaled but is not one of the three zero-checked ranges;
 the inspected installer does not show a build-signature comparison at that
 site. These remain integration/runtime review items.
 
+### Bootstrap transcription correction
+
+The earlier prerelease used `806C0004` at bootstrap `+0x60`, which is
+`lwz r3,4(r12)`. At that point `r12` is the callback address, so the callback
+received its own second instruction (`0x7C0802A6` for the packaged worker)
+instead of the task entry's context (`0x01C75000` in the first-slot layout).
+Blackrock's x64 emitter trace at `E:\DestinyResearch\BlackrockAudit\executor-trace.txt`
+passes register 3, displacement 4 and base register 30 to the load encoder;
+the corrected instruction is `807E0004`, `lwz r3,4(r30)`.
+
+The same trace emits `805E0008`, `lwz r2,8(r30)`, for the separate command
+queue's 32-bit TOC field. The previous reconstruction used the 64-bit load
+`E85E0008`. The corrected 292-byte bootstrap SHA-256 is
+`616e8294b969ad36fdb78844a0bafb7dcc9b11a25384c7288201c6aed6d24d1f`.
+The previous image SHA-256 was
+`19168afea738565520cb7a803354398ff76222d91fad1a6ce7e8700ab4d10dea`.
+
+`python research/verify_bootstrap_dispatch.py` uses the optional Python
+`unicorn` package to execute the 32-bit-compatible task-loop and command-header
+fragments. It checks an empty table, task entries 0/3/7, context/callback/TOC,
+status 1→2, and reproduces the old bad context. It does not execute the PPC64
+worker, game functions, or cache behavior. When the journal and original hook
+establish a pre-activation failure, recovery recognizes the exact older
+bootstrap hash, reconstructs that known image, and clears only matching owned
+bytes; unknown hashes and changed chunks remain resident. After activation
+may have occurred, restoring the hook does not prove an in-flight callback has
+returned. Recovery therefore leaves the task entry, dispatcher header, code and
+data intact and requires a Destiny restart before another install, even when
+no spawn request was submitted.
+
 ## Dispatcher block at `0x1C74000`
 
 The whole `0xC000` region must be zero before installation. Only the 12-byte

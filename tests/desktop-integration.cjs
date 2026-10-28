@@ -8,6 +8,7 @@ if (!origin) throw new Error('Run this script through go test');
 function element(id = '') {
   const node = {id,value:'',className:'',style:{setProperty(){}},dataset:{},children:[],textContent:'',innerHTML:'',
     appendChild(child){this.children.push(child);},append(...children){this.children.push(...children);},
+    replaceChildren(...children){this.children=children;this.innerHTML='';},
     addEventListener(){},setAttribute(){},querySelector(){return null;},remove(){},focus(){}};
   node.classList = {
     contains: name => node.className.split(/\s+/).includes(name),
@@ -40,17 +41,17 @@ for(const file of ['desktop-host','transport','operations','backups','connection
   vm.runInContext(fs.readFileSync(`source/js/${file}.js`,'utf8'),context,{filename:file+'.js'});
 }
 (async()=>{
-  get('ip').value='192.168.0.62';
+  get('ip').value='192.168.1.100';
   await context.quickReconnectFromBadge();
   assert.equal(get('status-badge').classList.contains('connected'),true);
-  await context.ps3fetch('http://192.168.0.62/setmem.ps3mapi?addr=1254&val=AABBCCDD');
+  await context.ps3fetch('http://192.168.1.100/setmem.ps3mapi?addr=1254&val=AABBCCDD');
   await context.ps3writeU16(0x1256,0x1122);
   assert.equal(await context.ps3getmem(0x1254,4),'AABB1122','unaligned UInt16 write changed neighboring bytes');
   get('rtm-launch-iso-path').value='/dev_hdd0/PS3ISO/Destiny.iso';
   await context.launchDestiny();
   assert.match(get('rtm-launch-status').textContent,/Destiny start is not confirmed/);
   await assert.rejects(context.ps3fetch('http://192.168.0.63/setmem.ps3mapi?addr=1254&val=00000000'),/active game session/);
-  await assert.rejects(context.ps3fetch('http://192.168.0.62/setmem.ps3mapi?addr=1254&val=00000000&proc=77'),/active game session/);
+  await assert.rejects(context.ps3fetch('http://192.168.1.100/setmem.ps3mapi?addr=1254&val=00000000&proc=77'),/active game session/);
   const button=get('integration-toggle');
   await context.togFire('1234','AABBCCDD','00000000','Integration toggle',button);
   assert.equal(vm.runInContext("cheatRuntimeStatus['integration-toggle']",context),'verified-on');
@@ -65,7 +66,11 @@ for(const file of ['desktop-host','transport','operations','backups','connection
   for (const [address,value] of ammoOff) assert.equal(await context.ps3getmem(parseInt(address,16),value.length/2),value);
   await context.toggleUnlimitedAmmo(ammo);
   const reset = await context.resetAllCheats();
-  assert.equal(reset.failed,0);
+  // The fresh session has no verified Server Cheats mode. Reset All must keep
+  // that state unknown when the shared hook branch does not match a known site.
+  assert.equal(reset.verified,1,`unexpected reset result; ${get('log').children.map(node=>node.innerHTML).join(' | ')}`);
+  assert.equal(reset.failed,1,`unexpected reset result; ${get('log').children.map(node=>node.innerHTML).join(' | ')}`);
+  assert.match(get('log').children.at(-2).innerHTML,/Shared hook site has an unexpected instruction/);
   for (const [address,value] of ammoOff) assert.equal(await context.ps3getmem(parseInt(address,16),value.length/2),value);
   assert.equal(await context.ps3getmem(0x00310F94,4),'00000000','the stale single-site ammo address must not be touched');
   const mismatch=get('integration-mismatch');

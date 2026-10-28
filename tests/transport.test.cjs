@@ -46,7 +46,7 @@ test('buffered response remains readable by existing memory parsers',async()=>{
 });
 test('diagnostics preserve HTTP status without exposing popup text or console addresses',async()=>{
   const transport=createTransport({fetch:async()=>new Response('accepted')});
-  await transport.request('http://192.168.0.62/popup.ps3/private-message');
+  await transport.request('http://192.168.1.100/popup.ps3/private-message');
   const exported=JSON.stringify(transport.diagnostics());
   assert.equal(exported.includes('private-message'),false); assert.equal(exported.includes('192.168'),false);
   assert.equal(transport.diagnostics()[0].httpStatus,200);

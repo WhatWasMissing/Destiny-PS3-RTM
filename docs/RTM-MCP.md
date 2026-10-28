@@ -9,8 +9,10 @@ open the desktop app or automate its UI.
 | Tool | What it does |
 |---|---|
 | `rtm_status` | Checks webMAN reachability. It does not confirm Destiny is running. |
-| `rtm_verify_build` | Reads the three code anchors in the BLES01857 01.24 signature profile and reports each match. Read-only; the profile does not prove the whole EBOOT hash or title region. |
+| `rtm_verify_build` | Reads the five code anchors in the BLES01857 01.24 signature profile and reports each match. Read-only; the profile does not prove the whole EBOOT hash or title region. |
 | `rtm_read_memory` | Reads 1–65536 bytes from Destiny PID `0x1010200`. |
+| `rtm_read_actor_pool_descriptor` | Verifies the five-anchor BLES 01.24 profile and full 64-byte actor-path signature before and after a 20-byte descriptor sample at `0x01A1E160`. Returns capacity, stride, raw leading words and bounded storage pointer after a stable recheck. Initialized storage requires capacity 40, stride `0x28D0` and a bounded span. Never follows storage or enumerates actors; loaded-enemy identity and spawnability remain unconfirmed. |
+| `rtm_read_allocated_actor_candidates` | Requires the five-anchor profile, actor-path/allocator/datum signatures and a stable active-player pointer. Follows the verified allocator header and bitmap, then reads at most 40 set slots' full datums plus selected raw fields from each first `0x48` bytes. Discards changed bitmap/identity snapshots. Read-only and non-atomic; allocated slots are not confirmed enemies or spawnable tags, and process restart/ABA reuse cannot be ruled out. |
 | `rtm_read_live_inventory_pool` | Verifies the BLES 01.24 profile, item-pool getter/lookup signatures, and live descriptor, then returns at most 646 occupied pool slots with item indexes. Instance/owner IDs are suppressed; this is a sequential non-atomic snapshot and is not mapped to an active character or vault. |
 | `rtm_read_player_position` | Follows the Overwalls player pointer at `0x0190EBB0` and decodes X/Y/Z as big-endian Float32 values at pointer offsets `+0x140/+0x144/+0x148`. Read-only; live build compatibility and gameplay meaning remain unconfirmed. |
 | `rtm_inspect_entity_pointers` | Reads Overwalls player and OPK-target roots at `0x0190EBB0` and `0x0190EBB4`. For valid pointers it returns raw bytes and decoded big-endian Float32 X/Y/Z at `+0x140/+0x144/+0x148`, plus the target activation field at `+0x1B8`. Null and invalid pointers are reported without dereferencing; a self-target is marked. The several reads form a non-atomic snapshot. Live pointer semantics and build compatibility remain unconfirmed. |
@@ -31,11 +33,11 @@ client as well as the MCP tool layer. The entity pointer inspector performs
 memory reads only and includes raw hex for each pointer and decoded field;
 non-finite Float32 values are returned as null while their raw bytes are kept.
 
-All memory write tools fail closed unless live code reads match the three-site
+All memory write tools fail closed unless live code reads match the five-anchor
 BLES01857 01.24 signature profile documented in `docs/ADDRESS-AUDIT.md`. The
 profile is not a full EBOOT hash or region check. Status, memory reads, pointer
 inspection, and position reads remain available when it does not match. Raw
-write tools also refuse to overwrite the three signature ranges.
+write tools also refuse to overwrite the five signature ranges.
 
 `rtm_launch_game` defaults to `/dev_hdd0/PS3ISO/Destiny.iso`. Its optional
 `iso_path` must be a simple `.iso` filename directly inside `/dev_hdd0/PS3ISO/`;

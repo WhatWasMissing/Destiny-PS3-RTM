@@ -36,6 +36,8 @@ var destiny0124Signatures = [...]memorySignature{
 	{address: 0x00444B64, hex: "3C600044C03601283CC03F803B4349EC3061034462C4000063850000C05A0000"},
 	{address: 0x001FB3C8, hex: "8084001C908300004E800020"},
 	{address: 0x002FF2D0, hex: "7C0802A648A99751F821FF81F8010090"},
+	{address: 0x0013ED38, hex: "7C0802A648C59CC9F821FE21F80101F0"},
+	{address: 0x00255FA8, hex: "7C0802A648B42A5DF821FF21F80100F0"},
 }
 
 // ValidateDestinyWriteRange prevents raw writes from overwriting the bytes used
@@ -55,7 +57,7 @@ func ValidateDestinyWriteRange(address uint32, length int) error {
 	return nil
 }
 
-// InspectDestiny0124SignatureProfile reads three independent code sites that
+// InspectDestiny0124SignatureProfile reads five independent code sites that
 // match the audited BLES01857 01.24 ELF. A match is a compatibility signal, not
 // proof of the whole EBOOT hash or title-region ID.
 func InspectDestiny0124SignatureProfile(ctx context.Context, target string, read memoryReadFunc) BuildProfileStatus {
@@ -91,7 +93,7 @@ func InspectDestiny0124SignatureProfile(ctx context.Context, target string, read
 	return status
 }
 
-// VerifyDestiny0124SignatureProfile refuses a write unless all three signature
+// VerifyDestiny0124SignatureProfile refuses a write unless all five signature
 // sites match the audited profile.
 func VerifyDestiny0124SignatureProfile(ctx context.Context, target string, read memoryReadFunc) error {
 	status := InspectDestiny0124SignatureProfile(ctx, target, read)

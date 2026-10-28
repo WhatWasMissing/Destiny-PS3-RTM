@@ -28,6 +28,9 @@
   const DEFAULT_TIMEOUT_MS = 5000;
   const DEFAULT_POLL_MS = 30;
   const CANCEL_GRACE_MS = 1000;
+  const LEGACY_BOOTSTRAP_SHA256 = '19168afea738565520cb7a803354398ff76222d91fad1a6ce7e8700ab4d10dea';
+  const CORRECTED_BOOTSTRAP_SHA256 = '616e8294b969ad36fdb78844a0bafb7dcc9b11a25384c7288201c6aed6d24d1f';
+  const SPAWN_PROGRAM_SHA256 = '3b4a46a3aa4246709d99c8e71a643dabdea134f5f387498d1cd375da0885fb76';
 
   function bytesToHex(bytes) {
     return Array.from(bytes, value => value.toString(16).padStart(2, '0')).join('').toUpperCase();
@@ -99,6 +102,7 @@
 
   function create(options = {}) {
     const memory = options.memory;
+    const profileAnchorCount = options.profileAnchorCount;
     const writeIfEqual = options.writeIfEqual;
     const signatures = options.signatures;
     const regions = options.regions;
@@ -110,6 +114,7 @@
     const sleep = options.sleep || (ms => new Promise(resolve => setTimeout(resolve, ms)));
     const onProgress = options.onProgress || (() => {});
     if (!memory || typeof memory.session !== 'function' || typeof memory.verify !== 'function' || typeof memory.read !== 'function' ||
+        !Number.isInteger(profileAnchorCount) || profileAnchorCount < 1 ||
         typeof writeIfEqual !== 'function' || !Array.isArray(signatures) || !Array.isArray(regions) ||
         !packet || !dataBlock || !images || !storage) {
       throw new TypeError('Spawn executor controller requires guarded memory, layouts, images, and persistent journal storage');
@@ -165,8 +170,8 @@
       let reads = 0;
       let bytes = 0;
       function requireProfile(value) {
-        if (!value || value.profile !== PROFILE_NAME || value.anchors !== 3) {
-          throw new Error('The three-anchor BLES01857 01.24 profile did not verify');
+        if (!value || value.profile !== PROFILE_NAME || value.anchors !== profileAnchorCount) {
+          throw new Error(`The ${profileAnchorCount}-anchor BLES01857 01.24 profile did not verify`);
         }
       }
       requireProfile(profile);
@@ -492,7 +497,7 @@
           optionsForSpawn.pollMs || DEFAULT_POLL_MS
         );
         const finalProfile = await memory.verify(owner);
-        if (memory.session() !== owner || finalProfile.profile !== PROFILE_NAME || finalProfile.anchors !== 3) {
+        if (memory.session() !== owner || finalProfile.profile !== PROFILE_NAME || finalProfile.anchors !== profileAnchorCount) {
           throw new Error('Final build/session recheck failed; discard spawn results');
         }
         journal.pendingCommand = null;
@@ -581,7 +586,7 @@
         }
         await reader.recheck();
         const finalProfile = await memory.verify(owner);
-        if (memory.session() !== owner || finalProfile.profile !== PROFILE_NAME || finalProfile.anchors !== 3) {
+        if (memory.session() !== owner || finalProfile.profile !== PROFILE_NAME || finalProfile.anchors !== profileAnchorCount) {
           throw new Error('Final build/session recheck failed; discard reconciliation sample');
         }
         journal.pendingCommand = null;
@@ -620,6 +625,22 @@
       return allClean;
     }
 
+    function recoveryBootstrapImage(journal) {
+      const bootstrap = images.createBootstrapExecutor();
+      const journalHash = typeof journal.bootstrapSha256 === 'string' ? journal.bootstrapSha256.toLowerCase() : '';
+      // Only the pinned current image or the exact previous prerelease image
+      // can be used as an ownership template. Unknown journal versions stay
+      // resident until Destiny restarts.
+      if (images.metadata.bootstrap_executor.sha256 !== CORRECTED_BOOTSTRAP_SHA256 || bootstrap.length !== 292 ||
+          bytesToHex(bootstrap.subarray(0x60, 0x64)) !== '807E0004' ||
+          bytesToHex(bootstrap.subarray(0x98, 0x9c)) !== '805E0008') return null;
+      if (journalHash === CORRECTED_BOOTSTRAP_SHA256) return bootstrap;
+      if (journalHash !== LEGACY_BOOTSTRAP_SHA256) return null;
+      bootstrap.set(hexToBytes('806C0004'), 0x60);
+      bootstrap.set(hexToBytes('E85E0008'), 0x98);
+      return bootstrap;
+    }
+
     async function recover() {
       if (busy) throw new Error('A spawn executor operation is already running');
       busy = true;
@@ -643,27 +664,38 @@
         }
 
         const hookNow = await reader.readHex(HOOK_ADDRESS, 4);
+        const safePreActivationPhases = ['journaled', 'bootstrap', 'spawn-program', 'data-block', 'dispatcher-header', 'task-registration'];
+        const preActivation = hookNow === HOOK_ORIGINAL &&
+          ['installing', 'recovery-required'].includes(journal.state) &&
+          safePreActivationPhases.includes(journal.phase) && journal.spawnCount === 0;
+        const bootstrap = preActivation ? recoveryBootstrapImage(journal) : null;
+        const programHash = typeof journal.programSha256 === 'string' ? journal.programSha256.toLowerCase() : '';
+        const program = preActivation && programHash === SPAWN_PROGRAM_SHA256 &&
+          images.metadata.spawn_program.sha256 === SPAWN_PROGRAM_SHA256 ? images.createSpawnProgram() : null;
+        const canCleanImages = Boolean(preActivation && bootstrap && program && program.length === 2908);
         if (hookNow === HOOK_INSTALLED) await writeIfEqual(owner, HOOK_ADDRESS, HOOK_INSTALLED, HOOK_ORIGINAL);
         else if (hookNow !== HOOK_ORIGINAL) throw new Error(`Hook contains ${hookNow}; recovery stopped without overwriting unknown code`);
 
-        const descriptorNow = await reader.readHex(journal.descriptorAddress, 8);
-        if (descriptorNow === journal.descriptorHex) {
-          await writeIfEqual(owner, journal.descriptorAddress, journal.descriptorHex, repeatByteHex(0, 8));
-        } else if (descriptorNow !== repeatByteHex(0, 8)) {
-          throw new Error(`Task descriptor contains ${descriptorNow}; recovery retained the journal`);
-        }
-
-        const headerNow = await reader.readHex(DISPATCHER_HEADER, 8);
-        if (headerNow === journal.dispatcherHeaderHex || headerNow === '4252583100000000') {
-          await writeIfEqual(owner, DISPATCHER_HEADER, headerNow, repeatByteHex(0, 8));
-        } else if (headerNow !== repeatByteHex(0, 8)) {
-          throw new Error(`Dispatcher header contains ${headerNow}; recovery retained the journal`);
-        }
-
         let imagesCleaned = false;
-        if ((journal.spawnCount || 0) === 0) {
-          const bootstrap = images.createBootstrapExecutor();
-          const program = images.createSpawnProgram();
+        // The per-frame callback can run as soon as the hook is activated,
+        // even when no spawn request has ever been submitted. Unhooking does
+        // not prove that an in-flight callback has returned. The dispatcher
+        // reads its callback and context separately, so its task entry and
+        // header must remain intact along with code and data in that case.
+        if (canCleanImages) {
+          const descriptorNow = await reader.readHex(journal.descriptorAddress, 8);
+          if (descriptorNow === journal.descriptorHex) {
+            await writeIfEqual(owner, journal.descriptorAddress, journal.descriptorHex, repeatByteHex(0, 8));
+          } else if (descriptorNow !== repeatByteHex(0, 8)) {
+            throw new Error(`Task descriptor contains ${descriptorNow}; recovery retained the journal`);
+          }
+
+          const headerNow = await reader.readHex(DISPATCHER_HEADER, 8);
+          if (headerNow === journal.dispatcherHeaderHex || headerNow === '4252583100000000') {
+            await writeIfEqual(owner, DISPATCHER_HEADER, headerNow, repeatByteHex(0, 8));
+          } else if (headerNow !== repeatByteHex(0, 8)) {
+            throw new Error(`Dispatcher header contains ${headerNow}; recovery retained the journal`);
+          }
           const data = dataBlock.buildDataBlock();
           const cleanBootstrap = await cleanOwnedImage(owner, reader, BOOTSTRAP_BASE, bootstrap);
           const cleanProgram = await cleanOwnedImage(owner, reader, PROGRAM_BASE, program);
@@ -677,7 +709,7 @@
         journal.recoveredAt = new Date(now()).toISOString();
         journal.recoveryMessage = imagesCleaned
           ? 'Hook restored and owned executor images returned to their prior zero state.'
-          : 'Hook restored and task unregistered. Executor code/data were left resident; restart Destiny before another install.';
+          : 'Hook restored. Executor task, code and data may remain resident; restart Destiny before another install.';
         saveJournal(journal);
         activeCommand = null;
         return { state: journal.state, message: journal.recoveryMessage };

@@ -1,6 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { create, signatures } = require('../source/js/build-compatibility.js');
+assert.equal(signatures.length, 5, 'profile must include all audited code anchors');
 
 function toBytes(hex) {
   return Uint8Array.from(hex.match(/../g), pair => parseInt(pair, 16));
@@ -9,7 +10,7 @@ function toBytes(hex) {
 test('the 01.24 profile verifies all independent code signatures and caches briefly', async () => {
   let reads = 0, now = 1000;
   const guard = create({
-    session: () => '1:192.168.0.62',
+    session: () => '1:192.168.1.100',
     now: () => now,
     read: async (address, length) => {
       reads++;
@@ -32,7 +33,7 @@ test('the 01.24 profile verifies all independent code signatures and caches brie
 test('a signature mismatch fails closed and leaves the profile uncached', async () => {
   let reads = 0;
   const guard = create({
-    session: () => '1:192.168.0.62',
+    session: () => '1:192.168.1.100',
     read: async address => {
       reads++;
       const signature = signatures.find(candidate => candidate.address === address);
@@ -47,7 +48,7 @@ test('a signature mismatch fails closed and leaves the profile uncached', async 
 test('writes cannot overwrite any of the signatures used for future verification', async () => {
   let reads = 0;
   const guard = create({
-    session: () => '1:192.168.0.62',
+    session: () => '1:192.168.1.100',
     read: async () => { reads++; return ''; }
   });
   await assert.rejects(guard.ensure([[parseInt(signatures[2].address, 16) - 1, '000000']]), /overlaps protected 01.24 code signature/);
@@ -55,13 +56,13 @@ test('writes cannot overwrite any of the signatures used for future verification
 });
 
 test('the profile is bound to a connected session and detects a session change mid-read', async () => {
-  let current = '1:192.168.0.62', reads = 0;
+  let current = '1:192.168.1.100', reads = 0;
   const guard = create({
     session: () => current,
     read: async address => {
       reads++;
       const signature = signatures.find(candidate => candidate.address === address);
-      current = '2:192.168.0.62';
+      current = '2:192.168.1.100';
       return toBytes(signature.hex);
     }
   });

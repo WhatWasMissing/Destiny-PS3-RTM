@@ -11,22 +11,32 @@ memory features still use BLES evidence and the RTM's verified runtime profile.
 
 | Feature | RTM implementation | Scope |
 |---|---|---|
-| Activity and session snapshot | `source/js/activity-session-inspector.js` | On-demand reads behind a fresh 3/3 BLES01857 01.24 signature check; bounded PS3MAPI reads; session and pointer rechecks; explicitly non-atomic. No polling or writes. The resolver algorithm is GPL-2.0-only, ported from the D1 Reimagined source repository. |
+| Activity and session snapshot | `source/js/activity-session-inspector.js` | On-demand reads behind a fresh 5/5 BLES01857 01.24 signature check; bounded PS3MAPI reads; session and pointer rechecks; explicitly non-atomic. No polling or writes. The resolver algorithm is GPL-2.0-only, ported from the D1 Reimagined source repository. |
 | Resource / bootflow snapshot | `source/js/resource-bootflow-snapshot.js` | Reads BLES 01.24 bootflow, eight resource slots, scheduler fields, and readiness masks behind a fresh build-profile check. Dynamic pointers are bounded; it does not follow readiness pointers or asset handles. Rechecks sampled state before displaying. Read-only, sequential, non-atomic, and explicitly not a tag-loader queue view. |
 | Activity pool diagnostics | Included in the session snapshot | BLES 01.24 initializer evidence supplies the three descriptor addresses, labels, element sizes, and capacities. `0x01A20B70` and `0x01A20BF0` are raw-only; only `0x01A20C70` has resolver-backed field labels. The feature does not traverse pool storage beyond the guarded context-handle resolver. |
 | Local player appearance probe | `source/js/player-appearance-probe.js` | Uses the BLES 01.24 player-pool header and sparse bitmap, requires stride `0x2930`, caps scans at 64 slots, matches the local descriptor transiently, rechecks all captured bitmap words, and returns two short raw windows only for one stable match. It never displays owner bytes and performs no writes. |
-| Live item-object pool snapshot | `source/js/live-inventory-pool.js` | Requires the 3-anchor profile plus exact BLES 01.24 manager-getter and pool-lookup signatures. It validates the self-family kind-3 descriptor (`0x80801732`, stride `0xA8`, signed count 1–646), applies conservative Blackrock-derived range ceilings, reads in 18-chunk batches under fresh session capabilities, then rechecks the descriptor and boundary rows. Optional names require a user-imported catalog explicitly indexed by BLES `itemIndex` or `blesItemIndex`. The 01.24 item-definition functions are known, but their absolute cached table pointer is not established for this build, so no hash/tag join is attempted. Read-only and explicitly non-atomic. |
+| Live item-object pool snapshot | `source/js/live-inventory-pool.js` | Requires the 5-anchor profile plus exact BLES 01.24 manager-getter and pool-lookup signatures. It validates the self-family kind-3 descriptor (`0x80801732`, stride `0xA8`, signed count 1–646), applies conservative Blackrock-derived range ceilings, reads in 18-chunk batches under fresh session capabilities, then rechecks the descriptor and boundary rows. Optional names require a user-imported catalog explicitly indexed by BLES `itemIndex` or `blesItemIndex`. The 01.24 item-definition functions are known, but their absolute cached table pointer is not established for this build, so no hash/tag join is attempted. Read-only and explicitly non-atomic. |
 | Spawn-path code check | `source/js/spawn-path-check.js` | Compares three BLES 01.24 authored-member signatures, Blackrock's confirmed `0x354074` hook-site instruction, the object-creation entry and manager-registration continuation at `0x13ED38` / `0x13ED90`, and the main ELFv1 descriptor/TOC. This identifies matching code only; it does not verify a selected tag's live class, prove descriptor/placement behavior, or execute the path. |
 | Spawn executor region preflight | `source/js/spawn-region-preflight.js` | Reads the exact zero-only bootstrap ranges (`0x183E000/0x2000`, `0x1C74000/0xC000`, `0x183D200/0xE00`) behind fresh BLES 01.24 capabilities. Logical reads are split into PS3MAPI GETMEM requests no larger than `0x100` bytes. It does not reserve the memory, install the hook, or prove the regions stay free. |
 | Reconstructed spawn images | `source/js/spawn-executor-images.js` | Embeds the audited 2,908-byte spawn program and 292-byte bootstrap as immutable image factories. SHA-256 and byte-for-byte checks compare them with the generated research binaries. |
-| Experimental operation-1 spawn controller | `source/js/spawn-executor-controller.js`, `source/js/spawn-executor-runtime.js` | User-triggered install, queue-slot selection, submit/poll/cancel, and compare-before-restore recovery. Requires a fresh BLES 01.24 profile, all three scratch ranges zero, and a persistent recovery journal; hook activation occurs last. Queue reads and writes are not atomic reservations, so another Blackrock or RTM spawn client must not run concurrently. After a published spawn request, recovery unregisters and restores the hook but leaves images resident until Destiny restarts. PPC cache behavior, tag/class matching, actual creation, and placement remain unverified on a live console. |
-| Spawn-tag resolver probe | `source/js/spawn-tag-resolver-probe.js` | Requires the 3-anchor profile plus an address-specific 100-byte match at the BLES 01.24 packed-handle helper `0x0013B7E8`, then reads and rechecks the runtime table descriptor and record word using Blackrock op-1's zero suboffset. The function returns a pointer candidate only; it does not test tag validity, residency, enemy class, or spawn success. See [ADDRESS-AUDIT.md](ADDRESS-AUDIT.md#bles-0124-packed-handle-resolver-used-by-spawn) and [spawn-candidate-audit.md](../research/spawn-candidate-audit.md). |
-| Actor lookup descriptor probe | `source/js/actor-lookup-descriptor-probe.js` | Verifies the three-site BLES profile and an exact 64-byte actor-path signature at `0x00255FA8`, then reads and rechecks only the 16-byte descriptor at `0x01A1E160`. Shows its raw leading words, storage pointer, and stride; never follows storage or enumerates records. It is not proven to be the separate AI actor pool; capacity and record semantics remain unresolved. |
+| Experimental operation-1 spawn controller | `source/js/spawn-executor-controller.js`, `source/js/spawn-executor-runtime.js` | User-triggered install, queue-slot selection, submit/poll/cancel, and compare-before-restore recovery. Requires a fresh BLES 01.24 profile, all three scratch ranges zero, and a persistent recovery journal; hook activation occurs last. Queue reads and writes are not atomic reservations, so another Blackrock or RTM spawn client must not run concurrently. If hook activation may have happened, recovery restores the hook but leaves the task entry, dispatcher header, code and data resident until Destiny restarts, even if no spawn request was sent. Confirmed pre-activation failures can clean exact owned bytes. PPC cache behavior, tag/class matching, actual creation, and placement remain unverified on a live console. |
+| Spawn-tag resolver probe | `source/js/spawn-tag-resolver-probe.js` | Requires the 5-anchor profile plus an address-specific 100-byte match at the BLES 01.24 packed-handle helper `0x0013B7E8`, then reads and rechecks the runtime table descriptor and record word using Blackrock op-1's zero suboffset. The function returns a pointer candidate only; it does not test tag validity, residency, enemy class, or spawn success. See [ADDRESS-AUDIT.md](ADDRESS-AUDIT.md#bles-0124-packed-handle-resolver-used-by-spawn) and [spawn-candidate-audit.md](../research/spawn-candidate-audit.md). |
+| Actor lookup descriptor probe | `source/js/actor-lookup-descriptor-probe.js` | Verifies the five-anchor BLES profile and an exact 64-byte actor-path signature at `0x00255FA8`, then reads/rechecks only the 20-byte descriptor at `0x01A1E160`. Shows its raw leading words, storage pointer, stride, and capacity; checks active dimensions against capacity 40 and stride `0x28D0`; never follows storage. It accepts only the address spans used by Blackrock's recovered host reader. See [ADDRESS-AUDIT.md](ADDRESS-AUDIT.md#bles-0124-actor-lookup-descriptor-path) and [the reproducible PPC evidence](../research/actor-pool-descriptor.md). |
+| Allocated actor-candidate snapshot | `internal/rtmclient/actor_pool.go`, CLI `rtmctl actor-candidates`, MCP `rtm_read_allocated_actor_candidates` | Verifies the five-anchor BLES profile plus exact datum/allocator signatures, requires a stable non-null player pointer, follows the `0x34`-byte descriptor → allocator header → bitmap descriptor → bitmap words, and reads at most 40 allocated slots. Preserves the full reconstructed datum and selected raw fields from each first `0x48` bytes. Rechecks bitmap and identity words, but remains sequential/non-atomic; it identifies allocated candidates, not enemies or spawnable tags. The `+0x30` word is a unit-datum candidate; `+0x24/+0x28` are opaque, and `+0x40/+0x44` are raw member-owner fields. It does not follow `+0x226C` or the separate cleanup bitmap. |
 | Offline inventory snapshot viewer | `source/js/offline-inventory-snapshot.js` | Reads explicitly selected BLES 01.24 QZ payload files (28,104-byte character or 28,768-byte account). It validates the big-endian type hash (`EB4B8439` character; `B5DF2907` account) and body size, then shows character slot and item index, with an optional name from a matching user-imported BLES-indexed catalog. Header SOID bytes are skipped; row instance IDs are reduced to a transient empty/nonempty check and never surfaced or persisted. Account +0x4C0 appears only as an unverified vault-like candidate. No live memory, writes, actions, network, or persistence. |
 | Verified equipped-position labels | `source/js/offline-inventory-snapshot.js` | Labels only the 17 BLES 01.24 equipped inventory starts proven by the bucket-range and equipped-slot tables. Nine have known subclass/armour/weapon names; the other eight remain numbered. Every non-start row keeps its numeric inventory slot. |
 | Local catalog browser | `source/js/local-catalogs.js` | Imports user-selected CSV, TSV, JSON, and text catalogs in page memory, with per-file, total-size, and row caps. Supports activity, spawn/hop-on, item/loot, and world-data categories. Spawn catalog rows can copy a syntactically valid 32-bit tag into the experimental executor; catalog type is not copied into the expected runtime-class field. Inventory labels can use an explicitly BLES-indexed `itemIndex` or `blesItemIndex` column, or an exact unique unsigned `hash` + `tag` pair for live pool rows. The Blackrock `def` ordinal is ignored; offline payloads have no definition-table tuple join. No catalog data or executable code is bundled. |
 
 ## Already present in the RTM
+
+The actor-pool descriptor and allocated-candidate snapshots are also available
+without the desktop UI through `rtmctl actor-pool` / `rtmctl actor-candidates`
+and MCP tools `rtm_read_actor_pool_descriptor` /
+`rtm_read_allocated_actor_candidates`. The descriptor tool reads only the
+20-byte descriptor. Candidate enumeration follows the BLES allocator bitmap,
+preserves full datums, and reads only selected words from the first `0x48`
+bytes of each allocated record. Both are read-only; candidate rows do not
+confirm enemy status, spawn tags, or process-instance continuity.
 
 The current app already has activity loading, teleport and scenario routines,
 character name/emblem/scale utilities, ammo and cheat controls, Overwalls
@@ -43,13 +53,21 @@ faction matrices; world mutations and hooks; component/facet/effect probes;
 and broader player/loadout/stat inspection. Blackrock's package data does not
 prove these features' addresses or layouts apply to BLES01857.
 
-The BLES 01.24 AI actor pool is separately verified as 40 records with stride
-`0x28D0`; Blackrock's Xbox-origin catalog assumes `0x28E0`. The new actor-lookup
-descriptor probe follows a distinct actor-path descriptor and does not assume
-it is that AI pool. The actor manager and spawn-system globals are present in BLES, but
-that does not establish a generic BLES spawn entry point or safe spawn
-arguments beyond the experimental Blackrock operation-1 path, which is now
-exposed behind a BLES signature gate but has not been tested on a live console.
+The hash-matched BLES ELF now confirms Blackrock's `actors` descriptor at
+`0x01A1E160` as `AI Actor Manager + 0x10`, initialized with capacity 40 and
+PS3 stride `0x28D0`; Blackrock's row records `ElemSize=0x28E0` while the PS3
+initializer supplies `0x28D0`. The
+descriptor's backing pointer is allocated dynamically through a shared helper.
+This resolves the pool identity and dimensions, but not whether records are
+loaded enemies. A separate allocator bitmap and full-datum reconstruction have
+now been traced in the BLES EBOOT and Blackrock; the `+0x30` unit-cleanup bitmap
+and `+0x226C` packed-handle target remain unresolved, and the app does not yet
+read the allocator bitmap or classify live actors. See
+[actor-pool allocation evidence](../research/actor-pool-allocation-evidence.md).
+This static
+result still does not establish a generic BLES spawn entry point or safe spawn
+arguments beyond the experimental Blackrock operation-1 path, which has not
+been tested on a live console. See [the descriptor initializer trace](../research/actor-pool-descriptor.md).
 Blackrock's hop-on
 catalog likewise does not prove a BLES tag/type crosswalk. The BLES authored
 Ghost path depends on a live component and the game's state-application /
@@ -206,6 +224,16 @@ callback through `r12`/CTR. `Handler::ensure` registers its shared-code address
 with the 0x1CD0-byte state block as context. The ABI is statically resolved;
 runtime register preservation, cache coherence, and safe teardown remain
 unverified.
+
+The earlier prerelease bootstrap transcribed two instructions incorrectly.
+The task callback loaded its context from callback code instead of the task
+entry; the generic command queue also loaded eight bytes for the TOC where the
+Blackrock emitter specifies a four-byte load. The regenerated image now uses
+`807E0004` (`lwz r3,4(r30)`) and `805E0008` (`lwz r2,8(r30)`). An independent
+offline Unicorn check executes the 32-bit-compatible dispatch fragments and
+observes the intended context, callback, TOC and command status; it does not
+execute the PPC64 spawn worker or validate PS3 cache behavior. See
+[bootstrap-data-layout.md](../research/bootstrap-data-layout.md).
 
 Three generic direct-call relocations found in the emitted program target BLES
 01.24 functions `0x26B398`, `0x26B448`, and `0x26B5E4`. The hash-matched ELF

@@ -49,11 +49,24 @@ func run(args []string, stdout, stderr io.Writer) error {
 	if strings.TrimSpace(*ip) == "" {
 		return errors.New("--ip is required")
 	}
+	if command == "actor-pool" || command == "actor-candidates" {
+		var unsupportedFlag string
+		flags.Visit(func(option *flag.Flag) {
+			if option.Name != "ip" && option.Name != "json" {
+				unsupportedFlag = option.Name
+			}
+		})
+		if unsupportedFlag != "" {
+			return fmt.Errorf("%s accepts only --ip and --json; --%s is not supported", command, unsupportedFlag)
+		}
+	}
 
 	client := rtmclient.New()
 	commandTimeout := 12 * time.Second
 	if command == "inventory-pool" {
 		commandTimeout = 2 * time.Minute
+	} else if command == "actor-candidates" {
+		commandTimeout = 45 * time.Second
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), commandTimeout)
 	defer cancel()
@@ -107,6 +120,37 @@ func run(args []string, stdout, stderr io.Writer) error {
 			return json.NewEncoder(stdout).Encode(map[string]any{"ok": true, "request_dispatched": true, "delivery_confirmed": false})
 		}
 		fmt.Fprintln(stdout, "Notification request dispatched; delivery is not confirmed.")
+	case "actor-pool":
+		snapshot, err := client.ReadActorPoolDescriptor(ctx, *ip)
+		if err != nil {
+			return err
+		}
+		if *jsonOutput {
+			return json.NewEncoder(stdout).Encode(map[string]any{
+				"ok": true, "read_only": true, "target": strings.TrimSpace(*ip),
+				"snapshot": snapshot, "loaded_enemy_list_confirmed": false, "spawnability_confirmed": false,
+			})
+		}
+		fmt.Fprintf(stdout, "BLES 01.24 actor-pool descriptor: %s (non-atomic read-only sample)\n", snapshot.DescriptorAddress)
+		fmt.Fprintf(stdout, "Storage: %s\nStride: 0x%X\nCapacity: %d\nBacking span: 0x%X bytes\nInitialized: %t\nRecords read: %d\n%s\n",
+			snapshot.StoragePointer, snapshot.Stride, snapshot.Capacity, snapshot.BackingBytes, snapshot.Initialized, snapshot.RecordsRead, snapshot.Note)
+	case "actor-candidates":
+		snapshot, err := client.ReadAllocatedActorCandidates(ctx, *ip)
+		if err != nil {
+			return err
+		}
+		if *jsonOutput {
+			return json.NewEncoder(stdout).Encode(map[string]any{
+				"ok": true, "read_only": true, "target": strings.TrimSpace(*ip),
+				"snapshot": snapshot, "loaded_enemy_list_confirmed": false, "spawnability_confirmed": false,
+			})
+		}
+		fmt.Fprintf(stdout, "BLES 01.24 allocated actor candidates: %d / %d (non-atomic, read-only sample)\n", snapshot.AllocatedCount, snapshot.Capacity)
+		fmt.Fprintln(stdout, "Slot\tActor datum\tUnit datum candidate\tMember owner")
+		for _, candidate := range snapshot.Candidates {
+			fmt.Fprintf(stdout, "%d\t%s\t%s\t%s\n", candidate.Slot, candidate.ActorDatum, candidate.RecordPreview.UnitDatumCandidate, candidate.RecordPreview.MemberOwnerHandle)
+		}
+		fmt.Fprintln(stdout, snapshot.Note)
 	case "inventory-pool":
 		snapshot, err := client.ReadLiveItemPool(ctx, *ip)
 		if err != nil {
@@ -147,15 +191,22 @@ func printUsage(w io.Writer) {
 	fmt.Fprintln(w, `Destiny RTM command-line client
 
 Usage:
-  rtmctl status --ip 192.168.0.62
-  rtmctl read --ip 192.168.0.62 --address 0030D230 --length 4
-  rtmctl inventory-pool --ip 192.168.0.62
-  rtmctl write --ip 192.168.0.62 --address 0030D230 --hex 3DCCCCCD
-  rtmctl notify --ip 192.168.0.62 --message "Hello from RTM"
-  rtmctl read --ip 192.168.0.62 --address 0030D230 --length 4 --json
+  rtmctl status --ip 192.168.1.100
+  rtmctl read --ip 192.168.1.100 --address 0030D230 --length 4
+  rtmctl inventory-pool --ip 192.168.1.100
+  rtmctl actor-pool --ip 192.168.1.100 --json
+  rtmctl actor-candidates --ip 192.168.1.100 --json
+  rtmctl write --ip 192.168.1.100 --address 0030D230 --hex 3DCCCCCD
+  rtmctl notify --ip 192.168.1.100 --message "Hello from RTM"
+  rtmctl read --ip 192.168.1.100 --address 0030D230 --length 4 --json
 
 Writes are limited to 1-8 bytes and only report success after matching memory readback.
 The client targets private IPv4 addresses on port 80 and uses Destiny PID 0x1010200.
+actor-pool verifies the BLES profile and actor-path code, reads only the 20-byte
+descriptor twice, and never follows its storage pointer or enumerates actors.
+actor-candidates verifies the allocator and datum code, then reads the bounded
+allocation bitmap and first 0x48 bytes of allocated records (at most 40); it
+does not identify enemies or prove that any candidate is spawnable.
 inventory-pool is read-only, verifies the BLES 01.24 profile plus item-pool code and
 descriptor signatures, and never returns instance or owner IDs. It does not call
 undocumented PS3 function-call endpoints.`)

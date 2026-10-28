@@ -87,6 +87,10 @@ func fake0124Signature(address string, length int) []byte {
 		signature = "8084001C908300004E800020"
 	case "002FF2D0":
 		signature = "7C0802A648A99751F821FF81F8010090"
+	case "0013ED38":
+		signature = "7C0802A648C59CC9F821FE21F80101F0"
+	case "00255FA8":
+		signature = "7C0802A648B42A5DF821FF21F80100F0"
 	}
 	data, err := hex.DecodeString(signature)
 	if err != nil || len(data) != length {
@@ -217,8 +221,8 @@ func TestToolsListAdvertisesBoundedRTMTools(t *testing.T) {
 	}
 	list := resultObject(t, responseByID(t, responses, 2))
 	tools, ok := list["tools"].([]any)
-	if !ok || len(tools) != 14 {
-		t.Fatalf("expected fourteen tools, got %#v", list["tools"])
+	if !ok || len(tools) != 16 {
+		t.Fatalf("expected sixteen tools, got %#v", list["tools"])
 	}
 	var sawEntityInspector bool
 	var sawScaleInspector, sawScaleSetter bool
@@ -255,14 +259,14 @@ func TestToolsListAdvertisesBoundedRTMTools(t *testing.T) {
 
 func TestBuildVerifierIsReadOnlyAndReportsPerSignatureMismatch(t *testing.T) {
 	client := &fakeClient{readDataByAddress: map[string][]byte{"002FF2D0": make([]byte, 16)}}
-	responses := runServer(t, client, toolRequest(1, "rtm_verify_build", `{"target_ipv4":"192.168.0.62"}`))
+	responses := runServer(t, client, toolRequest(1, "rtm_verify_build", `{"target_ipv4":"192.168.1.100"}`))
 	result := structuredObject(t, responseByID(t, responses, 1))
 	if result["read_only"] != true || result["profile_match"] != false || result["full_eboot_hash_confirmed"] != false || result["title_region_confirmed"] != false {
 		t.Fatalf("build check overstated its result: %#v", result)
 	}
 	signatures, ok := result["signatures"].([]any)
-	if !ok || len(signatures) != 3 || client.reads != 3 || len(client.writes) != 0 {
-		t.Fatalf("build check did not return three read-only signature results: %#v reads=%d writes=%#v", result, client.reads, client.writes)
+	if !ok || len(signatures) != 5 || client.reads != 5 || len(client.writes) != 0 {
+		t.Fatalf("build check did not return five read-only signature results: %#v reads=%d writes=%#v", result, client.reads, client.writes)
 	}
 	if signatures[2].(map[string]any)["matches"] != false {
 		t.Fatalf("mismatched signature was reported as matching: %#v", signatures[2])
@@ -271,12 +275,12 @@ func TestBuildVerifierIsReadOnlyAndReportsPerSignatureMismatch(t *testing.T) {
 
 func TestReadAndWritesReturnStructuredVerifiedResults(t *testing.T) {
 	client := &fakeClient{statusCode: 200, readData: []byte{0x3f, 0x80, 0, 0}, position: rtmclient.PlayerPosition{PlayerPointer: 0x10000000, CoordinatesAddress: 0x10000140, X: 12.5, Y: -3.25, Z: 128, RawHex: "41480000C050000043000000"}}
-	input := toolRequest(1, "rtm_status", `{"target_ipv4":"192.168.0.62"}`) +
-		toolRequest(2, "rtm_read_memory", `{"target_ipv4":"192.168.0.62","address":"006101C0"}`) +
-		toolRequest(3, "rtm_write_memory", `{"target_ipv4":"192.168.0.62","address":"006101C0","hex":"3F800000"}`) +
-		toolRequest(4, "rtm_set_brightness", `{"target_ipv4":"192.168.0.62","preset":"inverted"}`) +
-		toolRequest(5, "rtm_read_player_position", `{"target_ipv4":"192.168.0.62"}`) +
-		toolRequest(6, "rtm_launch_game", `{"target_ipv4":"192.168.0.62"}`)
+	input := toolRequest(1, "rtm_status", `{"target_ipv4":"192.168.1.100"}`) +
+		toolRequest(2, "rtm_read_memory", `{"target_ipv4":"192.168.1.100","address":"006101C0"}`) +
+		toolRequest(3, "rtm_write_memory", `{"target_ipv4":"192.168.1.100","address":"006101C0","hex":"3F800000"}`) +
+		toolRequest(4, "rtm_set_brightness", `{"target_ipv4":"192.168.1.100","preset":"inverted"}`) +
+		toolRequest(5, "rtm_read_player_position", `{"target_ipv4":"192.168.1.100"}`) +
+		toolRequest(6, "rtm_launch_game", `{"target_ipv4":"192.168.1.100"}`)
 	responses := runServer(t, client, input)
 	if got := structuredObject(t, responseByID(t, responses, 1))["destiny_process_confirmed"]; got != false {
 		t.Fatalf("status incorrectly claims Destiny is confirmed: %v", got)
@@ -299,7 +303,7 @@ func TestReadAndWritesReturnStructuredVerifiedResults(t *testing.T) {
 	if launch["iso_path"] != rtmclient.DefaultDestinyISOPath || launch["game_start_confirmed"] != false || launch["request_dispatched"] != true {
 		t.Fatalf("unexpected launch result: %#v", launch)
 	}
-	if len(client.launches) != 1 || client.launches[0] != "192.168.0.62 "+rtmclient.DefaultDestinyISOPath {
+	if len(client.launches) != 1 || client.launches[0] != "192.168.1.100 "+rtmclient.DefaultDestinyISOPath {
 		t.Fatalf("unexpected launch call: %#v", client.launches)
 	}
 	if len(client.writes) != 2 {
@@ -321,7 +325,7 @@ func TestReadAndWritesReturnStructuredVerifiedResults(t *testing.T) {
 
 func TestGenericWriteRefusesToOverwriteBuildFingerprint(t *testing.T) {
 	client := &fakeClient{}
-	responses := runServer(t, client, toolRequest(1, "rtm_write_memory", `{"target_ipv4":"192.168.0.62","address":"002FF2D0","hex":"00000000"}`))
+	responses := runServer(t, client, toolRequest(1, "rtm_write_memory", `{"target_ipv4":"192.168.1.100","address":"002FF2D0","hex":"00000000"}`))
 	response := responseByID(t, responses, 1)
 	result := resultObject(t, response)
 	structured, _ := result["structuredContent"].(map[string]any)
@@ -345,7 +349,7 @@ func TestEntityPointerInspectorReturnsStructuredReadOnlySnapshot(t *testing.T) {
 			ActivationAddress: 0x100011B8, ActivationRawHex: "3F800000", ActivationState: "valid", ActivationValue: float32Value(1),
 		},
 	}}
-	responses := runServer(t, client, toolRequest(1, "rtm_inspect_entity_pointers", `{"target_ipv4":"192.168.0.62"}`))
+	responses := runServer(t, client, toolRequest(1, "rtm_inspect_entity_pointers", `{"target_ipv4":"192.168.1.100"}`))
 	result := structuredObject(t, responseByID(t, responses, 1))
 	if result["ok"] != true || result["read_only"] != true || result["snapshot_atomic"] != false || result["build_compatibility_confirmed"] != false || client.entityPointerReads != 1 || len(client.writes) != 0 {
 		t.Fatalf("unexpected entity inspection envelope or side effect: %#v", result)
@@ -371,7 +375,7 @@ func TestEntityPointerInspectorPreservesNullAndInvalidPointerStates(t *testing.T
 			PointerError: "pointer is not four-byte aligned", CoordinatesState: "not_read", ActivationState: "not_read",
 		},
 	}}
-	responses := runServer(t, client, toolRequest(1, "rtm_inspect_entity_pointers", `{"target_ipv4":"192.168.0.62"}`))
+	responses := runServer(t, client, toolRequest(1, "rtm_inspect_entity_pointers", `{"target_ipv4":"192.168.1.100"}`))
 	result := structuredObject(t, responseByID(t, responses, 1))
 	player := result["player"].(map[string]any)
 	if player["pointer"] != "0x00000000" || player["pointer_raw_hex"] != "00000000" || player["pointer_state"] != rtmclient.PointerStateNull || player["coordinates_address"] != nil || player["x"] != nil {
@@ -400,8 +404,8 @@ func TestPlayerScaleToolsReturnReadOnlyStateAndVerifiedWriteResults(t *testing.T
 		},
 	}
 	responses := runServer(t, client,
-		toolRequest(1, "rtm_inspect_player_scale", `{"target_ipv4":"192.168.0.62"}`)+
-			toolRequest(2, "rtm_set_player_scale", `{"target_ipv4":"192.168.0.62","scale":5}`),
+		toolRequest(1, "rtm_inspect_player_scale", `{"target_ipv4":"192.168.1.100"}`)+
+			toolRequest(2, "rtm_set_player_scale", `{"target_ipv4":"192.168.1.100","scale":5}`),
 	)
 	inspection := structuredObject(t, responseByID(t, responses, 1))
 	if inspection["ok"] != true || inspection["read_only"] != true || inspection["snapshot_atomic"] != false || inspection["gameplay_effect_confirmed"] != false || inspection["player_name"] != "TestGuardian" || inspection["scale_address"] != "0x1008201C" || inspection["scale"] != float64(1) || inspection["resolver_signature_match"] != true {
@@ -422,12 +426,12 @@ func TestInvalidTargetArgumentsAndOversizedWritesFailBeforeBackend(t *testing.T)
 	client := &fakeClient{}
 	responses := runServer(t, client,
 		toolRequest(1, "rtm_status", `{"target_ipv4":"8.8.8.8"}`)+
-			toolRequest(2, "rtm_write_memory", `{"target_ipv4":"192.168.0.62","address":"1000","hex":"001122334455667788"}`)+
-			toolRequest(3, "rtm_read_memory", `{"target_ipv4":"192.168.0.62","address":"1000","length":65537}`)+
-			toolRequest(4, "rtm_notify", `{"target_ipv4":"192.168.0.62","message":"hello","extra":true}`)+
-			toolRequest(5, "rtm_read_memory", `{"target_ipv4":"192.168.0.62","address":"FFFFFFFF","length":2}`)+
-			toolRequest(6, "rtm_write_memory", `{"target_ipv4":"192.168.0.62","address":"FFFFFFFF","hex":"0102"}`)+
-			toolRequest(7, "rtm_launch_game", `{"target_ipv4":"192.168.0.62","iso_path":"/dev_hdd0/PS3ISO/../../play.ps3"}`)+
+			toolRequest(2, "rtm_write_memory", `{"target_ipv4":"192.168.1.100","address":"1000","hex":"001122334455667788"}`)+
+			toolRequest(3, "rtm_read_memory", `{"target_ipv4":"192.168.1.100","address":"1000","length":65537}`)+
+			toolRequest(4, "rtm_notify", `{"target_ipv4":"192.168.1.100","message":"hello","extra":true}`)+
+			toolRequest(5, "rtm_read_memory", `{"target_ipv4":"192.168.1.100","address":"FFFFFFFF","length":2}`)+
+			toolRequest(6, "rtm_write_memory", `{"target_ipv4":"192.168.1.100","address":"FFFFFFFF","hex":"0102"}`)+
+			toolRequest(7, "rtm_launch_game", `{"target_ipv4":"192.168.1.100","iso_path":"/dev_hdd0/PS3ISO/../../play.ps3"}`)+
 			toolRequest(8, "rtm_read_player_position", `{"target_ipv4":"8.8.8.8"}`)+
 			toolRequest(9, "rtm_inspect_entity_pointers", `{"target_ipv4":"8.8.8.8"}`)+
 			toolRequest(10, "rtm_set_player_scale", `{"target_ipv4":"8.8.8.8","scale":2}`),
@@ -445,7 +449,7 @@ func TestInvalidTargetArgumentsAndOversizedWritesFailBeforeBackend(t *testing.T)
 
 func TestNotificationDispatchIsNotReportedAsDelivery(t *testing.T) {
 	client := &fakeClient{}
-	responses := runServer(t, client, toolRequest(1, "rtm_notify", `{"target_ipv4":"192.168.0.62","message":"hello"}`))
+	responses := runServer(t, client, toolRequest(1, "rtm_notify", `{"target_ipv4":"192.168.1.100","message":"hello"}`))
 	result := structuredObject(t, responseByID(t, responses, 1))
 	if result["request_dispatched"] != true || result["delivery_confirmed"] != false || len(client.notifies) != 1 {
 		t.Fatalf("unexpected notification result: %#v", result)
@@ -454,7 +458,7 @@ func TestNotificationDispatchIsNotReportedAsDelivery(t *testing.T) {
 
 func TestCancellationNotificationCancelsOutstandingToolCall(t *testing.T) {
 	client := &fakeClient{blockRead: true, readStarted: make(chan struct{})}
-	input := toolRequest(1, "rtm_read_memory", `{"target_ipv4":"192.168.0.62","address":"1000"}`) +
+	input := toolRequest(1, "rtm_read_memory", `{"target_ipv4":"192.168.1.100","address":"1000"}`) +
 		`{"jsonrpc":"2.0","method":"notifications/cancelled","params":{"requestId":1,"reason":"test"}}` + "\n"
 	responses := runServer(t, client, input)
 	<-client.readStarted

@@ -18,6 +18,16 @@
       address: '002FF2D0',
       role: 'Player object resolver',
       hex: '7C0802A648A99751F821FF81F8010090'
+    }),
+    Object.freeze({
+      address: '0013ED38',
+      role: 'Object-creation routine',
+      hex: '7C0802A648C59CC9F821FE21F80101F0'
+    }),
+    Object.freeze({
+      address: '00255FA8',
+      role: 'Actor-lookup routine',
+      hex: '7C0802A648B42A5DF821FF21F80100F0'
     })
   ]);
 
@@ -161,6 +171,6 @@
     return { ensure, inspect, reset };
   }
 
-  root.RtmBuildCompatibility = { create, signatures: SIGNATURES, profileName: PROFILE_NAME };
+  root.RtmBuildCompatibility = { create, signatures: SIGNATURES, anchorCount: SIGNATURES.length, profileName: PROFILE_NAME };
   if (typeof module !== 'undefined') module.exports = root.RtmBuildCompatibility;
 })(globalThis);

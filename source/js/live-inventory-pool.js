@@ -75,8 +75,8 @@
 
   async function verifiedCapability(api, owner) {
     const verification = await api.verify(owner);
-    if (verification.profile !== 'BLES01857 01.24 signature profile' || verification.anchors !== 3) {
-      throw new Error('The three-anchor BLES01857 01.24 profile did not verify.');
+    if (verification.profile !== 'BLES01857 01.24 signature profile' || verification.anchors !== root.RtmBuildCompatibility.anchorCount) {
+      throw new Error('The five-anchor BLES01857 01.24 profile did not verify.');
     }
     for (const signature of MEMORY_SIGNATURES) {
       const raw = await api.read(signature.address, signature.expected.length / 2, owner, verification.capability);
