@@ -51,5 +51,7 @@ The branch uses `0x447A`, consistent with the RTM's main preset and its
 The global build gate now also checks the five BLES01857 01.24 signatures used
 by the RTM, in addition to Blackrock's existing fingerprints. The RTM test
 toggles also compare every target against its RTM off value before writing.
-These are static checks, not live-console validation. No Windows build or PS3
-test has been performed for this branch.
+The reported BLES01857 title ID is a target label, not a value read from the
+console; the gate verifies code signatures and cheat-site words. These are
+static checks, not live-console validation. No Windows build or PS3 test has
+been performed for this branch.
