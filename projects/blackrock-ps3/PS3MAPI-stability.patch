@@ -1,0 +1,427 @@
+diff --git a/PATCH_NOTES.md b/PATCH_NOTES.md
+new file mode 100644
+index 0000000..4c264a5
+--- /dev/null
++++ b/PATCH_NOTES.md
+@@ -0,0 +1,77 @@
++# BlackrockPS3 — low-impact PS3MAPI connection patch
++
++Prepared from the uploaded 26 October 2026 source snapshot. This is a SOURCE patch;
++the original Windows preview binary is unchanged and should not be described as patched.
++
++## What changed
++
++1. The background game-executor heartbeat is now sampled once every **5 seconds**
++   instead of once every 250 ms. Each PS3MAPI `MEMORY GET` requires a separate
++   temporary passive-mode data TCP connection, so this removes roughly 95% of
++   the *idle dashboard polling* data-socket creation (240/minute -> 12/minute).
++   Other enabled features and manual memory operations still generate traffic.
++2. The executor's "ticking" status tolerates the longer sample interval; FPS
++   is computed over that longer window, rather than claiming instant FPS.
++3. A sustained *heartbeat memory-read* failure is now shown as a degraded
++   executor warning **without automatically destroying the session or attempting
++   remote patch restoration**. A heartbeat failure by itself does not establish
++   that the TCP control channel has gone down. The existing explicit Disconnect,
++   restoration journal and Recover operations remain unchanged.
++4. The reconnect backoff is reset only after a complete, successful PS3MAPI
++   request (`200` for a control-only query, or complete binary transfer and
++   final `226` for a memory read/write). Receiving only the initial `PASV`/
++   `150` response no longer falsely resets reconnect backoff. Repeated
++   failed control reconnections back off as far as 30 seconds.
++5. A socket `select()` error is no longer misclassified as readable data.
++6. The connected screen shows the executor error when heartbeat polling is
++   degraded, instead of hiding it behind the ONLINE label.
++
++## BLES / Rebug DEX
++
++The European Destiny disc edition is catalogued as **BLES01857**. Blackrock's
++original developer target was **NPEB02021**, APP_VER **01.24**, build
++**51539.16.07.26.1808.v230**. The current connection code locates the process
++by `EBOOT.BIN`, not by its BLES/NPEB title ID, so no title-ID switch is needed.
++
++**Do not blindly reuse profile addresses for a different EBOOT.** The existing
++`Session::verifyBuild()` fingerprint validation remains intact. BLES01857 is
++not confirmed compatible by this patch. A modified DEX EBOOT or a different game
++revision may fail these checks: stop instead of bypassing them. Avoid other
++memory-patching tools simultaneously during tests.
++
++## How to build on a Windows PC
++
++Requires Visual Studio 2022 with Desktop development with C++ and CMake 3.20+:
++
++```powershell
++cmake -S . -B build -G "Visual Studio 17 2022" -A x64
++cmake --build build --config Release -- /m:8
++ctest --test-dir build -C Release --output-on-failure
++```
++
++The executable and `data/` are written to `out/` by the project's existing
++CMake build. Do **not** use the old `BlackrockPS3-preview-win64-2026-10-26.zip`
++as proof of these changes; it predates this patch.
++
++## Verification and limitations
++
++Portable unit tests of the **real** heartbeat policy can be run without a PS3:
++
++```sh
++g++ -std=c++20 -Wall -Wextra -Werror -Isrc tests/heartbeat_health_tests.cpp -o heartbeat_health_tests
++./heartbeat_health_tests
++python3 tests/test_connection_wiring.py
++```
++
++The tests verify the poll schedule, heartbeat liveness window, error grace,
++warning throttling, recovery and session reset, plus critical integration
++wiring. They **do not** prove live PS3MAPI timing, console notification behavior,
++BLES executable compatibility or Windows build success. Only a real console
++and a Windows release build can validate those.
++
++When Windows is available, check `%LOCALAPPDATA%\BlackrockPS3\blackrock.log`
++for `PS3MAPI: control socket reopened`, `Executor heartbeat unavailable` and errors.
++If the PS3 continues to report repeated TCP **control** connections despite
++no active features, capture both the app log and, if possible, the destination
++port of the connections; individual passive-mode data connections are expected
++for memory GET/SET under PS3MAPI.
+diff --git a/README.md b/README.md
+index 18323ee..5829f03 100644
+--- a/README.md
++++ b/README.md
+@@ -8,3 +8,9 @@ Build with Visual Studio 2022 (Desktop C++) and CMake 3.20+:
+ The executable and runtime data are copied to `out/`. This package contains only the files needed to build and run the Windows app: `src/`, `data/`, CMake, and the required Dear ImGui files. The game dump, research, alternate source snapshot, old build directories, and development tools are omitted.
+ 
+ Target: Destiny NPEB02021, APP_VER 01.24, build 51539.16.07.26.1808.v230, on PS3 HEN with webMAN MOD PS3MAPI. The developer's offline tests do not establish that ported features work on a live console; use the app's TESTING > Port checks workflow.
++
++## Connection stability patch
++
++See [PATCH_NOTES.md](PATCH_NOTES.md) for the reduced background PS3MAPI polling,
++transaction-level reconnect recovery, testing and BLES01857 / Rebug DEX caveats.
++This source package must be rebuilt on Windows; the old preview EXE is unmodified.
+diff --git a/src/app/engine.cpp b/src/app/engine.cpp
+index c8b80f5..36aa256 100644
+--- a/src/app/engine.cpp
++++ b/src/app/engine.cpp
+@@ -1,4 +1,5 @@
+ #include "app/engine.h"
++#include "app/heartbeat_health.h"
+ 
+ #include <windows.h>
+ 
+@@ -746,11 +747,10 @@ struct Engine::Impl {
+ 
+      
+     void refreshMain() {
++        HeartbeatHealth heartbeatHealth;
+         const Conn* seen = nullptr;
+         uint32_t lastBeat = 0, windowBeat = 0;
+         double lastChange = -1e9, windowStart = 0, fps = 0, lastJournalCheck = -1e9;
+-        int failures = 0;
+-        double failingSince = 0;    
+         for (;;) {
+             {
+                 std::unique_lock<std::mutex> lock(quitMutex);
+@@ -762,6 +762,7 @@ struct Engine::Impl {
+             auto c = liveConn();
+             if (!c) {
+                 seen = nullptr;
++                heartbeatHealth.reset();
+                 if (state == EngineStatus::Disconnected && t - lastJournalCheck >= 1.0) {
+                     lastJournalCheck = t;
+                     bool pending = Session::journalPending();
+@@ -770,6 +771,7 @@ struct Engine::Impl {
+                 }
+                 continue;
+             }
++            if (!heartbeatHealth.shouldSample(Clock::now())) continue;
+             try {
+                 auto t0 = Clock::now();
+                 uint32_t beat = c->rt->heartbeat();
+@@ -780,7 +782,6 @@ struct Engine::Impl {
+                     windowStart = t;
+                     lastChange = -1e9;
+                     fps = 0;
+-                    failures = 0;
+                 }
+                 if (beat != lastBeat) {
+                     lastBeat = beat;
+@@ -791,7 +792,7 @@ struct Engine::Impl {
+                     windowStart = t;
+                     windowBeat = beat;
+                 }
+-                bool ticking = t - lastChange < 1.0;
++                bool ticking = heartbeatHealth.ticking(t, lastChange);
+                 std::lock_guard<std::mutex> lock(statusMutex);
+                 status.heartbeat = beat;
+                 status.ticking = ticking;
+@@ -801,23 +802,24 @@ struct Engine::Impl {
+                 status.hooks = c->rt->hookCount();
+                 status.tasks = c->rt->taskCount();
+                 status.journalPending = true;
+-                failures = 0;
++                if (heartbeatHealth.succeeded()) {
++                    log(LogLine::Good, "Executor heartbeat polling recovered");
++                    status.error.clear();
++                }
+             } catch (const std::exception& e) {
+-                 
+-                 
+-                 
+-                if (++failures == 1) failingSince = t;
+-                if (failures == 3) log(LogLine::Warn, std::string("Console is slow to answer, still trying: ") + e.what());
+-                if (failures > 3 && t - failingSince >= 15.0 && failures < 1000000) {
+-                    failures = 1000000;    
+-                    std::string msg = e.what();
+-                    toast(LogLine::Error, "Lost contact with the console: " + msg);
+-                    {
+-                        std::lock_guard<std::mutex> lock(statusMutex);
+-                        status.error = msg;
+-                        status.ticking = false;
+-                    }
+-                    enqueueLife([this] { doDisconnect("connection lost"); });
++                const bool prolongedFailure = heartbeatHealth.failed(t);
++                if (heartbeatHealth.failureCount() == 3)
++                    log(LogLine::Warn, std::string("Executor heartbeat read is slow, retrying: ") + e.what());
++                if (prolongedFailure) {
++                    const std::string msg = std::string("Executor heartbeat unavailable: ") + e.what();
++                    log(LogLine::Warn, msg + " (PS3MAPI session retained; disconnect manually if necessary)");
++                    // A failed PASV transfer does not prove the control session
++                    // disconnected. Do not tear down the session and attempt
++                    // patch restoration automatically on this ambiguous signal.
++                    std::lock_guard<std::mutex> lock(statusMutex);
++                    status.error = msg;
++                    status.ticking = false;
++                    status.fps = 0;
+                 }
+             }
+         }
+diff --git a/src/app/heartbeat_health.h b/src/app/heartbeat_health.h
+new file mode 100644
+index 0000000..bf555cc
+--- /dev/null
++++ b/src/app/heartbeat_health.h
+@@ -0,0 +1,59 @@
++#pragma once
++
++#include <chrono>
++
++namespace brps3 {
++
++// A read of the executor heartbeat opens a PS3MAPI passive data socket.
++// Keep the dashboard responsive without continually creating TCP connections.
++class HeartbeatHealth {
++public:
++    using Clock = std::chrono::steady_clock;
++    static constexpr auto SamplePeriod = std::chrono::seconds(5);
++    static constexpr double TickWindowSeconds = 11.0;
++    static constexpr double ErrorGraceSeconds = 15.0;
++    static constexpr double WarningRepeatSeconds = 30.0;
++
++    void reset() {
++        nextSample_ = {};
++        failures_ = 0;
++        lastReport_ = -1e9;
++    }
++
++    bool shouldSample(Clock::time_point now) {
++        if (now < nextSample_) return false;
++        nextSample_ = now + SamplePeriod;
++        return true;
++    }
++
++    bool ticking(double now, double lastChange) const {
++        return now - lastChange < TickWindowSeconds;
++    }
++
++    // True only after a sustained failure and at most once per warning window.
++    bool failed(double now) {
++        if (++failures_ == 1) failingSince_ = now;
++        if (now - failingSince_ < ErrorGraceSeconds || now - lastReport_ < WarningRepeatSeconds)
++            return false;
++        lastReport_ = now;
++        return true;
++    }
++
++    int failureCount() const { return failures_; }
++
++    // Returns true if a previously reported failure recovered.
++    bool succeeded() {
++        bool hadReport = lastReport_ >= 0;
++        failures_ = 0;
++        lastReport_ = -1e9;
++        return hadReport;
++    }
++
++private:
++    Clock::time_point nextSample_{};
++    int failures_ = 0;
++    double failingSince_ = 0;
++    double lastReport_ = -1e9;
++};
++
++} // namespace brps3
+diff --git a/src/core/ps3mapi.cpp b/src/core/ps3mapi.cpp
+index 4703e3f..e54a531 100644
+--- a/src/core/ps3mapi.cpp
++++ b/src/core/ps3mapi.cpp
+@@ -105,7 +105,7 @@ bool waitReadable(SOCKET s, int ms) {
+     FD_ZERO(&rd);
+     FD_SET(s, &rd);
+     timeval tv{ms / 1000, (ms % 1000) * 1000};
+-    return select(0, &rd, nullptr, nullptr, &tv) != 0;    
++    return select(0, &rd, nullptr, nullptr, &tv) > 0;
+ }
+ 
+  
+@@ -243,10 +243,14 @@ void reopen(const std::string& host, int port, int timeoutMs, void* oplock, uint
+         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(b.next - now).count();
+         throw Error("PS3MAPI is reconnecting (next attempt in " + std::to_string(ms) + " ms)");
+     }
+-    b.next = now + std::chrono::milliseconds(1000 << std::min(b.failures, 3));
++    // Back off up to 30 seconds while transfers keep failing; do not spam
++    // the console with new control connections every few seconds.
++    int delayMs = std::min(30000, 1000 << std::min(b.failures, 5));
++    b.next = now + std::chrono::milliseconds(delayMs);
+     ++b.failures;
+     openControl(host, port, timeoutMs, oplock, ctrl, rbuf);
+-    coreLog("PS3MAPI: reconnected to " + host + ":" + std::to_string(port) + " (attempt " + std::to_string(b.failures) + ")");
++    coreLog("PS3MAPI: control socket reopened to " + host + ":" + std::to_string(port) +
++            " (attempt " + std::to_string(b.failures) + "; awaiting completed transaction)");
+ }
+ 
+ void markHealthy(const uintptr_t& ctrl) {
+@@ -319,7 +323,6 @@ std::string Ps3Mapi::command(const std::string& text) {
+         throw;
+     }
+     std::string l = line();
+-    markHealthy(ctrl_);
+     if (!l.empty() && l[0] != '1' && l[0] != '2') throw Error("'" + text + "' -> " + l);
+     return l;
+ }
+@@ -331,8 +334,10 @@ std::string Ps3Mapi::value(const std::string& text) {
+         ready();
+         OpLock op(oplock_);
+         l = command(text);
++        if (!startsWith(l, "200 ")) throw Error("'" + text + "' -> " + l);
++        // A complete control-only transaction is a valid reconnect health signal.
++        markHealthy(ctrl_);
+     }
+-    if (!startsWith(l, "200 ")) throw Error("'" + text + "' -> " + l);
+     return l.substr(4);
+ }
+ 
+@@ -424,6 +429,9 @@ std::vector<uint8_t> Ps3Mapi::read(uint32_t pid, uint32_t addr, uint32_t size) {
+             out.resize(before + got);
+             data.close();
+             done = line();
++            // 150/PASV acknowledge only the start of a transfer, not its success.
++            // Don't reset reconnect backoff until the binary data and final 226 arrive.
++            if (startsWith(done, "226") && got == n) markHealthy(ctrl_);
+         }
+         size_t got = out.size() - before;
+         if (!startsWith(done, "226") || got != n) {
+@@ -460,6 +468,7 @@ void Ps3Mapi::write(uint32_t pid, uint32_t addr, const void* data, size_t size)
+         }
+         sock.close();
+         done = line();
++        if (startsWith(done, "226")) markHealthy(ctrl_);
+     }
+     if (!startsWith(done, "226")) {
+         std::snprintf(cmd, sizeof cmd, "MEMORY SET %X/%zu: ", addr, size);
+diff --git a/src/ui/pages/home.cpp b/src/ui/pages/home.cpp
+index d545367..9698042 100644
+--- a/src/ui/pages/home.cpp
++++ b/src/ui/pages/home.cpp
+@@ -37,8 +37,9 @@ void connectionCard() {
+     }
+     std::string headline, detailText;
+     if (isConn) {
+-        headline = "Connected to " + s.host;
+-        detailText = (s.process.empty() ? std::string("Destiny") : s.process) + (s.build.empty() ? "" : "  \xC2\xB7  build " + s.build) +
++        headline = (s.error.empty() ? "Connected to " : "Connection degraded - ") + s.host;
++        detailText = !s.error.empty() ? s.error :
++                     (s.process.empty() ? std::string("Destiny") : s.process) + (s.build.empty() ? "" : "  \xC2\xB7  build " + s.build) +
+                      (s.ticking ? "  \xC2\xB7  executor ticking" : "  \xC2\xB7  executor idle: load into orbit or a patrol");
+     } else if (s.state == EngineStatus::Connecting) {
+         headline = "Connecting to " + S.host;
+diff --git a/tests/heartbeat_health_tests.cpp b/tests/heartbeat_health_tests.cpp
+new file mode 100644
+index 0000000..f67bc45
+--- /dev/null
++++ b/tests/heartbeat_health_tests.cpp
+@@ -0,0 +1,46 @@
++#include "app/heartbeat_health.h"
++
++#include <cassert>
++#include <chrono>
++#include <iostream>
++
++int main() {
++    using brps3::HeartbeatHealth;
++    using Clock = HeartbeatHealth::Clock;
++    using namespace std::chrono_literals;
++
++    HeartbeatHealth health;
++    const auto t = Clock::time_point{} + 123s;
++    assert(health.shouldSample(t));
++    assert(!health.shouldSample(t + 250ms));
++    assert(!health.shouldSample(t + 4999ms));
++    assert(health.shouldSample(t + 5000ms));
++    assert(!health.shouldSample(t + 5100ms));
++
++    // A fresh heartbeat is considered live until two sample windows pass.
++    assert(health.ticking(110.0, 100.0));
++    assert(!health.ticking(111.0, 100.0));
++
++    // Transient PASV/memory read failures must not be treated as full disconnects.
++    assert(!health.failed(10.0));
++    assert(!health.failed(15.0));
++    assert(!health.failed(20.0));
++    assert(health.failureCount() == 3);
++    assert(!health.failed(24.9));
++    assert(health.failed(25.0));
++    assert(!health.failed(30.0));
++    assert(!health.failed(54.9));
++    assert(health.failed(55.0));
++    assert(health.succeeded());
++    assert(health.failureCount() == 0);
++    assert(!health.succeeded());
++
++    // A new session starts without inheriting an old failure or polling deadline.
++    health.reset();
++    assert(health.shouldSample(t + 5100ms));
++    assert(!health.failed(100.0));
++    assert(!health.failed(105.0));
++    assert(!health.failed(110.0));
++    assert(health.failed(115.0));
++    std::cout << "PASS: PS3MAPI heartbeat polling and degradation policy\n";
++}
+diff --git a/tests/test_connection_wiring.py b/tests/test_connection_wiring.py
+new file mode 100644
+index 0000000..de92747
+--- /dev/null
++++ b/tests/test_connection_wiring.py
+@@ -0,0 +1,26 @@
++"""Static integration guard checking the production PS3MAPI/monitor wiring.
++
++Unlike a mock PS3 server, this test does not pretend to verify network behavior.
++It checks the production source, while heartbeat_health_tests.cpp executes the
++actual portable polling policy used by the engine.
++"""
++
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[1]
++transport = (ROOT / "src/core/ps3mapi.cpp").read_text()
++engine = (ROOT / "src/app/engine.cpp").read_text()
++home = (ROOT / "src/ui/pages/home.cpp").read_text()
++
++command = transport.split("std::string Ps3Mapi::command(", 1)[1].split("std::string Ps3Mapi::value(", 1)[0]
++read = transport.split("std::vector<uint8_t> Ps3Mapi::read(", 1)[1].split("void Ps3Mapi::write(", 1)[0]
++write = transport.split("void Ps3Mapi::write(", 1)[1]
++assert "markHealthy(ctrl_)" not in command, "An initial reply must not reset reconnect backoff"
++assert 'if (startsWith(l, "200 "))' not in command
++assert 'if (startsWith(done, "226") && got == n) markHealthy(ctrl_);' in read
++assert 'if (startsWith(done, "226")) markHealthy(ctrl_);' in write
++assert 'if (!heartbeatHealth.shouldSample(Clock::now())) continue;' in engine
++assert 'heartbeatHealth.failed(t)' in engine
++assert 'doDisconnect("connection lost")' not in engine
++assert '!s.error.empty() ? s.error :' in home
++print("PASS: connection transaction and watchdog integration wiring")

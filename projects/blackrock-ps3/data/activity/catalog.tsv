@@ -1,0 +1,339 @@
+# Activity deploy catalogue: id, category, name (Xbox shared/activity_catalog.h, otherplugin table 0x91A04440)
+id	category	name
+1	Towers / Social	Tower
+2	Towers / Social	Iron Banner Tower
+3	Towers / Social	Queen's Wrath Tower
+4	Towers / Social	Festival of the Lost Tower
+5	Towers / Social	SRL Tower
+6	Towers / Social	The Dawning Tower
+7	Towers / Social	Crimson Days Tower
+39	Towers / Social	Vestian Outpost (Reef)
+40	Towers / Social	The Lighthouse (0x0028)
+159	Towers / Social	The Lighthouse (0x009F)
+8	Patrols	Patrol Cosmodrome
+9	Patrols	Patrol Moon
+10	Patrols	Patrol Venus
+11	Patrols	Patrol Mars
+90	Patrols	Cosmodrome Patrol (TTK)
+91	Patrols	Dreadnaught Patrol
+92	Patrols	Mars Patrol (TTK)
+93	Patrols	Moon Patrol (TTK)
+94	Patrols	Venus Patrol (TTK)
+12	Raids	Vault of Glass (L26)
+13	Raids	Vault of Glass (L30 Heroic)
+14	Raids	Vault of Glass (L31 Epic)
+15	Raids	Crota's End (L30)
+16	Raids	Crota's End (L33 Heroic)
+157	Raids	King's Fall (Light 290)
+158	Raids	King's Fall (Light 310)
+27	Prison of Elders / CoE	PoE (L28)
+28	Prison of Elders / CoE	The Forever Eater (L32 PoE)
+29	Prison of Elders / CoE	The Forever Eater (L34 PoE)
+30	Prison of Elders / CoE	Broken Legion (L32 PoE)
+31	Prison of Elders / CoE	Broken Legion (L34 PoE)
+32	Prison of Elders / CoE	Machine Wrath (L32 PoE)
+33	Prison of Elders / CoE	Machine Wrath (L34 PoE)
+34	Prison of Elders / CoE	Cult of The Worm (L32)
+35	Prison of Elders / CoE	Cult of The Worm (L34)
+36	Prison of Elders / CoE	Urrox's Grudge (L32 PoE)
+37	Prison of Elders / CoE	Urrox's Grudge (L34)
+38	Prison of Elders / CoE	Skolas's Revenge (L35 PoE)
+329	Prison of Elders / CoE	PoE (Light 260)
+330	Prison of Elders / CoE	CoE (Light 320 Weekly)
+331	Prison of Elders / CoE	PoE (Light 260, No Taken)
+332	Prison of Elders / CoE	PoE: Taken (Light 260)
+333	Prison of Elders / CoE	CoE (Light 320, No Mods)
+71	Nightfalls (TTK 320)	Vanguard Nightfall (320 Weekly)
+72	Nightfalls (TTK 320)	Fallen SABER (320)
+73	Nightfalls (TTK 320)	The Sunless Cell (320)
+74	Nightfalls (TTK 320)	Shield Brothers (320)
+75	Nightfalls (TTK 320)	Dust Palace (320)
+76	Nightfalls (TTK 320)	Cerberus Vae III (320)
+77	Nightfalls (TTK 320)	The Undying Mind (320)
+78	Nightfalls (TTK 320)	The Devil's Lair (320)
+79	Nightfalls (TTK 320)	The Will of Crota (320)
+80	Nightfalls (TTK 320)	Dust Palace (320) 2
+81	Nightfalls (TTK 320)	Cerberus Vae III (320) 2
+82	Nightfalls (TTK 320)	The Undying Mind (320) 2
+83	Nightfalls (TTK 320)	The Summoning Pits (320)
+84	Nightfalls (TTK 320)	The Shadow Thief (320)
+85	Nightfalls (TTK 320)	The Nexus (320)
+86	Nightfalls (TTK 320)	Winter's Run (320)
+87	Nightfalls (TTK 320)	Blighted Chalice (320)
+88	Nightfalls (TTK 320)	Winter's Run (320) 2
+89	Nightfalls (TTK 320)	Echo Chamber (320)
+17	Nightfalls (Y1)	NF Epic Arc Juggler Brawler
+18	Nightfalls (Y1)	NF Epic Angry Lightswitch Brawler
+19	Nightfalls (Y1)	NF Epic Arc Solar Small Arms
+20	Nightfalls (Y1)	NF Epic Arc Void Solar Grounded
+21	Nightfalls (Y1)	NF Epic Angry Juggler Void
+22	Nightfalls (Y1)	NF Epic Arc Brawler Solar
+23	Nightfalls (Y1)	NF Epic Juggler Void Solar
+24	Nightfalls (Y1)	NF Epic Arc Specialist Lightswitch
+25	Nightfalls (Y1)	NF Epic Angry Brawler Grounded
+26	Nightfalls (Y1)	NF Epic Void Solar Arc
+41	Weekly Heroics (Y1)	Weekly Heroic L26 Juggler
+42	Weekly Heroics (Y1)	Weekly Heroic L30 Juggler
+43	Weekly Heroics (Y1)	Weekly Heroic L32 Juggler
+44	Weekly Heroics (Y1)	Weekly Heroic L26 Specialist
+45	Weekly Heroics (Y1)	Weekly Heroic L30 Specialist
+46	Weekly Heroics (Y1)	Weekly Heroic L32 Specialist
+47	Weekly Heroics (Y1)	Weekly Heroic L26 Brawler
+48	Weekly Heroics (Y1)	Weekly Heroic L30 Brawler
+49	Weekly Heroics (Y1)	Weekly Heroic L32 Brawler
+50	Weekly Heroics (Y1)	Weekly Heroic L26 Small Arms
+51	Weekly Heroics (Y1)	Weekly Heroic L30 Small Arms
+52	Weekly Heroics (Y1)	Weekly Heroic L32 Small Arms
+53	Weekly Heroics (Y1)	Weekly Heroic L26 Grounded
+54	Weekly Heroics (Y1)	Weekly Heroic L30 Grounded
+55	Weekly Heroics (Y1)	Weekly Heroic L32 Grounded
+56	Weekly Heroics (Y1)	Weekly Heroic L26 Angry
+57	Weekly Heroics (Y1)	Weekly Heroic L30 Angry
+58	Weekly Heroics (Y1)	Weekly Heroic L32 Angry
+59	Weekly Heroics (Y1)	Weekly Heroic L26 Juggler 2
+60	Weekly Heroics (Y1)	Weekly Heroic L30 Juggler 2
+61	Weekly Heroics (Y1)	Weekly Heroic L32 Juggler 2
+62	Weekly Heroics (Y1)	Weekly Heroic L26 Solar
+63	Weekly Heroics (Y1)	Weekly Heroic L30 Solar
+64	Weekly Heroics (Y1)	Weekly Heroic L32 Solar
+65	Weekly Heroics (Y1)	Weekly Heroic L26 Grounded 2
+66	Weekly Heroics (Y1)	Weekly Heroic L30 Grounded 2
+67	Weekly Heroics (Y1)	Weekly Heroic L32 Grounded 2
+68	Weekly Heroics (Y1)	Weekly Heroic L26 Void
+69	Weekly Heroics (Y1)	Weekly Heroic L30 Void
+70	Weekly Heroics (Y1)	Weekly Heroic L32 Void
+277	Strikes: Vanguard	Vanguard Legacy (L20)
+278	Strikes: Vanguard	Vanguard Strikes (L36)
+317	Strikes: Vanguard	Vanguard Heroic Strikes (Light 260)
+279	Strikes: L36	The Will of Crota (L36)
+280	Strikes: L36	Fallen SABER (L36)
+281	Strikes: L36	The Sunless Cell (L36)
+282	Strikes: L36	Shield Brothers (L36)
+283	Strikes: L36	Echo Chamber (L36)
+284	Strikes: L36	The Shadow Thief (L36)
+285	Strikes: L36	Fallen SABER (L36) 2
+286	Strikes: L36	Fallen SABER (Light 280 Epic)
+287	Strikes: L36	Fallen SABER (L40)
+288	Strikes: L36	The Sunless Cell (L36) 2
+289	Strikes: L36	The Sunless Cell (Light 300 Epic)
+290	Strikes: L36	The Sunless Cell (L40)
+291	Strikes: L36	Shield Brothers (L40)
+292	Strikes: L36	Shield Brothers (Light 290 Epic)
+293	Strikes: L36	Shield Brothers (L40) 2
+294	Strikes: L36	Echo Chamber (L36) 2
+295	Strikes: L36	Dust Palace (L36)
+296	Strikes: L36	Cerberus Vae III (L36)
+297	Strikes: L36	The Undying Mind (L40 Heroic)
+298	Strikes: L36	The Undying Mind (L36)
+299	Strikes: Y1	The Devil's Lair (L8)
+300	Strikes: Y1	The Will of Crota (L16)
+301	Strikes: Y1	Dust Palace (L20)
+302	Strikes: Y1	Cerberus Vae III (L20)
+303	Strikes: Y1	The Undying Mind (L20)
+304	Strikes: Y1	The Summoning Pits (L10)
+305	Strikes: Y1	The Shadow Thief (L20, Y2 gear 335)
+306	Strikes: Y1	The Nexus (L14)
+307	Strikes: Y1	Winter's Run (L14)
+308	Strikes: Y1	The Devil's Lair (L20)
+309	Strikes: Y1	The Will of Crota (L20) 2
+310	Strikes: Y1	Dust Palace (L20) 2
+311	Strikes: Y1	Cerberus Vae III (L20) 2
+312	Strikes: Y1	The Undying Mind (L20) 2
+313	Strikes: Y1	The Summoning Pits (L20, Y2 gear)
+314	Strikes: Y1	The Shadow Thief (L20, Y2 gear) 2
+315	Strikes: Y1	The Nexus (L20) 2
+316	Strikes: Y1	Winter's Run (L20) 2
+318	Strikes: Heroic Light260	The Will of Crota (Light 260)
+319	Strikes: Heroic Light260	Fallen SABER (Light 260)
+320	Strikes: Heroic Light260	The Sunless Cell (Light 260)
+321	Strikes: Heroic Light260	Shield Brothers (Light 260)
+322	Strikes: Heroic Light260	Echo Chamber (Light 260)
+323	Strikes: Heroic Light260	Dust Palace (Light 260)
+324	Strikes: Heroic Light260	Cerberus Vae III (Light 260)
+325	Strikes: Heroic Light260	The Undying Mind (Light 260)
+326	Strikes: Heroic Light260	The Shadow Thief (Light 260)
+327	Strikes: Heroic Light260	Blighted Chalice (Light 260)
+328	Strikes: Heroic Light260	Winter's Run (Light 260)
+334	Strikes: April Update	Pretender to the Throne (L36)
+335	Strikes: April Update	Blighted Chalice (L36)
+336	Strikes: April Update	Blighted Chalice (L40)
+337	Strikes: April Update	Winter's Run (L36)
+95	Crucible	Clash
+96	Crucible	Salvage
+97	Crucible	Skirmish
+98	Crucible	Rumble
+99	Crucible	Control
+100	Crucible	Rift
+101	Crucible	Trials of Osiris (Light 290)
+102	Crucible	Iron Banner (L40)
+103	Crucible	Iron Banner (L40) 2
+104	Crucible	Iron Banner (L40) 3
+105	Crucible	Inferno Clash
+106	Crucible	Inferno Control
+107	Crucible	Mayhem Clash
+108	Crucible	Zone Control
+109	Crucible	Elimination
+110	Crucible	Arsenal
+111	Crucible	Doubles
+112	Crucible	Crimson Doubles
+113	Crucible	Inferno Rumble
+114	Crucible	Inferno Skirmish
+115	Crucible	Inferno Salvage
+116	Crucible	Inferno Doubles
+117	Crucible	Mayhem Rumble
+118	Crucible	Inferno 3v3
+119	Crucible	Inferno 6v6
+120	Crucible	Freelance 3v3
+121	Crucible	Freelance 6v6
+122	Crucible	Classic 6v6
+123	Crucible	Classic 3v3
+124	Crucible	Classic FFA
+125	SRL	SRL
+126	SRL	SRL (Solo Queue)
+127	Rumble Maps	Rumble (Honeydew Error)
+128	Rumble Maps	Rumble: The Anomaly
+129	Rumble Maps	Rumble: Firebase Delphi
+130	Rumble Maps	Rumble: Twilight Gap
+131	Rumble Maps	Rumble: Exodus Blue
+132	Rumble Maps	Rumble: Rusted Lands
+133	Rumble Maps	Rumble: Shores of Time
+134	Rumble Maps	Rumble: Bastion
+135	Rumble Maps	Rumble: First Light
+136	Rumble Maps	Rumble: Blind Watch
+137	Rumble Maps	Rumble: Asylum
+138	Rumble Maps	Rumble: The Burning Shrine
+139	Rumble Maps	Rumble: The Cauldron
+140	Rumble Maps	Rumble: Skyshock
+141	Rumble Maps	Rumble: Pantheon
+142	Rumble Maps	Rumble: Thieves' Den
+143	Rumble Maps	Rumble: The Timekeeper
+144	Rumble Maps	Rumble: Black Shield
+145	Rumble Maps	Rumble: Widow's Court
+146	Rumble Maps	Rumble: Sector 618
+147	Rumble Maps	Rumble: The Drifter
+148	Rumble Maps	Rumble: Crossroads
+149	Rumble Maps	Rumble: Memento
+150	Rumble Maps	Rumble: Bannerfall
+151	Rumble Maps	Rumble: The Dungeons
+152	Rumble Maps	Rumble: Frontier
+153	Rumble Maps	Rumble: Vertigo
+154	Rumble Maps	Rumble: Cathedral of Dusk
+155	Rumble Maps	Rumble: Campus Martius (SRL track)
+156	Rumble Maps	Rumble: Infinite Descent (SRL track)
+160	Story: Cinematics	Destiny Credits
+161	Story: Cinematics	A Guardian Rises (L1, intro+Tower)
+162	Story: Cinematics	A Guardian Rises (L1, Tower)
+164	Story: Cinematics	The Speaker (L2)
+183	Story: Cinematics	The Awoken (L10)
+192	Story: Cinematics	A Key Awaits (L13)
+203	Story: Cinematics	A Hero's Return (L18)
+226	Story: Cinematics	Hangar Stakes (L25)
+228	Story: Cinematics	Oryx Triumphant (L20)
+229	Story: Cinematics	TTK Prelude (L1)
+230	Story: Cinematics	Ghost Finds You (L1)
+163	Story: Vanilla	Restoration (L2)
+165	Story: Vanilla	The Dark Within (L3)
+166	Story: Vanilla	The Dark Within (Heroic 240)
+167	Story: Vanilla	The Warmind (L4)
+168	Story: Vanilla	The Warmind (Heroic 240)
+169	Story: Vanilla	The Last Array (L6)
+170	Story: Vanilla	The Last Array (Heroic 240)
+171	Story: Vanilla	The Dark Beyond (L7)
+172	Story: Vanilla	The Dark Beyond (Heroic 240)
+173	Story: Vanilla	The World's Grave (L8)
+174	Story: Vanilla	The World's Grave (Heroic 240)
+175	Story: Vanilla	The Sword of Crota (L8)
+176	Story: Vanilla	The Sword of Crota (Heroic 240)
+177	Story: Vanilla	Chamber of Night (L9)
+178	Story: Vanilla	Chamber of Night (Heroic 240)
+179	Story: Vanilla	Shrine of Oryx (L9)
+180	Story: Vanilla	Shrine of Oryx (Heroic 240)
+181	Story: Vanilla	A Stranger's Call (L10)
+182	Story: Vanilla	A Stranger's Call (Heroic 240)
+184	Story: Vanilla	Ishtar Collective (L11)
+185	Story: Vanilla	Ishtar Collective (Heroic 240)
+186	Story: Vanilla	The Archive (L12)
+187	Story: Vanilla	The Archive (Heroic 240)
+188	Story: Vanilla	Scourge of Winter (L14)
+189	Story: Vanilla	Scourge of Winter (Heroic 240)
+190	Story: Vanilla	Eye of a Gate Lord (L12)
+191	Story: Vanilla	Eye of a Gate Lord (Heroic 240)
+193	Story: Vanilla	Exclusion Zone (L15)
+194	Story: Vanilla	Exclusion Zone (Heroic 240)
+195	Story: Vanilla	The Buried City (L17)
+196	Story: Vanilla	The Buried City (Heroic 240)
+197	Story: Vanilla	The Garden's Spire (L16)
+198	Story: Vanilla	The Garden's Spire (Heroic 240)
+199	Story: Vanilla	A Rising Tide (L17)
+200	Story: Vanilla	A Rising Tide (Heroic 240)
+201	Story: Vanilla	The Black Garden (L18)
+202	Story: Vanilla	The Black Garden (Heroic 240)
+204	Story: Dark Below	Fist of Crota (L10)
+205	Story: Dark Below	Fist of Crota (Heroic 240)
+206	Story: Dark Below	Siege of The Warmind (L12)
+207	Story: Dark Below	Siege of The Warmind (Heroic 240)
+208	Story: Dark Below	The Wakening (L14)
+209	Story: Dark Below	The Wakening (Heroic 240)
+210	Story: Dark Below	Ritual of Sacrifice (L26)
+211	Story: House of Wolves	A Kell Rising (L16)
+212	Story: House of Wolves	A Kell Rising (Heroic 240)
+213	Story: House of Wolves	The Ruling House (L20)
+214	Story: House of Wolves	The Ruling House (Heroic 240)
+215	Story: House of Wolves	Queen's Ransom (L24)
+216	Story: House of Wolves	Queen's Ransom (Heroic 240)
+217	Story: House of Wolves	The Silent Fang (L18)
+218	Story: House of Wolves	The Silent Fang (Heroic 240)
+219	Story: House of Wolves	The Archon-Slayer (L28)
+220	Story: House of Wolves	Wolves' Gambit (L22)
+221	Story: House of Wolves	Wolves' Gambit (Heroic 240)
+222	Story: TTK	Tenebrous Tunnels (Light 250)
+223	Story: TTK	Shadows at Twilight (Light 270)
+224	Story: TTK	Entropy's Pinnacle (L40)
+225	Story: TTK	Entropy's Pinnacle (Heroic 240)
+227	Story: TTK	Lost to Light (L31)
+231	Story: TTK	The Coming War (L25)
+232	Story: TTK	The Coming War (L25) 2
+233	Story: TTK	The Coming War (Heroic 240)
+234	Story: TTK	Dread Patrol (L35)
+235	Story: TTK	Lost to Light (L31) 2
+236	Story: TTK	Lost to Light (Heroic 240)
+237	Story: TTK	Summoner's Circle (Light 270)
+238	Story: TTK	Cayde's Stash (L26)
+239	Story: TTK	Cayde's Stash (Heroic 240)
+240	Story: TTK	Shadow Call (Light 270)
+241	Story: TTK	The Prime's Path (L40)
+242	Story: TTK	The Prime's Path (Heroic 240)
+243	Story: TTK	Knock Knock (L40)
+244	Story: TTK	A Ranger Found (L25 Nightstalker)
+245	Story: TTK	Bound by Fire (L25 Sunbreaker)
+246	Story: TTK	Bottle the Arc (L25 Stormcaller)
+247	Story: TTK	Fear's Embrace (Light 260)
+248	Story: TTK	Fear's Embrace (Light 260) 2
+249	Story: TTK	Fear's Embrace (Light 270)
+250	Story: TTK	Blood in The Garden (Light 290)
+251	Story: TTK	Enemy of My Enemy (L30)
+252	Story: TTK	Enemy of My Enemy (Heroic 240)
+253	Story: TTK	A New Den (L39)
+254	Story: TTK	A New Den (Heroic 240)
+255	Story: TTK	A Spark in Shadow (L25 Stormcaller)
+256	Story: TTK	Paradox (L38)
+257	Story: TTK	Paradox (Heroic 240)
+258	Story: TTK	Blighted Coven (L40)
+259	Story: TTK	Blighted Coven (Heroic 240)
+260	Story: TTK	The First Firewall (Light 260)
+261	Story: TTK	A March of Fire (L25 Sunbreaker)
+262	Story: TTK	A Ranger Lost (L25 Nightstalker)
+263	Story: TTK	Kings of Decay (L40)
+264	Story: TTK	Kings of Decay (Heroic 240)
+265	Story: TTK	Last Rites (L33)
+266	Story: TTK	Last Rites (Heroic 240)
+267	Story: TTK	Outbound Signal (L38)
+268	Story: TTK	Outbound Signal (L38) 2
+269	Story: TTK	Outbound Signal (Heroic 240)
+270	Story: TTK	Regicide (L34)
+271	Story: TTK	Regicide (Heroic 240)
+272	Story: TTK	The Dreadnaught (L28)
+273	Story: TTK	The Dreadnaught (Heroic 240)
+274	Story: TTK	The Promethean Code (L32)
+275	Story: TTK	The Promethean Code (Heroic 240)
+276	Story: TTK	The Promethean Code (Light 240)

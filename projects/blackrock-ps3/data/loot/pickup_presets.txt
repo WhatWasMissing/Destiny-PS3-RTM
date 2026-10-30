@@ -1,0 +1,55 @@
+# Built-in pickup filter presets (Loot > Pickup filter). Read-only: duplicate one to edit it.
+# One [preset] per block. Rules are checked in order and the first match decides; "others" covers
+# every definition no rule matches. Fields: class (weapon, armor, ghost, engram, other), tier
+# (1 common, 2 uncommon, 3 rare, 4 legendary, 5 exotic, 6, 0, 255), bucket (native bucket id),
+# name (substring, any case), items (item hashes, hex).
+
+[preset] Legendary loot only
+note = Legendary weapons, armor, ghost shells and engrams: the Xbox filter (1,704 definitions). Everything else stays on the ground.
+others = drop
+rule = keep; class = weapon,armor,ghost,engram; tier = 4
+
+[preset] Legendary and exotic
+note = Legendary and exotic equipment and engrams.
+others = drop
+rule = keep; class = weapon,armor,ghost,engram; tier = 4,5
+
+[preset] Exotics only
+note = Exotic equipment and exotic engrams.
+others = drop
+rule = keep; class = weapon,armor,ghost,engram; tier = 5
+
+[preset] Imago Loop only
+note = Only Imago Loop (definition 5258, B5F43880): the Xbox filter. Generic engrams are not assumed to hold it.
+others = drop
+rule = keep; items = B5F43880
+
+[preset] Morgue only
+note = Two To The Morgue, both versions (definitions 2919 and 5627). Pickup only sees the item: the Full Auto + Final Round roll rule is applied when you farm (Vault).
+others = drop
+rule = keep; items = CE72759A,3D9FF90F
+
+[preset] Saterienne only
+note = The Saterienne Rapier, both versions (definitions 2917 and 5628). Its Explosive Rounds roll rule is applied when you farm (Vault).
+others = drop
+rule = keep; items = DD33B3AF,BB52BE72
+
+[preset] Morgue and Saterienne
+note = The two farm targets of the Xbox design docs, all four definitions.
+others = drop
+rule = keep; items = CE72759A,3D9FF90F,DD33B3AF,BB52BE72
+
+[preset] No blues or greens
+note = Leaves common, uncommon and rare gear and engrams on the ground; picks up everything else (materials, ammo, consumables...).
+others = keep
+rule = drop; class = weapon,armor,ghost,engram; tier = 1,2,3
+
+[preset] Engrams only
+note = Every engram, nothing else.
+others = drop
+rule = keep; class = engram
+
+[preset] Legendary weapons only
+note = Legendary and exotic weapons; armor, ghosts and everything else stay on the ground.
+others = drop
+rule = keep; class = weapon; tier = 4,5

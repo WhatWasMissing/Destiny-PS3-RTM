@@ -1,0 +1,53 @@
+group	id	name	tags	where	opens	verdict	note
+main	1	Patches 99-40 'Research Assistant' playtest Frame	80C7A2F0	any Tower activity scenario (city_tower_default1/queen/iron_banner/harvest/srl/fol/crimson)	city_test 0861C78F #23 vendor_large (87 exotics @ 1 Glimmer)	confirmed	playtest/test vendor; only placement is the never-shown vendor_playtest squad; no other launcher targets 0861C78F
+main	2	Petra Venj 'Queen's Emissary' (Year-1 Tower Queen's Wrath)	80C883B0	any Tower activity scenario, plaza side (bubble 3)	event_queen B5255B20 #28 (4 cosmetics + hidden Queen's Favor)	confirmed	vendor screen unreachable in TTK retail (only the Year-1 city_tower_queen scenario placed it); buyable rows identical to Reef Petra #39
+main	3	'Vanity Vendor' kiosk mesh (cinematic Queen destination)	80C2217C	only where map:cinematic_queen is loaded [I]; disputed whether act_cinematic_queen_101/102 load it	screen 0D526075 'vanity_vendor' via 80802349 (unregistered; probably nothing)	uncertain	only 'open screen by hash' interactable; prototype vanity store left on a cinematic-only map
+normal	A1	Lord Saladin (Iron Banner), activity body	80C7AD45	any Tower activity, plaza side (b3); default1 8106217A word +0x20F8 bit 5	event_iron_banner 0E6EC405	normally_available	retail opened the same body/screen during Iron Banner weeks; off-event screen is near-empty unless clock/flags are moved
+normal	A2	Xur	80C7AE44,811A80E1	Tower activity (80C7AE44) / Reef (811A80E1)	black_market A6ADA445	normally_available	weekend vendor; spawning only changes the day
+normal	A3	Brother Vance (Disciple of Osiris)	811A80DF	Reef (social_landing, ambient_reef) or PoE arenas	VENDOR_OSIRIS 70A22E27	normally_available	placed at the Reef all week; Trials not cut on 360
+normal	A4	Petra Venj 'Queen's Wrath' (Reef)	811A80D8	Reef	54164339	normally_available	normal Reef vendor
+normal	A5	Event stock inside regular vendors (FotL/SRL/Crimson Days)	80C7A2ED,80C7AE48,80C7A367,80C7AD42,80C98040,80C98042	Tower activity		normally_available	same bodies in every Tower scenario; stock is flag-gated in one shared definition; spawning changes nothing
+normal	A6	Abandoned Quests kiosk	80C9921A,811BC067	Tower / Reef	kiosk_quest 18BEDDA9	normally_available	placed retail kiosk
+normal	A7	Roni 55-30	80C7AE49	Any Tower activity	vendor 9F13DC06 #16 811C9DC5 default	normally_available	ambient copy 80C880D6 is not resident in activities
+normal	A7	Xander 99-40	80C7A368	Any Tower activity	vendor 5B06D63A #7 811C9DC5 default	normally_available	ambient copy 80C88041 is not resident in activities
+normal	A7	Arcite 99-40	80C7A364	Any Tower activity	vendor DA0BB62E #24 811C9DC5 default	normally_available	ambient copy 80C88040 is not resident in activities
+normal	A7	Kadi 55-30	80C7AD44	Any Tower activity	vendor 7879DB8F #20 31BAEAC2 vendor_postmaster	normally_available	ambient copy 80C887B4 is not resident in activities
+normal	A7	Eva Levante	80C7A2ED	Any Tower activity	vendor 080760B4 #6 811C9DC5 default	normally_available	harvest copy 80C7A511; ambient copy 80C880AB is not resident in activities
+normal	A7	Executor Hideo	80C7A2EE	Any Tower activity	vendor 6BC7A0F5 #15 811C9DC5 default	normally_available	ambient copy 80C880AC is not resident in activities
+normal	A7	The Speaker	80C7A2EF	Any Tower activity	vendor 9FC82609 #29 811C9DC5 default	normally_available	harvest copy 80C7A512; ambient copy 80C880AD is not resident in activities
+normal	A7	Amanda Holliday	80C7AE48	Any Tower activity	vendor 1B6696CD #22 811C9DC5 default	normally_available	ambient copy 80C88207 is not resident in activities
+normal	A7	Lakshmi-2	80C7A32F	Any Tower activity	vendor 6C94ED20 #14 811C9DC5 default	normally_available	ambient copy 80C88208 is not resident in activities
+normal	A7	Arach Jalaal	80C7A330	Any Tower activity	vendor D745F67C #13 811C9DC5 default	normally_available	ambient copy 80C88209 is not resident in activities
+normal	A7	Zavala	80C7AD43	Any Tower activity	vendor 001E6126 #9 811C9DC5 default	normally_available	ambient copy 80C883A8 is not resident in activities
+normal	A7	Cayde-6	80C7AD40	Any Tower activity	vendor B307CEC2 #10 811C9DC5 default	normally_available	harvest copy 80C7A737; ambient copy 80C883A9 is not resident in activities
+normal	A7	Ikora Rey	80C7AD41	Any Tower activity	vendor 5DED1EAF #11 811C9DC5 default	normally_available	harvest copy 80C7A738; ambient copy 80C883AA is not resident in activities
+normal	A7	Lord Shaxx	80C7AD42	Any Tower activity	vendor DF514C23 #21 811C9DC5 default	normally_available	harvest copy 80C7A739; ambient copy 80C883AB is not resident in activities
+normal	A7	Master Rahool	80C7A365	Any Tower activity	vendor FE7C7BA3 #17 811C9DC5 default	normally_available	harvest copy 80C7A73A; ambient copy 80C883AC is not resident in activities
+normal	A7	Banshee-44	80C7A366	Any Tower activity	vendor 2207B0A3 #25 811C9DC5 default	normally_available	harvest copy 80C7A73B; ambient copy 80C883AD is not resident in activities
+normal	A7	Tess Everis	80C7A367	Any Tower activity	vendor E97AAA75 #12 7322CF4F vendor_mtx	normally_available	ambient copy 80C883AE is not resident in activities
+normal	A7	Eris Morn	80C7AD46	Any Tower activity	vendor 0A6717F7 #30 811C9DC5 default	normally_available	ambient copy 80C88808 is not resident in activities
+normal	A7	Shader kiosk	80C98040	Any Tower activity	vendor 9047DE05 #31 C2DDEF93 vendor_large	normally_available	
+normal	A7	Emblem kiosk	80C98042	Any Tower activity	vendor C4C8E846 #40 C2DDEF93 vendor_large	normally_available	
+normal	A7	Vehicles kiosk	80C989B3	Any Tower activity	vendor 02A56ABA #33 C2DDEF93 vendor_large	normally_available	
+normal	A7	Emotes kiosk	80C989B4	Any Tower activity	vendor 24A42902 #41 C2DDEF93 vendor_large	normally_available	
+normal	A7	Ships kiosk	80C989B5	Any Tower activity	vendor 85CE2742 #32 C2DDEF93 vendor_large	normally_available	
+normal	A7	Exotic Armor Blueprints	80C99218	Any Tower activity	vendor E89A8157 #43 C2DDEF93 vendor_large	normally_available	
+normal	A7	Exotic Weapon Blueprints	80C99219	Any Tower activity	vendor 57089DF2 #42 C2DDEF93 vendor_large	normally_available	
+normal	A7	Vault (Tower)	80C991DA	Any Tower activity	vendor 353475DD #26 933D6CF6 vendor_vault	normally_available	
+normal	A7	Reef Variks	811A80DD	Reef	vendor 7723763F #38 811C9DC5 default	normally_available	
+normal	A7	Reef Sentha 55-30	811A80E0	Reef	vendor A4A3EBDA #36 31BAEAC2 vendor_postmaster	normally_available	
+normal	A7	Reef Master Ives	811A80E6	Reef	vendor 4DB06927 #37 811C9DC5 default	normally_available	
+normal	A7	Reef Berg 99-40	811A80E7	Reef	vendor 5B06D63A #7 811C9DC5 default	normally_available	
+normal	A7	Reef Vault	811BC026	Reef	vendor 353475DD #26 933D6CF6 vendor_vault	normally_available	
+normal	A7	Reef Eververse kiosk	811BC068	Reef	vendor E97AAA75 #12 7322CF4F vendor_mtx	normally_available	
+broken	B1	Rasputin 'vendor' Frame 'City Frame 22-10'	80CC1279	mission_turing (The Promethean Code) b16/b18 only	016F2C45 'rasputin' (not mapped)	chain_broken	827F7550 returns -1; 83368920 exits at 83368974/78 -> 83368B5C
+broken	B2	'Access Special Orders' kiosk (ui_social)	808764DC	not placed; only UI-record manifest 81063823	D612C083 (not mapped)	chain_broken	ordinal lookup -1
+broken	B3	Ambient 0244 duplicates (not resident in Tower activities)	80C88019,80C885B6,80C883AF,80C880D6,80C88041,80C88040,80C887B4,80C880AB,80C880AC,80C880AD,80C88207,80C88208,80C88209,80C883A8,80C883A9,80C883AA,80C883AB,80C883AC,80C883AD,80C883AE,80C88808			not_resident	listed only in ambient_city_tower slices; owner-verified failure for 80C88019 and 80C885B6; use the 023D twin
+nonui		FotL lantern relic 'Object lantern carry[0]'	80C7AB13	city_tower_fol b3 only			critic-only, no verify pass; event-only placement
+nonui		Jukebox 'Play Music'	80C8830E	Tower b2			80C8831E (808028DB), prompt 5A891256
+nonui		Activate Fan	80C991D8	Tower			80C991E9 (80802ABA), prompt 284C6336
+nonui		Patrol 'Get Mission' / 'Scan Environment'	80AAA04D,80AAA0A2	patrol bubbles			
+nonui		Dead Ghost 'Revive' / 'Awaken'	80AAD57F,80AAD330	Tower and destinations			
+nonui		Dev-fallback 'Open Chest'	80B0001B,80B0001D,80B00022,80B00023	package 0180_0, not loaded in retail			
+nonui		Eris held prop	80C88842	Tower b3			pickup 80876DCF (80802719), empty prompt
+nonui		Reef 'Turn On' toggle	811BC035	Reef			811BC0EE (80802ABA)

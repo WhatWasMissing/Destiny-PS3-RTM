@@ -1,0 +1,18 @@
+{
+  "source": "Xbox tool pc/data/control_catalog.tsv (unchanged text)",
+  "format": "Windows Compression API MSZIP, buffer mode",
+  "rows": 82663,
+  "systems": {
+    "AI squads": 9415,
+    "Encounters and scripts": 38677,
+    "Hop-ons and patterns": 5005,
+    "Package named resources": 610,
+    "Pattern expressions": 408,
+    "Sequences and authored paths": 1176,
+    "Talents and abilities": 27372
+  },
+  "bytes": 48475786,
+  "compressed": 4718676,
+  "sha256": "4158c572e4348bffa8be800b2fb75eec14b14f4a969867f042f1ff2087169ad4",
+  "tag_ids": "Xbox ids; the app maps them with names::toPs3Tag (identity, see x.catalog_translation)"
+}

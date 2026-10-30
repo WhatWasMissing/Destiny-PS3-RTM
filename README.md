@@ -71,3 +71,8 @@ AI Disclaimer: Some AI was used in the creation of this project, mostly formatti
 
 ## Known issues
 -Join discord or see known issues page
+
+## Repository layout
+
+- `source/` contains the recovered Destiny RTM frontend.
+- `projects/blackrock-ps3/` contains the separate Blackrock PS3 source snapshot with the PS3MAPI stability changes, patch notes, and portable checks. Its README documents the Windows build and hardware-testing limits.

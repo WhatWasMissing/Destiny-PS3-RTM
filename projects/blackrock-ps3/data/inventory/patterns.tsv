@@ -1,0 +1,789 @@
+# P index label search | C category stat_selector thresholds(min:variant)
+P	0	0 - Generalist Shell, Ishtar Shell, Mare Cognitum Shell, Meridian Shell	Generalist Shell Ishtar Shell Mare Cognitum Shell Meridian Shell Metropolitan Shell Redux Shell Skywatch Shell Verdant Shell Weathered Shell Winter Sky Shell
+P	1	1 - Blue Spine Shell, Classified, Competitive Shell, Purple Spine Shell	Blue Spine Shell Classified Competitive Shell Purple Spine Shell
+P	2	2 - Classified, Iron Shell, Sunlit Shell	Classified Iron Shell Sunlit Shell
+P	3	3 - Classified, Scholar Shell	Classified Scholar Shell
+P	4	4 - Amethyst Shell, Bold Red Shell, Brave Shell, Dread Explorer Shell	Amethyst Shell Bold Red Shell Brave Shell Dread Explorer Shell Frontier Shell Joyride Shell Pale Dawn Shell Pursuer Shell Questing Shell Standard Shell Turquoise Shell Vanguard Shell
+P	5	5 - ALR96-40 Overkill, AR760 Truth Serum, Abyss Defiant, Abyss Defiant (Adept)	ALR96-40 Overkill AR760 Truth Serum Abyss Defiant Abyss Defiant (Adept) Antipodal Hindsight Assembly II Atheon's Epilogue Atheon's Epilogue (Adept) Black SUROS ADM-94 Black SUROS PPG-96 Bronzed Miyamoto-D Carte Blanche S.1 Cassiopeia Clean Sweep XI Cydonia-AR2 Cydonia-AR3 Deep Fix T76 Dispatch I11 Do Gooder V Doctor Nope Doctor Nope  Doctrine of Passing Doctrine of Passing (Adept) Does Not Bow Eclypse V/MX2 Extremophile 011 First Rule DHYB For The People Forcing Function Frontier-AR1 Galahad-B Galahad-E Grim Citizen III Haakon's Hatchet Her Memory Her Right Hand Her Right Hand  Her Vengeance Hex Caster ARC Low Down P-XIV Marshal-A Marshal-A0 Marshal-A1 Morass-AR4 Painted SUROS CGB-47 Paleocontact JPK-43 Payback SOS Pest Control Matrix Primed SUROS JJJ-76 Problem 78F Quagmire-AR1 Questing Beast Red Spectre Rising Tide AR0 Ros Neve IV SUROS ADM-50 SUROS ARN-33 SUROS ARN-39 Sahara-AR2 Sahara-AR3 Sahara-AR5 Shadow Price Shingen-C Shingen-E Silimar's Wrath Silvered Hushwind-D Steppe-AR3 Surrender A Surrender A  The Continental The Summoner The Summoner (Adept) Unwilling Soul-09 Up For Anything Vanquisher VIII Veldt-AR3 Vindicator XI Vision Stone Vision Stone (Adept) Wolfslayer's Claw Wolfslayer's Claw II Zero-Day Dilemma
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,1:1,2:2,3:3,4:4,5:5
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	6	6 - Unnamed	
+C	3	28	0:0,3:1,5:2
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	7	7 - 123 Syzygy, 123 Syzygy , 55A-allFATE, 55A-allFATE	123 Syzygy 123 Syzygy  55A-allFATE 55A-allFATE  Aegis of the Kell Aegis of the Kell II Aegis of the Reef Anomie MSm Antapex MSc B-29 Party Favor Bad Seed Down Baryon MSc Black SUROS SWB-42 Blind Perdition Blind Perdition (Adept) Catena MSc Coiled Hiss 1919 Cold Current Cold Current  Corona MSc Crackerjack.beta Crackerjack.beta  Dead Air 09F3 Echo 33 Evergreen II.I Fair and Square Final Duty Grasp of Malok Hopscotch Pilgrim Hydrus KAU8 Constellation Scar Lump Distribution New Heart LDD Nirwen's Mercy Occulate MSc Oversoul Edict Oversoul Edict (Adept) Painted Apollo MSc Painted Neptune MSc Painted SUROS BZL-45 Parthian Shot Payment VI Praedyth's Timepiece Praedyth's Timepiece (Adept) Primed Starfall MSc Psi Alba IV Psi Alto III Psi Lento III Psi Tempus II Psi Tempus III Psi Umbra I Psi Umbra II Psi Umbra II-A Psi Volo II Psi Volo III Pulsar MSe Pulsar MSm Reflection Sum Reflection Sum (Adept) SUROS JPS-20 SUROS JPS-32 SUROS JPS-55 SUROS MIN-15 Silvered Continuum MSc Silvered Procyon MSc Skorri's Revenge Spare Change.25 Strange Suspect Super Pox VLO TKO (First Round) Temporal MSm The Conduit The Messenger The Messenger  The Messenger (Adept) The Ninth Edict The Villainy Three Little Words Time On Target Trifecta S.2
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,3:1,4:2,5:3,6:4
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	8	8 - The Stranger's Rifle	The Stranger's Rifle
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,3:1,4:2,5:3,6:4
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	9	9 - A.1F19X-Ryl, Acheron SR5, Angel's Advocate, Another NitC	A.1F19X-Ryl Acheron SR5 Angel's Advocate Another NitC B-Line Trauma Badger CCL Bronzed Yamaduta SR4 Burning Eye Burning Eye (Adept) Caelum Colovance's Duty Crusader I Crypt Dweller SR1 Cryptic Dragon Deadshot Luna SR1 Fang of Ir YÜt Fang of Ir YÜt (Adept) Fang of Ir Yût Foresight 3 Foresight 3  Gallows Cure Gheleon's Demise Gladius 77 Hand of Judgment High Road Soldier Hygiea Noblesse Jigoku SR2 Jigoku SR2-SL Jigoku SR3 Jigoku SR3-SL Keystone 01 Lampad SR4 Lethe Noblesse Mitternacht SR2 Mitternacht SR3 NA3D1 Salvation State NL Shadow 701X Naraka SR5 Not Like the Others One/One Synesthete Painted Abaddon SR5 Painted Sorg SR5 Pallas Regime Parallax PSm Pickpocket Saint Primed DÍyÚ SR5 Primed Dìyù SR5 Primed Midnight SR5 Primed Yamaduta S4 Proxima Centauri II Pulwar V/Ace Radial PSm Rainmaster V4 Silvered KÎn SR5 Silvered Kín SR5 Singularity S.3 Stalker BNGL Thanatos SR5 The Aries Nemesis X4 The Calling The Hero Formula The Inward Lamp The Inward Lamp (Adept) The Saterienne Rapier The Scholar The Scholar  The Scholar (Adept) The Wounded Trax Callum I Trax Callum II Trax Callum II-A Trax Devotio III Trax Elan IV Trax Mallus II Trax Mallus III Trax Onus III Treads Upon Stars Vesta Noblese Vision of Confluence Vision of Confluence (Adept) VÂlka SR2 VÂlka SR3 Válka SR2 Válka SR3 Wolves' Leash Wolves' Leash  Wolves' Leash II Wyestar X9 Xibalba SR5 Zero Point LOTP Zero Point LOTP
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,1:1,2:2,3:3,5:4
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	10	10 - 44 Curtain Call, Agnes III, Antimuon ESc, Arcana ESc	44 Curtain Call Agnes III Antimuon ESc Arcana ESc Astral Horizon Bad Counsel IV Baryonic ESm Binary Dawn Black Chasma ESc Bronzed Chasma Esc Burden of Proof XI Cepheid ESm Chasma Esc Conspiracy Theory-D Copperhead Mk. 32 Crash Casket 81 Deadlander Mk. 24 Ded Alia III Ded Hexia IV Ded Laurea IV Ded Regnum III Ded Venefici I Deidris's Retort Double Nickel Dry Rot 32 Felwinter's Lie Found Verdict Graviton ESe Graviton ESm Hard Luck Charm Her Champion Her Courtesy Her Courtesy  Her Eyes Her Eyes  Her Unspoken Will Hide and Seek-42 I PROTEST Impulse Esc In Times of Need Invisible Hand M7 Judgment VI LOCKJAW LOCKJAW  Last-Ditch 001 Matador 64 Occam's Razor Outlander Mk. 26 Outlander Mk. 38 Party Crasher +1 Preacher Mk. 11 Preacher Mk. 20 Preacher Mk. 22 Rude Awakening DOA SG-Scattercast SUROS MKB-21 SUROS MKB-33 SUROS MKB-51 Sagitta Secret Handshake Sidewinder Mk.53 Swordbreaker The Comedian The Crash Two To The Morgue Two for the Road Two for the Road  Unraveling Thread Vector Esc Wolfborne Oath
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	11	11 - 77 Wizard, Amethyst Reign-99, Andromeda, Angelic Acid	77 Wizard Amethyst Reign-99 Andromeda Angelic Acid Ashraven's Flight Badlands-FR4 Bronzed Nox Volo V Caldera-FR1 Darkblade's Spite DÅmmerung FR3 DÅmmerung FR5 Dämmerung FR3 Dämmerung FR5 Each New Day Elevating Vision Ex Astris Exile's Curse Feral Spark FR6 Final Rest II Futile Gesture GIVE/Take Equation Heath-FR3 Helios FR5 Hitchhiker FR4 LIGHT/Beware Light of the Abyss Long Far Gone Nox Acror IV Nox Astur III Nox Cantor II Nox Cantor III Nox Cantor V Nox Crocia I Nox Fury V Nox Inergia IV Nox Praeli III Nox Revus II Nox Revus III Nox Umber I PLUG ONE.1 Painted Helios FR4 Panta Rhei Perun's Fire Praetorian Foil Primed Nox Revus IV Prism Schism Prost FR2 Prost FR3 Purifier VII SK5 Type-Null Servant of Aksor Silvered Eos FR4 Snakebite Surgeon Solas FR2 Solas FR5 Spindevil 3AA Split Shifter Pro Stellar Vestige Techeun Force Techeun Force  Techeun Rage Tengoku FR1 Tengoku FR2 Tengoku FR2a That Beautiful Glow The Calming The Exile's Curse The Exile's Curse  The Frenzy The Trolley Problem The Vortex The Waiting Tundra-FR3 Worlds to Come 001
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,1:1,2:2,5:3,6:4
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	12	12 - A Little Voice, Appellant III, Backhanded Compliment, Bandit Mk. 24	A Little Voice Appellant III Backhanded Compliment Bandit Mk. 24 Bandit Mk. 36 Byronic Hero Cordova-HC3 Duke Mk. 10 Duke Mk. 20 Duke Mk. 21 Equuleus Exile's Student Exile's Student (Adept) Eyasluna Fatebringer Fatebringer (Adept) Finnala's Peril Free Will III Hard Luck Mk. 52 Heaven Can Wait Her Mercy Her Mercy  Her Revenge Hoss Mk.51 How Dare You Ill Will Imago Loop Imprecation Jewel of Osiris Jewel of Osiris (Adept) Kaifeng-HC3 LOCK_ARETE Loner.Rebel Lord High Fixer Maverick Mk. 20 Maverick Mk. 32 Merciful Merciless Mos Aria III Mos Azoth IV Mos Calamus I Mos Ganon II Mos Ganon III Mos Ganon V Mos Morsus III Mos Scala I NIFTY_BISCUIT NIFTY_BISCUIT  Painted Big Chief Mk. 45 Painted Mos Ardus V Peccadillo's Grace Polite Denial 0/1 Primed Big Sky Mk.48 Red Hand IX Regulator Mk. 56 Renegade Mk.55 Searcher Mk. 20 Searcher Mk. 37 Silvered Maverick Mk. 41 Sir Isaac Six Dreg Pride Six Dreg Pride II Stolen Pride TFWPKY 1969 The Chance The Devil You Don't The Devil You Know The Fulcrum The Palindrome The Revelator The Revelator  The Wail The Water Star The Water Star (Adept) Timur's Lash Timur's Lash  Up the Ante Venation III Vortimer-D Word of Crota Word of Crota (Adept)
+C	3	29	0:0,1:1,2:2,3:3
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3
+P	13	13 - 1000-Yard Stare, 13098v Incognito, 20/20 AMR7, 20/20 AMR7	1000-Yard Stare 13098v Incognito 20/20 AMR7 20/20 AMR7 Allowance V/C4 Amina-E7 Amplified Geo-D6 Andacht 81 Andacht 81  Ascalon-LR1 Avenue A Bitter Edge 010 Black Hammer Black Trung-D Broken Truth-LR1 Calcutta-LR1 Calcutta-LR2 Calcutta-LR2a Candace-B Caracas-LR5 Civilian Applications Deposition VII Devil's Dawn Doom Echo XI Efrideet's Spear Epitaph 2261 Equiprobable LSc Eumolpias-SR3 Event Horizon Extrasolar RR4 Eye of Sol FINAL BOSS Glass Promontory Gozen-C Her Benevolence Her Fury Hieracon-LR2 Hieracon-LR3 Hieracon-LR5 Known Horizon LDR 5001 Low-Grade Humility Luna Chiral III Luna Phasar III Luna Vallar IV Neutrino LSm Painted Sammuramat-C Pompeii-LR2 Pompeii-LR3 Pompeii-LR5 Praedyth's Revenge Prudence II SUROS JLL-19 Saigon-LR5 Scipio-E Seventh Sense Shadow of Veils Silvered Boudicca-D Silvered Caracas-LR4 Silvered Mulan-D Subtle Nudge DN7 Tao Hua Yuan The Chosen The Majestic The Supremacy The Winged Word Tomyris-E2 Trajan-B Trajan-C Trajan-C  Violator XII Vulpecula Weyloran's March Y-09 Longbow Synthesis
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,1:1,2:2,3:3,4:4,5:5,6:6
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9
+P	14	14 - Aether CSm, Against All Odds, Arighan's Blossom, Arma Engine DOA	Aether CSm Against All Odds Arighan's Blossom Arma Engine DOA BFF 2.0 BTRD-345 Backscratcher 9.0 Bane of the Taken Baron's Ambition Bonekruscher Bretomart's Stand Bronzed Thutmose-D Chain of Orbiks-Fel Chaotic Neutral Corrective Measure Cyrus-B Darius-B Darius-C Deviant Gravity-A Deviant Gravity-A  Diluvian 10/4x First Citizen IX Formerly Penitent Genghis-E Genghis-E1 Hannibal-E Horologium Jolder's Hammer Karst-MG4 Lacustrine-MG4 Lunation CSc MG18A Harm's Way MG18A Harm's Way  Maria-MG3 Nihilist CSc Objection IV Pacifier X Painted Artemisia-D Phenomena CSm Planetary CSc Prestige IV Qua Brecan I Qua Roris I Red River Mk. 40 Rift Valley-MG3 Ruin Wake Sargon-A Sargon-B Sargon-B1 Sargon-B2 Sargon-C Sawtooth Oscillator Song of Ir YÜt Song of Ir Yût Spirit of Alliance SudaZomba-3 THE SWARM Tamerlane-B Tamerlane-C3 Tamerlane-E1 The Culling The Infinite Theorem The Unseeing Eye The Variable Unending Deluge III Wolves' Bane Wolves' Curse Xerxes-C Xerxes-E Xerxes-E1 Zombie Apocalypse WF47
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	6	255	
+C	21	255	
+P	15	15 - Admonisher III, Affentheater C/L-A, Baron RS/1, Baron RS/2	Admonisher III Affentheater C/L-A Baron RS/1 Baron RS/2 Baron RS/2a Big Rig XXL Bishop RS/5 Breaker SA/2 Breaker SA/3 Butcher SA/2 Butcher SA/3 Ceres Lost BMJ-46 Chamberlain SA/5 Choleric Dragon SRT-49 Crown Prince SA/3 Crown Princess SA/3 Dauphin RS/1 Dauphine SA/4 Deacon RS/2 Deacon RS/3 Despot SA/5 Disassembly Required Disruptor 5000 Dowager SA/3 Duchess RS/5 Exodus Plan RS/1 Happy Boomer Happy Boomer  Harbinger Herald SA/5 Hezen Vengeance Hunger of Crota Jester SA/2 Jester SA/3 Lacerta Marquise RS/1 Minstrel RA/4 Oligarch SA/3 One Way Ticket 000 Overlord SA/5 Painted Camelot SA/4 Pax Totalus EPR8 Primed Khan RS/4 Queen Mother SA/4 Radegast's Fury Radegast's Fury   Seneschal RS/1 Silvered Warmonger SA/4 Something Wicked Steel Oracle Z-11 Sultan SA/5 The Ash Factory The Cure The Dreammaker The Dreamwaker The Fear The Good Doctor The Hothead The Last Rebellion The Last Rebellion  The Nightmare The Smolder The Tamarind The Warpath Tomorrow's Answer Tormod's Bellows Unfriendly Giant Unto Dust 00 Uppercut Payload Uppercut�Payload Valedictorian 9-44 Wastelander V2V Whisper C/L-A
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	16	16 - Antique Camera	Antique Camera
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	17	17 - Dragon's Breath	Dragon's Breath
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	18	18 - "80 Proofreader", "Act on Instinct", "Aries Ascendant", "Armor of Vows"	"80 Proofreader" "Act on Instinct" "Aries Ascendant" "Armor of Vows" "Aspect of Glass" "Atalanta's Hunt" "Aurora Lance" "Bane of Dark Gods" "Belisarius Defiant" "Birth of History" "Chasing Infinity" "Comitatus" "Crypt Hammer" "Draught of Nectar" "Dream Eater" "Eon Trespass" "Ether Eater" "Extinction Event" "Fatal Vision" "Glass Minuet" "Gloriole Jump" "Hebridean Thoughtcrime" "High and Flighty" "Karuna, Falling" "Ketch Me If You Can" "Kondratyuk's Escape" "Laughing Behind Your Back" "Light in the Abyss" "Little Light" "Made of Shakespeare" "Mind Bleacher" "Newsbreaker" "Outrageous Fortune" "Plasma Donor" "Quite Content Damsel" "Ripship Pardoner" "Rope to Heaven" "Scorpio Miracle" "Seraphim Toaster" "Shark Whisperer" "Sidereal Rumba" "Smokehouse Six" "Steel Atreus" "Sun Current" "The Climb" "The Dirigible Incorrigible" "The Fangs of Nyx" "The Fermi Solution" "The Road Unraveled" "The Teilhard War" "The Visible Hand" "Ticktock Inquisitor" "Tiger Tiger" "Tropos Gardener" "Vacuum Diagram" "Vienna Singer" "Vintage Russian Soul" AFv1 Octavian AFv2 Octavian AFv3 Octavian AX19 Slipper Misfit AX19 Spindle Demon Agonarch Karve Arcadia Class Jumpship CX20 Slipper Misfit CX20 Spindle Demon Ceres Galliot Classified Coldsnap BKR Dead Orbit Vote Devils' Due BKR EX21 Slipper Misfit EX21 Spindle Demon Future War Cult Vote Hildian Seeker Kestrel Class AX Kestrel Class AX0 Kestrel Class CX Kestrel Class CX0 Kestrel Class EX Kestrel Class EX0 Kingslayer BKR LRv1 Javelin LRv2 Javelin LRv3 Javelin Last Battle Longest Vigil Lost Legacy Manus Celer Dei NS22 Cloud Errant NS22 High Water NS44 Cloud Errant NS44 High Water NS66 Cloud Errant NS66 High Water New Monarchy Vote Phaeton Class v1 Phaeton Class v1.1 Phaeton Class v2 Phaeton Class v2.1 Phaeton Class v3 Phaeton Class v3.1 Regulus Class 22a Regulus Class 44b Regulus Class 55 Regulus Class 66c Regulus Class 77 Regulus Class 99 Space-Age Mariner Valkyrie-O5X Waning Star Wolf Hunter BKR
+C	8	255	
+C	9	255	
+C	0	255	
+C	11	255	
+C	10	255	
+C	12	255	
+P	19	19 - Khvostov 7G-02	Khvostov 7G-02
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	20	20 - Hard Light, Hard Light	Hard Light Hard Light
+C	3	28	0:0,3:1,5:2
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	21	21 - SUROS Regime, SUROS Regime	SUROS Regime SUROS Regime
+C	3	28	0:0,3:1,5:2
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	22	22 - Monte Carlo	Monte Carlo
+C	3	28	0:0,3:1,5:2
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	23	23 - Bad Juju	Bad Juju
+C	3	28	0:0,3:1,5:2
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	24	24 - Red Death, Red Death	Red Death Red Death
+C	3	28	0:0,3:1,5:2
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	25	25 - MIDA Multi-Tool	MIDA Multi-Tool
+C	3	28	0:0,3:1,5:2
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	26	26 - Fate of All Fools, Fate of All Fools	Fate of All Fools Fate of All Fools
+C	3	28	0:0,3:1,5:2
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	27	27 - Invective, Invective	Invective Invective
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	28	28 - Universal Remote, Universal Remote	Universal Remote Universal Remote
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	29	29 - Plan C	Plan C
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	30	30 - Pocket Infinity, Pocket Infinity	Pocket Infinity Pocket Infinity
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	31	31 - Vex Mythoclast	Vex Mythoclast
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	32	32 - The Last Word	The Last Word
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	33	33 - Thorn, Thorn	Thorn Thorn
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	34	34 - Hawkmoon	Hawkmoon
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	35	35 - Ice Breaker	Ice Breaker
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	36	36 - Patience and Time	Patience and Time
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	37	37 - Thunderlord, Thunderlord	Thunderlord Thunderlord
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	6	255	
+C	21	255	
+P	38	38 - Super Good Advice, Super Good Advice	Super Good Advice Super Good Advice
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	6	255	
+C	21	255	
+P	39	39 - Gjallarhorn, Gjallarhorn , Iron Gjallarhorn	Gjallarhorn Gjallarhorn  Iron Gjallarhorn
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	40	40 - Truth	Truth
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	41	41 - Sparrow S-10, Sparrow S-11	Sparrow S-10 Sparrow S-11
+P	42	42 - Unnamed	
+P	43	43 - Sparrow S-10V	Sparrow S-10V
+P	44	44 - S-20 Cavalier, S-21 Cavalier, S-22 Cavalier	S-20 Cavalier S-21 Cavalier S-22 Cavalier
+P	45	45 - S-20 Nomad, S-21 Nomad, S-22 Nomad	S-20 Nomad S-21 Nomad S-22 Nomad
+P	46	46 - S-20 Seeker, S-21 Seeker, S-22 Seeker	S-20 Seeker S-21 Seeker S-22 Seeker
+P	47	47 - S-30C Phoenix, S-31C Phoenix, S-32C Phoenix, Sparrow S-30V	S-30C Phoenix S-31C Phoenix S-32C Phoenix Sparrow S-30V Sparrow S-31V Sparrow S-32V
+P	48	48 - S-31V, S-32V, S-34 Ravensteel, Upgraded S-30C	S-31V S-32V S-34 Ravensteel Upgraded S-30C Upgraded S-30V Upgraded S-31C Upgraded S-32C
+P	49	49 - S-30V, S-31V, S-32V, Upgraded S-30C	S-30V S-31V S-32V Upgraded S-30C Upgraded S-31C Upgraded S-32C
+P	50	50 - S-30V, S-31V, S-32V, Upgraded S-30C	S-30V S-31V S-32V Upgraded S-30C Upgraded S-31C Upgraded S-32C
+P	51	51 - S-30V, S-31V, S-32V, Upgraded S-30C	S-30V S-31V S-32V Upgraded S-30C Upgraded S-31C Upgraded S-32C
+P	52	52 - Classified, F11 "Scavenger", S-13 "Graverobber", SV7 "Morrow's Gait"	Classified F11 "Scavenger" S-13 "Graverobber" SV7 "Morrow's Gait" SV7 "War Runner" XV0 "Timebreaker"
+P	53	53 - EV-30 Tumbler, EV-31 Nightbird, EV-32 Snowblind, EV-33 Dragonrider	EV-30 Tumbler EV-31 Nightbird EV-32 Snowblind EV-33 Dragonrider
+P	54	54 - Unnamed	
+P	55	55 - Unnamed	
+P	56	56 - Unnamed	
+P	57	57 - Unnamed	
+P	58	58 - Unnamed	
+P	59	59 - Unnamed	
+P	60	60 - Unnamed	
+P	61	61 - Unnamed	
+P	62	62 - Unnamed	
+P	63	63 - Unnamed	
+P	64	64 - Unnamed	
+P	65	65 - Unnamed	
+P	66	66 - No Land Beyond	No Land Beyond
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	67	67 - Unnamed	
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	68	68 - Murmur	Murmur
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	69	69 - Eidolon Ally, Husk of the Pit	Eidolon Ally Husk of the Pit
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	70	70 - Necrochasm	Necrochasm
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	71	71 - Soulstealer's Claw	Soulstealer's Claw
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,1:1,2:2,3:3,4:4,5:5
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	72	72 - Lord of Wolves	Lord of Wolves
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	73	73 - NotFound-D65F256B	NotFound-D65F256B
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	6	255	
+C	21	255	
+P	74	74 - Unnamed	
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	75	75 - The 4th Horseman	The 4th Horseman
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	76	76 - Queenbreakers' Bow	Queenbreakers' Bow
+C	3	29	0:0,1:1
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,1:1,2:2,5:3,6:4
+C	4	255	
+C	21	29	0:0,1:1
+P	77	77 - Unnamed	
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,1:1,2:2,3:3,4:4,5:5,6:6
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9
+P	78	78 - Dreg's Promise, Dreg's Promise	Dreg's Promise Dreg's Promise
+C	3	29	0:0,1:1,2:2,3:3
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3
+P	79	79 - Queen's Choice, Vestian Dynasty, Vestian Dynasty	Queen's Choice Vestian Dynasty Vestian Dynasty
+C	3	29	0:0,1:1,2:2,3:3
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3
+P	80	80 - An Answering Chord, Righteous VII, SUROS ARI-41, SUROS ARI-45	An Answering Chord Righteous VII SUROS ARI-41 SUROS ARI-45 SUROS PRR-11 SUROS TSA-10 SUROS TYR-14 SUROS WER-45
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+C	1	31	0:0,1:1
+C	0	31	0:0,1:1
+C	2	255	
+C	5	31	0:0,1:1,2:2,3:3,4:4,5:5
+C	4	31	0:0,1:1
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	81	81 - Arminius-D, Fabian Strategy, HÅkke Test-A, Häkke Test-A	Arminius-D Fabian Strategy HÅkke Test-A Häkke Test-A Izdubar-D Longesp½e-A Longespée-A The Dealbreaker Zarinaea-D
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,1:1,2:2,3:3,4:4,5:5
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	82	82 - Hawksaw, SUROS BNS-13, SUROS PDX-41, SUROS PDX-45	Hawksaw SUROS BNS-13 SUROS PDX-41 SUROS PDX-45 SUROS PRI-44 SUROS TSP-10
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,3:1,4:2,5:3,6:4
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	83	83 - Apple of Discord, Herja-D, Hotspur-A, HÅkke Test-A	Apple of Discord Herja-D Hotspur-A HÅkke Test-A Häkke Test-A Lyudmila-D Moriaen-D Raskova-A
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,3:1,4:2,5:3,6:4
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	84	84 - Cocytus SR4, Garmr SR1, Hung Jury SR4, Last Extremity	Cocytus SR4 Garmr SR1 Hung Jury SR4 Last Extremity Orphne SR4 Shinigami SR1 Tlaloc Tuonela SR4
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,1:1,2:2,3:3,5:4
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	85	85 - SUROS BVV-13, SUROS DIS-43, SUROS DIS-47, SUROS SCO-43	SUROS BVV-13 SUROS DIS-43 SUROS DIS-47 SUROS SCO-43 SUROS WSC-17
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,1:1,2:2,3:3,5:4
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	86	86 - CÎchulainn-D, Cúchulainn-D, Dido-A, HÅkke Test-A	CÎchulainn-D Cúchulainn-D Dido-A HÅkke Test-A Häkke Test-A Immobius Jingukogo-D Patch-A Strongbow-D The Next Big Thing
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	87	87 - Eosphoros FR4, Omolon Test FR1, Susanoo, The Vacancy	Eosphoros FR4 Omolon Test FR1 Susanoo The Vacancy Thesan FR4
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,1:1,2:2,5:3,6:4
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	88	88 - Down and Doubt 00-0, Kumakatok HC4, Omolon Test HC1, The Vanity	Down and Doubt 00-0 Kumakatok HC4 Omolon Test HC1 The Vanity Threnody HC4 Uffern HC4
+C	3	29	0:0,1:1,2:2,3:3
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3
+P	89	89 - Azurduy-A, Gaheris-D, HÅkke Test-A, Häkke Test-A	Azurduy-A Gaheris-D HÅkke Test-A Häkke Test-A Judith-D Rience-D
+C	3	29	0:0,1:1,2:2,3:3
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3
+P	90	90 - Eirene RR4, Matuta RR4, Omolon Test RR1, Uzume RR4	Eirene RR4 Matuta RR4 Omolon Test RR1 Uzume RR4
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,1:1,2:2,3:3,4:4,5:5,6:6
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9
+P	91	91 - Antinomy XVI, Aoife Rua-D, Chandragupta-A, Deianeira-D	Antinomy XVI Aoife Rua-D Chandragupta-A Deianeira-D HÅkke Test-A Häkke Test-A Stillpiercer Tamar-D
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,1:1,2:2,3:3,4:4,5:5,6:6
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9
+P	92	92 - SUROS BWN-48, SUROS JLB-42, SUROS JLB-47, SUROS TSR-10	SUROS BWN-48 SUROS JLB-42 SUROS JLB-47 SUROS TSR-10 The Vertigo
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	93	93 - Arc Edge, Arc Infinite Edge, Bolt-Caster, Dark-Drinker	Arc Edge Arc Infinite Edge Bolt-Caster Dark-Drinker Dreadfang Raze-Lighter Sol Edge Solar Infinite Edge The Young Wolf's Howl Void Edge Void Infinite Edge
+C	1	255	
+C	0	255	
+P	94	94 - Zhalo Supercell	Zhalo Supercell
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	95	95 - No Time to Explain	No Time to Explain
+C	3	255	
+C	1	255	
+C	0	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	96	96 - Boolean Gemini	Boolean Gemini
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	97	97 - Touch of Malice	Touch of Malice
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	98	98 - The Jade Rabbit	The Jade Rabbit
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	99	99 - Ace of Spades, The First Curse	Ace of Spades The First Curse
+C	3	29	0:0,1:1,2:2,3:3
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3
+P	100	100 - Telesto	Telesto
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	101	101 - Sleeper Simulant	Sleeper Simulant
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	102	102 - The Chaperone	The Chaperone
+C	3	255	
+C	21	255	
+C	1	255	
+C	0	255	
+C	4	255	
+P	103	103 - Hereafter	Hereafter
+C	3	255	
+C	1	255	
+C	0	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	104	104 - Black Spindle	Black Spindle
+C	3	255	
+C	1	255	
+C	0	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	105	105 - Zen Meteor	Zen Meteor
+C	3	255	
+C	1	255	
+C	0	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	106	106 - Nova Mortis	Nova Mortis
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	6	255	
+C	21	255	
+P	107	107 - Abbadon	Abbadon
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	6	255	
+C	21	255	
+P	108	108 - Classified	Classified
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	109	109 - Unnamed	
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,1:1,2:2,3:3,4:4,5:5
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	110	110 - Unnamed	
+C	3	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	30	0:0,1:1,2:2,3:3,4:4,5:5
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	111	111 - Antandre-D, Chilonis-A, Conviction II, Crow's Eye	Antandre-D Chilonis-A Conviction II Crow's Eye Hawkwood-A JabberH¸kke-D JabberHäkke-D Lamorak-A Llefelys-D Penthesilea-C Pryderi-D Rustam-D Sagramore-A Thalestris-C Vesosis-C Vortigern-C
+C	3	29	0:0,1:1,2:2,3:3
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3
+P	112	112 - Havoc Pigeon, Ironwreath-D	Havoc Pigeon Ironwreath-D
+C	3	29	0:0,1:1,2:2,3:3
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3
+P	113	113 - Unnamed	
+P	114	114 - SR-0 Swiftriver	SR-0 Swiftriver
+P	115	115 - SR-1 Swiftriver	SR-1 Swiftriver
+P	116	116 - Anguish of Drystan, Anguish of Drystan (Adept), Harrowed Anguish of Drystan	Anguish of Drystan Anguish of Drystan (Adept) Harrowed Anguish of Drystan
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	117	117 - Harrowed Smite of Merain, Smite of Merain, Smite of Merain (Adept)	Harrowed Smite of Merain Smite of Merain Smite of Merain (Adept)
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	118	118 - Doom of Chelchis, Doom of Chelchis (Adept), Harrowed Doom of Chelchis	Doom of Chelchis Doom of Chelchis (Adept) Harrowed Doom of Chelchis
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	119	119 - Harrowed Silence of A'arn, Silence of A'arn	Harrowed Silence of A'arn Silence of A'arn
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	120	120 - Harrowed Midha's Reckoning, Midha's Reckoning	Harrowed Midha's Reckoning Midha's Reckoning
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	29	0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,11:11,12:12,13:13,14:14
+P	121	121 - Harrowed Zaouli's Bane, Zaouli's Bane, Zaouli's Bane (Adept)	Harrowed Zaouli's Bane Zaouli's Bane Zaouli's Bane (Adept)
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	122	122 - Defiance of Yasmin, Harrowed Defiance of Yasmin	Defiance of Yasmin Harrowed Defiance of Yasmin
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	123	123 - Harrowed Qullim's Terminus, Qullim's Terminus	Harrowed Qullim's Terminus Qullim's Terminus
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	6	255	
+C	21	255	
+P	124	124 - Elulim's Frenzy, Harrowed Elulim's Frenzy	Elulim's Frenzy Harrowed Elulim's Frenzy
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	125	125 - Kingslayer Shell	Kingslayer Shell
+P	126	126 - EV-34 Vector Infinite	EV-34 Vector Infinite
+P	127	127 - EV-35 Arcrunner	EV-35 Arcrunner
+P	128	128 - EV-38 Laurelbearer	EV-38 Laurelbearer
+P	129	129 - EV-36 Solscout	EV-36 Solscout
+P	130	130 - EV-37 Voidstreak	EV-37 Voidstreak
+P	131	131 - EV-39 Lumos	EV-39 Lumos
+P	132	132 - EV-40 Snowscream	EV-40 Snowscream
+P	133	133 - EV-41 Momentum Master	EV-41 Momentum Master
+P	134	134 - EV-42 Nightsteed, EV-43 Lightrunner, S-35 Aeon Glow	EV-42 Nightsteed EV-43 Lightrunner S-35 Aeon Glow
+P	135	135 - Days of Wind	Days of Wind
+P	136	136 - Velumbra	Velumbra
+P	137	137 - Crimson Shell	Crimson Shell
+P	138	138 - Sugary Shell	Sugary Shell
+P	139	139 - Consumed Shell	Consumed Shell
+P	140	140 - Stolen Will	Stolen Will
+C	3	255	
+C	1	255	
+C	0	255	
+C	2	255	
+C	5	255	
+C	4	255	
+C	21	255	
+P	141	141 - Unnamed	

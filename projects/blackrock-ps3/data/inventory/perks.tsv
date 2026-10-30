@@ -1,0 +1,978 @@
+ordinal	enabled	display_hash	name	description
+0	0	811C9DC5		
+1	0	811C9DC5		
+2	0	811C9DC5		
+3	0	811C9DC5		
+4	0	811C9DC5		
+5	0	811C9DC5		
+6	1	1EB7A619	Momentum Transfer	Grenade hits restore melee energy.
+7	0	811C9DC5	Paramuscle Armature	Increased grenade throw distance.
+8	1	E32B140A	Light the Blade	Causing damage with a grenade reduces your melee cooldown.
+9	0	811C9DC5	Energy Projection	Increases grenade throw distance.
+10	0	811C9DC5	Rain Blows	Decreases melee attack cooldown time.
+11	0	811C9DC5	Impact Induction	Causing damage with a melee attack reduces your grenade cooldown.
+12	1	FB7CDD5D	Infusion	Replenishes health each time you pick up an Orb of Light.
+13	1	FB7CDD5C	Innervation	Reduces grenade cooldown each time you pick up an Orb of Light.
+14	1	FB7CDD5F	Invigoration	Reduces melee cooldown each time you pick up an Orb of Light.
+15	1	0858BE9F	Inverse Shadow	Increased Super energy gained from killing minions of the Darkness.
+16	1	0858BE9E	Ashes to Asset	Replenish Super energy when you kill an enemy with a grenade.
+17	0	811C9DC5	Combat Proprioceptor	Increased melee attack speed.
+18	0	811C9DC5	Impact Induction	Melee hits replenish Grenade energy.
+19	1	FD56A6EA	Infusion	Replenish health when you pick up an Orb.
+20	1	FD56A6EB	Innervation	Reduce grenade cooldown when you pick up an Orb.
+21	1	FD56A6E8	Invigoration	Reduce melee cooldown when you pick up an Orb.
+22	1	93740970	Darkness Slayer	More Super energy from non-Guardian kills.
+23	1	93740971	Grenade Tap	More Super energy from Grenade kills.
+24	1	93740972	Brawler's Draw	More Super energy from Melee kills.
+25	1	B741B414	Light the Blade	Causing damage with a grenade reduces your melee cooldown.
+26	0	811C9DC5	Fastball	Increases grenade throw distance.
+27	0	811C9DC5	Switchblade	Decreases melee attack cooldown time.
+28	0	811C9DC5	Incisive Maintenance	Causing damage with a melee attack reduces your grenade cooldown.
+29	1	3F74402F	Infusion	Replenishes health each time you pick up an Orb of Light.
+30	1	3F74402E	Innervation	Reduces grenade cooldown each time you pick up an Orb of Light.
+31	1	3F74402D	Invigoration	Reduces melee cooldown each time you pick up an Orb of Light.
+32	1	2FF4AA4D	Inverse Shadow	Increased Super energy gained from killing minions of the Darkness.
+33	1	2FF4AA4C	Ashes to Asset	Replenish Super energy when you kill an enemy with a grenade.
+34	1	9C37199F	Momentum Transfer	Causing damage with a grenade reduces your melee cooldown.
+35	0	811C9DC5	Paramuscle Armature	Increases grenade throw distance.
+36	0	811C9DC5	Rain Blows	Increases melee attack speed.
+37	0	811C9DC5	Impact Induction	Causing damage with a melee reduces your grenade cooldown.
+38	1	B4FACDD0	Infusion	Replenishes health each time you pick up an Orb of Light.
+39	1	B4FACDD1	Innervation	Reduces grenade cooldown each time you pick up an Orb of Light.
+40	1	B4FACDD2	Invigoration	Reduces melee cooldown each time you pick up an Orb of Light.
+41	1	1EE4AAC2	Inverse Shadow	Increased Super energy gained from killing minions of the Darkness.
+42	1	1EE4AAC3	Quintessence Transfer	Replenish Super energy when you kill an enemy with a grenade.
+43	1	A4A6CDF5	Auto Rifle Mags	Carry more ammo for Auto Rifles.
+44	1	D76CB37C	Fusion Rifle Mags	Carry more ammo for Fusion Rifles.
+45	1	C9B48E48	Hand Cannon Slugs	Carry more ammo for Hand Cannon.
+46	1	7B356304	Heavy Ammo	Carry more ammo for Heavy Weapons.
+47	1	B9FDB1D0	Machine Gun Mags	Carry more ammo for Machine Guns.
+48	1	1557801F	Primary Weapon Mags	Carry more ammo for Primary Weapons.
+49	1	E1A53D35	Pulse Rifle Mags	Carry more ammo for Pulse Rifles.
+50	1	53889E0A	Rocket Launcher Mags	Carry more ammo for Rocket Launcher.
+51	1	36A02B94	Scout Rifle Mags	Carry more ammo for Scout Rifle.
+52	1	4B40EF83	Shotgun Shells	Carry more ammo for Shotgun.
+53	1	B877656D	Sniper Rifle Mags	Carry more ammo for Sniper Rifle.
+54	1	DB6B81E4	Special Ammo	Carry more ammo for Special Weapons.
+55	1	38E877E1	All Weapon Loader	Increased reload speed with all weapons.
+56	1	2B70794A	Auto Rifle Loader	Increased reload speed with Auto Rifles.
+57	1	FD359E37	Fusion Rifle Loader	Increased reload speed with Fusion Rifles.
+58	1	52DCA901	Hand Cannon Loader	Increased reload speed with Hand Cannons.
+59	1	A161FE35	Heavy Weapon Loader	Increased reload speed with Heavy Weapons.
+60	1	8C578A27	Machine Gun Loader	Increased reload speed with Machine Guns.
+61	1	EBAB93DA	Primary Weapon Loader	Increased reload speed with Primary Weapons.
+62	1	5CA7CFDC	Pulse Rifle Loader	Increased reload speed with Pulse Rifles.
+63	1	4C1F2CF3	Rocket Launcher Loader	Increased reload speed with Rocket Launchers.
+64	1	A38C3055	Scout Rifle Loader	Increased reload speed with Scout Rifles.
+65	1	C04130BE	Shotgun Loader	Increased reload speed with Shotguns.
+66	1	872442B6	Sniper Rifle Loader	Increased reload speed with Sniper Rifles.
+67	1	2545F3D9	Special Weapon Loader	Increased reload speed with Special Weapons.
+68	0	811C9DC5		
+69	0	811C9DC5	Tempered	A boon from the Lords of Iron. Increases Event Standing gained in the Iron Banner.  Becomes increasingly effective every day the Iron Banner is available.
+70	1	F14A48D7	Jackolyte	The Hive may haunt the dreams of children, but you haunt the dreams of the Hive.
+71	1	443E90A9	Flight of Shadows	Are you the dream of a sleeping god? Or the nightmare of a dead one?
+72	1	2D7A1A22	Radiant Light	You have come through the darkness undiminished. Increases all XP gains.  Lasts until weekly refresh.
+73	0	811C9DC5	Extinguished	You have succumbed to Nightfall. Unable to attempt it again until next week.
+74	1	C625ABA4	Sunforged	You have found success in the Trials of Osiris. Increases all XP gains.  Lasts until next weekly refresh.
+75	0	811C9DC5		
+76	1	0A0D25ED		
+77	1	0A0D25EC		
+78	1	0A0D25EF		
+79	0	811C9DC5		
+80	0	811C9DC5		
+81	0	811C9DC5		
+82	1	FB42D9EE		
+83	1	FB42D9EF		
+84	1	FB42D9EC		
+85	1	541663B9		
+86	1	6EB0E883		
+87	1	6EB0E882		
+88	1	6EB0E881		
+89	0	811C9DC5		
+90	1	D9AA8619		
+91	0	811C9DC5		
+92	1	D9AA861B		
+93	1	5B06C323		
+94	1	5B06C322		
+95	1	98B0B64C		
+96	0	811C9DC5		
+97	0	811C9DC5		
+98	0	811C9DC5		
+99	0	811C9DC5		
+100	0	811C9DC5		
+101	1	10CD3023		
+102	0	811C9DC5		
+103	1	CFBE112F		
+104	1	CFBE112C		
+105	1	EE9B8FDF		
+106	0	811C9DC5		
+107	1	EE9B8FDD		
+108	0	811C9DC5		
+109	0	811C9DC5		
+110	0	811C9DC5		
+111	1	6674AA43		
+112	1	6674AA40		
+113	1	692AC03E		
+114	1	BA3A104E		
+115	1	BA3A104F		
+116	1	BA3A104C		
+117	1	D2AE267F		
+118	1	D2AE267E		
+119	0	811C9DC5		
+120	0	811C9DC5		
+121	0	811C9DC5		
+122	1	C5F0788C		
+123	1	9AAFAAF6		
+124	1	9AAFAAF7		
+125	1	9AAFAAF4		
+126	1	C161EEFA		
+127	1	213AECEB		
+128	1	213AECEA		
+129	0	811C9DC5		
+130	0	811C9DC5		
+131	0	811C9DC5		
+132	1	357A7F7A		
+133	1	357A7F79		
+134	1	5E82391B		
+135	1	1229C135		
+136	1	1229C134		
+137	1	1229C137		
+138	0	811C9DC5		
+139	1	CE11EA07		
+140	1	E2261A54		
+141	1	E2261A55		
+142	0	811C9DC5		
+143	0	811C9DC5	Auto Rifle Affinity	Unlocks upgrades on Auto Rifles.
+144	0	811C9DC5	Fusion Rifle Affinity	Unlocks upgrades on Fusion Rifles.
+145	0	811C9DC5	Hand Cannon Affinity	Unlocks upgrades on Hand Cannons.
+146	0	811C9DC5	Machine Gun Affinity	Unlocks upgrades on Machine Guns.
+147	0	811C9DC5	Pulse Rifle Affinity	Unlocks upgrades on Pulse Rifles.
+148	0	811C9DC5	Rocket Launcher Affinity	Unlocks upgrades on Rocket Launchers.
+149	0	811C9DC5	Scout Rifle Affinity	Unlocks upgrades on Scout Rifles.
+150	0	811C9DC5	Shotgun Affinity	Unlocks upgrades on Shotguns.
+151	0	811C9DC5	Sniper Rifle Affinity	Unlocks upgrades on Sniper Rifles.
+152	1	FB1E6223		
+153	1	4B16FFF4		
+154	1	0ABFF5DB		
+155	0	811C9DC5	XP Boost	Increases experience gains for your Subclass, Weapons, and Armor.
+156	0	811C9DC5	Auto Rifle Analysis	Increased XP for Auto Rifles.
+157	0	811C9DC5	Fusion Rifle Analysis	Increased XP for Fusion Rifles.
+158	0	811C9DC5	Hand Cannon Analysis	Increased XP for Hand Cannons.
+159	0	811C9DC5	Machine Gun Analysis	Increased XP for Machine Guns.
+160	0	811C9DC5	Pulse Rifle Analysis	Increased XP for Pulse Rifles.
+161	0	811C9DC5	Rocket Launcher Analysis	Increased XP for Rocket Launchers.
+162	0	811C9DC5	Scout Rifle Analysis	Increased XP for Scout Rifles.
+163	0	811C9DC5	Shotgun Analysis	Increased XP for Shotguns.
+164	0	811C9DC5	Sniper Rifle Analysis	Increased XP for Sniper Rifles.
+165	0	811C9DC5	Cabal Hunter	Increased XP from Cabal enemies.
+166	0	811C9DC5	Cabal Seeker	Increased Glimmer from Cabal enemies.
+167	0	811C9DC5	Fallen Hunter	Increased XP from Fallen enemies.
+168	0	811C9DC5	Fallen Seeker	Increased Glimmer from Fallen enemies.
+169	0	811C9DC5	Hive Hunter	Increased XP from Hive enemies.
+170	0	811C9DC5	Hive Seeker	Increased Glimmer from Hive enemies.
+171	0	811C9DC5	Vex Hunter	Increased XP from Vex enemies.
+172	0	811C9DC5	Vex Seeker	Increased Glimmer from Vex enemies.
+173	0	811C9DC5	Weapon XP Boost	Increases experience gains for your Weapons.
+174	1	9043E748		
+175	1	9043E749		
+176	1	9043E74A		
+177	1	9043E74B		
+178	1	9043E74C		
+179	1	9043E74D		
+180	1	9043E74E		
+181	1	9043E74F		
+182	1	9043E740		
+183	0	811C9DC5		
+184	0	811C9DC5		
+185	0	811C9DC5	Faction Champion	Reputation gains applied to Dead Orbit when equipped.
+186	0	811C9DC5	Faction Champion	Reputation gains applied to Future War Cult when equipped.
+187	0	811C9DC5	Faction Champion	Reputation gains applied to New Monarchy when equipped.
+188	0	811C9DC5		
+189	0	811C9DC5		
+190	0	811C9DC5		
+191	0	811C9DC5		
+192	0	811C9DC5		
+193	0	811C9DC5		
+194	0	811C9DC5		
+195	0	811C9DC5		
+196	0	811C9DC5		
+197	0	811C9DC5		
+198	0	811C9DC5		
+199	0	811C9DC5		
+200	0	811C9DC5		
+201	0	811C9DC5		
+202	0	811C9DC5		
+203	0	811C9DC5		
+204	0	811C9DC5		
+205	0	811C9DC5		
+206	0	811C9DC5		
+207	1	8E99C56F		
+208	0	811C9DC5		
+209	0	811C9DC5	Iron Allegiance	Increases Event Standing gained in the Iron Banner.
+210	0	811C9DC5	Iron Allegiance	Increases Event Standing gained in the Iron Banner.
+211	0	811C9DC5	Iron Allegiance	Increases Event Standing gained in the Iron Banner.
+212	0	811C9DC5		
+213	0	811C9DC5		
+214	0	811C9DC5		
+215	0	811C9DC5		
+216	0	811C9DC5		
+217	0	811C9DC5		
+218	0	811C9DC5		
+219	0	811C9DC5		
+220	0	811C9DC5		
+221	0	811C9DC5		
+222	0	811C9DC5		
+223	0	811C9DC5		
+224	0	811C9DC5		
+225	0	811C9DC5		
+226	0	811C9DC5		
+227	0	811C9DC5		
+228	0	811C9DC5		
+229	0	811C9DC5		
+230	0	811C9DC5		
+231	0	811C9DC5		
+232	0	811C9DC5		
+233	0	811C9DC5		
+234	0	811C9DC5		
+235	0	811C9DC5		
+236	0	811C9DC5		
+237	0	811C9DC5		
+238	0	811C9DC5		
+239	0	811C9DC5		
+240	0	811C9DC5		
+241	0	811C9DC5		
+242	0	811C9DC5		
+243	0	811C9DC5		
+244	0	811C9DC5		
+245	0	811C9DC5		
+246	0	811C9DC5		
+247	0	811C9DC5		
+248	0	811C9DC5		
+249	0	811C9DC5		
+250	0	811C9DC5		
+251	0	811C9DC5		
+252	0	811C9DC5		
+253	0	811C9DC5		
+254	0	811C9DC5		
+255	0	811C9DC5		
+256	0	811C9DC5		
+257	0	811C9DC5		
+258	1	C1E16934		
+259	1	6149FB25		
+260	1	3065971E		
+261	1	A7BB23D8		
+262	1	C7ECEC0E		
+263	1	ACC8919C		
+264	1	B3DEE52D		
+265	0	811C9DC5	Improved Tripmine Grenade	Gain invisibility after crouching in place for a short time. Melee attacking an enemy from behind while invisible delivers 4x damage.
+266	1	9E8B2FB6	Keeper of the Pack	Revive teammates faster. Spawn more orbs.
+267	0	811C9DC5	Improved Arcbolt Grenade	Arcbolt Grenade chains further. Spawn with grenade energy.
+268	1	C9C42987	Big Game	Golden Gun fires one shot, delivering 6x damage, while granting Keyhole for overpenetration.
+269	0	811C9DC5	Last Man Standing	Golden Gun gains one additional shot per use.
+270	0	811C9DC5	Unstable Current	Arc Blade attacks use less super energy.
+271	1	25539300		
+272	1	25539301		
+273	1	BFCA4B89		
+274	1	BFCA4B88		
+275	1	A3D9AF82	Improved Disintegrate	Find more heavy ammo. Ready and reload heavy weapons more quickly.
+276	1	7404C2AA	Keeper of the Pack	Revive teammates faster. Spawn more orbs.
+277	0	811C9DC5	Quite a Handful	Carry an additional grenade.
+278	0	811C9DC5	Bathed in Light	Blessing of Light and Weapons of Light last longer.
+279	0	811C9DC5	Recklessness	Provides Death from Above and Headstrong for Fist of Havoc.
+280	1	C4902779	Improved Transfusion	Storm Fist kills regenerate health. Spawn with melee energy.
+281	0	811C9DC5	Helium Cycle	Enables tracking for Scatter Grenades.  Hold an extra Scatter Grenade charge.
+282	0	811C9DC5	Burn Brighter	Activating Radiance from death disorients nearby enemies.
+283	0	811C9DC5	Improved Axion Bolt	Enhanced Axion Bolt. Spawn with grenade energy.
+284	1	15237060	Delusions of Grandeur	Increased armor.  All melee hits grant Life Steal.
+285	1	BB4F2191	Private Reserves	Activating your Super regenerates your health.
+286	1	626E94CA	Keeper of the Pack	Revive teammates faster. Spawn more orbs.
+287	0	811C9DC5		
+288	0	811C9DC5		
+289	0	811C9DC5		
+290	0	811C9DC5		
+291	0	811C9DC5		
+292	0	811C9DC5		
+293	0	811C9DC5		
+294	0	811C9DC5		
+295	0	811C9DC5		
+296	0	811C9DC5		
+297	0	811C9DC5		
+298	0	811C9DC5		
+299	0	811C9DC5		
+300	0	811C9DC5		
+301	0	811C9DC5		
+302	0	811C9DC5		
+303	0	811C9DC5		
+304	0	811C9DC5		
+305	0	811C9DC5		
+306	1	A4A3E100	SUROS Regime	The bottom half of each magazine deals bonus damage and has a chance to return health on kill.
+307	1	A4A3E101		
+308	1	E33430EE		
+309	1	A4954D2A	String of Curses	After each kill, this weapon will reload instantly and increase damage for a short time. Kills will help charge your super.
+310	1	A4954D2B		
+311	1	6A5769B1		
+312	1	142DB119		
+313	1	1550E454	Wolfpack Rounds	Rounds fired from this weapon split into tracking cluster missiles upon detonation.
+314	1	D31CBE6D		
+315	1	7EC5D258	Volatile Light	Rounds fired from this weapon have no damage falloff, overpenetrate targets and ricochet off hard surfaces.
+316	1	7EC5D259		
+317	1	01DEC5DB		
+318	1	507894FE	Ice Breaker	Ice Breaker's victims spontaneously combust, dealing damage to others nearby.
+319	1	4201E167		
+320	1	4201E166		
+321	1	69B0107D	Invective	This weapon regenerates ammo over time.
+322	1	7690C7B5	Last Word	Improved stability and target acquisition when firing from the hip.
+323	1	8B146755		
+324	1	6360C593	MIDA Multi-Tool	This weapon boosts move speed and fires on a hair trigger.
+325	1	6360C592		
+326	1	F28E4420		
+327	1	17E0A32C	Luck in the Chamber	One random bullet in the magazine causes considerable bonus damage.
+328	1	986192E1	Holding Aces	Two more random bullets in your magazine deal considerable bonus damage.
+329	1	986192E0		
+330	1	986192E3		
+331	1	2CAAF85B	Patience and Time	You gain active camouflage while aiming down the sights.
+332	1	20795D99	Plan C	Charge and equip times are very short immediately after weapon swap.
+333	1	D8A79388		
+334	1	2826C109	Pocket Infinity	Fires in full auto mode and has a chance to return rounds that miss to the magazine.
+335	1	2826C108		
+336	1	3BAEC6F0	Red Death	Each kill heals you and speeds up reloads.
+337	1	3BAEC6F1		
+338	1	9BC07808	Super Good Advice	Missed shots may be returned to the magazine. Landed shots may be replaced in the magazine from your reserves.
+339	1	27B40775		
+340	1	4D107472	The Fate of All Fools	Chain body shots to gain bonus damage on your next precision shot and return ammo to the mag.
+341	1	B58B80F5	Mark of the Devourer	Rounds pierce targets and cause lingering damage over time.
+342	1	72CCAC40		
+343	1	F76B057C	Monte Carlo Method	Dealing damage with this weapon reduces your melee cooldown and grants a chance to fully charge your melee ability with each kill.
+344	1	76B29F47	Lightning Rounds	This weapon fires faster and more accurately the longer the trigger is held.
+345	1	76B29F46		
+346	1	76B29F45		
+347	1	E7927301		
+348	1	EE0424C3	Prototype Trueseeker	Rounds fired from this weapon seek their targets aggressively.
+349	1	1E82E072	Universal Remote	Range and precision damage increases greatly while aiming down the sights.
+350	1	DB28294A		
+351	1	48A56DA3	Cascade	Melee kills increase the reload speed of this weapon for a short time.
+352	1	6B877E9B	Cluster Bomb	Rockets create cluster bombs when they detonate.
+353	1	B6DC7646	Shot Package	Aiming this weapon reduces the spread of its projectiles.
+354	1	0898E110	Crowd Control	Kills with this weapon grant bonus damage for a short time.
+355	1	B1F72701	Headseeker	Body shots with this weapon increase precision damage for a short time.
+356	1	D59EBBEF	Shoot to Loot	Shooting any type of ammo picks it up.
+357	1	E8B2B313	Double Down	On initial spawn only, this weapon gains additional ammo.
+358	1	309A75B8		
+359	1	B830F64C	Focused Fire	When zoomed, this weapon fires slower, but causes additional damage.
+360	1	5D70DCCD	Hip Fire	This weapon has bonus accuracy while firing from the hip.
+361	1	2A704119	Glass Half Full	The bottom half of each magazine causes additional damage.
+362	1	8847143A	Grenadier	Kills with this weapon reduce the cooldown of your grenade.
+363	1	2F81361E	Hat Trick	The final round in each burst deals bonus precision damage.
+364	1	AF2D58CC	Final Round	The last round in a magazine deals bonus damage.
+365	1	F9FAFBCE	Feeding Frenzy	Kills with this weapon increase reload speed for a short time.
+366	1	D1806C59	Life Support	Recovering from near death grants additional ammo and briefly increases reload speed.
+367	1	98591D1D		
+368	1	F28437D9	Luck in the Chamber	One random bullet in the magazine causes considerable bonus damage.
+369	1	49FEC08D	Luck in the Chamber	One random bullet in the magazine causes considerable bonus precision damage.
+370	1	B1F573C2	Luck in the Chamber	One random bullet in the magazine causes considerable bonus damage.
+371	1	3CF9DB9D	Metal Detector	Expect to find more ammo for this weapon.
+372	1	23AC07FF	Metal Detector	Expect to find more ammo for this weapon.
+373	1	1E14A3DD	Metal Detector	Expect to find more ammo for this weapon.
+374	1	8F9383D2	Metal Detector	Expect to find more ammo for this weapon.
+375	1	1BCD9881	Metal Detector	Expect to find more ammo for this weapon.
+376	1	332FDB00	Mulligan	Missing a shot has a chance to return ammo directly to the magazine.
+377	1	55CE5580	Pack Mule	This weapon has bonus backpack ammo reserves available.
+378	1	2C161887		
+379	1	B0A30A2E		
+380	1	57557C74	Rangefinder	Aiming this weapon increases its effective range.
+381	1	6AB250F3	Rangefinder	Aiming this weapon increases its effective range.
+382	1	273F521C	Vacuum	Increases the pick-up radius of ammo drops for this weapon.
+383	1	1F943A96	Reactive Reload	Reloading this weapon after a kill grants a damage bonus for a short time.
+384	1	9CBED26D	Rodeo	Reduces the severity of this weapon��s recoil.
+385	1	AF89CDF3	Spray and Play	Increases the reload speed of this weapon when its mag is empty.
+386	1	072732CB		
+387	1	B69FCF4E	Rewind	Missing a shot has a chance to return ammo directly to the magazine.
+388	1	043C89F2	Secret Round	Missing a shot from this weapon's burst will fire a fourth shot.
+389	1	A0A9046A		
+390	1	E116F33B		
+391	1	F586B33B	Surplus	Expect to find more ammo for this weapon.
+392	1	7AE24B34	Persistence	This weapon grows more accurate the longer it is fired.
+393	1	2C13BCB4	Take a Knee	Gain bonus accuracy while crouched.
+394	1	B8A69A38	Third Eye	Radar stays active while aiming down this weapon's sights.
+395	1	E3FB09DA	Snapshot	This weapon aims extremely quickly.
+396	0	811C9DC5	Kneepads	Slide further while this weapon is equipped.
+397	1	074AFE99	Zen Moment	Causing damage with this weapon increases its stability.
+398	1	433BCBCC	Deep Squeeze	This weapon fires faster the deeper its trigger is pulled.
+399	1	DFE15B0D		
+400	1	D870EB8C		
+401	1	B4872E82	Clown Cartridge	Reloading this weapon has a chance to grant a larger than normal magazine.
+402	1	F6090E1D	Counterbalance	This weapon has increased stability.
+403	0	811C9DC5	Elementalist	Enemies vulnerable to this weapon's damage type explode on death.
+404	1	40BFFEA2		
+405	1	589F1ED8	Firefly	Precision kills with this weapon cause the target to explode.
+406	1	840ED6AB		
+407	1	6A3F6CA4	Full Auto	This weapon can be fired in full auto mode.
+408	1	BAEAB8B6		
+409	1	5ACDE37E	Full Auto	This weapon can be fired in full auto mode.
+410	0	811C9DC5		
+411	1	B7337B60	Grenades and Horseshoes	Rockets from this weapon will detonate early based on proximity to targets.
+412	1	EAED91D9	Outlaw	Precision kills with this weapon dramatically increase reload speed.
+413	1	8128238C	Hair Trigger	This weapon doesn't require a full trigger pull to fire.
+414	1	2D730258		
+415	1	B7A870A8	Unflinching	It's easier to aim under fire using this weapon.
+416	1	1A77A43B		
+417	1	82E9A54E		
+418	1	BC21B58D	Spinning Up	The longer this weapon is fired, the faster it fires.
+419	1	C021BC2C	Spinning Up	The longer this weapon is fired, the faster it fires.
+420	1	86BACE97	Marksman	This weapon gains bonus precision damage.
+421	1	2F1DAF87	MIRV Mini	Rockets fired from this weapon split into several smaller shells upon detonating.
+422	1	5F88C276	Performance Bonus	Kills with this weapon have the chance to grant bonus reserve ammo.
+423	1	EDB8B90B	Performance Bonus	Kills with this weapon have the chance to grant bonus reserve ammo.
+424	1	5C2D7935	Performance Bonus	Kills with this weapon have the chance to grant bonus reserve ammo.
+425	1	5885475B	Performance Bonus	Kills with this weapon have the chance to grant bonus reserve ammo.
+426	1	330C59A0	Performance Bonus	Kills with this weapon have the chance to grant bonus reserve ammo.
+427	1	CA7B8769	Performance Bonus	Kills with this weapon have the chance to grant bonus reserve ammo.
+428	1	C299B092	Performance Bonus	Kills with this weapon have the chance to grant bonus reserve ammo.
+429	1	996EB6AA	Performance Bonus	Kills with this weapon have the chance to grant bonus reserve ammo.
+430	1	3EDA46D0	Private Eye	Optical zoom length is increased while crouched.
+431	1	80089D07	Return to Sender	Kills with this weapon have the chance to grant bonus ammo to the magazine.
+432	1	1956BB40	Secret Round	Missing a shot from this weapon's burst will fire a fourth shot.
+433	1	4552BB5C		
+434	1	5BED842E	Persistence	This weapon grows more accurate the longer it is fired.
+435	1	7C1C5BF2		
+436	1	C15AA0FE	Third Eye	Radar stays active while aiming down this weapon's sights.
+437	1	F527E966	Tripod	This launcher's tube can hold three shells.
+438	1	DC5F1DF6	Tracking	Shells fired from this weapon track their targets
+439	1	6649CEAD		
+440	1	8113B7EA	Who's Next?	A kill with the final round in the magazine increases reload speed.
+441	1	DD87D80C		
+442	0	811C9DC5		
+443	0	811C9DC5		
+444	0	811C9DC5		
+445	0	811C9DC5		
+446	0	811C9DC5		
+447	0	811C9DC5		
+448	0	811C9DC5		
+449	0	811C9DC5		
+450	0	811C9DC5		
+451	1	10759E89	Defensive Reflex	Enables tracking for Scatter Grenades.  Hold an extra Scatter Grenade charge.
+452	0	811C9DC5	Arachnid Sensorium	Blessing of Light and Weapons of Light last longer.
+453	1	77BBF8E7	Be Somewhere Else	Increases the duration Shoulder Charge remains active.
+454	1	8C778001	Hive Breaker	Killing a Hive with a melee attack has a chance to spawn an Orb of Light.
+455	1	8C778000	Hive Striker	Killing a Hive with a critical hit has a chance to spawn an Orb of  Light.
+456	1	8C778003	Hive Destroyer	Killing a Hive with a grenade ability has a chance to spawn an Orb of Light.
+457	1	BB0FDCD7	Moment of Speed	Gain a temporary increase to reload speed while Oversoul's Gaze is active.
+458	1	988513B0	Moment of Power	Gain a temporary increase to weapon damage while Oversoul's Gaze is active.
+459	1	E5910873	Swordbearer's Touch	Gain a temporary increase to Agility while carrying the sword of a Hive Swordbearer.
+460	1	8973B7FB	Defensive Reflex	Enables tracking for Scatter Grenades.  Hold an extra Scatter Grenade charge.
+461	1	8973B7FA		
+462	0	811C9DC5	Arachnid Sensorium	Blessing of Light and Weapons of Light last longer.
+463	0	811C9DC5	Be Somewhere Else	Increases the duration Shoulder Charge remains active.
+464	0	811C9DC5	Defensive Reflex	Enables tracking for Scatter Grenades.  Hold an extra Scatter Grenade charge.
+465	0	811C9DC5	Burn Brighter	Activating Radiance from death disorients nearby enemies.
+466	1	4539B851	Arachnid Sensorium	Blessing of Light and Weapons of Light last longer.
+467	1	1EE8BCA6	Napalm	Release trigger after weapon fire to drop a Solar Damage napalm canister.
+468	1	C1E04635	Cursebringer	Precision kills with this weapon frequently trigger a Cursed Thrall explosion.
+469	1	0BEF242E		
+470	1	4900B826	The Master	Increased precision damage. Kills briefly increase damage against next target.
+471	1	0A9E8837		
+472	1	BB87DE9E		
+473	1	7376A54E	Primary Care	This Exotic Sniper Rifle can be equipped in the primary weapon slot.
+474	1	C606A5BF	The Master	Increased precision damage. Kills briefly increase damage against next target.
+475	1	A61CF14A		
+476	1	818DE8E0	Dark Breaker	Projectiles will overpenetrate through Hive Knight Wall of Darkness.
+477	1	22A66B0E		
+478	1	83D4B4DF	White Nail	Rapidly landing three precision shots will refill the magazine from your reserves.
+479	1	4B7EF348	Phantom Gift	Rapidly landing three precision hits returns one round to the magazine.
+480	1	C58CA7FB	Target Mark	Enemies hit by this weapon are briefly highlighted.
+481	1	584D8477	Lich Bane	Projectiles have a chance to disorient Hive Wizards.
+482	0	811C9DC5	Aspect Swap	This weapon can swap between Arc and Solar damage.
+483	0	811C9DC5		
+484	0	811C9DC5		
+485	0	811C9DC5		
+486	0	811C9DC5		
+487	0	811C9DC5		
+488	0	811C9DC5		
+489	0	811C9DC5		
+490	0	811C9DC5		
+491	0	811C9DC5		
+492	0	811C9DC5		
+493	0	811C9DC5	Shader Version 1	Recolor armor with Type I coating.
+494	0	811C9DC5		
+495	0	811C9DC5	Shader Version 2	Recolor armor with Type I to II coating.
+496	0	811C9DC5		
+497	0	811C9DC5	Shader Version 3	Recolor armor with Type I to III coating.
+498	0	811C9DC5		
+499	0	811C9DC5	Shader Version 4	Recolor armor with Type I to IV coating.
+500	0	811C9DC5		
+501	0	811C9DC5	Shader Version 5	Recolor armor with Type I to V coating.
+502	0	811C9DC5		
+503	0	811C9DC5	Shader Version 6	Recolor armor with Type I to VI coating.
+504	0	811C9DC5		
+505	0	811C9DC5		
+506	0	811C9DC5		
+507	0	811C9DC5		
+508	0	811C9DC5		
+509	0	811C9DC5	Ticket Expired	All tries used up. Redeem ticket to collect winnings.
+510	0	811C9DC5	One Try Remaining	One try remaining on this ticket.
+511	0	811C9DC5	Two Tries Remaining	Two tries remaining on this ticket.
+512	0	811C9DC5	Three Tries Remaining	Three tries remaining on this ticket.
+513	0	811C9DC5		
+514	0	811C9DC5		
+515	0	811C9DC5		
+516	0	811C9DC5		
+517	0	811C9DC5	Boost	Hold  to accelerate to higher speed.
+518	0	811C9DC5	Air Brakes	Use  to brake and corner more aggressively.
+519	0	811C9DC5	Destabilizers	Use  while airborne to release roll stabilizers, and  to roll.
+520	0	811C9DC5	Vernier Thrusters	Use  or  and   or  for quick lateral movements.
+521	0	811C9DC5	Overdrive	Hold  for greater speed at risk of exploding.
+522	0	811C9DC5		
+523	0	811C9DC5		
+524	0	811C9DC5		
+525	0	811C9DC5		
+526	0	811C9DC5		
+527	0	811C9DC5		
+528	0	811C9DC5		
+529	0	811C9DC5		
+530	0	811C9DC5		
+531	0	811C9DC5		
+532	0	811C9DC5		
+533	0	811C9DC5		
+534	0	811C9DC5		
+535	0	811C9DC5		
+536	0	811C9DC5		
+537	0	811C9DC5		
+538	0	811C9DC5		
+539	1	FCFB1574	Arc Damage	This weapon causes Arc Damage.
+540	1	E38031B9	Solar Damage	This weapon causes Solar Damage.
+541	1	3D2CB332	Void Damage	This weapon causes Void Damage.
+542	1	4D687A8D		
+543	1	29A85830		
+544	1	4DB0F10B		
+545	1	365ADE12		
+546	0	811C9DC5		
+547	0	811C9DC5		
+548	0	811C9DC5		
+549	0	811C9DC5		
+550	0	811C9DC5		
+551	0	811C9DC5		
+552	0	811C9DC5		
+553	0	811C9DC5		
+554	0	811C9DC5		
+555	0	811C9DC5		
+556	0	811C9DC5		
+557	0	811C9DC5		
+558	0	811C9DC5		
+559	0	811C9DC5		
+560	0	811C9DC5		
+561	0	811C9DC5		
+562	0	811C9DC5		
+563	0	811C9DC5		
+564	0	811C9DC5		
+565	0	811C9DC5		
+566	0	811C9DC5		
+567	0	811C9DC5		
+568	0	811C9DC5		
+569	0	811C9DC5		
+570	0	811C9DC5		
+571	0	811C9DC5		
+572	0	811C9DC5		
+573	0	811C9DC5		
+574	0	811C9DC5		
+575	0	811C9DC5		
+576	0	811C9DC5		
+577	0	811C9DC5		
+578	0	811C9DC5		
+579	0	811C9DC5		
+580	0	811C9DC5		
+581	0	811C9DC5		
+582	0	811C9DC5		
+583	0	811C9DC5		
+584	0	811C9DC5		
+585	0	811C9DC5	Favor of Osiris	You have been granted a Favor. You will start the Trials with a win already awarded.
+586	0	811C9DC5	Mercy of Osiris	You have been granted Mercy. Your first loss in the Trials will be forgiven.
+587	0	811C9DC5	Boon of Osiris	You have been granted a Boon. If you win your next Trials match, it will count as two wins.
+588	1	F8C75D54	Defensive Reflex	Enables tracking for Scatter Grenades.  Hold an extra Scatter Grenade charge.
+589	1	F8C75D55		
+590	1	EE644F55	Arachnid Sensorium	Blessing of Light and Weapons of Light last longer.
+591	0	811C9DC5	Be Somewhere Else	Increases the duration Shoulder Charge remains active.
+592	1	C35C5C08	Cabal Stalker	Greatly increased Agility and Grenade recharge when fighting Cabal in the Prison of Elders.  Equip prior to first Wave of each Round.
+593	1	EFCCD435	Fallen Stalker	Greatly increased Agility and Grenade recharge when fighting Fallen in the Prison of Elders.  Equip prior to first Wave of each Round.
+594	1	E8F7865D	Hive Stalker	Greatly increased Agility and Grenade recharge when fighting Hive in the Prison of Elders.  Equip prior to first Wave of each Round.
+595	1	57A0E510	Vex Stalker	Greatly increased Agility and Grenade recharge when fighting Vex in the Prison of Elders.  Equip prior to first Wave of each Round.
+596	1	824CB134	Cabal Rampart	Greatly increased Armor and Melee recharge when fighting Cabal in the Prison of Elders.  Equip prior to first Wave of each Round.
+597	1	75B193B9	Fallen Rampart	Greatly increased Armor and Melee recharge when fighting Fallen in the Prison of Elders.  Equip prior to first Wave of each Round.
+598	1	AC329339	Hive Rampart	Greatly increased Armor and Melee recharge when fighting Hive in the Prison of Elders.  Equip prior to first Wave of each Round.
+599	1	5A097754	Vex Rampart	Greatly increased Armor and Melee recharge when fighting Vex in the Prison of Elders.  Equip prior to first Wave of each Round.
+600	1	E3FF0B29	Ether Bomb	Chance to generate Orbs when killing Fallen with grenades.
+601	1	09A42FEF	Ether Claw	Chance to generate Orbs when killing Fallen with melee attacks.
+602	1	480D229F	Ether Needle	Chance to generate Orbs when killing Fallen with precision hits.
+603	1	2BF8741E	Cabal Arbiter	Greatly increased Recovery and Super recharge when fighting Cabal in the Prison of Elders.  Equip prior to first Wave of each Round.
+604	1	F98A757F	Fallen Arbiter	Greatly increased Recovery and Super recharge when fighting Fallen in the Prison of Elders.  Equip prior to first Wave of each Round.
+605	1	E6C2DCB3	Hive Arbiter	Greatly increased Recovery and Super recharge when fighting Hive in the Prison of Elders.  Equip prior to first Wave of each Round.
+606	1	8339EC02	Vex Arbiter	Greatly increased Recovery and Super recharge when fighting Vex in the Prison of Elders.  Equip prior to first Wave of each Round.
+607	1	ADFEA2D0	Defensive Reflex	Enables tracking for Scatter Grenades.  Hold an extra Scatter Grenade charge.
+608	0	811C9DC5	Arachnid Sensorium	Blessing of Light and Weapons of Light last longer.
+609	0	811C9DC5	Be Somewhere Else	Increases the duration Shoulder Charge remains active.
+610	0	811C9DC5	Defensive Reflex	Enables tracking for Scatter Grenades.  Hold an extra Scatter Grenade charge.
+611	0	811C9DC5	Burn Brighter	Activating Radiance from death disorients nearby enemies.
+612	0	811C9DC5	Arachnid Sensorium	Blessing of Light and Weapons of Light last longer.
+613	1	BF40F249	Army of One	Quick unassisted kills with this weapon reduce grenade and melee cooldown.
+614	1	CF2DAE3E		
+615	1	24BD8C06	Battle Runner	Kills with this weapon grant a brief boost to the sprint's top speed.
+616	1	3465B453		
+617	1	8C6DAD2C	Close and/or Personal	Short period of 25% bonus melee damage after landing a hit with this weapon.
+618	1	2DD59D2C		
+619	1	DFDD7E34	Thunderer	This weapon can be fired in full auto mode.
+620	1	22131232	Devil's Touch	Kills grant nearby Guardians bonus Recovery.
+621	1	A0176183		
+622	1	9941CA0A		
+623	1	055B83B3	David	Precision kills temporarily increase Agility stat for 15 seconds.
+624	1	93F5D8CB	Goliath	Non precision kills temporarily increase Armor stat for 15 seconds.
+625	1	BBC84238	Reserve Ammo	This weapon always has ammo on respawn.
+626	1	9A4632E5		
+627	1	FF2DE741	Shock Rounds	High ricochet shock rounds with enhanced target acquisition.
+628	1	88B72033	Chasm Rounds	This weapon fires faster and more accurately the longer the trigger is held.
+629	1	8EC9E88D		
+630	1	42AEBC08		
+631	1	E50A5129	Grave Robber	Melee kills while this weapon is equipped have a chance to refill the magazine.
+632	1	7BE8F3ED	Hidden Hand	This weapon gains better target acquisition.
+633	1	0D612DF6	Hot Swap	Readying this weapon grants a brief period of bonus accuracy.
+634	1	B681F5AE	Icarus	Improved accuracy while airborne.
+635	1	AF332313	Replenish	This weapon's magazine will be refilled whenever you unleash your Super.
+636	1	9B64DBF8		
+637	1	AD5A7D3D	Triple Tap	Rapidly landing precision hits will return one round to the magazine.
+638	1	0FD9ECF2		
+639	1	33762151	Demotion	This weapon has a chance to stun Fallen Captains.
+640	1	46291EB6		
+641	1	25194BE6	Disciplinarian	This weapon deals a small amount of bonus damage to Fallen enemies.
+642	1	5BAFAE9D		
+643	1	59AE8FFC	Dreg Burn	This weapon deals moderate bonus damage to Fallen Dregs.
+644	1	F52134D7	Scrambler	This weapon has a chance to stun Fallen Servitors.
+645	1	ED6E0FC7	Shank Burn	This weapon deals moderate bonus damage to Fallen Shanks.
+646	1	A22AF448	Mutineer	This weapon has a chance of suppressing a Fallen Captain's abilities.
+647	1	07077864	Vandal Burn	This weapon deals moderate bonus damage to Fallen Vandals.
+648	0	811C9DC5	Tempered	A boon from the Lords of Iron. Increases Event Standing gained in the Iron Banner.  Becomes increasingly effective every day the Iron Banner is available.
+649	1	5F6B81BC	Flaming Skull	The haunting touch of the afterlife.
+650	1	B30839E1		
+651	1	6161086B		
+652	1	C776FC0A		
+653	1	C776FC0B		
+654	1	AEEE3633		
+655	1	AEEE3632		
+656	1	AEEE3631		
+657	1	AEEE3630		
+658	1	AEEE3637		
+659	0	811C9DC5		
+660	1	0A91924C		
+661	1	0A91924F		
+662	1	02D19CDE		
+663	1	02D19CDD		
+664	1	04310088		
+665	1	04310089		
+666	1	0431008A		
+667	1	E46CB0C5		
+668	1	E46CB0C4		
+669	1	6EC70C2D		
+670	1	6EC70C2C		
+671	1	47A96351		
+672	1	13192778		
+673	1	13192779		
+674	1	023FA381		
+675	1	023FA382		
+676	1	A2F9CEFC	Arc Double-Down	Increased Agility for 5 seconds after an Arc double kill.
+677	1	74C0702F	Last Hope	Increased Agility after becoming the last Guardian standing.
+678	1	CCE37ABF	Solar Double-Down	Increased Agility for 5 seconds after a Solar Double kill.
+679	1	CE767D7C	Void Double-Down	Increased Agility for 5 seconds after a Void double kill.
+680	1	D0BC7BB2	Arc Armor	Increased Armor when using an Arc-based subclass.
+681	1	F48E22C5	Solar Armor	Increased Armor when using a Solar-based subclass.
+682	1	7661C3B2	Void Armor	Increased Armor when using a Void-based subclass.
+683	1	FE6F3286	Arc Burn Defense	Reduces incoming Arc Burn damage.
+684	1	8B63E59D	Solar Burn Defense	Reduces incoming Solar Burn damage.
+685	1	6D393A38	Void Burn Defense	Reduces incoming Void Burn damage.
+686	1	4B9B89DB	Impact Induction	Bonus grenade energy on melee hits.
+687	1	839299ED	Innervation	Bonus grenade energy on Orb pickup.
+688	1	0082607F	Nightmare Fuel	Gain additional melee charge, and melee damage may reload Primary Weapon.
+689	0	811C9DC5	New Tricks	Improves Skip Grenade and gain an additional Skip Grenade charge.
+690	1	40739989	The Tarantella	Reduced Arc damage from minions of the Darkness. Arc grenades and Arc Blade recharge faster.
+691	1	40739988		
+692	0	811C9DC5		
+693	0	811C9DC5	Arcmage	Your Nightstalker subclass upgrades 25% faster and your Level increases 10% faster.
+694	0	811C9DC5		
+695	1	5514062E	Versatile Shooter	Chance to create Orbs on Heavy Weapon kills.  With a full Super, Orbs may grant Special Ammo.
+696	1	0E64754F	Elusive Shadow	Grants Shadestep.
+697	1	5514062F		
+698	1	F21EFFC5	Rapid Cooldown	While sprinting, gain tighter turn radius and faster grenade and melee regeneration.
+699	0	811C9DC5		
+700	0	811C9DC5	Field Trip	Increased Tripmine Grenade duration. Gain an additional Tripmine Grenade charge.
+701	1	C9B44CEE	Touch of Venom	Invisible while crouching.  Invisible melee from behind deals 4x damage.  Melee attacks cause lingering damage.
+702	1	C9B44CEF		
+703	0	811C9DC5	Keeper of the Pack	Supers generate an extra Orb.  Revive and be revived faster.
+704	1	D0EC4F59		
+705	0	811C9DC5	Make Your Luck	Arcbolt Grenade chains further.  Respawn with full grenade energy.
+706	0	811C9DC5	Last Man Standing	Golden Gun gains one additional shot.
+707	0	811C9DC5	Unstable Current	Arc Blade attacks use less Super energy.
+708	0	811C9DC5	Arachnid Sensorium	Golden Gun lasts longer, zooms in further when aimed.
+709	0	811C9DC5	Big Game	Golden Gun fires one shot with 6x damage, while granting Keyhole for overpenetration.
+710	0	811C9DC5	Cover	Increased Armor while peeking over cover, and increased movement speed while aiming your weapon.
+711	1	829F52AB	Be Somewhere Else	Increases the duration of Shoulder Charge and tighter turn radius while sprinting.
+712	0	811C9DC5	Not Bound by Law	Upgrades Double Jump with an additional jump.
+713	1	13027A4B	Momentum Transfer	Gain bonus melee energy on grenade hits.
+714	1	0AA3FEF7	Invigoration	Gain bonus melee energy on Orb pickups.
+715	1	C8C829D3	Buddy System	Faster weapon reload while in an Aura.
+716	1	86279A71	Run for Your Life	Increased Agility while Torn Between Dimensions.
+717	1	5F85822D	Mortal Medicine	Gain a boost to Recovery per grenade kill. Stacks for 20 seconds.
+718	1	4C7C4936	Glutton	Receive bonus melee energy for each enemy standing nearby you when you get a kill.
+719	1	FD790EFB	Fists Flying	Gain a boost to Agility per melee kill. Stacks for 20 seconds.
+720	1	AEF1342D	Old Gods' Boon	Increased Armor while carrying the King's Fall relic.
+721	1	64BBB19C		
+722	1	CACE76F6	Shine On	Increased Super energy gained from killing minions of the Darkness.
+723	1	5D7EC7E8	Take That	Orb pickups create the chance for temporary bonus precision damage to Taken.
+724	1	3D43F5E1	Arc Recovery	Increased Recovery for 5 seconds after taking Arc splash damage.
+725	1	EE0E54B4	Solar Recovery	Increased Recovery for 5 seconds after taking Solar splash damage.
+726	1	DADC4545	Void Recovery	Increased Recovery for 5 seconds after taking Void splash damage.
+727	1	4902D239	Better Already	Shields start recovery immediately after Orb pickup.
+728	1	E75644E1	Ashes to Assets	Gain bonus Super energy on Grenade kills.
+729	1	9BD312C0	Heavy Lifting	Gain bonus Super energy from Heavy Weapon kills on minions of the Darkness.
+730	1	31252FF0	Inverse Shadow	Gain bonus Super energy on kills.
+731	1	8DFB718F	Hands-On	Gain bonus Super energy from melee kills on minions of the Darkness.
+732	1	8B80F15B	Angel of Mercy	Gain bonus Super energy from reviving others.
+733	1	27B4075D	Second Thoughts	Gain bonus Super energy from Special Weapon kills on minions of the Darkness.
+734	1	ECBBAFA6	Capture King	After capturing control zones in Crucible matches, weapon and movement speeds are greatly increased.
+735	1	229DBFA5	Second Wind	On respawn, weapon and movement speeds are greatly increased.
+736	1	64BB6869	Accelerant	Grants Explosive Pyre.
+737	1	B20126B8	One-Two Punch	Grants Amplify. Grants additional melee charge.
+738	1	B20126B9		
+739	0	811C9DC5	Tactical Air Support	Press ,  while airborne to evade.
+740	0	811C9DC5	Arcmage	Your Nightstalker subclass upgrades 25% faster and your Level increases 10% faster.
+741	0	811C9DC5		
+742	1	70068AA8	Antigrav Thrusters	Aiming weapons while airborne holds you in place. With full Super, Orbs recharge melee.
+743	1	70068AA9		
+744	1	AE381459	Air Traffic Control	All Rocket Launchers gain tracking.  Visible radar while zooming with Heavy Weapons.  Heavy ammo drops more often.
+745	1	AE381458		
+746	1	AE38145B		
+747	0	811C9DC5	Speed Demon	Increased sprint speed.  Move faster with aimed weapon. Tighter sprinting turn radius.
+748	1	67480446		
+749	1	26CAE7CE	Force Multiplier	Shotgun kills trigger Force Barrier and Force Barrier's duration is increased.
+750	1	26CAE7CF		
+751	0	811C9DC5	Keeper of the Pack	Supers generate an extra Orb.  Revive and be revived faster.
+752	1	CB13DE27		
+753	0	811C9DC5	And Another Thing	Gain an additional grenade charge.
+754	0	811C9DC5	Starless Night	Blind enemies inside your Ward of Dawn.
+755	0	811C9DC5	Recklessness	Gain Death from Above and Headstrong.
+756	1	372FE4ED	Hit It Again	Gain an additional melee charge.
+757	0	811C9DC5	Bathed in Light	Blessing of Light and Weapons of Light lasts longer.
+758	0	811C9DC5	Resolute	Gain Unstoppable for Fist of Havoc.
+759	0	811C9DC5	Be Somewhere Else	Increases the duration of Shoulder Charge and tighter turn radius while sprinting.
+760	0	811C9DC5	Peregrine Strike	Airborne Shoulder Charge deals bonus damage.
+761	1	8F9AC54F	Viper Totemic	Improved Energy Drain, and weapons ready and reload very quickly.
+762	0	811C9DC5	Lightning Rod	Grants Landfall.
+763	1	8F9AC54E		
+764	1	8F9AC54D		
+765	1	1BD02386	Iron to Gold	Chance to gain Glimmer on Primary Ammo pickup With full Super, Orbs recharge grenade and melee.
+766	1	1BD02387		
+767	1	1BD02384		
+768	0	811C9DC5	Arcmage	Your Nightstalker subclass upgrades 25% faster and your Level increases 10% faster.
+769	0	811C9DC5		
+770	1	16B0AE37	Doe or Die	Once per life, fast Super charge when all teammates die.  Chance to spawn with Overshield.
+771	1	16B0AE36		
+772	0	811C9DC5	Teleportation	Reduces Blink cooldown and increases travel distance.
+773	1	6B8895FC	Strange Angles	Faster movement speed while crouching. Ammo pickups automatically reload that weapon type.
+774	1	6B8895FD		
+775	1	6B8895FE		
+776	1	6B8895FF		
+777	0	811C9DC5	Helium Cycle	Increases the duration of your Solar Grenade while gaining an additional Solar Grenade charge.
+778	0	811C9DC5	The Whispers	Gain an additional melee charge.
+779	0	811C9DC5	Scatter Charge	Enables Scatter Grenade tracking.   Gain an additional Scatter Grenade charge.
+780	1	211794F3	Praise the Sun	When Radiance is active, increased Agility and decreased ability cooldowns
+781	0	811C9DC5	Hungering Void	Spawn with full grenade.  Axion Bolt gains additional seeker.
+782	0	811C9DC5	Starfire Protocol	Gain an additional Fusion Grenade charge.
+783	0	811C9DC5	Burn Brighter	Activating Radiance from death disorients nearby enemies.
+784	1	F18DA284	Delusions of Grandeur	Take reduced damage while using Nova Bomb. Improved Energy Drain abilities.
+785	1	6780EE25	Private Reserves	Immediate health, melee, and grenade regeneration on activating your Super.
+786	1	6780EE24		
+787	0	811C9DC5	Keeper of the Pack	Supers generate an extra Orb.  Revive and be revived faster.
+788	1	6D78218F		
+789	1	7A6C72AF	Insatiable	Nova Bomb reduces cooldown of next Nova Bomb.
+790	0	811C9DC5	Strength of the Ram	Gain increased Armor and all Voidwalker melee attacks trigger Life Steal on hit.
+791	1	51ACD666	Auto Rifle Ammo	Increases the amount of Auto Rifle ammunition you can carry.
+792	1	B738E86D	Hand Cannon Ammo	Increases the amount of Hand Cannon ammunition you can carry.
+793	1	356FBC3E	Machine Gun Ammo	Increases the amount of Machine Gun ammunition you can carry.
+794	1	A139A8E4	Fusion Rifle Ammo	Increases the amount of Fusion Rifle ammunition you can carry.
+795	1	19798242	Pulse Rifle Ammo	Increases the amount of Pulse Rifle ammunition you can carry.
+796	1	2B18E013	Rocket Launcher Ammo	Increases the amount of Rocket Launcher ammunition you can carry.
+797	1	0C78E565	Scout Rifle Ammo	Increases the amount of Scout Rifle ammunition you can carry.
+798	1	A9D643C8	Shotgun Ammo	Increases the amount of Shotgun ammunition you can carry.
+799	1	6DB95F6D	Sidearm Ammo	Increases the amount of Sidearm ammunition you can carry.
+800	1	23AEDD3E	Sniper Rifle Ammo	Increases the amount of Sniper Rifle ammunition you can carry.
+801	1	D85649C8	Sidearm Ready	Increases speed at which you switch to Sidearms.
+802	1	194E3AE3	Auto Rifle Loader	Increases the reload speed of Auto Rifles.
+803	1	B3770256	Hand Cannon Loader	Increases the reload speed of Hand Cannons.
+804	1	C6503C99	Pulse Rifle Loader	Increases the reload speed of Pulse Rifles.
+805	1	2A6BC77E	Scout Rifle Loader	Increases the reload speed of Scout Rifles.
+806	1	AEF376C2	Sidearm Loader	Increases the reload speed of Sidearms.
+807	1	1C5640A7	Arc Resonance	Arc grenades have a chance to generate an Orb when killing a minion of the Darkness.
+808	1	173A2406	Taken Imploder	Grenades have a chance to generate an Orb when killing a Taken enemy.
+809	1	A29F4D22	Solar Resonance	Solar grenades have a chance to generate an Orb when killing a minion of the Darkness.
+810	1	7615B6A7	Void Resonance	Void grenades have a chance to generate an Orb when killing a minion of the Darkness.
+811	1	28D6C9C5	Arc Accumulator	Arc melees have a chance to generate an Orb when killing a minion of the Darkness.
+812	1	4CEF4ADC	Taken Breaker	Melees have a chance to generate an Orb when killing a Taken enemy.
+813	1	9458AF1C	Solar Accumulator	Solar melees have a chance to generate an Orb when killing a minion of the Darkness.
+814	1	65D15EB1	Void Accumulator	Void melees have a chance to generate an Orb when killing a minion of the Darkness.
+815	1	94657825	Arc Catalyst	Arc precision kills against a minion of the Darkness have a chance to generate an Orb.
+816	1	DF9AE03C	Taken Piercer	Precision kills against a Taken enemy have a chance to generate an Orb.
+817	1	ACA84F7C	Solar Catalyst	Solar precision kills against a minion of the Darkness have a chance to generate an Orb.
+818	1	14F37691	Void Catalyst	Void precision kills against a minion of the Darkness have a chance to generate an Orb.
+819	0	811C9DC5	Vanguard Streak	Increases Vanguard Reputation and drop chance for Legendaries in Strikes.   Lasts until you return to orbit.
+820	1	63D4337C		
+821	1	63D4337D		
+822	1	63D4337E		
+823	0	811C9DC5	Heavy Weapon Analysis	Increased XP gain for Heavy weapons.
+824	0	811C9DC5	Primary Weapon Analysis	Increased XP gain for Primary weapons.
+825	0	811C9DC5	Special Weapon Analysis	Increased XP gain for Special weapons.
+826	0	811C9DC5	Crimson Connection	Inspiration: Increases the upgrade rate for all weapons for 30 minutes. Affects you and all Fireteam members.
+827	0	811C9DC5		
+828	0	811C9DC5		
+829	0	811C9DC5		
+830	0	811C9DC5		
+831	0	811C9DC5		
+832	0	811C9DC5		
+833	0	811C9DC5		
+834	0	811C9DC5		
+835	0	811C9DC5		
+836	0	811C9DC5		
+837	0	811C9DC5	Spinmetal Extractor	Chance to find additional spinmetal when looting engrams in the Cosmodrome.
+838	0	811C9DC5	Wormspore Extractor	Chance to find additional wormspore when looting engrams on Oryx's Dreadnaught.
+839	0	811C9DC5	Relic Iron Extractor	Chance to find additional relic iron when looting engrams on Mars.
+840	0	811C9DC5	Helium Extractor	Chance to find additional helium filaments when looting engrams on the Moon.
+841	0	811C9DC5	Spirit Bloom Extractor	Chance to find additional spirit blooms when looting engrams on Venus.
+842	0	811C9DC5	Network Tap	Generate additional Glimmer when killing Cabal.
+843	0	811C9DC5	Ether Seeds	Generate additional Glimmer when killing Fallen.
+844	0	811C9DC5	Cleansing Ritual	Generate additional Glimmer when killing Hive.
+845	0	811C9DC5	Hunter Bounty	Generate additional Glimmer when killing Hunters in the Crucible.
+846	0	811C9DC5	Reclamation	Generate additional Glimmer when killing Taken.
+847	0	811C9DC5	Titan Bounty	Generate additional Glimmer when killing Titans in the Crucible.
+848	0	811C9DC5	Blue Polyphage	Generate additional Glimmer when killing Vex.
+849	0	811C9DC5	Warlock Bounty	Generate additional Glimmer when killing Warlocks in the Crucible.
+850	0	811C9DC5	Spinmetal Sensor	Detects and marks nearby spinmetal formations.
+851	0	811C9DC5	Wormspore Sensor	Detects and marks nearby wormspore clusters.
+852	0	811C9DC5	Relic Iron Sensor	Detects and marks nearby relic iron formations.
+853	0	811C9DC5	Helium Filament Sensor	Detects and marks nearby helium filament collectors.
+854	0	811C9DC5	Treasure Sensor	Detects and marks nearby storage containers.
+855	0	811C9DC5	Spirit Bloom Sensor	Detects and marks nearby spirit blooms.
+856	0	811C9DC5	Crimson Connection	Inspiration: Increases the upgrade rate for all weapons while you are in a Fireteam with the Inspiration provider.  Effect lasts for 30 minutes and will fade if you leave the Fireteam.
+857	0	811C9DC5	Exotic Particles	Grants a chance to receive an Exotic Engram on the next Ultra kill or Crucible match completion.
+858	0	811C9DC5	Placeholder	Not yet implemented. Pardon our dust!
+859	0	811C9DC5	Crucible Champion	Increases your Crucible reputation gains.
+860	0	811C9DC5	Dead Orbit Champion	Increases your Dead Orbit reputation gains.
+861	0	811C9DC5	Future War Cult Champion	Increases your Future War Cult reputation gains.
+862	0	811C9DC5	New Monarchy Champion	Increases your New Monarchy reputation gains.
+863	0	811C9DC5	Vanguard Champion	Increases your Vanguard reputation gains.
+864	0	811C9DC5	Auto Rifle Focus	A Ghost telemetry link that speeds the development of your upgradeable Auto Rifles. Lasts 30 minutes.
+865	0	811C9DC5	Fusion Rifle Focus	A Ghost telemetry link that speeds the development of your upgradeable Fusion Rifles. Lasts 30 minutes.
+866	0	811C9DC5	Hand Cannon Focus	A Ghost telemetry link that speeds the development of your upgradeable Hand Cannons. Lasts 30 minutes.
+867	0	811C9DC5	Machine Gun Focus	A Ghost telemetry link that speeds the development of your upgradeable Machine Guns. Lasts 30 minutes.
+868	0	811C9DC5	Pulse Rifle Focus	A Ghost telemetry link that speeds the development of your upgradeable Pulse Rifles. Lasts 30 minutes.
+869	0	811C9DC5	Rocket Launcher Focus	A Ghost telemetry link that speeds the development of your upgradeable Rocket Launchers. Lasts 30 minutes.
+870	0	811C9DC5	Scout Rifle Focus	A Ghost telemetry link that speeds the development of your upgradeable Scout Rifles. Lasts 30 minutes.
+871	0	811C9DC5	Shotgun Focus	A Ghost telemetry link that speeds the development of your upgradeable Shotguns. Lasts 30 minutes.
+872	0	811C9DC5	Sidearm Focus	Increases the upgrade rate for Sidearms.
+873	0	811C9DC5	Sniper Rifle Focus	A Ghost telemetry link that speeds the development of your upgradeable Sniper Rifles. Lasts 30 minutes.
+874	0	811C9DC5	Unsealed Power	The power of the warden seethes uncontrollably.
+875	0	811C9DC5	Unsealed Power	The power of the warden seethes uncontrollably.
+876	0	811C9DC5	Unsealed Power	The power of the warden seethes uncontrollably.
+877	0	811C9DC5	Link of Friendship	Increased XP gain when playing with a Linked Friend. Lasts until Level 40.
+878	1	C4D442CF	Relentless Tracker	Kills with this weapon grant enhanced motion tracker resolution for a short time.
+879	1	FD517ABA	Blinding Light	Precision kills with this weapon cause a bright flash that can blind nearby enemies.
+880	1	6161C98C	Rescue Mag	Chance to refill this weapon's magazine when critically wounded.
+881	1	CCF88CFF		
+882	1	D6BEEC30	Danger Close	This weapon gains increased reload and handling when two or more enemies are in close proximity.
+883	1	B8425910	Exhumed	This weapon gains improved range and handling for a short time after revival.
+884	1	18161252	The Roadborn	Precision kills briefly grant bonus handling, range and precision damage with this weapon.
+885	1	05BAB3EA		
+886	1	94F35EB5	The Survivor	Three rapid precision kills while Born on the Road is active will return two rounds to the chamber.
+887	1	5B69F56C	The Hereafter	Crouching increases scope zoom and makes it easier to aim under fire.
+888	1	30930A67	Dubious Munitions	Kills from the volley add another round to the volley.
+889	1	CAE14129	Dubious Ordnance	This weapon delivers a high-energy volley of explosive ordnance.
+890	1	7BDCF034	With a Laser Beam	The extra round from Dynamite causes a massive explosion.
+891	1	908D91CC	Dynamite	Grants explosive rounds. Rapid kills with every round in the clip load an extra, higher-damage round for 5 seconds.
+892	1	8800E797		
+893	1	8800E796		
+894	1	96B4031D	Activate IKELOS	Upgrades laser to allow multiple ricochets on hard surfaces.
+895	1	E38D05E2		
+896	1	C46D2F9D	Sleeper Simulant	Weapon's laser tears through enemies and ricochets once on hard surfaces.
+897	1	28D588FC	Harbinger's Spark	Multikills with this weapon spawn Orbs for your allies.
+898	1	BFF7FA74	Unplanned Reprieve	Fusion projectiles attach and detonate with a delayed Void blast.
+899	1	B9BB8B1F	Zhalo Supercell	Arc projectiles have the chance to chain lightning when enemies are close together.
+900	1	C2BC3EAF	Bolts from the Blue	Double kills with this weapon charge a small amount of Super energy and return ammo to the magazine.
+901	1	D1B3EBA6	Incendiary Rounds	This weapon fires faster and more accurately the longer the trigger is held.
+902	1	37A1B441	Rewind Again	Precision hits are immediately returned to the magazine.
+903	1	65B1D7BE	Touch of Malice	Final round of the magazine regenerates and deals bonus damage at the cost of the wielder's life force.
+904	1	DD225ECB		
+905	1	DD108566	Touch of Mercy	Three rapid kills will return a portion of the wielder's health.
+906	1	18D71E18	The First Curse	First precision kill of the magazine refills it, granting bonuses to range and stability until the player reloads.
+907	1	8FAC1110	Dead Eye	Bonus to range, stability, and movement speed when aiming down sights.
+908	1	16C28A1F	Eye of the Storm	This weapon becomes more accurate as your health gets lower.
+909	1	01131E10		
+910	1	B7DA6F03	Guerilla Fighter	Increased accuracy, handling and damage resistance when shooting this weapon from behind cover.
+911	1	1D868D76		
+912	1	F46C9CDC		
+913	1	16B4910E	Maverick	Precision kills move one round from your ammo reserves into the magazine.
+914	1	9C143560	Self Spotter	Increased radar resolution when this weapon is equipped.
+915	1	B0A77957	Final Round	Bonus precision damage on last round in clip.
+916	1	4CFFD2A7	Cocoon	When stowed for a short time, this weapon is automatically reloaded from your reserves.
+917	1	DF4F7814	Last Resort	This weapon handles and reloads faster when the wielder is the last living player of their Fireteam.
+918	1	19CB6726		
+919	1	DAF7302D	Life Support	Kills with this weapon while critically wounded have a chance to start regenerating health.
+920	1	3FC80D62		
+921	1	8495F1A2	Life Leech	Three rapid kills with this weapon heals a small amount and starts health regeneration
+922	1	C55A15A0	Partial Refund	Chance to return a portion of the magazine after an assist.
+923	1	7EA98E61	Perfectionist	Magazine is refunded if all shots fired are precision kills.
+924	1	D42BD04A	Surrounded	This weapon gains bonus damage when three or more enemies are in close proximity.
+925	1	8379D6D6		
+926	1	0A627AAF		
+927	1	19E0DE24	Arc-Forged Guard	Use  to guard. Effective against Solar and Void attacks, less effective against Arc attacks.
+928	1	BC2A6409	Solar-Forged Guard	Use  to guard. Effective against Arc and Void attacks, less effective against Solar attacks.
+929	1	CD241942	Void-Forged Guard	Use  to guard. Effective against Arc and Solar attacks, less effective against Void attacks.
+930	1	EC15482E	Supermassive Vortex	Use  to unleash a spiral of Void energy in all directions.
+931	1	969842F0	Phoenix Uppercut	Use  to launch into a Solar Light uppercut.
+932	1	FD5AC11A	Sword of Thunder	Use  to shoot a beam of Arc Light from your sword creating a lingering electrical storm.
+933	1	E9D2B85D	Warrior of Light	Increased damage for your  attack.
+934	1	ABBE5262	Warrior of Light	Increased damage for your  attack.
+935	1	3A48115D	Warrior of Light	Increased damage for your  attack.
+936	1	3BE41A47	Thrive by the Sword	Kills with the sword grant Super energy.
+937	1	225F8E7F	Die by the Sword	Kills with the sword replenish grenade energy.
+938	1	15826871	Live by the Sword	Kills with the sword have a chance to grant Orbs.
+939	1	F3D99DA5		
+940	1	118F2F24		
+941	1	6CF4100C	Front Lines	This weapon has increased handling, stability and rate of fire when enemies are close.
+942	1	30819C01	Bouncer	Kills inside Ward of Dawn with Armor of Light do not expend ammo.
+943	1	9B8E3104	Underdog	This weapon gains a boost to range and handling when health is low.
+944	1	986C5499		
+945	1	7A8904BA		
+946	1	50B04654		
+947	1	54B36F75		
+948	1	3A499CCD		
+949	1	998A0646	Elemental Transfusion	Causing damage with subclass abilities will transfuse that damage type to this weapon for a period of time.
+950	1	342EC26E		
+951	1	1FD204E3		
+952	1	C1C8CFA8	Overflow	This weapon has better handling, rate of fire and stability while the wielder's Super is charged.
+953	0	811C9DC5	Heuristic Light	Killing your next foe in King's Fall will grant an additional Moldering Shard.
+954	0	811C9DC5	Indomitable Light	Your next foe in King's Fall is more likely to drop weapons and armor.
+955	0	811C9DC5	Valorous Light	Your next foe in Heroic King's Fall is more likely to drop weapons and armor.
+956	0	811C9DC5	Place Boon	Gives you credit as if you had scored one place in front of where you placed.
+957	1	9243BC79	Air Control	Use  to pitch the Sparrow forward or back while in the air. Pitch forward to fall faster, pitch back to fall slower.
+958	1	7CD03250	Fast Enter	Reduces time needed to summon Sparrow.
+959	1	901BEE32	Faster Cooldown Time	Reduced cooldown after the Sparrow is destroyed.
+960	1	56578613	Fuel Efficiency	Side boost takes less fuel.
+961	1	0A7A5DE7	Trick Master	The amount of fuel you gain from performing tricks is increased.
+962	0	811C9DC5	SRL Champion	Increases SRL Event Standing.
+963	0	811C9DC5	Red Chroma	Activates a Red Chroma glow.
+964	0	811C9DC5	Blue Chroma	Activates a Blue Chroma glow.
+965	0	811C9DC5	Yellow Chroma	Activates a Yellow Chroma glow.
+966	0	811C9DC5	White Chroma	Activates a White Chroma glow.
+967	0	811C9DC5		
+968	0	811C9DC5	Vanguard Reputation Booster	INSPIRATION Increased Vanguard reputation rewards from Strike playlists.  Inspirations are shared with Fireteam members.
+969	0	811C9DC5	Vanguard Reputation Booster	AURA Increased Vanguard reputation rewards from Strike playlists.  Auras will fade if you leave the Fireteam of the providing Guardian.
+970	0	811C9DC5	Crucible Reputation Booster	INSPIRATION Increased Crucible reputation rewards from Crucible matches.  Inspirations are shared with Fireteam members.
+971	0	811C9DC5	Crucible Reputation Booster	AURA Increased Crucible reputation rewards from Crucible matches.  Auras will fade if you leave the Fireteam of the providing Guardian.
+972	0	811C9DC5	House of Judgment Reputation Booster	INSPIRATION Increased House of Judgment reputation rewards from the Prison of Elders.  Inspirations are shared with Fireteam members.
+973	0	811C9DC5	House of Judgment Reputation Booster	AURA Increased House of Judgment reputation rewards from the Prison of Elders.  Auras will fade if you leave the Fireteam of the providing Guardian.
+974	0	811C9DC5	Orange Chroma	Activates an Orange Chroma glow.
+975	0	811C9DC5	Magenta Chroma	Activates a Magenta Chroma glow.
+976	0	811C9DC5	Green Chroma	Activates a Green Chroma glow.

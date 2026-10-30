@@ -1,0 +1,869 @@
+# Grimoire whitelist (blackrock-grimoire/catalog.json); PS3 tables are byte-identical (port map grim.tables)
+# core_first	32
+# core_size	19112
+# core_sha256	f1503c1e9ab8b28fac4b197e4e9203f7816c278ebf9513fdc74ac7913dbd94a2
+# flags_size	48264
+# flags_sha256	aac8fe57148966c9da08ab220b6ea0530ed5d0a0c2388b1e8e265e22a907ff63
+ordinal	dense	name
+904	442	The Exo Stranger
+906	444	The Queen
+909	447	The Queen's Brother
+921	459	Factions
+928	466	Lord Shaxx, Crucible Handler
+930	468	Lakshmi-2, Future War Cult
+931	469	Arach Jalaal, Dead Orbit
+932	470	Executor Hideo, New Monarchy
+936	474	Frames
+937	475	Xûr, Agent of the Nine
+940	478	Tess Everis, Special Orders
+941	479	Kadi 55-30, Postmaster
+942	480	Master Rahool, Cryptarch
+943	481	Eva Levante, Guardian Outfitter
+944	482	Amanda Holliday, Shipwright
+844	382	Eris Morn, Crota's Bane
+952	490	Hive Faction: Blood of Oryx
+990	528	Vex Faction: Hezen Corrective
+991	529	Vex Faction: Hezen Protective
+992	530	Vex Faction: Virgo Prohibition
+993	531	Vex Faction: Sol Divisive
+994	532	Vex Faction: Precursors
+995	533	Vex Faction: Descendants
+1012	550	Vex Hydra - Kills Rank I
+1013	551	Vex Hydra - Kills Rank II
+1014	552	Vex Hydra - Kills Rank III
+1015	553	Vex Foe: Hydra
+1027	565	Cabal Faction: Sand Eaters
+1028	566	Cabal Faction: Dust Giants
+1029	567	Cabal Faction: Siege Dancers
+1030	568	Cabal Faction: Blind Legion
+1031	569	Cabal Faction: Sky Burners
+1056	594	Cabal Vehicle: Harvester
+1057	595	Cabal Vehicle: Interceptor
+1058	596	Cabal Vehicle: Goliath Tank
+1062	600	The Fallen
+1067	605	Fallen Faction: House of Wolves
+1068	606	Fallen Faction: House of Winter
+1069	607	Fallen Faction: House of Devils
+1070	608	Fallen Faction: House of Exile
+1071	609	Fallen Faction: House of Kings
+1099	637	Fallen Vehicle: Skiff
+1100	638	Fallen Vehicle: Pike
+1101	639	Fallen Vehicle: Walker
+1108	646	Guardian Abilities
+1109	647	Ghost Fragment: Abilities
+1110	648	Movement: Double Jump
+1111	649	Movement: Glide
+1112	650	Movement: Blink
+1113	651	Movement: Lift
+1132	670	Super: Fist of Havok
+1133	671	Super: Ward of Dawn
+1134	672	Super: Golden Gun
+1135	673	Super: Arc Blade
+1136	674	Super: Nova Bomb
+1137	675	Super: Radiance
+1141	679	Primary Weapon: Auto Rifle
+1142	680	Auto Rifles - Kills Rank I
+1143	681	Auto Rifles - Kills Rank II
+1144	682	Auto Rifles - Kills Rank III
+1152	690	Scout Rifles - Kills Rank I
+1153	691	Scout Rifles - Kills Rank II
+1154	692	Scout Rifles - Kills Rank III
+1145	683	Exotic Weapon: SUROS Regime
+1146	684	Exotic Weapon: The Fate of All Fools
+1148	686	Exotic Weapon: Monte Carlo
+1149	687	Exotic Weapon: Necrochasm
+1150	688	Exotic Weapon: Hard Light
+1155	693	Exotic Weapon: MIDA Multi-Tool
+1156	694	Exotic Weapon: Bad Juju
+1161	699	Exotic Weapon: Red Death
+1166	704	Exotic Weapon: Hawkmoon
+1167	705	Exotic Weapon: The Last Word
+1172	710	Exotic Weapon: Thorn
+1182	720	Exotic Weapon: Universal Remote
+1183	721	Exotic Weapon: Invective
+1190	728	Exotic Weapon: Pocket Infinity
+1191	729	Exotic Weapon: Plan C
+1192	730	Exotic Weapon: Vex Mythoclast
+1197	735	Exotic Weapon: Patience and Time
+1198	736	Exotic Weapon: Ice Breaker
+1199	737	Exotic Weapon: No Land Beyond
+1200	738	Exotic Weapon: The 4th Horseman
+1208	746	Exotic Weapon: Gjallarhorn
+1209	747	Exotic Weapon: Truth
+1210	748	Exotic Weapon: Dragon's Breath
+1215	753	Exotic Weapon: Thunderlord
+1216	754	Exotic Weapon: Super Good Advice
+1217	755	Damage Type: Arc
+1218	756	Damage Type: Thermal
+1219	757	Damage Type: Void
+1220	758	Titan Subclass: Striker
+1221	759	Titan Subclass: Defender
+1222	760	Hunter Subclass: Gunslinger
+1223	761	Hunter Subclass: Bladedancer
+1224	762	Warlock Subclass: Voidwalker
+1225	763	Warlock Subclass: Sunsinger
+1226	764	Currency: Vanguard Marks
+1227	765	Currency: Crucible Marks
+1228	766	Currency: Motes of Light
+1229	767	Currency: Strange Coins
+1230	768	Guardian Vehicle: Sparrow
+1231	769	Guardian Ships
+1234	772	Place: Venus
+1235	773	Ghost Fragment: Venus
+1236	774	Ishtar Sink - Kills Rank I
+1237	775	Ishtar Sink - Kills Rank II
+1238	776	Ishtar Sink - Kills Rank III
+1241	779	Place: The City
+1242	780	Destination: The Tower
+1243	781	City History: The Golden Age
+1246	784	City History: The Dark Age
+1249	787	City History: The City Age
+1252	790	Place: Earth
+1253	791	Destination: Old Russia
+1254	792	Old Russia - Kills Rank I
+1255	793	Old Russia - Kills Rank II
+1256	794	Old Russia - Kills Rank III
+1260	798	Place: Moon
+1261	799	Destination: Ocean Of Storms
+1262	800	Ocean of Storms - Kills Rank I
+1263	801	Ocean of Storms - Kills Rank II
+1264	802	Ocean of Storms - Kills Rank III
+1267	805	Place: Mars
+1268	806	Destination: Meridian Bay
+1269	807	Meridian Bay - Kills Rank I
+1270	808	Meridian Bay - Kills Rank II
+1271	809	Meridian Bay - Kills Rank III
+1274	812	Place: The Asteroid Belt
+1275	813	Destination: The Reef
+1276	814	Place: Jupiter
+1284	822	Story Activities - Completion Rank I
+1285	823	Story Activities - Completion Rank II
+1286	824	Story Activities - Completion Rank III
+1287	825	Story: A Guardian Rises
+1288	826	Story: Restoration
+1289	827	Fallen Boss: Riksis, Devil Archon
+1295	833	Fallen Boss: Sepiks-4
+1304	842	Unresolved package title 6A8A0843
+1306	844	Story: Siege of the Warmind
+1309	847	Story: The Dark Beyond
+1310	848	Story: The World's Grave
+1314	852	Hive Boss: Kranox, The Graven
+1315	853	Story: The Sword of Crota
+1316	854	Hive Boss: Swarm Princes
+1320	858	Story: Chamber of Night
+1324	862	Hive Boss: Telthor, Unborn
+1325	863	Story: Shrine of Oryx
+1327	865	Story: The Wakening
+1331	869	Hive Boss: Sardok, Eye of Oryx
+1332	870	Hive Boss: Mormu, Xol Spawn
+1336	874	Story: A Stranger's Call
+1337	875	Story: Ishtar Collective
+1338	876	Vex Boss: Corrective Mind
+1342	880	Story: The Archive
+1346	884	Fallen Boss: Simiks-3
+1347	885	Story: Scourge of Winter
+1348	886	Fallen Boss: Draksis, Winter Kell
+1352	890	Story: Eye of a Gate Lord
+1356	894	Vex Boss: Zydron, Gate Lord
+1359	897	Story: Exclusion Zone
+1360	898	Cabal Boss: Bracus Tho'ourg
+1364	902	Story: The Buried City
+1365	903	Cabal Boss: Bracus Tha'aurn
+1369	907	Story: The Garden's Spire
+1370	908	Cabal Boss: Primus Sha'aull
+1374	912	Story: A Rising Tide
+1375	913	Vex Boss: Prohibitive Mind
+1379	917	Story: The Black Garden
+1383	921	Vex Boss: Sol Progenies
+1384	922	Quests Introduction
+1385	923	Quest: Rise of Crota
+1386	924	Quest: Disciples of Crota
+1387	925	Quest: Urn of Sacrifice
+1398	936	Strike: Dust Palace
+1399	937	Cabal Boss: The Psion Flayers
+1406	944	Strike: The Summoning Pits
+1407	945	Hive Boss: Phogoth, the Untamed
+1411	949	Unresolved package title 785AB72B
+1412	950	Unresolved package title D48C2BF5
+1413	951	Unresolved package title 9A3243E5
+1417	955	Strike: The Nexus
+1418	956	Exalted Hive: Omnigul, Will of Crota
+1419	957	Vex Axis Mind: The Undying Mind
+1420	958	Exalted Hive: Ir Yût, the Deathsinger
+1421	959	Exalted Hive: Crota, Son of Oryx
+1425	963	Vex Boss: Sekrion, Nexus Mind
+1429	967	Strike: The Devils' Lair
+1437	975	Strike: Cerberus Vae III
+1441	979	Cabal Boss: Valus Ta'aurc
+1445	983	Strike: Winter's Run
+1446	984	Fallen Boss: Aksor, Archon Priest
+1451	989	Strike: Will of Crota
+1456	994	Strike: The Undying Mind
+1486	1024	Raid: Vault of Glass
+1490	1028	Vex Boss: The Gorgons
+1494	1032	Vex Boss: The Templar
+1495	1033	Raid: Crota's End
+1500	1038	Relic: Ascendant Sword
+1506	1044	Vex Boss: Atheon, Time's Conflux
+1510	1048	Vex Axis Mind: The Undying Mind
+1511	1049	Relic: The Aegis
+1513	1051	Crucible - Total Kills Rank I
+1514	1052	Crucible - Total Kills Rank II
+1515	1053	Crucible - Total Kills Rank III
+1555	1093	Crucible Playlist: Combined Arms
+1562	1100	Crucible Events
+1563	1101	Crucible Tournaments
+1565	1103	Doubles Rank 1
+1566	1104	Doubles Rank 2
+1567	1105	Doubles Rank 3
+1568	1106	Crucible Playlist: Doubles
+1569	1107	Crucible Playlist: Inferno
+1582	1120	Crucible Arena: The Cauldron
+1587	1125	Crucible Arena: Pantheon
+1589	1127	Crucible Arena: Skyshock
+1592	1130	Patrols - VIP Kills Rank I
+1593	1131	Patrols - VIP Kills Rank II
+1594	1132	Patrols - VIP Kills Rank III
+1599	1137	Public Event Activities - Completion Rank I
+1600	1138	Public Event Activities - Completion Rank II
+1601	1139	Public Event Activities - Completion Rank III
+1602	1140	Bounties Introduction
+1603	1141	Exalted Hive: Blades of Crota
+1604	1142	Exalted Hive: Sardon, Fist of Crota
+1605	1143	Exalted Hive: Might of Crota
+1606	1144	Exalted Hive: Hand of Crota
+1607	1145	Exalted Hive: Eyes of Crota
+1608	1146	Exalted Hive: Heart of Crota
+1609	1147	Exalted Hive: Urzok, the Hated
+1610	1148	Exalted Hive: The Forsaken
+3359	1482	Crucible Wins: Elimination Rank I
+3360	1483	Crucible Wins: Elimination Rank II
+3361	1484	Crucible Wins: Elimination Rank III
+3300	1423	Prisoner: Val Aru'un
+3304	1427	Prisoner: Valus Trau'ug
+3297	1420	Prisoner: Pilot Servitor
+3302	1425	Prisoner: Kaliks Reborn
+3306	1429	Skolas: Defeated
+3298	1421	Prisoner: Wretched Knight
+3301	1424	Prisoner: Urrox, Flame Prince
+3305	1428	Prisoner: Gulrot, Unclean
+3299	1422	Prisoner: Overmind Minotaur
+3303	1426	Prisoner: Qodron, Gate Lord
+3347	1470	Arenas Introduction
+3348	1471	Arena: Prison of Elders
+933	471	Xander 99-40, Bounty Tracker
+924	462	Faction: Dead Orbit
+922	460	Faction: Future War Cult
+926	464	Faction: New Monarchy
+1477	1015	Raid Activities - Completion Rank I
+1478	1016	Raid Activities - Completion Rank II
+1479	1017	Raid Activities - Completion Rank III
+1280	818	Story Activity Introduction
+1293	831	Story: The Dark Within
+1294	832	Story: The Warmind
+1303	841	Story: The Last Array
+929	467	Arcite 99-40, Crucible Quartermaster
+902	440	Dead Ghosts
+3341	1464	The Lighthouse, Caloris Spires
+3343	1466	Prison of Elders, The Reef
+3342	1465	Vestian Outpost, Queen's Bay
+1598	1136	Public Events Introduction
+3285	1408	Exotic Weapon: Dreg's Promise
+3284	1407	Exotic Weapon: Lord of Wolves
+3286	1409	Exotic Weapon: Queenbreakers' Bow
+3295	1418	Osiris
+953	491	Hive Faction: The Hidden Swarm
+951	489	Hive Faction: Spawn of Crota
+3317	1440	WANTED: Skoriks, Archon-Slayer
+3332	1455	WANTED: Howling Raider
+3337	1460	WANTED: Wolf Enforcer
+3339	1462	WANTED: Tracer Shank
+3331	1454	WANTED: Queenbreaker Vandal
+3333	1456	WANTED: Repeater Shank
+3338	1461	WANTED: Queenbreaker Captain
+3336	1459	WANTED: Silent Fang
+3330	1453	WANTED: High Servitor
+3334	1457	WANTED: Ether Runner
+3335	1458	WANTED: Wolves' Guard
+3329	1452	WANTED: Twisted Claw
+3328	1451	WANTED: Wolf Scavenger
+3327	1450	WANTED: Weksis, the Meek
+3321	1444	WANTED: Kaliks-12
+3324	1447	WANTED: Beltrik, the Veiled
+3318	1441	WANTED: Grayor, Wolf Assassin
+3319	1442	WANTED: Drevis, Wolf Baroness
+3320	1443	WANTED: Pirsis, Pallas-Bane
+3325	1448	WANTED: Mecher Orbiks-11
+3326	1449	WANTED: Saviks, Queenbreaker
+3323	1446	WANTED: Peekis, the Disavowed
+3322	1445	WANTED: Veliniks, the Ravenous
+3311	1434	The Silent Fang
+3314	1437	Vekis, King Baron
+3312	1435	Paskin, King Baron
+3313	1436	Yavek, Wolf Baron
+3310	1433	WANTED: Fallen Hunted
+3315	1438	WANTED: Skolas, Kell of Kells
+3316	1439	Skolas: Captured
+3340	1463	Taniks, the Scarred
+901	439	Ghosts
+1121	659	Arcbolt Grenade
+1131	669	Grenade: Axion Bolt
+1129	667	Grenade: Axion Field
+1114	652	Flashbang Grenade
+1124	662	Tripmine Grenade
+1117	655	Magnetic Grenade
+1125	663	Grenade: Ember Drones
+1122	660	Grenade: Flux Grenade
+1128	666	Fusion Grenade
+1123	661	Incendiary Grenade
+1118	656	Grenade: Scatter Grenade
+1115	653	Pulse Grenade
+1120	658	Skip Grenade
+1126	664	Solar Grenade
+1119	657	Suppressor Grenade
+1127	665	Firebolt Grenade
+1116	654	Lightning Grenade
+1130	668	Spike Grenade
+846	384	Guardians
+945	483	Banshee-44, Gunsmith
+1212	750	Machine Guns - Kills Rank I
+1213	751	Machine Guns - Kills Rank II
+1214	752	Machine Guns - Kills Rank III
+1211	749	Heavy Weapon: Machine Guns
+1205	743	Rocket Launchers - Kills Rank I
+1206	744	Rocket Launchers - Kills Rank II
+1207	745	Rocket Launchers - Kills Rank III
+1204	742	Heavy Weapon: Rocket Launcher
+882	420	Cayde-6, Hunter Vanguard
+938	476	Lord Saladin, Iron Banner
+886	424	Race: Awoken
+887	425	Race: Exo
+934	472	Currency: Glimmer
+885	423	Race: Human
+858	396	Enemy Kills as Hunter - Rank I
+859	397	Enemy Kills as Hunter - Rank II
+860	398	Enemy Kills as Hunter - Rank III
+861	399	Hunters Killed in the Crucible - Rank I
+862	400	Hunters Killed in the Crucible - Rank II
+863	401	Hunters Killed in the Crucible - Rank III
+864	402	Crucible Kills as Hunter - Rank I
+865	403	Crucible Kills as Hunter - Rank II
+866	404	Crucible Kills as Hunter - Rank III
+857	395	Class: Hunter
+935	473	Upgrade Materials
+1102	640	The Darkness
+848	386	Enemy Kills as Titan - Rank I
+849	387	Enemy Kills as Titan - Rank II
+850	388	Enemy Kills as Titan - Rank III
+851	389	Titans Killed in the Crucible - Rank I
+852	390	Titans Killed in the Crucible - Rank II
+853	391	Titans Killed in the Crucible - Rank III
+854	392	Crucible Kills as Titan - Rank I
+855	393	Crucible Kills as Titan - Rank II
+856	394	Crucible Kills as Titan - Rank III
+847	385	Class: Titan
+868	406	Enemy Kills as Warlock - Rank I
+869	407	Enemy Kills as Warlock - Rank II
+870	408	Enemy Kills as Warlock - Rank III
+871	409	Warlocks Killed in the Crucible - Rank I
+872	410	Warlocks Killed in the Crucible - Rank II
+873	411	Warlocks Killed in the Crucible - Rank III
+874	412	Crucible Kills as Warlock - Rank I
+875	413	Crucible Kills as Warlock - Rank II
+876	414	Crucible Kills as Warlock - Rank III
+867	405	Class: Warlock
+3287	1410	Legendary Weapon: Vestian Dynasty
+1140	678	Melee: Palm
+1138	676	Melee: Punch
+1139	677	Melee: Stab
+1591	1129	Patrols Introduction
+1278	816	Place: Saturn
+1163	701	Hand Cannons - Kills Rank I
+1164	702	Hand Cannons - Kills Rank II
+1165	703	Hand Cannons - Kills Rank III
+1162	700	Primary Weapon: Hand Cannon
+1158	696	Pulse Rifles - Kills Rank I
+1159	697	Pulse Rifles - Kills Rank II
+1160	698	Pulse Rifles - Kills Rank III
+1157	695	Primary Weapon: Pulse Rifle
+1151	689	Primary Weapon: Scout Rifle
+1512	1050	Crucible Introduction
+3365	1488	Crucible Arena: Thieves' Den
+3366	1489	Crucible Arena: Timekeeper
+3364	1487	Crucible Arena: Black Shield
+3367	1490	Crucible Arena: Widow's Court
+3358	1481	Crucible Playlist: Elimination
+3362	1485	Crucible Event: Iron Banner
+3363	1486	Crucible Event: Trials of Osiris
+939	477	Petra Venj, Awoken Emissary
+3351	1474	Quest: Gone to Ground
+3349	1472	Quest: The Hunt for Skolas
+3354	1477	Quest: The Kell of Kells
+1476	1014	Raids Introduction
+3292	1415	The Royal Awoken Guard
+3293	1416	Master Ives, Cryptarch
+3290	1413	Brother Vance, Disciple of Osiris
+3291	1414	Reef Frames
+3289	1412	Petra Venj, Queen's Wrath
+1186	724	Fusion Rifles - Kills Rank I
+1187	725	Fusion Rifles - Kills Rank II
+3288	1411	Variks, The Loyal
+1188	726	Fusion Rifles - Kills Rank III
+1189	727	Special Weapon: Fusion Rifles
+1178	716	Shotguns - Kills Rank I
+1179	717	Shotguns - Kills Rank II
+1180	718	Shotguns - Kills Rank III
+1181	719	Special Weapon: Shotguns
+1193	731	Sniper Rifles - Kills Rank I
+1194	732	Sniper Rifles - Kills Rank II
+1195	733	Sniper Rifles - Kills Rank III
+1196	734	Special Weapons: Sniper Rifles
+3296	1419	Special Weapon: Sidearm
+1433	971	Fallen Boss: Sepiks Prime
+896	434	The Speaker
+1048	586	Cabal Centurion - Kills Rank I
+1049	587	Cabal Centurion - Kills Rank II
+1050	588	Cabal Centurion - Kills Rank III
+1051	589	Cabal Foe: Centurion
+1044	582	Cabal Colossus - Kills Rank I
+1045	583	Cabal Colossus - Kills Rank II
+1046	584	Cabal Colossus - Kills Rank III
+1047	585	Cabal Foe: Colossus
+1036	574	Cabal Legionary - Kills Rank I
+1037	575	Cabal Legionary - Kills Rank II
+1038	576	Cabal Legionary - Kills Rank III
+1039	577	Cabal Foe: Legionary
+1040	578	Cabal Phalanx - Kills Rank I
+1041	579	Cabal Phalanx - Kills Rank II
+1042	580	Cabal Phalanx - Kills Rank III
+1043	581	Cabal Foe: Phalanx
+1032	570	Cabal Psion - Kills Rank I
+1033	571	Cabal Psion - Kills Rank II
+1034	572	Cabal Psion - Kills Rank III
+1035	573	Cabal Foe: Psion
+1021	559	The Cabal - Kills Rank I
+1022	560	The Cabal - Kills Rank II
+1023	561	The Cabal - Kills Rank III
+1024	562	The Cabal
+1072	610	Fallen Captain - Kills Rank I
+1073	611	Fallen Captain - Kills Rank II
+1074	612	Fallen Captain - Kills Rank III
+1075	613	Fallen Foe: Captain
+1080	618	Fallen Dreg - Kills Rank I
+1081	619	Fallen Dreg - Kills Rank II
+1082	620	Fallen Dreg - Kills Rank III
+1083	621	Fallen Foe: Dreg
+1059	597	The Fallen - Kills Rank I
+1060	598	The Fallen - Kills Rank II
+1061	599	The Fallen - Kills Rank III
+1084	622	Fallen Servitor - Kills Rank I
+1085	623	Fallen Servitor - Kills Rank II
+1086	624	Fallen Servitor - Kills Rank III
+1087	625	Fallen Foe: Servitor
+1088	626	Fallen Shank - Kills Rank I
+1089	627	Fallen Shank - Kills Rank II
+1090	628	Fallen Shank - Kills Rank III
+1091	629	Fallen Foe: Shank
+1076	614	Fallen Vandal - Kills Rank I
+1077	615	Fallen Vandal - Kills Rank II
+1078	616	Fallen Vandal - Kills Rank III
+1079	617	Fallen Foe: Vandal
+958	496	Hive Knight - Kills Rank I
+959	497	Hive Knight - Kills Rank II
+960	498	Hive Knight - Kills Rank III
+961	499	Hive Foe: Knight
+970	508	Hive Ogre - Kills Rank I
+971	509	Hive Ogre - Kills Rank II
+972	510	Hive Ogre - Kills Rank III
+973	511	Hive Foe: Ogre
+946	484	The Hive - Kills Rank I
+947	485	The Hive - Kills Rank II
+948	486	The Hive - Kills Rank III
+966	504	Hive Thrall - Kills Rank I
+967	505	Hive Thrall - Kills Rank II
+968	506	Hive Thrall - Kills Rank III
+969	507	Hive Foe: Thrall
+954	492	Hive Acolyte - Kills Rank I
+955	493	Hive Acolyte - Kills Rank II
+956	494	Hive Acolyte - Kills Rank III
+957	495	Hive Foe: Acolyte
+949	487	The Hive
+962	500	Hive Wizard - Kills Rank I
+963	501	Hive Wizard - Kills Rank II
+964	502	Hive Wizard - Kills Rank III
+965	503	Hive Foe: Wizard
+996	534	Vex Goblin - Kills Rank I
+997	535	Vex Goblin - Kills Rank II
+998	536	Vex Goblin - Kills Rank III
+999	537	Vex Foe: Goblin
+1009	547	Vex Harpy - Kills Rank I
+1010	548	Vex Harpy - Kills Rank II
+1011	549	Vex Harpy - Kills Rank III
+1008	546	Vex Foe: Harpy
+1000	538	Vex Hobgoblin - Kills Rank I
+1001	539	Vex Hobgoblin - Kills Rank II
+1002	540	Vex Hobgoblin - Kills Rank III
+1003	541	Vex Foe: Hobgoblin
+1004	542	Vex Minotaur - Kills Rank I
+1005	543	Vex Minotaur - Kills Rank II
+1006	544	Vex Minotaur - Kills Rank III
+1007	545	Vex Foe: Minotaur
+982	520	The Vex - Kills Rank I
+983	521	The Vex - Kills Rank II
+984	522	The Vex - Kills Rank III
+985	523	The Vex
+3352	1475	Story: The Silent Fang
+3353	1476	Story: A Ruling House
+3350	1473	Story: A Kell Rising
+3355	1478	Story: Wolves' Gambit
+3356	1479	Story: Queen's Ransom
+1394	932	Strikes Introduction
+1388	926	Strike Activities - Completion Rank I
+1389	927	Strike Activities - Completion Rank II
+1390	928	Strike Activities - Completion Rank III
+3357	1480	Strike: The Shadow Thief
+881	419	Commander Zavala, Titan Vanguard
+897	435	The Traveler
+884	422	Roni 55-30, Vanguard Quartermaster
+980	518	Hive Vehicle: Tomb Ship
+1020	558	Vex Vehicle: Cyclops
+3307	1430	Fallen Arsenal: Heavy Pike
+981	519	Hive Turret: Shrieker
+883	421	Ikora Rey, Warlock Vanguard
+977	515	Hive Weapon: Shredder
+978	516	Hive Weapon: Boomer
+1055	593	Cabal Weapon: Cabal Shield
+979	517	Hive Weapon: Cleaver
+3308	1431	Fallen Arsenal: Web Mines
+3309	1432	Fallen Arsenal: Scorch Cannon
+1054	592	Cabal Weapon: Heavy Slug Thrower
+1017	555	Vex Weapon: Line Rifle
+1053	591	Cabal Weapon: Projection Rifle
+1097	635	Fallen Weapon: Shock Blade
+1096	634	Fallen Weapon: Shock Dagger
+1098	636	Fallen Weapon: Shock Grenade
+1092	630	Fallen Weapon: Shock Pistol
+1093	631	Fallen Weapon: Shock Rifle
+1094	632	Fallen Weapon: Shrapnel Launcher
+1019	557	Vex Weapon: Slap Grenade
+1016	554	Vex Weapon: Slap Rifle
+1052	590	Cabal Weapon: Slug Rifle
+1018	556	Vex Weapon: Torch Hammer
+1095	633	Fallen Weapon: Wire Rifle
+1471	1009	Weekly Strike Challenge Introduction
+1575	1113	Crucible Arena: The Anomaly
+1571	1109	Crucible Arena: Asylum
+1578	1116	Crucible Arena: Bastion
+1580	1118	Crucible Arena: Blind Watch
+1579	1117	Crucible Arena: City of the Dead
+1574	1112	Crucible Arena: Exodus Blue
+1577	1115	Crucible Arena: Firebase Delphi
+1576	1114	Crucible Arena: First Light
+1564	1102	Crucible Arena: The Lighthouse
+1527	1065	Crucible: Clash - Wins Rank I
+1528	1066	Crucible: Clash - Wins Rank II
+1529	1067	Crucible: Clash - Wins Rank III
+1526	1064	Crucible Playlist: Clash
+1556	1094	Crucible Playlist: Combined Arms
+1520	1058	Crucible: Control - Wins Rank I
+1521	1059	Crucible: Control - Wins Rank II
+1522	1060	Crucible: Control - Wins Rank III
+1519	1057	Crucible Playlist: Control
+1534	1072	Crucible: Rumble - Wins Rank I
+1535	1073	Crucible: Rumble - Wins Rank II
+1536	1074	Crucible: Rumble - Wins Rank III
+1533	1071	Crucible Playlist: Rumble
+1548	1086	Crucible: Salvage - Wins Rank I
+1549	1087	Crucible: Salvage - Wins Rank II
+1550	1088	Crucible: Salvage - Wins Rank III
+1547	1085	Crucible Playlist: Salvage
+1541	1079	Crucible: Skirmish - Wins Rank I
+1542	1080	Crucible: Skirmish - Wins Rank II
+1543	1081	Crucible: Skirmish - Wins Rank III
+1540	1078	Crucible Playlist: Skirmish
+1573	1111	Crucible Arena: Rustlands
+1570	1108	Crucible Arena: Shores of Time
+1572	1110	Crucible Arena: Twilight Gap
+877	415	Ghost Fragment: Titan
+878	416	Ghost Fragment: Hunter
+879	417	Ghost Fragment: Warlock
+880	418	Ghost Fragment: Warlock 2
+888	426	Ghost Fragment: Human
+889	427	Ghost Fragment: Human 2
+890	428	Ghost Fragment: Human 3
+891	429	Ghost Fragment: Awoken
+892	430	Ghost Fragment: Exo
+893	431	Ghost Fragment: Human 4
+894	432	Ghost Fragment: Awoken 2
+895	433	Ghost Fragment: Exo 2
+898	436	Ghost Fragment: The Traveler
+899	437	Ghost Fragment: The Traveler 2
+900	438	Ghost Fragment: The Traveler 3
+903	441	Ghost Fragment: Ghosts
+905	443	Ghost Fragment: Exo Stranger
+907	445	Ghost Fragment: The Queen
+908	446	Ghost Fragment: The Queen 2
+910	448	Ghost Fragment: The Queen's Brother
+911	449	Ghost Fragment: Legends
+912	450	Ghost Fragment: Legends 2
+913	451	Ghost Fragment: Legends 3
+914	452	Ghost Fragment: Mysteries
+915	453	Ghost Fragment: Mysteries 2
+916	454	Legend: The Black Garden
+3294	1417	Mystery: Fate of Skolas
+917	455	Rasputin, the Last Warmind
+918	456	Ghost Fragment: Rasputin 3
+919	457	Ghost Fragment: Rasputin 2
+920	458	Ghost Fragment: Rasputin
+923	461	Ghost Fragment: Future War Cult
+925	463	Ghost Fragment: Dead Orbit
+927	465	Ghost Fragment: New Monarchy
+950	488	Ghost Fragment: Hive
+974	512	Ghost Fragment: Hive 2
+975	513	Ghost Fragment: Hive 3
+976	514	Ghost Fragment: Hive 4
+986	524	Ghost Fragment: Vex
+987	525	Ghost Fragment: Vex 2
+988	526	Ghost Fragment: Vex 3
+989	527	Ghost Fragment: Vex 4
+1025	563	Ghost Fragment: Cabal
+1026	564	Ghost Fragment: Cabal 2
+1063	601	Ghost Fragment: Fallen
+1064	602	Ghost Fragment: Fallen 2
+1065	603	Ghost Fragment: Fallen 3
+1066	604	Ghost Fragment: Fallen 4
+1103	641	Ghost Fragment: Darkness
+1104	642	Ghost Fragment: Darkness 2
+1106	644	Ghost Fragment: Darkness 3
+1107	645	Ghost Fragment: Darkness 4
+1168	706	Ghost Fragment: The Last Word
+1169	707	Ghost Fragment: The Last Word 2
+1170	708	Ghost Fragment: The Last Word 3
+1171	709	Ghost Fragment: The Last Word 4
+1173	711	Ghost Fragment: Thorn
+1174	712	Ghost Fragment: Thorn 2
+1176	714	Ghost Fragment: Thorn 3
+1177	715	Ghost Fragment: Thorn 4
+1232	770	Place: Mercury
+1233	771	Ghost Fragment: Mercury
+1239	777	Ghost Fragment: Venus
+1240	778	Ghost Fragment: The Shattered Coast
+1244	782	Ghost Fragment: The Golden Age
+1245	783	Ghost Fragment: The Golden Age 2
+1247	785	Ghost Fragment: The Dark Age
+1248	786	Ghost Fragment: The Dark Age 2
+1250	788	Ghost Fragment: The City Age
+1251	789	Ghost Fragment: The City Age 2
+1257	795	Ghost Fragment: Earth
+1258	796	Ghost Fragment: Cosmodrome
+1259	797	Ghost Fragment: Cosmodrome 2
+1265	803	Ghost Fragment: Moon
+1266	804	Ghost Fragment: The Ocean of Storms
+1272	810	Ghost Fragment: Mars
+1273	811	Ghost Fragment: The Buried City
+3344	1467	Ghost Fragment: The Reef
+3345	1468	Ghost Fragment: The Reef 2
+3346	1469	Ghost Fragment: The Reef 3
+1277	815	Ghost Fragment: Jupiter
+1279	817	Ghost Fragment: Saturn
+1201	739	Sidearm - Kills Rank I
+1202	740	Sidearm - Kills Rank II
+1203	741	Sidearm - Kills Rank III
+4327	1696	Super: Hammer of Sol
+4326	1695	Super: Shadowshot
+4328	1697	Super: Stormtrance
+5214	2040	Heavy Weapon: Swords
+4190	1569	Exotic Weapon: Bolt-Caster
+4191	1570	Exotic Weapon: Raze-Lighter
+4192	1571	Exotic Weapon: Dark-Drinker
+4477	1839	Exotic Weapon: Sleeper Simulant
+4485	1847	Exotic Weapon: Touch of Malice
+4475	1837	Exotic Weapon: Zhalo Supercell
+4488	1850	Exotic Weapon: Hereafter
+4487	1849	Exotic Weapon: The Chaperone
+4476	1838	Exotic Weapon: Telesto
+4486	1848	Exotic Weapon: The Jade Rabbit
+4484	1846	Exotic Weapon: Boolean Gemini
+4478	1840	Exotic Weapon: The First Curse
+4482	1844	Exotic Weapon: No Time To Explain
+4489	1851	Exotic Weapon: Black Spindle
+4512	1874	Exotic Weapon: Ace of Spades
+4513	1875	Exotic Weapon: Fabian Strategy
+4514	1876	Exotic Weapon: Tlaloc
+5215	2041	Hive Arsenal: Dreadnaught
+5216	2042	Cabal Faction: Skyburners
+5217	2043	Place: The Rings of Saturn
+5218	2044	Place: Fleetbase Korus, Phobos
+5219	2045	The Queen: The Coven
+5220	2046	Story: The Coming War
+5221	2047	Story: Cayde's Stash
+5222	2048	Story: The Dreadnaught
+5223	2049	Story: Enemy of My Enemy
+5224	2050	Story: Lost to Light
+5225	2051	Story: The Promethean Code
+5226	2052	Story: Last Rites
+5227	2053	Story: Regicide
+5228	2054	Story: Dread Patrol
+5229	2055	Story: Outbound Signal
+5230	2056	Hunter: The Nightstalker's Trail
+5231	2057	Warlock: The Stormcaller's Path
+5232	2058	Titan: The Sunbreakers' Challenge
+5233	2059	The Court of Oryx
+5234	2060	Story: The Taken War, Venus
+5235	2061	Story: The Taken War, Earth
+5236	2062	Story: The Taken War, Mars
+5237	2063	Story: The Road to King's Fall
+5238	2064	Story: The Wolves of Mars
+5239	2065	Strike: Fallen S.A.B.E.R.
+5240	2066	Strike: The Sunless Cell
+5241	2067	Strike: Shield Brothers
+5242	2068	Strike: Echo Chamber
+5243	2069	Raid: King's Fall
+5244	2070	The Taken
+5245	2071	The Taken: Thrall
+5246	2072	The Taken: Acolyte
+5247	2073	The Taken: Knight
+5248	2074	The Taken: Wizard
+5249	2075	The Taken: Psion
+5250	2076	The Taken: Phalanx
+5251	2077	The Taken: Centurion
+5252	2078	The Taken: Vandal
+5253	2079	The Taken: Captain
+5254	2080	The Taken: Goblin
+5255	2081	The Taken: Hobgoblin
+5256	2082	The Taken: Minotaur
+5257	2083	The Taken: Primus Ta'aun
+5258	2084	The Taken: Baxx, the Gravekeeper
+5259	2085	Exalted Hive: Oryx, The Taken King
+5260	2086	Echo of Oryx
+5261	2087	Oryx: Escaped
+5262	2088	Oryx: Defeated
+5263	2089	Court of Oryx: Krughor
+5264	2090	Court of Oryx: Bracus Horu'usk
+5265	2091	Court of Oryx: Lokaar
+5266	2092	Court of Oryx: Mengoor and Cra'adug
+5267	2093	Court of Oryx: Alzok Däl, Gornuk Däl, Zyrok Däl
+5268	2094	Court of Oryx: Vorlog
+5269	2095	Court of Oryx: Balwûr
+5270	2096	Court of Oryx: Thalnok, Fanatic of Crota
+5271	2097	Court of Oryx: Kagoor
+5272	2098	Fallen Leadership: S.A.B.E.R.-2
+5273	2099	Vex Axis Mind: Theosyion, the Restorative Mind
+5274	2100	Exalted Hive: Alak-Hul, the Darkblade
+5275	2101	Cabal Command: Valus Tlu'urn
+5276	2102	Cabal Command: Valus Mau'ual
+5277	2103	Exalted Hive: The Warpriest
+5278	2104	Exalted Hive: Golgoroth
+5279	2105	Exalted Hive: Ir Halak, Deathsinger
+5280	2106	Exalted Hive: Ir Anûk, Deathsinger
+5281	2107	Hive Champions
+5282	2108	Cabal Champions
+5283	2109	Taken Champions
+5284	2110	Ghost Fragment: Clovis Bray
+5285	2111	Ghost Fragment: Cabal 3
+5286	2112	Ghost Fragment: Cabal 4
+5287	2113	Ghost Fragment: Old Russia 3
+5288	2114	Ghost Fragment: Human 5
+5289	2115	Ghost Fragment: Rasputin 4
+5290	2116	Ghost Fragment: The Last Word 4
+5291	2117	Ghost Fragment: Awoken 3
+5292	2118	Ghost Fragment: Thorn 4
+5293	2119	Ghost Fragment: Vex 5
+5294	2120	Ghost Fragment: The Hellmouth
+5295	2121	Ghost Fragment: The Hellmouth 2
+5296	2122	Ghost Fragment: Exo 3
+5297	2123	The Queen: The Aftermath
+5298	2124	Mystery: The Vault of Glass
+5299	2125	Mystery: The Vault of Glass 2
+5300	2126	Mystery: The Vault of Glass 3
+5301	2127	Mystery: Praedyth's Door
+5302	2128	Crucible Playlist: Rift
+5303	2129	Crucible Playlist: Mayhem
+5304	2130	Crucible Playlist: Zone Control
+5305	2131	Crucible Arena: Sector 618
+5306	2132	Crucible Arena: Bannerfall
+5307	2133	Crucible Arena: Memento
+5308	2134	Crucible Arena: Crossroads
+5309	2135	Crucible Arena: The Dungeons
+5310	2136	Crucible Arena: The Drifter
+5311	2137	Crucible Arena: Frontier
+5312	2138	Crucible Arena: Vertigo
+5313	2139	The Darkness: Curiosity
+5314	2140	Calcified Fragment: I
+5315	2141	Calcified Fragment: II
+5316	2142	Calcified Fragment: III
+5317	2143	Calcified Fragment: IV
+5318	2144	Calcified Fragment: V
+5319	2145	Calcified Fragment: VI
+5320	2146	Calcified Fragment: VII
+5321	2147	Calcified Fragment: VIII
+5322	2148	Calcified Fragment: IX
+5323	2149	Calcified Fragment: X
+5324	2150	Calcified Fragment: XI
+5325	2151	Calcified Fragment: XII
+5326	2152	Calcified Fragment: XIII
+5327	2153	Calcified Fragment: XIV
+5328	2154	Calcified Fragment: XV
+5329	2155	Calcified Fragment: XVI
+5330	2156	Calcified Fragment: XVII
+5331	2157	Calcified Fragment: XVIII
+5332	2158	Calcified Fragment: XIX
+5333	2159	Calcified Fragment: XX
+5334	2160	Calcified Fragment: XXI
+5335	2161	Calcified Fragment: XXII
+5336	2162	Calcified Fragment: XXIII
+5337	2163	Calcified Fragment: XXIV
+5338	2164	Calcified Fragment: XXV
+5339	2165	Calcified Fragment: XXVI
+5340	2166	Calcified Fragment: XXVII
+5341	2167	Calcified Fragment: XXVIII
+5342	2168	Calcified Fragment: XXIX
+5343	2169	Calcified Fragment: XXX
+5344	2170	Calcified Fragment: XXXI
+5345	2171	Calcified Fragment: XXXII
+5346	2172	Calcified Fragment: XXXIII
+5347	2173	Calcified Fragment: XXXIV
+5348	2174	Calcified Fragment: XXXV
+5349	2175	Calcified Fragment: XXXVI
+5350	2176	Calcified Fragment: XXXVII
+5351	2177	Calcified Fragment: XXXVIII
+5352	2178	Calcified Fragment: XXXIX
+5353	2179	Calcified Fragment: XL
+5354	2180	Calcified Fragment: XLI
+5355	2181	Calcified Fragment: XLII
+5356	2182	Calcified Fragment: XLIII
+5357	2183	Calcified Fragment: XLIV
+5358	2184	Calcified Fragment: XLV
+5359	2185	Calcified Fragment: XLVI
+5360	2186	Calcified Fragment: XLVII
+5361	2187	Calcified Fragment: XLVIII
+5362	2188	Calcified Fragment: XLIX
+5363	2189	Calcified Fragment: L
+5364	2190	The Darkness: Insight
+5365	2191	Ghost Fragment: Rasputin 5
+5366	2192	Osiris: Vision 81
+5367	2193	Legend: Saint-14
+5389	2215	Economy: Eververse
+5390	2216	Economy: Silver
+5391	2217	Crucible Arena: Cathedral of Dusk
+5392	2218	Activities: Festival of the Lost
+5393	2219	The Taken: Malok, Pride of Oryx
+5394	2220	Strike: Blighted Chalice
+5395	2221	Activities: SRL - Sparrow Racing
+5396	2222	Activities: SRL Record Book, Vol. 1
+5397	2223	SRL Track: Campus Martius
+5398	2224	SRL Track: Infinite Descent
+5399	2225	Osiris: Vision 47
+5400	2226	Ghost Fragment: The Ocean of Storms 2
+5401	2227	Ghost Fragment: The Exo Stranger 2
+5402	2228	Legend: Rezyl Azzir - Before These Walls
+5407	2233	Activities: Crimson Days
+5624	2323	Exotic Weapon: Zen Meteor
+5625	2324	Economy: Chroma
+5626	2325	Legend: Rezyl Azzir - War without End
+5627	2326	Prisoner: Seditious Mind
+5628	2327	Prisoner: Noru'usk, Servant of Oryx
+5629	2328	Prisoner: Keksis, the Betrayed
+5630	2329	Prisoner: Sylok, the Defiled
+5631	2330	The Taken: Report, Taken Power
+5632	2331	Arena: Challenge of the Elders

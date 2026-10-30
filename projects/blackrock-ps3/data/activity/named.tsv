@@ -1,0 +1,184 @@
+# Internal activity names (Xbox encounters/INDEX.tsv): name, category, display, phases, scenario_client tags
+name	category	display	phases	scenarios
+act_cinematic_queen_101	Story (Y1)	cinematic queen 101	2	80C02004
+act_cinematic_queen_102	Story (Y1)	cinematic queen 102	1	80C0200A
+act_cosmo_m0_5_hangar	Story (Y1)	cosmo m0 5 hangar	3	80CB802B
+act_cosmo_m0_highway	Story (Y1)	cosmo m0 highway	7	80CB800D
+act_cosmo_m1_dome_a	Story (Y1)	cosmo m1 dome a	3	80CB804B
+act_cosmo_m2_dome_c	Story (Y1)	cosmo m2 dome c	5	80CB806A
+act_cosmo_m4_dome_c	Story (Y1)	cosmo m4 dome c	4	80CB8089
+act_cosmo_m5_refinery	Story (Y1)	cosmo m5 refinery	4	80CB80E2
+act_cosmo_m6_rasputin	Story (Y1)	cosmo m6 rasputin	4	80CB8101
+act_mars_m01_valley	Story (Y1)	mars m01 valley	6	80D0000B
+act_mars_m03_penthouse	Story (Y1)	mars m03 penthouse	8	80D00031
+act_mars_m05_warbase	Story (Y1)	mars m05 warbase	9	80D00058
+act_mars_m06_subway	Story (Y1)	mars m06 subway	8	80D0007E
+act_mars_m07_lowergarden	Story (Y1)	mars m07 lowergarden	10	80D000A4
+act_moon_m1_launchtubes	Story (Y1)	moon m1 launchtubes	9	80D4C00B
+act_moon_m3_lowercitadel	Story (Y1)	moon m3 lowercitadel	5	80D4C023
+act_moon_m4_uppercitadel	Story (Y1)	moon m4 uppercitadel	6	80D4C039
+act_moon_m5_strength	Story (Y1)	moon m5 strength	8	80D4C050
+act_moon_m6_reactor	Story (Y1)	moon m6 reactor	6	80D4C068
+act_moon_m7_selection	Story (Y1)	moon m7 selection	6	80D4C0A8
+act_venus_m01_engineering	Story (Y1)	venus m01 engineering	6	80FE000D
+act_venus_m02_southern_tides	Story (Y1)	venus m02 southern tides	5	80FE0032
+act_venus_m05_vault	Story (Y1)	venus m05 vault	5	80FE0055
+act_venus_m06_ketch	Story (Y1)	venus m06 ketch	5	80FE0079
+act_venus_m07_northern_tides	Story (Y1)	venus m07 northern tides	5	80FE009C
+ambient_bootstrap	Ambient layers	bootstrap	0	80B46003
+ambient_cinematic_queen	Ambient layers	cinematic queen	0	80C14003
+ambient_cinematic_trv	Ambient layers	cinematic trv	0	80C4E003
+ambient_city_tower	Ambient layers	city tower	0	80C88003
+ambient_cosmo	Ambient layers	cosmo	0	80CCA045
+ambient_hiveship	Ambient layers	hiveship	0	8127E007
+ambient_impactsite	Ambient layers	impactsite	0	812B4003
+ambient_marathon_hunter	Ambient layers	marathon hunter	0	815CA003
+ambient_marathon_titan	Ambient layers	marathon titan	0	814C6003
+ambient_marathon_tower	Ambient layers	marathon tower	0	81632003
+ambient_marathon_warlock	Ambient layers	marathon warlock	0	81600003
+ambient_mars	Ambient layers	mars	0	80D12015
+ambient_moon	Ambient layers	moon	0	80D5E047
+ambient_moon_hive_raid1	Ambient layers	moon hive raid1	0	810A0003
+ambient_pvp_anomaly	Ambient layers	pvp anomaly	0	80D9C003
+ambient_pvp_arena_hive	Ambient layers	pvp arena hive	0	810D4003
+ambient_pvp_breach	Ambient layers	pvp breach	0	81312003
+ambient_pvp_cabal_camp	Ambient layers	pvp cabal camp	0	80DD2003
+ambient_pvp_city_battleground	Ambient layers	pvp city battleground	0	81346003
+ambient_pvp_city_defense	Ambient layers	pvp city defense	0	80E08003
+ambient_pvp_colony_ship	Ambient layers	pvp colony ship	0	80E3E003
+ambient_pvp_cosmobattle	Ambient layers	pvp cosmobattle	0	8113C003
+ambient_pvp_den	Ambient layers	pvp den	0	8124C003
+ambient_pvp_dos	Ambient layers	pvp dos	0	81492003
+ambient_pvp_eq	Ambient layers	pvp eq	0	8145E003
+ambient_pvp_factory	Ambient layers	pvp factory	0	80E74003
+ambient_pvp_greenhouse	Ambient layers	pvp greenhouse	0	80EAA003
+ambient_pvp_hive_cell	Ambient layers	pvp hive cell	0	813AE003
+ambient_pvp_ketch	Ambient layers	pvp ketch	0	81416003
+ambient_pvp_longshot	Ambient layers	pvp longshot	0	81108003
+ambient_pvp_marsbattle	Ambient layers	pvp marsbattle	0	80EE0003
+ambient_pvp_moonbase	Ambient layers	pvp moonbase	0	80F16003
+ambient_pvp_oasis	Ambient layers	pvp oasis	0	811E4003
+ambient_pvp_outskirts	Ambient layers	pvp outskirts	0	813E2003
+ambient_pvp_refinery	Ambient layers	pvp refinery	0	81218003
+ambient_pvp_rooftops	Ambient layers	pvp rooftops	0	80F4C003
+ambient_pvp_srl_mars01	Ambient layers	pvp srl mars01	0	81974002
+ambient_pvp_srl_venus01	Ambient layers	pvp srl venus01	0	8193C002
+ambient_pvp_tomb	Ambient layers	pvp tomb	0	8173E003
+ambient_pvp_venus_hcc	Ambient layers	pvp venus hcc	0	80F82003
+ambient_pvp_vertigo	Ambient layers	pvp vertigo	0	8137A003
+ambient_pvp_vex_tube	Ambient layers	pvp vex tube	0	80FB8003
+ambient_pvp_wilderness_town	Ambient layers	pvp wilderness town	0	81170003
+ambient_reef	Ambient layers	reef	0	811A8003
+ambient_venus	Ambient layers	venus	0	80FF4049
+arena_angelfish	Prison of Elders	Prison of Elders (angelfish)	4	811954C6
+arena_champion	Prison of Elders	Prison of Elders (champion)	3	81194004
+arena_goldfish	Prison of Elders	Prison of Elders (goldfish)	3	811954C3
+cine_end	Cinematics	end	1	80C3E004
+cine_hangar	Cinematics	hangar	1	80C3E15F
+cine_reveal	Cinematics	reveal	2	80C3E00A
+cine_speaker	Cinematics	speaker	1	80C3E011
+city_tower_crimson	Social spaces	Tower (Crimson Days)	0	80C7A3D5
+city_tower_default1	Social spaces	Tower	0	80C7A005
+city_tower_fol	Social spaces	Tower (Festival of the Lost)	0	80C7A3CF
+city_tower_harvest	Social spaces	Tower (harvest)	0	80C7A3BD
+city_tower_iron_banner	Social spaces	Tower (Iron Banner)	0	80C7A011
+city_tower_queen	Social spaces	Tower (Queen's Wrath)	0	80C7A00B
+city_tower_srl	Social spaces	Tower (Sparrow Racing League)	0	80C7A3CC
+cosmo_portal_1	Patrols	cosmo portal 1	8	80CB80A8
+cosmo_portal_2	Patrols	cosmo portal 2	8	80CB8120
+hiveship_patrols_1	Patrols	Dreadnaught patrol	0	812700CE
+mars_portal_1	Patrols	mars portal 1	9	80D000CB
+mars_portal_1_com01	Patrols	mars portal 1 com01	9	80D0020A
+mars_portal_2	Patrols	mars portal 2	7	80D000F1
+mars_portal_2_com01	Patrols	mars portal 2 com01	7	80D00228
+mars_portal_3	Patrols	mars portal 3	6	80D0013B
+mars_portal_3_com01	Patrols	mars portal 3 com01	6	80D00248
+mercury_social	Social spaces	The Lighthouse	2	81540003,8154E003
+mission_darksnow	Story (DLC)	darksnow	7	812A6004
+mission_deja	Story (DLC)	deja	11	80D4C1F4
+mission_destroyer	Story (DLC)	destroyer	5	81270021
+mission_elevator	Story (DLC)	elevator	5	80CB8104
+mission_marathon_hunter	Story (DLC)	marathon hunter	4	815BA003
+mission_marathon_titan	Story (DLC)	marathon titan	5	814B6003
+mission_marathon_tower	Story (DLC)	marathon tower	0	81624002
+mission_marathon_warlock	Story (DLC)	marathon warlock	4	815F2003
+mission_microwave	Story (DLC)	microwave	3	812A600C
+mission_omen	Story (DLC)	omen	6	8127006E
+mission_pact	Story (DLC)	pact	5	80CB808D
+mission_paradox	Story (DLC)	paradox	10	80FE0125
+mission_pursuit	Story (DLC)	pursuit	5	80FE001A
+mission_rook	Story (DLC)	rook	3	8127CA6B
+mission_souvenir	Story (DLC)	souvenir	6	8108E00B
+mission_toaster	Story (DLC)	toaster	5	81270055
+mission_topknot	Story (DLC)	topknot	10	8127003A
+mission_touchdown	Story (DLC)	touchdown	6	8127000C
+mission_traitor	Story (DLC)	traitor	6	80FE006C
+mission_turing	Story (DLC)	turing	6	80CB813B
+moon_portal_2	Patrols	moon portal 2	6	80D4C07F
+moon_raid_1	Raids	Crota's End	6	8108E004
+orbit	Orbit	Orbit	0	80B52003
+patrol_accel_com01	Patrols	accel com01	0	80D4C150
+patrol_deltas_com01	Patrols	deltas com01	0	80CB87BB
+patrol_plains_com01	Patrols	plains com01	0	80D00042
+patrol_shat_com01	Patrols	shat com01	0	80FE016C
+pvp_anomaly	Crucible	anomaly	0	80D8E003
+pvp_arena_hive	Crucible	arena hive	0	810C4003
+pvp_breach	Crucible	breach	0	81302003
+pvp_cabal_camp	Crucible	cabal camp	0	80DC4003
+pvp_city_battleground	Crucible	city battleground	0	81336003
+pvp_city_defense	Crucible	city defense	0	80DFA003
+pvp_city_defense_carbon	Crucible	city defense carbon	1	80DFA00F
+pvp_colony_ship	Crucible	colony ship	0	80E30003
+pvp_cosmobattle	Crucible	cosmobattle	0	8112C003
+pvp_den	Crucible	den	0	8123C003
+pvp_dos	Crucible	dos	0	81482003
+pvp_eq	Crucible	eq	0	8144E003
+pvp_factory	Crucible	factory	0	80E66003
+pvp_greenhouse	Crucible	greenhouse	0	80E9C003
+pvp_hive_cell	Crucible	hive cell	0	8139E003
+pvp_ketch	Crucible	ketch	0	81406003
+pvp_longshot	Crucible	longshot	0	810F8003
+pvp_marsbattle	Crucible	marsbattle	0	80ED2003
+pvp_moonbase	Crucible	moonbase	0	80F08003
+pvp_oasis	Crucible	oasis	0	811D4003
+pvp_outskirts	Crucible	outskirts	0	813D2003
+pvp_refinery	Crucible	refinery	0	81208003
+pvp_rooftops	Crucible	rooftops	0	80F3E003
+pvp_srl_mars01	Crucible	srl mars01	0	81964003
+pvp_srl_venus01	Crucible	srl venus01	0	8192C003
+pvp_tomb	Crucible	tomb	0	8172E003
+pvp_venus_hcc	Crucible	venus hcc	0	80F74003
+pvp_vertigo	Crucible	vertigo	0	8136A003
+pvp_vex_tube	Crucible	vex tube	0	80FAA003
+pvp_wilderness_town	Crucible	wilderness town	0	81160003
+quest_apollo	Quests	apollo	7	80D001B8
+quest_bonzo_dlc01	Quests	bonzo dlc01	2	80CB8036
+quest_catalyst	Quests	catalyst	5	80FE01D4
+quest_deadflower	Quests	deadflower	5	812700E8
+quest_helium	Quests	helium	1	80CB8468
+quest_hydrogen	Quests	hydrogen	4	80D00199
+quest_infidel	Quests	infidel	4	80CB80CF
+quest_lithium	Quests	lithium	3	80D0017A
+quest_nightcrawler	Quests	nightcrawler	3	80D4C0CB
+quest_nitrogen	Quests	nitrogen	2	80D001E0
+quest_oxygen	Quests	oxygen	4	80D00131
+quest_paper	Quests	paper	5	80D000F4
+quest_peekaboo	Quests	peekaboo	3	80CB8159
+quest_radium	Quests	radium	3	80CB8281
+quest_rock	Quests	rock	6	80FE019A
+quest_safari	Quests	safari	5	80FE00CD
+quest_scissors	Quests	scissors	5	80FE01B7
+quest_screw_dlc01	Quests	screw dlc01	4	80D4C098
+quest_sightline	Quests	sightline	3	80CB8382
+raid_epiphany	Raids	King's Fall	9	812700B9
+social_landing	Social spaces	Lighthouse landing	0	81194008
+strike_kingpin	Strikes	kingpin	8	80D54CC2
+strike_overlord	Strikes	overlord	7	8127009F
+strike_pandora	Strikes	pandora	8	81270086
+strike_reliquary	Strikes	reliquary	7	80CB8695
+strike_tracker	Strikes	tracker	6	80FE014B
+strike_vampire	Strikes	vampire	8	80D4C0BC
+venus_portal_1	Patrols	venus portal 1	5	80FE00BF
+venus_portal_2	Patrols	venus portal 2	8	80FE00E1
+venus_portal_2_redux	Patrols	venus portal 2 redux	8	80FE614F
+venus_raid_1	Raids	Vault of Glass	10	80FE0103
