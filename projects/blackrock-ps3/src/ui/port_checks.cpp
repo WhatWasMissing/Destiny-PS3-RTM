@@ -218,7 +218,7 @@ std::string buildReport(const std::vector<const Item*>& probes, const std::map<s
     }
     std::string out = "Blackrock PS3 - port checks report\n";
     out += "Date:      " + nowText("%Y-%m-%d %H:%M:%S") + "\n";
-    out += "Game:      NPEB02021 build " + std::string(profile::BUILD) + "\n";
+    out += "Game:      " + std::string(profile::TITLE_ID) + " APP_VER " + profile::APP_VER + " build " + profile::BUILD + "\n";
     if (es.state == EngineStatus::Connected) {
         char buf[160];
         std::snprintf(buf, sizeof buf, "Console:   %s, %s; executor %s (%.0f fps, heartbeat %u)\n", es.host.c_str(), es.process.c_str(),

@@ -819,8 +819,8 @@ BR_FEATURES(patches_group) {
     };
 
      
-    plain("patch.instant_respawn", "Player", kRespawn, "Instant Respawn Timer",
-          "The respawn countdown is never written, so you can respawn the moment you die. Patches both copies of the +0x30 timer store.",
+    plain("patch.instant_respawn", "Player", kRespawn, "Instant Respawn Timer (RTM Offset Test)",
+          "Uses the RTM's BLES 01.24 site at 0x0071C348. Blackrock's separate multi-site Auto Respawn control remains unchanged.",
           Feature::InstantRespawn);
     r.toggle({.id = "patch.fast_respawn", .page = C, .tab = "Player", .section = kRespawn, .label = "Auto Respawn",
               .help = "Brings you back the frame you die (fast respawn): removes the respawn timers and checks, then calls respawn() every "
@@ -839,8 +839,9 @@ BR_FEATURES(patches_group) {
           Feature::JoiningAllies);
 
      
-    plain("patch.stop_bullets", "Weapons", kProjectiles, "Stop Bullets",
-          "Projectiles stop where they are fired: the projectile step computes a velocity of exactly 0.", Feature::StopBullets);
+    plain("patch.stop_bullets", "Weapons", kProjectiles, "Stop Bullets (RTM Offset Test)",
+          "Uses the RTM's BLES 01.24 address and 1.0/0.0 values at 0x0051E7E0. Byte-level verification does not establish the in-game effect.",
+          Feature::StopBullets);
     plain("patch.bullet_walls", "Weapons", kProjectiles, "Bullets Through Walls",
           "Projectile traces use collision layer 0x11 instead of 0xA, so shots pass through world geometry.", Feature::BulletWalls);
 
@@ -895,7 +896,7 @@ BR_FEATURES(patches_group) {
           "Every hold-to-confirm inventory action (dismantle and the other hold prompts) completes the moment you press it.",
           Feature::InstantDismantle);
     plain("patch.sparrow_energy", "World", kQol, "Sparrow Energy Never Drains",
-          "The sparrow's boost energy is never written back after use, so boost lasts forever.", Feature::SparrowEnergy);
+          "Uses the same 0x0050A700 site and values as the RTM's Unlimited Sparrow preset.", Feature::SparrowEnergy);
     plain("patch.sparrow_anywhere", "World", kQol, "Summon Sparrow Anywhere",
           "The 'cannot summon in this location' verdict becomes 'allowed'. Other refusals (no free slot, invalid index) still apply.",
           Feature::SparrowAnywhere);
@@ -916,6 +917,35 @@ BR_FEATURES(patches_group) {
           "Removes the 'tag loaded' notification call (0x148D00) so a world-tag-loader load into a live world does not run the "
           "reclaimer on a half-loaded definition. Turn it on just before a World load, off right after.",
           Feature::HotloadSuppress, kBadgeDev);
+    plain("rtm.offset.no_recoil", "RTM Test", "RTM 01.24 Main Cheat Offsets", "No Recoil",
+          "Applies the RTM's three fixed sites with exact original-value checks.", Feature::RtmNoRecoil, "RTM 01.24");
+    plain("rtm.offset.unlimited_abilities", "RTM Test", "RTM 01.24 Main Cheat Offsets", "Unlimited Abilities",
+          "Applies the RTM's three fixed instruction sites with exact original-value checks.", Feature::RtmUnlimitedAbilities, "RTM 01.24");
+    plain("rtm.offset.unlimited_ammo", "RTM Test", "RTM 01.24 Main Cheat Offsets", "Unlimited Ammo",
+          "Applies the RTM's two instruction words and five-word ammo sequence with exact original-value checks.", Feature::RtmUnlimitedAmmo,
+          "RTM 01.24");
+    plain("rtm.offset.no_collision", "RTM Test", "RTM 01.24 Main Cheat Offsets", "No Collision",
+          "Applies the RTM's fixed value at 0x014FC690 after an exact original-value check.", Feature::RtmNoCollision, "RTM 01.24");
+    plain("rtm.offset.one_hit_kill", "RTM Test", "RTM 01.24 Main Cheat Offsets", "One-Hit Kill (Main RTM Variant)",
+          "Uses the main RTM 0x447A halfword variant, guarded and restored as its enclosing aligned word.", Feature::RtmOneHitKill,
+          "RTM 01.24");
+    plain("rtm.offset.rapid_fire", "RTM Test", "RTM 01.24 Main Cheat Offsets", "Rapid Fire",
+          "Applies the RTM's fixed site with an exact original-value check.", Feature::RtmRapidFire, "RTM 01.24");
+    plain("rtm.offset.no_target", "RTM Test", "RTM 01.24 Main Cheat Offsets", "No Target",
+          "Applies both RTM sites with exact original-value checks.", Feature::RtmNoTarget, "RTM 01.24");
+    plain("rtm.offset.god_mode", "RTM Test", "RTM 01.24 Main Cheat Offsets", "God Mode",
+          "Applies the RTM's fixed site with an exact original-value check.", Feature::RtmGodMode, "RTM 01.24");
+    plain("rtm.offset.no_gravity", "RTM Test", "RTM 01.24 Main Cheat Offsets", "No Gravity",
+          "Applies the RTM's fixed site with an exact original-value check.", Feature::RtmNoGravity, "RTM 01.24");
+    plain("rtm.offset.no_pushbacks", "RTM Test", "RTM 01.24 Main Cheat Offsets", "No Pushbacks",
+          "Applies all three RTM vector words with exact original-value checks.", Feature::RtmNoPushbacks, "RTM 01.24");
+    plain("rtm.offset.no_floors", "RTM Test", "RTM 01.24 Main Cheat Offsets", "No Floors",
+          "Applies the RTM's fixed site with an exact original-value check.", Feature::RtmNoFloors, "RTM 01.24");
+    plain("rtm.offset.static_actors", "RTM Test", "RTM 01.24 Main Cheat Offsets", "Static Actors",
+          "Applies the RTM's fixed site with an exact original-value check.", Feature::RtmStaticActors, "RTM 01.24");
+    plain("rtm.offset.variable_buff", "RTM Test", "RTM 01.24 Main Cheat Offsets", "Variable Buff",
+          "Uses the source-labelled 0x0005E614 preset. Its gameplay effect remains unverified.", Feature::RtmVariableBuff,
+          "RTM 01.24");
     r.section({.id = "patches.performance", .page = C, .tab = "World", .section = kPerformance, .order = 55, .draw = drawPerformance,
                .onDisconnect = resetOnDisconnect});
 

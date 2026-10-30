@@ -1,11 +1,13 @@
 #include "game/patches_sites.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdio>
 #include <mutex>
 
 #include "core/error.h"
 #include "core/ppc.h"
+#include "game/rtm_cheat_offsets.h"
 
 namespace brps3::patches {
 
@@ -13,10 +15,31 @@ namespace {
 
 constexpr uint32_t NOP = 0x60000000;
 
+template <std::size_t N>
+std::vector<Word> rtmWordList(const rtm_offsets::WordSite (&sites)[N]) {
+    std::vector<Word> words;
+    words.reserve(N);
+    for (const auto& site : sites) words.push_back({site.address, site.original, site.patched});
+    return words;
+}
+
 std::vector<Unit> buildUnits() {
     return {
-         
-        {"patches.stop_bullets", "Stop bullets", {{0x51E6E4, 0xEF420072, 0xEF421028}}},    
+        {"patches.stop_bullets", "Stop bullets", rtmWordList(rtm_offsets::kStopBullets)},
+        {"rtm.instant_respawn", "RTM instant respawn", rtmWordList(rtm_offsets::kInstantRespawn)},
+        {"rtm.no_recoil", "RTM no recoil", rtmWordList(rtm_offsets::kNoRecoil)},
+        {"rtm.unlimited_abilities", "RTM unlimited abilities", rtmWordList(rtm_offsets::kUnlimitedAbilities)},
+        {"rtm.unlimited_ammo", "RTM unlimited ammo", rtmWordList(rtm_offsets::kUnlimitedAmmo)},
+        {"rtm.no_collision", "RTM no collision", rtmWordList(rtm_offsets::kNoCollision)},
+        {"rtm.one_hit_kill", "RTM one-hit kill", rtmWordList(rtm_offsets::kOneHitKill)},
+        {"rtm.rapid_fire", "RTM rapid fire", rtmWordList(rtm_offsets::kRapidFire)},
+        {"rtm.no_target", "RTM no target", rtmWordList(rtm_offsets::kNoTarget)},
+        {"rtm.god_mode", "RTM god mode", rtmWordList(rtm_offsets::kGodMode)},
+        {"rtm.no_gravity", "RTM no gravity", rtmWordList(rtm_offsets::kNoGravity)},
+        {"rtm.no_pushbacks", "RTM no pushbacks", rtmWordList(rtm_offsets::kNoPushbacks)},
+        {"rtm.no_floors", "RTM no floors", rtmWordList(rtm_offsets::kNoFloors)},
+        {"rtm.static_actors", "RTM static actors", rtmWordList(rtm_offsets::kStaticActors)},
+        {"rtm.variable_buff", "RTM variable buff", rtmWordList(rtm_offsets::kVariableBuff)},
         {"patches.respawn_timer", "Respawn timer +0x30 (both copies)",                     
          {{0x71C138, 0x93BF0030, NOP}, {0x71C348, 0x93BF0030, NOP}}},
         {"patches.fast_respawn", "Auto respawn timers and checks",
@@ -30,7 +53,7 @@ std::vector<Unit> buildUnits() {
              {0x5AED54, 0x4801A7A5, NOP},           
          }},
         {"patches.joining_allies", "Joining allies", {{0x39BCE8, 0x7C0802A6, 0x4E800020}}},    
-        {"patches.sparrow_energy", "Sparrow energy", {{0x50A700, 0xD023002C, NOP}}},            
+        {"patches.sparrow_energy", "Sparrow energy", rtmWordList(rtm_offsets::kUnlimitedSparrow)},
         {"patches.immune_bypass", "Immune bypass",
          {{0x44CD68, 0xC0840004, 0xEC831828},       
           {0x444CA4, 0xC04100F0, 0xC05A0000}}},     
@@ -62,8 +85,7 @@ std::vector<Unit> buildUnits() {
 std::vector<FeatureInfo> buildFeatures() {
     return {
         {Feature::StopBullets, "stop_bullets", "Stop bullets", {"patches.stop_bullets"}, {}},
-        {Feature::InstantRespawn, "instant_respawn", "Instant respawn timer", {"patches.respawn_timer"},
-         {{0x71C020, "7C0802A64867C9F9F821FF71F80100A0"}, {0x71C1B0, "7C0802A64867C869F821FF71F80100A0"}}},
+        {Feature::InstantRespawn, "instant_respawn", "RTM instant respawn", {"rtm.instant_respawn"}, {}},
         {Feature::FastRespawn, "fast_respawn", "Auto respawn", {"patches.respawn_timer", "patches.fast_respawn"},
          {{0x3A86C0, "7C0802A6489F0355F821FF21F80100F0"},      
           {0x3AB578, "7C0802A6489ED48DF821FE11F8010200"},      
@@ -94,7 +116,20 @@ std::vector<FeatureInfo> buildFeatures() {
          {{0x14DB90, "7C0802A648C4AE8DF821FF71F80100A0"}}},    
         {Feature::HotloadSuppress, "hotload_suppress", "Hot-load suppression", {"patches.hotload_suppress"},
          {{0x148CBC, "7C0802A648C4FD65F821FF81F8010090"},      
-          {0x146F5C, "7C0802A648C51AC5F821FF81F8010090"}}},    
+          {0x146F5C, "7C0802A648C51AC5F821FF81F8010090"}}},
+        {Feature::RtmNoRecoil, "rtm.no_recoil", "RTM no recoil", {"rtm.no_recoil"}, {}},
+        {Feature::RtmUnlimitedAbilities, "rtm.unlimited_abilities", "RTM unlimited abilities", {"rtm.unlimited_abilities"}, {}},
+        {Feature::RtmUnlimitedAmmo, "rtm.unlimited_ammo", "RTM unlimited ammo", {"rtm.unlimited_ammo"}, {}},
+        {Feature::RtmNoCollision, "rtm.no_collision", "RTM no collision", {"rtm.no_collision"}, {}},
+        {Feature::RtmOneHitKill, "rtm.one_hit_kill", "RTM one-hit kill", {"rtm.one_hit_kill"}, {}},
+        {Feature::RtmRapidFire, "rtm.rapid_fire", "RTM rapid fire", {"rtm.rapid_fire"}, {}},
+        {Feature::RtmNoTarget, "rtm.no_target", "RTM no target", {"rtm.no_target"}, {}},
+        {Feature::RtmGodMode, "rtm.god_mode", "RTM god mode", {"rtm.god_mode"}, {}},
+        {Feature::RtmNoGravity, "rtm.no_gravity", "RTM no gravity", {"rtm.no_gravity"}, {}},
+        {Feature::RtmNoPushbacks, "rtm.no_pushbacks", "RTM no pushbacks", {"rtm.no_pushbacks"}, {}},
+        {Feature::RtmNoFloors, "rtm.no_floors", "RTM no floors", {"rtm.no_floors"}, {}},
+        {Feature::RtmStaticActors, "rtm.static_actors", "RTM static actors", {"rtm.static_actors"}, {}},
+        {Feature::RtmVariableBuff, "rtm.variable_buff", "RTM variable buff", {"rtm.variable_buff"}, {}},
     };
 }
 

@@ -75,3 +75,12 @@ If the PS3 continues to report repeated TCP **control** connections despite
 no active features, capture both the app log and, if possible, the destination
 port of the connections; individual passive-mode data connections are expected
 for memory GET/SET under PS3MAPI.
+
+## RTM offset test branch
+
+The separate `codex/blackrock-rtm-offsets-test` branch adds the user's BLES01857
+01.24 signatures to the global build gate and exposes the RTM's main fixed cheat
+sites in an **RTM Test** tab. Each toggle requires its exact RTM off value and
+uses Blackrock's compare-and-restore patch journal. This is a testing copy; it
+has not been built with MSVC or tested on a live PS3. See
+[`RTM-OFFSET-MAP.md`](RTM-OFFSET-MAP.md) for exact substitutions and omissions.

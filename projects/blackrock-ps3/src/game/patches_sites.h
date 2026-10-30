@@ -61,6 +61,19 @@ enum class Feature : int {
     Deafen,
     SparrowAnywhere,
     HotloadSuppress,
+    RtmNoRecoil,
+    RtmUnlimitedAbilities,
+    RtmUnlimitedAmmo,
+    RtmNoCollision,
+    RtmOneHitKill,
+    RtmRapidFire,
+    RtmNoTarget,
+    RtmGodMode,
+    RtmNoGravity,
+    RtmNoPushbacks,
+    RtmNoFloors,
+    RtmStaticActors,
+    RtmVariableBuff,
     Count
 };
 
