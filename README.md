@@ -9,6 +9,11 @@ This is the recovered frontend only; the desktop host/build project is not inclu
 versions require written permission.** See [LICENSE](LICENSE) for the full terms,
 including GitHub platform rights and third-party exclusions.
 
+## Repository layout
+
+- [source/](source/README.md) contains the recovered Destiny RTM frontend.
+- [projects/blackrock-ps3/](projects/blackrock-ps3/README.md) contains the separate Blackrock PS3 source snapshot with the PS3MAPI stability changes, patch notes, and portable checks. Its README documents the Windows build and hardware-testing limits.
+
 https://discord.gg/dHGNkmj39
 
 Destiny RTM is a real-time memory (RTM) tool for PS3, used for teleporting, memory read/write, and other in-game manipulation via [PS3MAPI](https://github.com/aldostools/webMAN-MOD). It's available as a Windows executable and an Android APK, both built from the same core web app.
@@ -71,8 +76,3 @@ AI Disclaimer: Some AI was used in the creation of this project, mostly formatti
 
 ## Known issues
 -Join discord or see known issues page
-
-## Repository layout
-
-- [source/](source/README.md) contains the recovered Destiny RTM frontend.
-- [projects/blackrock-ps3/](projects/blackrock-ps3/README.md) contains the separate Blackrock PS3 source snapshot with the PS3MAPI stability changes, patch notes, and portable checks. Its README documents the Windows build and hardware-testing limits.
