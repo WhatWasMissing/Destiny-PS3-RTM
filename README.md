@@ -1,24 +1,11 @@
-# Destiny RTM
 
-## Source backup and license
 
-The verified current desktop frontend is backed up in [source/](source/README.md).
-This is the recovered frontend only; the desktop host/build project is not included.
-
-**Proprietary — all rights reserved. Redistribution, rehosting, and sharing modified
-versions require written permission.** See [LICENSE](LICENSE) for the full terms,
-including GitHub platform rights and third-party exclusions.
-
-https://discord.gg/dHGNkmj39
-
-Destiny RTM is a real-time memory (RTM) tool for PS3, used for teleporting, memory read/write, and other in-game manipulation via [PS3MAPI](https://github.com/aldostools/webMAN-MOD). It's available as a Windows executable and an Android APK, both built from the same core web app.
+Destiny RTM is a real-time memory (RTM) tool for PS3, via [PS3MAPI](https://github.com/aldostools/webMAN-MOD). It's available as a Windows executable, both built from the Blackrock source
 
 ## Requirements
 
 - A PS3 running **[webMAN MOD](https://github.com/aldostools/webMAN-MOD)** (CFW required/Hen)
 - **PS3MAPI** enabled in webMAN MOD's settings
-- Your PS3 and the device running this tool (PC or phone) must be connected to the **same local network**
-- Your PS3's local IP address (found in webMAN MOD or your router's device list)
 
 ## Enabling PS3MAPI
 
@@ -27,47 +14,24 @@ Destiny RTM is a real-time memory (RTM) tool for PS3, used for teleporting, memo
 3. Enable **PS3MAPI**.
 4. Note your PS3's IP address - you'll enter this into the app.
 
-## Downloads
-
-| Platform | File |
-|---|---|
-| Windows | `DestinyRTM.exe` |
-| Android | `DestinyRTM.apk` |
 
 Grab the latest build from the [Releases](../../releases) page.
 
-## Usage
 
-### Windows (.exe)
-
-1. Download and run `DestinyRTM.exe`.
-2. Enter your PS3's IP address in the field provided.
-3. Connect and use the available tools.
-
-### Android (.apk)
-
-1. Download `DestinyRTM.apk` to your Android device.
-2. If prompted, allow installation from unknown sources (required since this isn't distributed via the Play Store).
-3. Open the app, enter your PS3's IP address, and connect.
-4. Make sure your phone is on the **same Wi-Fi network** as your PS3 - mobile data will not work.
-
-## Troubleshooting
-
-- **Can't connect:** Double-check your PS3's IP address and that PS3MAPI is enabled in webMAN MOD.
-- **Connects on PC but not on Android:** Confirm your phone is on the same local network as the PS3, not using mobile data or a different Wi-Fi/VPN.
 - **Nothing happens after entering IP:** Restart PS3MAPI from webMAN MOD's settings and try again.
 
 ## Disclaimer
 
 This tool directly reads and writes PS3 process memory. Use at your own risk. I am almost certain that Destiny legacy will never ban you, but the chance is non zero if you do not understand how to protect yourself when playing on a modded console, so invest some time to learn this if you do not already know.
-AI Disclaimer: Some AI was used in the creation of this project, mostly formatting.
+AI Disclaimer: Some AI was used in the creation of this project, mostly formatting and learning how to find offsets and creation of tools that allowed me to find them quicker. 
 
 ## Credits
 
 - [webMAN MOD](https://github.com/aldostools/webMAN-MOD) by aldostools
 - PS3MAPI
-- **[KiPOD](https://github.com/kipod8)** - some features used in this mod
-- **[Soul](https://github.com/PappaSoul)** - some features used
+- **[KiPOD](https://github.com/kipod8)** - l features used in this tool
+- **[Soul](https://github.com/PappaSoul)** -  features used in this tool
+- **[hellomike05] - built off the Blackrock source
 
 ## Known issues
--Join discord or see known issues page
+-See known issues page
