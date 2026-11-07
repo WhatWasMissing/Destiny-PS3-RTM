@@ -1,6 +1,8 @@
 
 
-Project Ghostlink is a real-time memory (RTM) tool for PS3, via [PS3MAPI](https://github.com/aldostools/webMAN-MOD). It's available as a Windows executable, both built from the Blackrock source
+Project Ghostlink is a real-time memory (RTM) tool for PS3, via [PS3MAPI](https://github.com/aldostools/webMAN-MOD). 
+
+Built from the Blackrock source.
 
 ## Requirements
 
@@ -18,6 +20,7 @@ Project Ghostlink is a real-time memory (RTM) tool for PS3, via [PS3MAPI](https:
 Grab the latest build from the [Releases](../../releases) page.
 
 
+The tool is currently in a release state but there are still a lot of things I've yet to test properly or fully map, these are marked clearly in the tool. If you encounter issues please open an issue report. 
 
 
 
