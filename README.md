@@ -6,7 +6,7 @@ Built from the Blackrock source.
 
 ## Requirements
 
--Grab the latest build from the [Releases](../../releases) page.
+- Grab the latest build from the [Releases](../../releases) page.
 - A PS3 running **[webMAN MOD](https://github.com/aldostools/webMAN-MOD)** (CFW required/Hen)
 - **PS3MAPI** enabled in webMAN MOD's settings
 
